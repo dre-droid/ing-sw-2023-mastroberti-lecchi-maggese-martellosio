@@ -190,7 +190,7 @@
 											"top": 984,
 											"width": 455,
 											"height": 13,
-											"text": "-grid: List<List<Tile>>",
+											"text": "-grid: Tile[*]",
 											"horizontalAlignment": 0
 										},
 										{
@@ -1513,7 +1513,7 @@
 											"top": 1549,
 											"width": 163.955078125,
 											"height": 20,
-											"text": "-type: String",
+											"text": "-type: Enum",
 											"horizontalAlignment": 0
 										}
 									],
@@ -1547,7 +1547,7 @@
 											"top": 1579,
 											"width": 163.955078125,
 											"height": 20,
-											"text": "+GetType(): String",
+											"text": "+GetType(): Enum",
 											"horizontalAlignment": 0
 										}
 									],
@@ -3505,7 +3505,7 @@
 											"top": 735,
 											"width": 487,
 											"height": 20,
-											"text": "+addPlayer(String nick): boolean",
+											"text": "+addPlayer(String nick): void",
 											"horizontalAlignment": 0
 										},
 										{
@@ -3522,7 +3522,7 @@
 											"top": 757,
 											"width": 487,
 											"height": 20,
-											"text": "+removePlayer(String nick): boolean",
+											"text": "+removePlayer(String nick): void",
 											"horizontalAlignment": 0
 										},
 										{
@@ -6948,7 +6948,10 @@
 							},
 							"name": "grid",
 							"visibility": "private",
-							"type": "List<List<Tile>>"
+							"type": {
+								"$ref": "AAAAAAGG4Hjyfe/XGC4="
+							},
+							"multiplicity": "*"
 						},
 						{
 							"_type": "UMLAttribute",
@@ -7660,7 +7663,7 @@
 							},
 							"name": "type",
 							"visibility": "private",
-							"type": "String"
+							"type": "Enum"
 						}
 					],
 					"operations": [
@@ -7678,7 +7681,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGHAMNUhfCWqJM="
 									},
-									"type": "String",
+									"type": "Enum",
 									"direction": "return"
 								}
 							]
@@ -8408,7 +8411,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGG5gFNVcBVAWU="
 									},
-									"type": "boolean",
+									"type": "void",
 									"direction": "return"
 								},
 								{
@@ -8417,8 +8420,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGG5gFNVcBVAWU="
 									},
-									"name": "String nick",
-									"type": ""
+									"name": "String nick"
 								}
 							]
 						},
@@ -8436,7 +8438,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGG5gGNBcUmZpA="
 									},
-									"type": "boolean",
+									"type": "void",
 									"direction": "return"
 								},
 								{
@@ -8445,8 +8447,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGG5gGNBcUmZpA="
 									},
-									"name": "String nick",
-									"type": ""
+									"name": "String nick"
 								}
 							]
 						},
