@@ -1,4 +1,4 @@
-package test.java.it.polimi.ingsw.Model;
+package java.it.polimi.ingsw.Model;
 
 public class TileTest {
 }
