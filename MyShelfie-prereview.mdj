@@ -1068,7 +1068,7 @@
 											"top": 1441,
 											"width": 234.013671875,
 											"height": 20,
-											"text": "+GetValidTiles(): Shelf",
+											"text": "+getValidTiles(): Shelf",
 											"horizontalAlignment": 0
 										}
 									],
@@ -1773,6 +1773,7 @@
 											"model": {
 												"$ref": "AAAAAAGG4JgwwkT91S4="
 											},
+											"visible": false,
 											"font": "Arial;20;0",
 											"left": 1589,
 											"top": 1483,
@@ -1792,7 +1793,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1505,
+											"top": 1483,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-currentTiles: List<Tile>",
@@ -1809,7 +1810,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1527,
+											"top": 1505,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-nickName: String",
@@ -1826,7 +1827,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1549,
+											"top": 1527,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-personalGoalCard: PersonalGoalCard",
@@ -1843,7 +1844,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1571,
+											"top": 1549,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-endGameToken: boolean",
@@ -1860,7 +1861,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1593,
+											"top": 1571,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-firstPlayerSeat: boolean",
@@ -1877,7 +1878,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1615,
+											"top": 1593,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "-scoringTokens: List<ScoringToken>",
@@ -1888,7 +1889,7 @@
 									"left": 1584,
 									"top": 1456,
 									"width": 407.412109375,
-									"height": 184
+									"height": 162
 								},
 								{
 									"_type": "UMLOperationCompartmentView",
@@ -1927,6 +1928,7 @@
 											"model": {
 												"$ref": "AAAAAAGG4Ld2/8i2Nj0="
 											},
+											"visible": false,
 											"font": "Arial;20;0",
 											"left": 1589,
 											"top": 1647,
@@ -1946,10 +1948,10 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1669,
+											"top": 1625,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+CheckPersonalGoal(): boolean",
+											"text": "+checkPersonalGoal(): int",
 											"horizontalAlignment": 0
 										},
 										{
@@ -1961,9 +1963,10 @@
 											"model": {
 												"$ref": "AAAAAAGG5dl4szV2zRQ="
 											},
+											"visible": false,
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1691,
+											"top": 1647,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "+insertTile(): boolean",
@@ -1980,7 +1983,7 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1713,
+											"top": 1647,
 											"width": 397.412109375,
 											"height": 20,
 											"text": "+getScore(): int",
@@ -1997,10 +2000,10 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1735,
+											"top": 1669,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+GetNickName(): String",
+											"text": "+getNickName(): String",
 											"horizontalAlignment": 0
 										},
 										{
@@ -2014,10 +2017,10 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1757,
+											"top": 1691,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+HasFirstPlayerSeat(): boolean",
+											"text": "+hasFirstPlayerSeat(): boolean",
 											"horizontalAlignment": 0
 										},
 										{
@@ -2031,10 +2034,10 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1779,
+											"top": 1713,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+HasEndGameToken(): boolean",
+											"text": "+hasEndGameToken(): boolean",
 											"horizontalAlignment": 0
 										},
 										{
@@ -2048,10 +2051,10 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1801,
+											"top": 1735,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+GetShelf(): Shelf",
+											"text": "+getShelf(): Shelf",
 											"horizontalAlignment": 0
 										},
 										{
@@ -2065,18 +2068,35 @@
 											},
 											"font": "Arial;20;0",
 											"left": 1589,
-											"top": 1823,
+											"top": 1757,
 											"width": 397.412109375,
 											"height": 20,
-											"text": "+GetPersonalGoalCard(): PersonalGoalCard",
+											"text": "+getPersonalGoalCard(): PersonalGoalCard",
+											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLOperationView",
+											"_id": "AAAAAAGHFJG0TkwAlb0=",
+											"_parent": {
+												"$ref": "AAAAAAGG4H+cI/Ajefw="
+											},
+											"model": {
+												"$ref": "AAAAAAGHFJG0Lkv9uH4="
+											},
+											"font": "Arial;20;0",
+											"left": 1589,
+											"top": 1779,
+											"width": 397.412109375,
+											"height": 20,
+											"text": "+addScoringToken(ScoringToken): void",
 											"horizontalAlignment": 0
 										}
 									],
 									"font": "Arial;20;0",
 									"left": 1584,
-									"top": 1640,
+									"top": 1618,
 									"width": 407.412109375,
-									"height": 208
+									"height": 186
 								},
 								{
 									"_type": "UMLReceptionCompartmentView",
@@ -8786,7 +8806,8 @@
 									"_parent": {
 										"$ref": "AAAAAAGG4NDPnDFW6/k="
 									},
-									"name": "int[2] start"
+									"name": "int[2] start",
+									"type": ""
 								},
 								{
 									"_type": "UMLParameter",
@@ -8794,7 +8815,8 @@
 									"_parent": {
 										"$ref": "AAAAAAGG4NDPnDFW6/k="
 									},
-									"name": "int amount"
+									"name": "int amount",
+									"type": ""
 								},
 								{
 									"_type": "UMLParameter",
@@ -8802,7 +8824,8 @@
 									"_parent": {
 										"$ref": "AAAAAAGG4NDPnDFW6/k="
 									},
-									"name": "int direction"
+									"name": "int direction",
+									"type": ""
 								}
 							]
 						},
@@ -9343,7 +9366,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4Hfnle9d5t4="
 							},
-							"name": "GetValidTiles",
+							"name": "getValidTiles",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -9955,7 +9978,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "CheckPersonalGoal",
+							"name": "checkPersonalGoal",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -9963,7 +9986,7 @@
 									"_parent": {
 										"$ref": "AAAAAAGG4NWoOxFeC5k="
 									},
-									"type": "boolean",
+									"type": "int",
 									"direction": "return"
 								}
 							]
@@ -10012,7 +10035,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "GetNickName",
+							"name": "getNickName",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -10031,7 +10054,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "HasFirstPlayerSeat",
+							"name": "hasFirstPlayerSeat",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -10050,7 +10073,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "HasEndGameToken",
+							"name": "hasEndGameToken",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -10069,7 +10092,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "GetShelf",
+							"name": "getShelf",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -10090,7 +10113,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG4H+cI/Aa9EA="
 							},
-							"name": "GetPersonalGoalCard",
+							"name": "getPersonalGoalCard",
 							"parameters": [
 								{
 									"_type": "UMLParameter",
@@ -10101,6 +10124,34 @@
 									"type": {
 										"$ref": "AAAAAAGG4Hfnle9d5t4="
 									},
+									"direction": "return"
+								}
+							]
+						},
+						{
+							"_type": "UMLOperation",
+							"_id": "AAAAAAGHFJG0Lkv9uH4=",
+							"_parent": {
+								"$ref": "AAAAAAGG4H+cI/Aa9EA="
+							},
+							"name": "addScoringToken",
+							"parameters": [
+								{
+									"_type": "UMLParameter",
+									"_id": "AAAAAAGHFJImp2swGSs=",
+									"_parent": {
+										"$ref": "AAAAAAGHFJG0Lkv9uH4="
+									},
+									"name": "ScoringToken",
+									"type": ""
+								},
+								{
+									"_type": "UMLParameter",
+									"_id": "AAAAAAGHFJImp2sxjpI=",
+									"_parent": {
+										"$ref": "AAAAAAGHFJG0Lkv9uH4="
+									},
+									"type": "void",
 									"direction": "return"
 								}
 							]
@@ -11070,7 +11121,8 @@
 									"_parent": {
 										"$ref": "AAAAAAGHCHB+/RRQfy8="
 									},
-									"name": "int numPlayers"
+									"name": "int numPlayers",
+									"type": ""
 								},
 								{
 									"_type": "UMLParameter",
