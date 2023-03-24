@@ -30,6 +30,15 @@ public class Player {
     public void addScoringToken(ScoringToken t) {
         scoringTokensList.add(t);
     }
+    public void insertTiles(List<Tile> currentTiles, int column) {
+        try {
+            shelf.insertTiles(currentTiles, column);
+        }
+        catch (IndexOutOfBoundsException e) {
+            System.out.println(e);
+            System.out.println("Choose another column.");
+        }
+    }
 
     //getters
     public Shelf getShelf() {
@@ -60,6 +69,5 @@ public class Player {
         for (ScoringToken t : scoringTokensList) sum += t.points;
         return sum;
     }
-
 
 }

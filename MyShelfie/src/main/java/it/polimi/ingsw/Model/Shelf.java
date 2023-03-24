@@ -11,6 +11,21 @@ public class Shelf {
         this.grid = new Tile[ROWS][COLUMNS];
     }
 
+    /**
+     * @param t - list of tiles to be inserted
+     * @param column - column of the shelf where tiles will be added
+     * @throws IndexOutOfBoundsException if the chosen column can't hold all the players tiles
+     */
+    public void insertTiles(List<Tile> t, int column) throws IndexOutOfBoundsException{
+        int size = t.size();
+        for (int i = 1; i <= 6; i++)
+            if (grid[i][column] == null){   //first available square
+                if ((ROWS - i) < size) throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles dont fit the column
+                else {
+                    for (int j = 0; i <= size; i++) grid[i][column] = t.remove(size - j);   //add all tiles from the list
+                }
+            }
+    }
 
     public int getAdjScore() {
         // for each element t in the array
