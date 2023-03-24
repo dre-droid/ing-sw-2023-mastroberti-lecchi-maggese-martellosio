@@ -2,17 +2,20 @@ package main.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.Tile;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * abstract class Board
+ * class Board represent the board where the tile are positioned
  * @author Francesco martellosio
  */
-abstract class Board{
-    private Tile[][] grid;
-    //private Bag bag;
+public class Board{
 
+    private TilePlacingSpot[][] grid;
+    private Bag bag;
+    private final static int NumOfRows = 9;
+    private final static int NumOfColumns = 9;
     public enum Direction{
         UP,
         DOWN,
@@ -20,52 +23,84 @@ abstract class Board{
         LEFT
     }
 
-
     public Board(){
-
+        bag = new Bag();
+        grid = new TilePlacingSpot[NumOfRows][NumOfColumns];
+        for(int i = 0;i<NumOfRows;i++) {for(int j=0;j<NumOfColumns;j++){ grid[i][j] = new TilePlacingSpot(null,true);}}
+        this.setAlwaysUnavailableSpot();
+    }
+    /**
+     * Constructor of the class, it builds the board setting the available spot based on the number of players
+     * @param numOfPlayers number of players playing the game
+     */
+    public Board(int numOfPlayers) throws InvalidParameterException{
+        if(numOfPlayers>4 || numOfPlayers<2){
+            throw new InvalidParameterException("There must be 2,3 or 4 players");
+        }
+        bag = new Bag();
+        grid = new TilePlacingSpot[NumOfRows][NumOfColumns];
+        for(int i = 0;i<NumOfRows;i++) {for(int j=0;j<NumOfColumns;j++){ grid[i][j] = new TilePlacingSpot(null,true);}}
+        this.setAlwaysUnavailableSpot();
+        switch(numOfPlayers){
+            case 2: this.setUnavailableSpotForTwoPlayersBoard(); break;
+            case 3: this.setUnavailableSpotForThreePlayerBoard(); break;
+        }
+        this.refill();
     }
 
     /**
-     *
-     * @param start starting point from where to start drawing tiles from the board
-     * @param amount amount of tiles drawn
-     * @param direction the direction in which the tiles are drawn (up, down, righ, left)
-     * @return a list containing the drawn tiles
-     * @throws IndexOutOfBoundsException if the start coordinates are out of the matrix bounds or if the final coordinates
-     * are out of the matrix bounds
-     *
+     * This method is used to draw tiles from the board
+     * @param x x coordinate of the starting position on the board
+     * @param y y coordinate of the starting position on the board
+     * @param amount number of tiles to be drawn
+     * @param direction the direction in which to move to draw the tiles
+     * @return a list containing the tiles drawn
+     * @throws InvalidMoveException if the selected tiles cannot be drawn according to the game rules
+     * @throws InvalidParameterException if the coordinate are wrong
      */
-    public List<Tile> drawTiles(int[] start, int amount,Direction direction) throws IndexOutOfBoundsException, InvalidMoveException{
-
-        int x,y;
-        x = start[0];
-        y = start[1];
+    public List<Tile> drawTiles(int x,int y,int amount,Direction direction) throws InvalidMoveException, InvalidParameterException{
         List<Tile> drawnTiles = new ArrayList<Tile>();
-
-        if(coordinateOutOfBounds(x,y)){
-            throw new IndexOutOfBoundsException();
-        }
-
-        for(int i=0; i<amount; i++){
-            if(isThisPositionEmpty(x,y)){
-                throw new InvalidMoveException("No Tile in this position");
-            }
-            drawnTiles.add(grid[x][y]);
-            grid[x][y]=null;
-
-
+        //checking that the tiles selected don't go out of the matrix
+        int increasingX=x;
+        int increasingY=y;
+        for(int i=0;i<amount;i++){
+            if(this.coordinateOutOfBounds(increasingX,increasingY))
+                throw new InvalidParameterException("Coordinate out of the matrix");
             switch(direction){
-                case UP: y--; break;
-                case RIGHT: x++; break;
-                case DOWN: y++; break;
-                case LEFT: x--; break;
+                case UP:    increasingX--;break;
+                case DOWN:  increasingX++;break;
+                case LEFT:  increasingY--;break;
+                case RIGHT: increasingY++;break;
             }
-            if(coordinateOutOfBounds(x,y)){
-                throw new IndexOutOfBoundsException();
+        }
+        //checking that the Tiles can be drawn according to the game rules, that means the Tiles selected must have at least one
+        // adjacent spot empty
+        increasingY=y;
+        increasingX=x;
+        for(int i=0;i<amount;i++){
+            if(!this.isThisTileDrawable(increasingX,increasingY))
+                throw new InvalidMoveException("Tile in position ("+increasingX+","+increasingY+") cannot be drawn");
+            switch(direction){
+                case UP:    increasingX--;break;
+                case DOWN:  increasingX++;break;
+                case LEFT:  increasingY--;break;
+                case RIGHT: increasingY++;break;
             }
+        }
+        //if all the controls are fulfilled we proceed with the extracion of the tile
+        for(int i=0;i<amount;i++){
+            drawnTiles.add(grid[x][y].drawTileFromSpot());
+            switch(direction){
+                case UP:    x--;break;
+                case DOWN:  x++;break;
+                case LEFT:  y--;break;
+                case RIGHT: y++;break;
+            }
+
         }
         return drawnTiles;
     }
+
 
     /**
      * This private methods checks if the coordinates are valid or out of the bounds of the matrix
@@ -74,12 +109,8 @@ abstract class Board{
      * @param y y coordinate
      * @return true if the coordinates are out of bound, false if they are valid
      */
-    protected boolean coordinateOutOfBounds(int x, int y){
-        int nrows, ncolumn;
-        nrows= grid.length;
-        ncolumn = grid[0].length;
-
-        if(y<0 || y>nrows || x<0 || x>ncolumn)
+    private boolean coordinateOutOfBounds(int x, int y){
+        if(y<0 || y>NumOfColumns || x<0 || x>NumOfRows)
             return true;
         else
             return false;
@@ -87,14 +118,14 @@ abstract class Board{
 
 
     /**
-     * This protected method check if a position is empty or alredy occupied by a Tile
+     * This method check if a position is empty or alredy occupied by a Tile
      * @author Francesco Martellosio
      * @param x x coordinate
      * @param y y coordinate
      * @return true if there is not a Tile in the position described by the parameters, false otherwise
      */
-    protected boolean isThisPositionEmpty(int x, int y){
-        return (grid[x][y]==null);
+    public boolean isThisPositionEmpty(int x, int y){
+        return (grid[x][y].isEmpty());
     }
 
     /**
@@ -103,9 +134,202 @@ abstract class Board{
      * @param y y coordiante
      * @return true if There is at least an empty position in the adiacent cells, false otherwise
      */
-    protected boolean isThisTileDrawable(int x, int y){
-        return (grid[x-1][y]==null || grid[x+1][y]==null || grid[x][y-1]==null || grid[x][y+1]==null);
+    private boolean isThisTileDrawable(int x, int y){
+        return ((!grid[x][y].isEmpty()) && (grid[x+1][y].isEmpty() || grid[x-1][y].isEmpty() || grid[x][y+1].isEmpty() || grid[x][y-1].isEmpty()));
     }
 
-    abstract public void Refill();
+    /**
+     * This method sets to false the flag on the PlacingSpot that are not available in any game mode
+     */
+    private void setAlwaysUnavailableSpot(){
+        this.grid[0][0].setAvailable(false);
+        this.grid[0][1].setAvailable(false);
+        this.grid[0][2].setAvailable(false);
+        this.grid[0][5].setAvailable(false);
+        this.grid[0][6].setAvailable(false);
+        this.grid[0][7].setAvailable(false);
+        this.grid[0][8].setAvailable(false);
+
+        this.grid[1][0].setAvailable(false);
+        this.grid[1][1].setAvailable(false);
+        this.grid[1][2].setAvailable(false);
+        this.grid[1][6].setAvailable(false);
+        this.grid[1][7].setAvailable(false);
+        this.grid[1][8].setAvailable(false);
+
+        this.grid[2][0].setAvailable(false);
+        this.grid[2][1].setAvailable(false);
+        this.grid[2][7].setAvailable(false);
+        this.grid[2][8].setAvailable(false);
+
+        this.grid[3][0].setAvailable(false);
+
+        this.grid[5][8].setAvailable(false);
+
+        this.grid[6][0].setAvailable(false);
+        this.grid[6][1].setAvailable(false);
+        this.grid[6][7].setAvailable(false);
+        this.grid[6][8].setAvailable(false);
+
+        this.grid[7][0].setAvailable(false);
+        this.grid[7][1].setAvailable(false);
+        this.grid[7][2].setAvailable(false);
+        this.grid[7][6].setAvailable(false);
+        this.grid[7][7].setAvailable(false);
+        this.grid[7][8].setAvailable(false);
+
+        this.grid[8][0].setAvailable(false);
+        this.grid[8][1].setAvailable(false);
+        this.grid[8][2].setAvailable(false);
+        this.grid[8][3].setAvailable(false);
+        this.grid[8][6].setAvailable(false);
+        this.grid[8][7].setAvailable(false);
+        this.grid[8][8].setAvailable(false);
+    }
+
+    /**
+     * This method sets to false the flag on the PlacingSpot that are not available in a 2 players game
+     */
+    private void setUnavailableSpotForTwoPlayersBoard(){
+        this.setUnavailableSpotForThreePlayerBoard();
+        grid[0][3].setAvailable(false);
+        grid[2][6].setAvailable(false);
+        grid[3][8].setAvailable(false);
+        grid[6][6].setAvailable(false);
+        grid[8][5].setAvailable(false);
+        grid[6][2].setAvailable(false);
+        grid[5][0].setAvailable(false);
+        grid[2][2].setAvailable(false);
+    }
+
+    /**
+     * This method sets to false the flag on the PlacingSpot that are not available in a 3 players game
+     */
+    private void setUnavailableSpotForThreePlayerBoard(){
+        grid[0][4].setAvailable(false);
+        grid[1][5].setAvailable(false);
+        grid[4][8].setAvailable(false);
+        grid[5][7].setAvailable(false);
+        grid[8][4].setAvailable(false);
+        grid[7][3].setAvailable(false);
+        grid[4][0].setAvailable(false);
+        grid[3][1].setAvailable(false);
+    }
+
+    /**
+     * This method clean the board of the remaining tiles, puts them back in the bag and then proceed to refill every available
+     * position with new tiles drawn from the bag
+     */
+    public void refill(){
+        if(this.isRefillneeded()==true){
+            //this section clean the board from the remaining Tiles left on the board
+            for(int i = 0;i<NumOfRows;i++){
+                for(int j=0;j<NumOfColumns;j++){
+                    if(grid[i][j].isAvailable() && !grid[i][j].isEmpty()){
+                        Tile toBeShuffledBackInTheBack = new Tile();
+                        try{
+                            toBeShuffledBackInTheBack = grid[i][j].drawTileFromSpot();
+                        }catch(InvalidMoveException e){}
+                        this.bag.reinsertTile(toBeShuffledBackInTheBack);
+                    }
+                }
+            }
+            //This section fill all the available spots on the board with new tiles from the bag
+            for(int i = 0;i<NumOfRows;i++){
+                for(int j=0;j<NumOfColumns;j++){
+                    if(grid[i][j].isAvailable()){
+                        grid[i][j].positionTile(bag.pickRandomTile());
+                    }
+                }
+            }
+        }
+    };
+
+    /**
+     * This method checks if all the Tiles present on the board are isolated prompting the need of a refill of the board
+     * @return a boolean value, true if all the Tiles on the board are isolated and false if there is at list one that is not isolated
+     */
+    private boolean isRefillneeded(){
+        boolean anyTileIsNotIsolated=false;
+        for(int i = 0;i<NumOfRows;i++){
+            for(int j=0;j<NumOfColumns;j++){
+                if(grid[i][j].isAvailable() && !grid[i][j].isEmpty()){
+                    //case for the tiles on the first row (the elements above must not be checked because it's out of the matrix
+                    if(i==0){
+                        if(!(grid[i+1][j].isEmpty() && grid[i][j+1].isEmpty() && grid[i][j-1].isEmpty()))
+                            anyTileIsNotIsolated = true;
+                    }
+                    //case for the tiles in the last row (the elements under this line must not be checked because they are out of the grid
+                    else if(i == 8){
+                        if(!(grid[i-1][j].isEmpty() && grid[i][j+1].isEmpty() && grid[i][j-1].isEmpty()))
+                            anyTileIsNotIsolated = true;
+                    }
+                    //case for the tiles in the first Column (the element on the left of this line are out of the matrix and therefore must not be checked
+                    else if(j==0){
+                        if(!(grid[i-1][j].isEmpty() && grid[i+1][j].isEmpty() && grid[i][j+1].isEmpty()))
+                            anyTileIsNotIsolated = true;
+                    }
+                    //case for the tiles in the last column (the element on the left of this line are out of the matrix and therefore must not be checked
+                    else if(j==8){
+                        if(!(grid[i-1][j].isEmpty() && grid[i+1][j].isEmpty() && grid[i][j-1].isEmpty()))
+                            anyTileIsNotIsolated = true;
+                    }
+                    //case for all the other tiles
+                    else{
+                        if(!(grid[i+1][j].isEmpty() && grid[i-1][i].isEmpty() && grid[i][j+1].isEmpty() && grid[i][j-1].isEmpty()))
+                            anyTileIsNotIsolated = true;
+                    }
+                }
+
+            }
+        }
+        return (!anyTileIsNotIsolated);
+    }
+
+    private void printGridMap(){
+        for(int i = 0;i<NumOfRows;i++) {
+            for (int j = 0; j < NumOfColumns; j++) {
+                if (grid[i][j].isAvailable() == false) System.out.print("X ");
+                else{
+                    if(grid[i][j].isEmpty()) System.out.print("e ");
+                    else{
+                        Tile t = grid[i][j].showTileInThisPosition();
+                        switch(t.getType()){
+                            case CAT: System.out.print("C ");break;
+                            case BOOK:System.out.print("B ");break;
+                            case GAME:System.out.print("G ");break;
+                            case FRAME:System.out.print("F ");break;
+                            case PLANT:System.out.print("P ");break;
+                            case TROPHY:System.out.print("T ");break;
+                        }
+                    }
+
+                }
+            }
+            System.out.println("");
+        }
+    }
+
+    /*public static void main(String[] args){
+        Board b = new Board(2);
+        System.out.println();
+        try{
+            b.drawTiles(1,3,3,Direction.DOWN);
+        } catch (InvalidMoveException e) {
+            throw new RuntimeException(e);
+        }
+        b.printGridMap();
+    }*/
+
+    /**
+     * this method position a tile in a specific spot (used only for testing)
+     * @param x coordinate
+     * @param y coordinate
+     */
+    public void setTile(int x, int y){
+        if(grid[x][y].isAvailable())
+            grid[x][y].positionTile(bag.pickRandomTile());
+    }
+
+
 }
