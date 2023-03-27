@@ -1,9 +1,8 @@
-package test.test.java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
 import org.junit.jupiter.api.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;

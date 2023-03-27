@@ -1,4 +1,4 @@
-package test.test.java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.Bag;
 import main.java.it.polimi.ingsw.Model.Tile;
