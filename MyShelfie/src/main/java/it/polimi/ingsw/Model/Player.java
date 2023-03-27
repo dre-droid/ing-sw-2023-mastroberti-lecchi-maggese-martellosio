@@ -27,12 +27,21 @@ public class Player {
     }
 
     //setters
+    public void setCurrentTiles(List<Tile> list){
+        this.currentTiles = list;
+    }
     public void addScoringToken(ScoringToken t) {
         scoringTokensList.add(t);
     }
+
+    /**
+     *
+     * @param currentTiles - list of tiles to be added to shelf, max length 3
+     * @param column - column where tiles will be inserted, column values range [1 ... 5]
+     */
     public void insertTiles(List<Tile> currentTiles, int column) {
         try {
-            shelf.insertTiles(currentTiles, column);
+            shelf.insertTiles(currentTiles, column - 1);
         }
         catch (IndexOutOfBoundsException e) {
             System.out.println(e);
@@ -61,9 +70,9 @@ public class Player {
      * @author Andrea Mastroberti
      * computes total score, which is the sum of personal goal, common goal and adjacent tiles objectives
      */
-    public int getScore(){
+    /*public int getScore(){
         return personalGoalCard.getPoints(shelf) + getTokensScore() + shelf.getAdjScore();
-    }
+    }*/
     private int getTokensScore(){
         int sum = 0;
         for (ScoringToken t : scoringTokensList) sum += t.points;

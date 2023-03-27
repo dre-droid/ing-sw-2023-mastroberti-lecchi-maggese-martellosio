@@ -1,9 +1,10 @@
-package test.java.it.polimi.ingsw.Model;
+package test.test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.Bag;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.Type;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;  //andrea mastroberti - inserito perche non funizonava sulla mia macchina. mettiamoci d'accordo
+//import org.junit.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
