@@ -18,7 +18,6 @@ public class PersonalGoalCard{
      * @param shelf is the player shelf that has to be checked for matches
      * @return an integer corresponding to the points associated with the matces
      */
-
     public int getPoints(Shelf shelf){
         int counter = o;
         for(int i=0;i<ROWS;i++){
