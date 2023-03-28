@@ -25,8 +25,9 @@ public class PersonalGoalCard{
         int counter = 0;
         for(int i=0;i<6;i++){
             for(int j=0;j<5;j++){
-                if(validTiles.getGrid()[i][j].getType()==shelf.getGrid()[i][j].getType()){
-                    counter++;
+                if(validTiles.getGrid()[i][j].getType()!=null && shelf.getGrid()[i][j].getType()!= null )
+                    if(validTiles.getGrid()[i][j].getType()==shelf.getGrid()[i][j].getType()){
+                        counter++;
                 }
             }
         }

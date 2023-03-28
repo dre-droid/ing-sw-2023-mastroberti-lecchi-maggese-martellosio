@@ -15,15 +15,16 @@ public class TwoColumnsOfDifferentTypes implements StrategyCommonGoal{
         for(int col=0;col<5;col++){
             for(int i=0;i<6;i++){
                 for(int j=i+1;j<6;j++){
-                    if(shelfGrid[i][col].getType() == shelfGrid[j][col].getType()){
-                        repeated=true;
+                    if(shelfGrid[i][col].getType() != null && shelfGrid[j][col].getType()!= null)
+                        if(shelfGrid[i][col].getType() == shelfGrid[j][col].getType()){
+                            repeated=true;
 
 
+
+                        }
 
                     }
-
                 }
-            }
             if (!repeated)
                     colcount++;
             repeated = false;

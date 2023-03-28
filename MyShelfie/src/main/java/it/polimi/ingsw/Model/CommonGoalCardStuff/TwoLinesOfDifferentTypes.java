@@ -14,12 +14,13 @@ public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
         for(int raw=0;raw<5;raw++){
             for(int i=0;i<5;i++){
                 for(int j=i+1;j<5;j++){
-                    if(shelfGrid[raw][i].getType() == shelfGrid[raw][j].getType()){
-                        repeated=true;
+                    if(shelfGrid[raw][i].getType() != null && shelfGrid[raw][j].getType()!= null)
+                        if(shelfGrid[raw][i].getType() == shelfGrid[raw][j].getType()){
+                            repeated=true;
 
 
 
-                    }
+                        }
 
                 }
             }
@@ -32,11 +33,6 @@ public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
             return true ;
         else
             return false;
-
-
-
-
-
 
     }
 }
