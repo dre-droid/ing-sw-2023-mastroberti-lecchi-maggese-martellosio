@@ -60,6 +60,10 @@ public class Shelf {
                         result = result || checkLeft(j, k, t);
                     if(k!=COLUMNS-1)
                         result = result || checkRight(j, k, t);
+
+                    if(result)
+                        adjCounter++;
+
                     if(!result){        //il calcolo va fatto su caselle adiacenti contigue
                         score = score + scoreCalc(adjCounter);
                         adjCounter = 0;
@@ -97,16 +101,28 @@ public class Shelf {
     }
 
     public boolean checkUp(int j, int k, Type tileType){
-        return grid[j-1][k].getType() == tileType;
+        if(grid[j-1][k] != null)
+            return grid[j-1][k].getType() == tileType;
+        else
+            return false;
     }
-    public boolean checkDown(int j, int k, Type tileType){
-        return grid[j+1][k].getType() == tileType;
+    public boolean checkDown(int j, int k, Type tileType) {
+        if(grid[j+1][k] != null)
+            return grid[j+1][k].getType() == tileType;
+        else
+            return false;
     }
-    public boolean checkLeft(int j, int k, Type tileType){
-        return grid[j][k-1].getType() == tileType;
+    public boolean checkLeft(int j, int k, Type tileType) {
+        if(grid[j][k-1] != null)
+            return grid[j][k-1].getType() == tileType;
+        else
+            return false;
     }
     public boolean checkRight(int j, int k, Type tileType){
-        return grid[j][k+1].getType() == tileType;
+        if(grid[j][k+1] != null)
+            return grid[j][k+1].getType() == tileType;
+        else
+            return false;
     }
 
     /**
