@@ -19,7 +19,7 @@ public class PersonalGoalCard{
      * @return an integer corresponding to the points associated with the matces
      */
     public int getPoints(Shelf shelf){
-        int counter = o;
+        int counter = 0;
         for(int i=0;i<ROWS;i++){
             for(int j=0;j<COLUMNS;j++){
                 if(validTiles[i][j].type==shelf[i][j].type{
