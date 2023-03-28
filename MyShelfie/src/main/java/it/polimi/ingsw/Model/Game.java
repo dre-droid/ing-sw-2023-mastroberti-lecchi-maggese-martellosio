@@ -22,14 +22,20 @@ public class Game {
         playersList = new ArrayList<>();
     }
 
+
     /**
      * adds a new player to the lobby - fristPlayerSeat set to false by default
      * @param nick
      */
-    void addPlayer(String nick){
+    public void addPlayer(String nick){
         Player player = new Player(nick, choosePersonalGoals(), false, board);
         playersList.add(player);
     }
+
+    public void playTurn(int x, int y, int amount, Board.Direction direction, int column){
+        isPlaying.insertTiles(isPlaying.drawTiles(x, y, amount, direction), column);
+
+    };
 
     //stub
     private CommonGoalCard chooseCommonGoals(){
@@ -50,11 +56,11 @@ public class Game {
         playersList.get(starter);
     }
 
-    void playTurn();
-    boolean getNextPlayer(){}
-    void removePlayer(){}
-    boolean isLastTurn(){}
-    void setLastTurnFlag(){}
-    List<Player> getLeaderBoard(){}
+
+    //boolean getNextPlayer(){}
+    //void removePlayer(){}
+    //boolean isLastTurn(){}
+    //void setLastTurnFlag(){}
+    //List<Player> getLeaderBoard(){}
 
 }
