@@ -1,4 +1,4 @@
-package java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
