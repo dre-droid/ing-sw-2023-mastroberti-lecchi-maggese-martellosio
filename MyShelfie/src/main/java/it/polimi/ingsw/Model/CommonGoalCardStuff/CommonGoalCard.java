@@ -58,6 +58,15 @@ public class CommonGoalCard {
         return outcome;
     }
 
+
+    public void addPlayerToAlredyBeenRewarded(Player player){
+        this.playersAlredyRewarded.add(player.getNickname());
+    }
+
+    public void addPlayerToWhoCompleted(Player player){
+        this.playersWhoCompleted.add(player.getNickname());
+    }
+
     /**
      * @author Francesco Martellosio
      * This method checks if the player passed in the parameter has alredy collected the reward from this common goal

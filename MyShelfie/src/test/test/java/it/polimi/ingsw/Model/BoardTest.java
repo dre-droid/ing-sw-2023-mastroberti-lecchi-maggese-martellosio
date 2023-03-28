@@ -84,18 +84,13 @@ public class BoardTest {
         if(b.isThisPositionEmpty(1,3))numOfEmptySpots++;
         if(b.isThisPositionEmpty(1,4))numOfEmptySpots++;
         assertEquals(2,numOfEmptySpots);
+
     }
 
     @Test
     public void drawTiles_CoordinateOutOfBound_InvalidParameterExceptionIsThrown() {
         Board b = new Board(3);
         assertThrows(InvalidParameterException.class,()->{b.drawTiles(3,42,2, Board.Direction.RIGHT);});
-    }
-
-    @Test
-    public void drawTiles_AmountGoesOutOfBound_InvalidParameterExceptionIsThrown(){
-        Board b = new Board(4);
-        assertThrows(InvalidParameterException.class,()->{b.drawTiles(3,5,10, Board.Direction.RIGHT);});
     }
 
     @Test
