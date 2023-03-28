@@ -2,6 +2,10 @@ package main.java.it.polimi.ingsw.Model;
 
 import java.util.List;
 
+/**
+ * @author Diego Lecchi
+ * class Shelf represents the shelf of a player as a matrix of Tiles
+ */
 public class Shelf {
     public final int ROWS = 6;
     public final int COLUMNS = 5;
@@ -31,6 +35,12 @@ public class Shelf {
     public Tile[][] getGrid(){
         return this.grid;
     }
+
+    /**
+     * @author Diego Lecchi
+     * @return score
+     * used to get the score of adjacent tiles of the same type
+     */
 
     public int getAdjScore() {
         // for each element t in the array
@@ -62,6 +72,11 @@ public class Shelf {
         return score;
     }
 
+    /**
+     * @author Diego Lecchi
+     * @param adjCounter -counter of adjacent tiles
+     * used to transform the number of adjacent tiles to the respective score for the game
+     */
     public int scoreCalc(int adjCounter){
 
         if(adjCounter<3)
@@ -94,4 +109,17 @@ public class Shelf {
         return grid[j][k+1].getType() == tileType;
     }
 
+    /**
+     * @author Diego Lecchi
+     * @return true if shelf is full or false otherwise
+     */
+    public boolean isFull() {
+        for (int j = 0; j < ROWS; j++) {
+            for (int k = 0; k < COLUMNS; k++) {
+                if (grid[j][k] == null)
+                    return false;
+            }
+        }
+        return true;
+    }
 }
