@@ -2,6 +2,10 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 
 
 import main.java.it.polimi.ingsw.Model.*;
+/**
+ * @author Saverio Maggese
+ * checks if there are at least tiles of the same type
+ */
 
 public class EightofSameType implements StrategyCommonGoal{
     @Override
