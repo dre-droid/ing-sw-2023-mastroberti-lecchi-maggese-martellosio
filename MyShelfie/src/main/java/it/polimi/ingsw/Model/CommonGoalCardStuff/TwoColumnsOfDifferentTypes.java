@@ -19,11 +19,12 @@ public class TwoColumnsOfDifferentTypes implements StrategyCommonGoal{
                         repeated=true;
 
 
+
                     }
 
                 }
             }
-            if (repeated == false)
+            if (!repeated)
                     colcount++;
             repeated = false;
 
