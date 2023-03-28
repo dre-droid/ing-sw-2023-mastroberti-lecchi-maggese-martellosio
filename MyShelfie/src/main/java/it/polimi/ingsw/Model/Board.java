@@ -60,24 +60,12 @@ public class Board{
      */
     public List<Tile> drawTiles(int x,int y,int amount,Direction direction) throws InvalidMoveException, InvalidParameterException{
         List<Tile> drawnTiles = new ArrayList<Tile>();
-        //checking that the tiles selected don't go out of the matrix
+        //checking that the tiles selected don't go out of the matrix or if the selected tiles are not drawable
         int increasingX=x;
         int increasingY=y;
         for(int i=0;i<amount;i++){
             if(this.coordinateOutOfBounds(increasingX,increasingY))
                 throw new InvalidParameterException("Coordinate out of the matrix");
-            switch(direction){
-                case UP:    increasingX--;break;
-                case DOWN:  increasingX++;break;
-                case LEFT:  increasingY--;break;
-                case RIGHT: increasingY++;break;
-            }
-        }
-        //checking that the Tiles can be drawn according to the game rules, that means the Tiles selected must have at least one
-        // adjacent spot empty
-        increasingY=y;
-        increasingX=x;
-        for(int i=0;i<amount;i++){
             if(!this.isThisTileDrawable(increasingX,increasingY))
                 throw new InvalidMoveException("Tile in position ("+increasingX+","+increasingY+") cannot be drawn");
             switch(direction){
