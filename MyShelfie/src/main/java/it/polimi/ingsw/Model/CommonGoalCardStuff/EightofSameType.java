@@ -17,9 +17,9 @@ public class EightofSameType implements StrategyCommonGoal{
         int countFrame=0;
         int countTrophy=0;
         int countPlant=0;
-        for(int i=0;i<5;i++){
-            for(int j=0;j<6;j++){
-                if(shelfGrid[i][j].getType()!= null)
+        for(int i=0;i<6;i++){
+            for(int j=0;j<5;j++){
+                if(shelfGrid[i][j]!= null)
                     switch (shelfGrid[i][j].getType()) {
                         case CAT:countCat++;
                         case BOOK:countBook++;

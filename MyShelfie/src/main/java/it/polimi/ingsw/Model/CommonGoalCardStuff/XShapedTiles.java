@@ -26,6 +26,5 @@ public class XShapedTiles implements StrategyCommonGoal {
             }
         }
         return false;
-
     }
 }
