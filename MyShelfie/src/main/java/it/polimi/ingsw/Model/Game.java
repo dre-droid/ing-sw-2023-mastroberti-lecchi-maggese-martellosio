@@ -22,16 +22,19 @@ public class Game {
     public Game(){
         playersList = new LinkedList<>();
         leaderBoard = new ArrayList<>();
+        commonGoalCards = new ArrayList<>();
         lastTurn = false;
         lastRound = false;
     }
 
     /**
-     * after players have been added to the lobby, game starts
+     * after players have been added to the lobby,
+     * game starts: sets first player, fills the board and chooses the common goal cards
      */
     public void gameStartSetup(){
        setFirstPlayer();
        setBoard();
+       chooseCommonGoals();
     }
 
     /**
@@ -111,6 +114,7 @@ public class Game {
         int starter = random.nextInt(playersList.size() - 1);
         playersList.get(starter).setFirstPlayerSeat();
         iterator = playersList.iterator();
+        isPlaying = playersList.get(starter);
     }
 
     //stub
@@ -125,6 +129,7 @@ public class Game {
 
     private void setBoard(){
         board = new Board(playersList.size());
+        for (Player p: playersList) p.setBoard(board);
     }
 
     private void setIsPlaying(Player player){
@@ -144,6 +149,7 @@ public class Game {
         return lastRound;
     }
 
+    //***   getters   ***//
     //prints leaderboard to output
     public void getLeaderBoard(){
         int i = 0;
@@ -153,4 +159,7 @@ public class Game {
         }
     }
 
+    public Board getBoard(){
+        return this.board;
+    }
 }

@@ -5,6 +5,7 @@ import main.java.it.polimi.ingsw.Model.Tile;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * class Board represent the board where the tile are positioned
@@ -123,7 +124,14 @@ public class Board{
      * @return true if There is at least an empty position in the adiacent cells, false otherwise
      */
     private boolean isThisTileDrawable(int x, int y){
-        return ((!grid[x][y].isEmpty()) && (grid[x+1][y].isEmpty() || grid[x-1][y].isEmpty() || grid[x][y+1].isEmpty() || grid[x][y-1].isEmpty()));
+        boolean flag = false;
+        if (x > 9 || y > 9 || x < 0 || y < 0) return false;
+        if (grid[x][y].isEmpty()) return false;
+        for (int i = -1; i <= 1; i += 2) {
+            if (x + i <= 9 && x + i >= 0) flag = !(grid[x + i][y].isEmpty());
+            if (y + i <= 9 && y + i >= 0) flag = !grid[x][y + i].isEmpty();
+        }
+        return flag;
     }
 
     /**
@@ -274,7 +282,7 @@ public class Board{
         return (!anyTileIsNotIsolated);
     }
 
-    private void printGridMap(){
+    public void printGridMap(){
         for(int i = 0;i<NumOfRows;i++) {
             for (int j = 0; j < NumOfColumns; j++) {
                 if (grid[i][j].isAvailable() == false) System.out.print("X ");
