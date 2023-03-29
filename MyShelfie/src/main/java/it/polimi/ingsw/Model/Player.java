@@ -4,6 +4,7 @@ import java.util.List;
 
 public class Player {
     private Shelf shelf;
+    public int score;
     private List<Tile> currentTiles;
     private List<ScoringToken> scoringTokensList;
     private String nickname;
@@ -69,6 +70,7 @@ public class Player {
         this.currentTiles = list;
     }
     private void setEndGameToken() {this.endGameToken = true;}
+    public void setFirstPlayerSeat() {this.firstPlayerSeat = true;}
     public void addScoringToken(ScoringToken t) {
         scoringTokensList.add(t);
     }
@@ -93,10 +95,14 @@ public class Player {
 
     /**
      * @author Andrea Mastroberti
-     * computes total score, which is the sum of personal goal, common goal and adjacent tiles objectives
+     * computes partial score, which is the sum of common goal and adjacent tiles objectives
+     * (personal goal is computed at the end of the game)
      */
-    public int getScore(){
-        return personalGoalCard.getPoints(shelf) + getTokensScore() + shelf.getAdjScore();
+    public void updateScore(){
+        this.score = getTokensScore() + shelf.getAdjScore();
+    }
+    public void updateFinalScore(){
+        score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
     }
     private int getTokensScore(){
         int sum = 0;
