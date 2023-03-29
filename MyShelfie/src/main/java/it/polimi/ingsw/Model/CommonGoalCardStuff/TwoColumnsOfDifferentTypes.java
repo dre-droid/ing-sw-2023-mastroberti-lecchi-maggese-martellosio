@@ -27,7 +27,7 @@ public class TwoColumnsOfDifferentTypes implements StrategyCommonGoal{
                     }
                 }
             if (!repeated)
-                    colcount++;
+                colcount++;
             repeated = false;
 
         }
