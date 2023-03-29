@@ -124,15 +124,16 @@ public class Board{
      * @return true if There is at least an empty position in the adiacent cells, false otherwise
      */
     private boolean isThisTileDrawable(int x, int y){
-        boolean flag = false;
-        if (x > 9 || y > 9 || x < 0 || y < 0) return false;
         if (grid[x][y].isEmpty()) return false;
-        for (int i = -1; i <= 1; i += 2) {
-            if (x + i <= 9 && x + i >= 0) flag = !(grid[x + i][y].isEmpty());
-            if (y + i <= 9 && y + i >= 0) flag = !grid[x][y + i].isEmpty();
+        for (int i = -1; i <= 1; i += 2) {  //checks tiles to the left, right, up and down
+            if (x + i > 9 || y + i > 9 || x + i < 0 || y + i < 0) return true;  //if indexes are out of grids bounds, the tile has an empty edge
+            else{
+                if (grid[x + i][y].isEmpty() || grid[x][y + i].isEmpty()) return true;
+            }
         }
-        return flag;
+        return false;
     }
+
 
     /**
      * This method sets to false the flag on the PlacingSpot that are not available in any game mode

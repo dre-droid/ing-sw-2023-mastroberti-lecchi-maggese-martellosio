@@ -1,6 +1,7 @@
 package main.java.it.polimi.ingsw.Model;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Player {
     private Shelf shelf;
@@ -21,12 +22,13 @@ public class Player {
     public Player(String nickname, PersonalGoalCard personalGoalCard, boolean firstPlayerSeat, Board board){
         this.nickname = nickname;
         this.personalGoalCard = personalGoalCard;
-        this.firstPlayerSeat = firstPlayerSeat;
         this.board = board;
-        shelf = new Shelf();
-        List<Tile> currentTiles = new ArrayList<Tile>();
-        List<ScoringToken> scoringTokensList = new ArrayList<ScoringToken>();
-        endGameToken = false;
+
+        this.shelf = new Shelf();
+        this.currentTiles = new ArrayList<Tile>();
+        this.scoringTokensList = new ArrayList<ScoringToken>();
+        this.firstPlayerSeat = firstPlayerSeat;
+        this.endGameToken = false;
     }
 
     /**
@@ -102,15 +104,31 @@ public class Player {
      * (personal goal is computed at the end of the game)
      */
     public void updateScore(){
+        Random random = new Random();
+        int starter = random.nextInt(10);
         this.score = getTokensScore() + shelf.getAdjScore();
+        this.score = starter;
     }
     public void updateFinalScore(){
         score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
     }
     private int getTokensScore(){
         int sum = 0;
+        if (scoringTokensList.isEmpty()) return 0;
         for (ScoringToken t : scoringTokensList) sum += t.points;
         return sum;
+    }
+
+    public void printShelf(){
+        Tile[][] grid = shelf.getGrid();
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 4; j++){
+                if (grid[i][j] == null) System.out.printf("X ");
+                else System.out.printf("%s ", grid[i][j].toString());
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

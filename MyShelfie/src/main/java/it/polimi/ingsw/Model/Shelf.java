@@ -64,7 +64,7 @@ public class Shelf {
         for(int i=0;i<6;i++){
             for(int j=0;j<5;j++){
                 if(grid[i][j]!=null){
-                    System.out.println("NUOVA CELLA ");
+                    //System.out.println("NUOVA CELLA ");
                     toBeChecked.add(new Coordinate(i,j));
                     do{
                         Coordinate c = toBeChecked.remove(toBeChecked.size()-1);
@@ -135,12 +135,12 @@ public class Shelf {
                         }
                         adjCounter+=1;
                         alredyChecked.add(c);
-                        System.out.println("Tile controllata: ("+c.x+","+c.y+")");
-                        System.out.println("Tile già controllate: ");
-                        for(Coordinate stampa : alredyChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
-                        System.out.println("Tile da controllare: ");
-                        for(Coordinate stampa : toBeChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
-                        System.out.println();
+                        //System.out.println("Tile controllata: ("+c.x+","+c.y+")");
+                        //System.out.println("Tile già controllate: ");
+                        //for(Coordinate stampa : alredyChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
+                        //System.out.println("Tile da controllare: ");
+                        //for(Coordinate stampa : toBeChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
+                        //System.out.println();
                     }while(toBeChecked.size()!=0);
                     //System.out.println("Tessere adiacenti: "+ adjCounter);
                     scoreCounter+=scoreCalc(adjCounter);

@@ -2,18 +2,17 @@ package main.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 
-import java.sql.Array;
 import java.util.*;
 
 public class Game {
-    Player isPlaying;
-    LinkedList<Player> playersList;
-    List<Player> leaderBoard;
-    Iterator<Player> iterator;
-    List<CommonGoalCard> commonGoalCards;
-    Board board;
-    boolean lastTurn;
-    boolean lastRound;
+    public Player isPlaying;//should be private
+    private LinkedList<Player> playersList;
+    private List<Player> leaderBoard;
+    private Iterator<Player> iterator;
+    private List<CommonGoalCard> commonGoalCards;
+    private Board board;
+    private boolean lastTurn;
+    private boolean lastRound;
 
 
     /**
@@ -77,6 +76,7 @@ public class Game {
             }
             getLeaderBoard();
         }
+        isPlaying = nextPlayer;
     };
 
 
@@ -131,22 +131,11 @@ public class Game {
         board = new Board(playersList.size());
         for (Player p: playersList) p.setBoard(board);
     }
-
-    private void setIsPlaying(Player player){
-        this.isPlaying = player;
-    }
-
     private void setLastTurnFlag(){
         this.lastTurn = true;
     }
     private void setLastRoundFlag(){
         this.lastRound = true;
-    }
-    private boolean isLastTurn(){
-        return lastTurn;
-    }
-    private boolean isLastRound(){
-        return lastRound;
     }
 
     //***   getters   ***//
@@ -157,6 +146,7 @@ public class Game {
             System.out.println(i + ". " + p.getNickname() + ", score: " + p.score);
             i++;
         }
+        System.out.println();
     }
 
     public Board getBoard(){
