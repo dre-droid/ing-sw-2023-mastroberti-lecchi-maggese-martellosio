@@ -52,7 +52,7 @@ public class Player {
      */
     public void insertTiles(List<Tile> currentTiles, int column) {
         try {
-            shelf.insertTiles(currentTiles, column - 1);
+            shelf.insertTiles(currentTiles, column);
             if (shelf.isFull()) setEndGameToken();
         }
         catch (IndexOutOfBoundsException e) {
@@ -66,6 +66,9 @@ public class Player {
     }
 
     //setters
+    public void setBoard(Board b){
+        this.board = b;
+    }
     public void setCurrentTiles(List<Tile> list){
         this.currentTiles = list;
     }
