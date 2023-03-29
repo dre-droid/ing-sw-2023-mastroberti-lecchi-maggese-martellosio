@@ -1,4 +1,4 @@
-package test.test.java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.Tile;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +53,78 @@ public class ShelfTest {
         grid[2][1] = new Tile(Type.CAT);
 
         assertEquals(3, shelf.getAdjScore());
+    }
+
+    @Test
+    public void getAdjScore_6AdjacentCatAnd4AdjacentGames_11PointsReturned(){
+        Shelf shelf = new Shelf();
+        Tile[][] grid = shelf.getGrid();
+
+        grid[0][0] = new Tile(Type.CAT);
+        grid[0][1] = new Tile(Type.CAT);
+        grid[1][1] = new Tile(Type.CAT);
+        grid[2][1] = new Tile(Type.CAT);
+        grid[2][2] = new Tile(Type.CAT);
+        grid[3][2] = new Tile(Type.CAT);
+
+
+        grid[4][0] = new Tile(Type.GAME);
+        grid[5][0] = new Tile(Type.GAME);
+        grid[4][1] = new Tile(Type.GAME);
+        grid[5][1] = new Tile(Type.GAME);
+
+        assertEquals(11,shelf.getAdjScore());
+
+    }
+
+    @Test
+    public void getAdjScore_6AdjacentCatAnd4AdjacentGamesNearEachOther_11PointsReturned(){
+        Shelf shelf = new Shelf();
+        Tile[][] grid = shelf.getGrid();
+
+        grid[0][0] = new Tile(Type.CAT);
+        grid[0][1] = new Tile(Type.CAT);
+        grid[1][1] = new Tile(Type.CAT);
+        grid[2][1] = new Tile(Type.CAT);
+        grid[2][2] = new Tile(Type.CAT);
+        grid[3][2] = new Tile(Type.CAT);
+
+
+        grid[3][0] = new Tile(Type.GAME);
+        grid[4][0] = new Tile(Type.GAME);
+        grid[3][1] = new Tile(Type.GAME);
+        grid[4][1] = new Tile(Type.GAME);
+
+        assertEquals(11,shelf.getAdjScore());
+
+    }
+
+    @Test
+    public void getAdjScore_4AdjacentCat2AdjPlatn3AdjFrame5AdjTrophy_10ptsReturned(){
+        Shelf shelf = new Shelf();
+        Tile[][] grid = shelf.getGrid();
+
+        grid[0][0] = new Tile(Type.CAT);
+        grid[0][1] = new Tile(Type.CAT);
+        grid[1][1] = new Tile(Type.CAT);
+        grid[2][1] = new Tile(Type.CAT);
+
+        grid[1][2] = new Tile(Type.PLANT);
+        grid[2][2] = new Tile(Type.PLANT);
+
+
+        grid[0][3] = new Tile(Type.FRAME);
+        grid[1][3] = new Tile(Type.FRAME);
+        grid[2][3] = new Tile(Type.FRAME);
+
+        grid[3][0] = new Tile(Type.TROPHY);
+        grid[3][1] = new Tile(Type.TROPHY);
+        grid[3][2] = new Tile(Type.TROPHY);
+        grid[3][3] = new Tile(Type.TROPHY);
+        grid[3][4] = new Tile(Type.TROPHY);
+
+
+        assertEquals(10,shelf.getAdjScore());
     }
 
 }

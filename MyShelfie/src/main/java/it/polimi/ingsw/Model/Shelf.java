@@ -1,5 +1,6 @@
 package main.java.it.polimi.ingsw.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,44 +37,121 @@ public class Shelf {
         return this.grid;
     }
 
-    /**
-     * @author Diego Lecchi
-     * @return score
-     * used to get the score of adjacent tiles of the same type
-     */
 
+    /**
+     * @author Francesco Martellosio
+     * This method is used to calculate the adjacence points of the shelf
+     * @return the points from the current adjacences
+     */
     public int getAdjScore() {
         // for each element t in the array
-        int score=0;
+        int adjCounter=0;
+        int scoreCounter=0;
+        boolean alreadyCheckedFlag;
+        boolean alreadyToBeCheckedFlag;
+        //Type maxAdjPtsType;
+        class Coordinate{
+            public int x,y;
+            public Coordinate(int x, int y){
+                this.x=x;
+                this.y=y;
 
-        for (Type t : Type.values()) {
-            int adjCounter=0;
-            for (int j = 0; j < ROWS; j++) {
-                for (int k = 0; k < COLUMNS; k++) {
-                    boolean result = false;
-
-                    if(j!=0)    //if not in first row and so on for the rest
-                        result = result || checkUp(j, k, t);
-                    if(j!=ROWS-1)
-                        result = result || checkDown(j, k, t);
-                    if(k!=0)
-                        result = result || checkLeft(j, k, t);
-                    if(k!=COLUMNS-1)
-                        result = result || checkRight(j, k, t);
-
-                    if(result)
-                        adjCounter++;
-
-                    if(!result){        //il calcolo va fatto su caselle adiacenti contigue
-                        score = score + scoreCalc(adjCounter);
-                        adjCounter = 0;
-                    }
-
-                }
             }
-
         }
-        return score;
+        List<Coordinate> toBeChecked = new ArrayList<Coordinate>();
+        List<Coordinate> alredyChecked = new ArrayList<Coordinate>();
+
+        for(int i=0;i<6;i++){
+            for(int j=0;j<5;j++){
+                if(grid[i][j]!=null){
+                    System.out.println("NUOVA CELLA ");
+                    toBeChecked.add(new Coordinate(i,j));
+                    do{
+                        Coordinate c = toBeChecked.remove(toBeChecked.size()-1);
+                        Coordinate tbc;
+                        if(checkUp(c.x,c.y,grid[c.x][c.y].getType())){
+                            tbc = new Coordinate(c.x-1,c.y);
+                            alreadyCheckedFlag = false;
+                            alreadyToBeCheckedFlag = false;
+                            for(Coordinate CoordAlredyChecked: alredyChecked){
+                                if(CoordAlredyChecked.x ==tbc.x && CoordAlredyChecked.y ==tbc.y)
+                                    alreadyCheckedFlag = true;
+                            }
+                            for(Coordinate CoordAlredyToBeChecked: toBeChecked){
+                                if(CoordAlredyToBeChecked.x ==tbc.x && CoordAlredyToBeChecked.y ==tbc.y)
+                                    alreadyToBeCheckedFlag = true;
+                            }
+
+                            if(!alreadyCheckedFlag && !alreadyToBeCheckedFlag)
+                                toBeChecked.add(tbc);
+                        }
+
+                        if(checkDown(c.x,c.y,grid[c.x][c.y].getType())){
+                            tbc = new Coordinate(c.x+1,c.y);
+                            alreadyCheckedFlag=false;
+                            alreadyToBeCheckedFlag = false;
+                            for(Coordinate CoordAlredyChecked: alredyChecked){
+                                if(CoordAlredyChecked.x ==tbc.x && CoordAlredyChecked.y ==tbc.y)
+                                    alreadyCheckedFlag = true;
+                            }
+                            for(Coordinate CoordAlredyToBeChecked: toBeChecked){
+                                if(CoordAlredyToBeChecked.x ==tbc.x && CoordAlredyToBeChecked.y ==tbc.y)
+                                    alreadyToBeCheckedFlag = true;
+                            }
+                            if(!alreadyCheckedFlag && !alreadyToBeCheckedFlag)
+                                toBeChecked.add(tbc);
+                        }
+
+                        if(checkLeft(c.x,c.y,grid[c.x][c.y].getType())){
+                            tbc = new Coordinate(c.x,c.y-1);
+                            alreadyCheckedFlag = false;
+                            alreadyToBeCheckedFlag = false;
+                            for(Coordinate CoordAlredyChecked: alredyChecked){
+                                if(CoordAlredyChecked.x ==tbc.x && CoordAlredyChecked.y ==tbc.y)
+                                    alreadyCheckedFlag = true;
+                            }
+                            for(Coordinate CoordAlredyToBeChecked: toBeChecked){
+                                if(CoordAlredyToBeChecked.x ==tbc.x && CoordAlredyToBeChecked.y ==tbc.y)
+                                    alreadyToBeCheckedFlag = true;
+                            }
+                            if(!alreadyCheckedFlag && !alreadyToBeCheckedFlag)
+                                toBeChecked.add(tbc);
+                        }
+
+                        if(checkRight(c.x,c.y,grid[c.x][c.y].getType())){
+                            tbc = new Coordinate(c.x,c.y+1);
+                            alreadyCheckedFlag = false;
+                            alreadyToBeCheckedFlag = false;
+                            for(Coordinate CoordAlredyChecked: alredyChecked){
+                                if(CoordAlredyChecked.x ==tbc.x && CoordAlredyChecked.y ==tbc.y)
+                                    alreadyCheckedFlag = true;
+                            }
+                            for(Coordinate CoordAlredyToBeChecked: toBeChecked){
+                                if(CoordAlredyToBeChecked.x ==tbc.x && CoordAlredyToBeChecked.y ==tbc.y)
+                                    alreadyToBeCheckedFlag = true;
+                            }
+                            if(!alreadyCheckedFlag && !alreadyToBeCheckedFlag)
+                                toBeChecked.add(tbc);
+                        }
+                        adjCounter+=1;
+                        alredyChecked.add(c);
+                        System.out.println("Tile controllata: ("+c.x+","+c.y+")");
+                        System.out.println("Tile già controllate: ");
+                        for(Coordinate stampa : alredyChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
+                        System.out.println("Tile da controllare: ");
+                        for(Coordinate stampa : toBeChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
+                        System.out.println();
+                    }while(toBeChecked.size()!=0);
+                    //System.out.println("Tessere adiacenti: "+ adjCounter);
+                    scoreCounter+=scoreCalc(adjCounter);
+                    toBeChecked.clear();
+                    adjCounter=0;
+                }
+
+
+            }
+        }
+        return scoreCounter;
     }
 
     /**
@@ -101,24 +179,28 @@ public class Shelf {
     }
 
     public boolean checkUp(int j, int k, Type tileType){
+        if(j-1<0) return false;
         if(grid[j-1][k] != null)
             return grid[j-1][k].getType() == tileType;
         else
             return false;
     }
     public boolean checkDown(int j, int k, Type tileType) {
+        if(j+1>5) return false;
         if(grid[j+1][k] != null)
             return grid[j+1][k].getType() == tileType;
         else
             return false;
     }
     public boolean checkLeft(int j, int k, Type tileType) {
+        if(k-1<0) return false;
         if(grid[j][k-1] != null)
             return grid[j][k-1].getType() == tileType;
         else
             return false;
     }
     public boolean checkRight(int j, int k, Type tileType){
+        if(k+1>4) return false;
         if(grid[j][k+1] != null)
             return grid[j][k+1].getType() == tileType;
         else
