@@ -267,4 +267,155 @@ public class CommonGoalCardTest {
         }
         assertFalse(cgc.isSatisfiedBy(player));
     }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingColumnsStartingFrom5Height_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<5-j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        assertTrue(cgc.isSatisfiedBy(player));
+
+    }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingColumnsStartingFrom6Height_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<6-j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingColumnsStartingFrom6Height_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<6-4+j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingColumnsStartingFrom5Height_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<6-5+j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingHeightsButWithHoles_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<6-j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        grid[0][0]=null;
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingHeightsButWithHoles_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
+        CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int j = 0;j<5;j++){
+            for(int i=0;i<6-4+j;i++){
+                grid[i][j]= new Tile(Type.CAT);
+            }
+        }
+        grid[1][3]=null;
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_SquaredShapedGroups_shelfMatchGoal_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
+        CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[1][1] = new Tile(Type.TROPHY);
+        grid[1][2] = new Tile(Type.TROPHY);
+        grid[2][1] = new Tile(Type.TROPHY);
+        grid[2][2] = new Tile(Type.TROPHY);
+
+        grid[4][2] = new Tile(Type.TROPHY);
+        grid[4][3] = new Tile(Type.TROPHY);
+        grid[5][2] = new Tile(Type.TROPHY);
+        grid[5][3] = new Tile(Type.TROPHY);
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_SquaredShapedGroups_squaresOfDifferentTypes_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
+        CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[1][1] = new Tile(Type.TROPHY);
+        grid[1][2] = new Tile(Type.TROPHY);
+        grid[2][1] = new Tile(Type.TROPHY);
+        grid[2][2] = new Tile(Type.TROPHY);
+
+        grid[4][2] = new Tile(Type.CAT);
+        grid[4][3] = new Tile(Type.CAT);
+        grid[5][2] = new Tile(Type.CAT);
+        grid[5][3] = new Tile(Type.CAT);
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_SquaredShapedGroups_squaresOverlap_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
+        CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[1][1] = new Tile(Type.TROPHY);
+        grid[1][2] = new Tile(Type.TROPHY);
+        grid[2][1] = new Tile(Type.TROPHY);
+        grid[2][2] = new Tile(Type.TROPHY);
+
+        grid[2][2] = new Tile(Type.TROPHY);
+        grid[2][3] = new Tile(Type.TROPHY);
+        grid[3][2] = new Tile(Type.TROPHY);
+        grid[3][3] = new Tile(Type.TROPHY);
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
 }

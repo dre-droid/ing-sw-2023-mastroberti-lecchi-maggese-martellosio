@@ -7,42 +7,71 @@ import main.java.it.polimi.ingsw.Model.*;
 public class IncreasingOrDecreasingHeight implements StrategyCommonGoal{
     @Override
     public boolean executeStrategy(Shelf shelf) {
-        Tile[][] shelfGrid = shelf.getGrid();
-        boolean desc=true;
-        boolean cresc=true;
-        for(int col=0;col<5;col++){
-            if(shelfGrid[5-col][col] != null){
-                desc=false;
-
+        Tile[][] grid = shelf.getGrid();
+        boolean asc1, desc1,asc2, desc2;
+        int tileInPreviousColumn=0;
+        int tileInThisColumn =0;
+        desc1 = true;
+        asc1 = true;
+        asc2=true;
+        desc2=true;
+        //desc heigth==6
+        for(int col =0;col<5;col++){
+            for(int row=0;row<6-col;row++){
+                if(grid[row][col]==null){
+                    desc1 = false;
+                }
             }
-        }
-        if(desc){
-            for(int col=0;col<5;col++){
-                for(int raw=0;raw<5-col;raw++){
-                    if(shelfGrid[raw][col] == null){
-                        desc=false;
-                    }
+            for(int row = 6-col;row<6;row++){
+                if(grid[row][col]!=null){
+                    desc1 = false;
                 }
             }
         }
-        for(int col=0;col<5;col++){
-            if(shelfGrid[col+1][col] != null){
-                cresc=false;
-
+        //desc heigth=5
+        for(int col =0;col<5;col++){
+            for(int row=0;row<5-col;row++){
+                if(grid[row][col]==null){
+                    desc2 = false;
+                }
             }
-        }
-        if(cresc){
-            for(int col=0;col<5;col++){
-                for(int raw=0;raw<=col;raw++){
-                    if(shelfGrid[raw][col] == null){
-                        cresc=false;
-                    }
+            for(int row = 5-col;row<6;row++){
+                if(grid[row][col]!=null){
+                    desc2 = false;
                 }
             }
         }
-        return(cresc || desc);
 
+        //asc heigth=6
+        for(int col =0;col<5;col++){
+            for(int row=0;row<6-4+col;row++){
+                if(grid[row][col]==null){
+                    asc1 = false;
+                }
+            }
+            for(int row = 6-4+col;row<6;row++){
+                if(grid[row][col]!=null){
+                    asc1 = false;
+                }
+            }
+        }
+        //asc heigth=5
+        for(int col =0;col<5;col++){
+            for(int row=0;row<5-4+col;row++){
+                if(grid[row][col]==null){
+                    asc2 = false;
+                }
+            }
+            for(int row = 5-4+col;row<6;row++){
+                if(grid[row][col]!=null){
+                    asc2 = false;
+                }
+            }
+        }
+
+        return (desc1 || desc2 || asc1 || asc2);
 
 
     }
+
 }

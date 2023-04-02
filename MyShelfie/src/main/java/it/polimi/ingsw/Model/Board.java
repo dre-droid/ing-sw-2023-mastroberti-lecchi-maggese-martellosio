@@ -308,10 +308,11 @@ public class Board{
     }
 
     /*public static void main(String[] args){
-        Board b = new Board(2);
+        Board b = new Board(4);
+        b.printGridMap();
         System.out.println();
         try{
-            b.drawTiles(1,3,3,Direction.DOWN);
+            b.drawTiles(0,3,2,Direction.RIGHT);
         } catch (InvalidMoveException e) {
             throw new RuntimeException(e);
         }
@@ -327,6 +328,7 @@ public class Board{
         if(grid[x][y].isAvailable())
             grid[x][y].positionTile(bag.pickRandomTile());
     }
+
 
 
 }
