@@ -64,6 +64,38 @@ public class CommonGoalCardTest {
     }
 
     @Test
+    public void getReward_FirstPlayerToCompleteTheGoal_8ptsTokenReturned(){
+        Player player = new Player("Francesco", null, false, null);
+        FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
+        CommonGoalCard cgc = new CommonGoalCard(strategy,3);
+        cgc.addPlayerToWhoCompleted(player);
+        try{
+            ScoringToken st = cgc.getReward(player);
+            assertEquals(8, st.getPoints());
+        }catch(CannotCollectRewardException c){
+            c.printStackTrace();
+        }
+    }
+
+    @Test
+    public void getReward_SecondPlayerToCompleteTheGoal_8ptsTokenReturned(){
+        Player player1 = new Player("Francesco", null, false, null);
+        Player player2 = new Player("Marco", null, false, null);
+        FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
+        CommonGoalCard cgc = new CommonGoalCard(strategy,3);
+        cgc.addPlayerToWhoCompleted(player1);
+        cgc.addPlayerToWhoCompleted(player2);
+
+        try{
+            ScoringToken st1 = cgc.getReward(player1);
+            ScoringToken st2 = cgc.getReward(player2);
+            assertEquals(6, st2.getPoints());
+        }catch(CannotCollectRewardException c){
+            c.printStackTrace();
+        }
+    }
+
+    @Test
     public void isSatisfied_DiagonalStrategy_shelfMatchCommonGoal_returnTrue(){
         Player player = new Player("Francesco", null, false, null);
         Diagonal diagonal = new Diagonal();
