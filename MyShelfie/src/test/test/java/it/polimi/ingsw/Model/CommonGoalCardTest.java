@@ -450,4 +450,80 @@ public class CommonGoalCardTest {
         assertFalse(cgc.isSatisfiedBy(player));
     }
 
+    @Test
+    public void isSatisfied_SixGroupsOfAtLeastTwoSameTypeTiles_shelfMatchGoal_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        SixGroupsOfAtLeastTwoSameTypeTiles sixGroupsOfAtLeastTwoSameTypeTiles = new SixGroupsOfAtLeastTwoSameTypeTiles();
+        CommonGoalCard cgc = new CommonGoalCard(sixGroupsOfAtLeastTwoSameTypeTiles, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[0][0] = new Tile(Type.TROPHY);
+        grid[1][0] = new Tile(Type.TROPHY);
+        grid[1][1] = new Tile(Type.TROPHY);
+        grid[2][1] = new Tile(Type.TROPHY);
+        grid[2][2] = new Tile(Type.TROPHY);
+        grid[2][3] = new Tile(Type.TROPHY);
+
+        grid[2][0] = new Tile(Type.CAT);
+        grid[3][0] = new Tile(Type.CAT);
+
+        grid[4][0] = new Tile(Type.FRAME);
+        grid[5][0] = new Tile(Type.FRAME);
+        grid[4][1] = new Tile(Type.FRAME);
+        grid[5][1] = new Tile(Type.FRAME);
+
+        grid[3][2] = new Tile(Type.GAME);
+        grid[3][3] = new Tile(Type.GAME);
+        grid[4][2] = new Tile(Type.GAME);
+        grid[4][3] = new Tile(Type.GAME);
+        grid[5][2] = new Tile(Type.GAME);
+        grid[5][3] = new Tile(Type.GAME);
+
+        grid[4][4] = new Tile(Type.FRAME);
+        grid[5][4] = new Tile(Type.FRAME);
+
+        grid[0][3] = new Tile(Type.PLANT);
+        grid[0][4] = new Tile(Type.PLANT);
+        grid[1][4] = new Tile(Type.PLANT);
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_SixGroupsOfAtLeastTwoSameTypeTiles_shelfDoesNotMatchGoal_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        SixGroupsOfAtLeastTwoSameTypeTiles sixGroupsOfAtLeastTwoSameTypeTiles = new SixGroupsOfAtLeastTwoSameTypeTiles();
+        CommonGoalCard cgc = new CommonGoalCard(sixGroupsOfAtLeastTwoSameTypeTiles, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[0][0] = new Tile(Type.TROPHY);
+        grid[1][0] = new Tile(Type.TROPHY);
+        grid[1][1] = new Tile(Type.TROPHY);
+        grid[2][1] = new Tile(Type.TROPHY);
+        grid[2][2] = new Tile(Type.TROPHY);
+        grid[2][3] = new Tile(Type.TROPHY);
+
+        grid[2][0] = new Tile(Type.CAT);
+        grid[3][0] = new Tile(Type.CAT);
+
+        grid[4][0] = new Tile(Type.FRAME);
+        grid[5][0] = new Tile(Type.FRAME);
+        grid[4][1] = new Tile(Type.FRAME);
+        grid[5][1] = new Tile(Type.FRAME);
+        grid[5][2] = new Tile(Type.FRAME);
+        grid[5][3] = new Tile(Type.FRAME);
+
+        grid[3][2] = new Tile(Type.GAME);
+        grid[3][3] = new Tile(Type.GAME);
+        grid[4][2] = new Tile(Type.GAME);
+        grid[4][3] = new Tile(Type.GAME);
+
+        grid[4][4] = new Tile(Type.FRAME);
+        grid[5][4] = new Tile(Type.FRAME);
+
+        grid[0][3] = new Tile(Type.PLANT);
+        grid[0][4] = new Tile(Type.PLANT);
+        grid[1][4] = new Tile(Type.PLANT);
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
 }
