@@ -3,6 +3,7 @@ package test.java.it.polimi.ingsw.Model;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 import main.java.it.polimi.ingsw.Model.*;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -413,7 +414,7 @@ public class CommonGoalCardTest {
     }
 
     @Test
-    public void isSatisfied_SquaredShapedGroups_squaresOfDifferentTypes_returnFalse(){
+    public void isSatisfied_SquaredShapedGroups_squaresOfDifferentTypes_returnTrue(){
         Player player = new Player("Francesco", null, false, null);
         SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
         CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
@@ -428,7 +429,7 @@ public class CommonGoalCardTest {
         grid[4][3] = new Tile(Type.CAT);
         grid[5][2] = new Tile(Type.CAT);
         grid[5][3] = new Tile(Type.CAT);
-        assertFalse(cgc.isSatisfiedBy(player));
+        assertTrue(cgc.isSatisfiedBy(player));
     }
 
     @Test
@@ -526,4 +527,192 @@ public class CommonGoalCardTest {
         assertFalse(cgc.isSatisfiedBy(player));
     }
 
+    @Test
+    public void isSatisfied_FourGroupsOfAtLeastFourSameTypeTiles_shelfMatchGoal_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        FourGroupsOfAtLeastFourSameTypeTiles fourGroupsOfAtLeastFourSameTypeTiles = new FourGroupsOfAtLeastFourSameTypeTiles();
+        CommonGoalCard cgc = new CommonGoalCard(fourGroupsOfAtLeastFourSameTypeTiles, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+
+        for(int i=0;i<2;i++)
+            for(int j=0;j<2;j++)
+                grid[i][j]=new Tile(Type.CAT);
+
+        for(int i=0;i<2;i++)
+            for(int j=2;j<4;j++)
+                grid[i][j]=new Tile(Type.TROPHY);
+        for(int j=0;j<4;j++)
+            grid[2][j] = new Tile(Type.TROPHY);
+
+        for(int i=3;i<6;i++)
+            grid[i][0] = new Tile(Type.PLANT);
+        grid[3][1] = new Tile(Type.PLANT);
+
+        for(int i=3;i<6;i++)
+            for(int j=2;j<4;j++)
+                grid[i][j] = new Tile(Type.GAME);
+        for(int i=4;i<6;i++)
+            grid[i][1] = new Tile(Type.GAME);
+
+        assertTrue(cgc.isSatisfiedBy(player));
+
+    }
+
+    @Test
+    public void isSatisfied_FourGroupsOfAtLeastFourSameTypeTiles_shelfDoesNotMatchGoal_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        FourGroupsOfAtLeastFourSameTypeTiles fourGroupsOfAtLeastFourSameTypeTiles = new FourGroupsOfAtLeastFourSameTypeTiles();
+        CommonGoalCard cgc = new CommonGoalCard(fourGroupsOfAtLeastFourSameTypeTiles, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+
+        for(int i=0;i<6;i++)
+            for(int j=0;j<3;j++)
+                grid[i][j]=new Tile(Type.CAT);
+        for(int i=0;i<6;i++)
+            for(int j=3;j<5;j++)
+                grid[i][j]=new Tile(Type.PLANT);
+
+
+        assertFalse(cgc.isSatisfiedBy(player));
+
+    }
+
+    @Test
+    public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_ShelfMatchGoal_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<4;row++)
+            for(int col=0;col<5;col++){
+                if(col<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(col==2)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+
+    @Test
+    public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_OnlyThreeRowsAreFull_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<3;row++)
+            for(int col=0;col<5;col++){
+                if(col<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(col==2)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_ThreeRowsOkOneWith4DifferentTypes_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<4;row++)
+            for(int col=0;col<5;col++){
+                if(col<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(col==2)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        grid[3][0] = new Tile(Type.GAME);
+
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+
+    @Test
+    public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_ShelfMatchGoal_returnTrue(){
+        Player player = new Player("Francesco", null, false, null);
+        ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<6;row++)
+            for(int col=0;col<3;col++){
+                if(row<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(row==2 || row ==5)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        assertTrue(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_OnlyTwoColumnsAreFull_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<6;row++)
+            for(int col=0;col<2;col++){
+                if(row<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(row==2 || row ==5)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
+
+    @Test
+    public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_TwoColumnsOkOneWith4DifferentTypes_returnFalse(){
+        Player player = new Player("Francesco", null, false, null);
+        ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        for(int row=0;row<6;row++)
+            for(int col=0;col<3;col++){
+                if(row<2){
+                    grid[row][col] = new Tile(Type.CAT);
+                }
+                else{
+                    if(row==2 || row ==5)
+                        grid[row][col] = new Tile(Type.PLANT);
+                    else
+                        grid[row][col] = new Tile(Type.TROPHY);
+                }
+            }
+        grid[0][0] = new Tile(Type.GAME);
+        assertFalse(cgc.isSatisfiedBy(player));
+    }
 }
