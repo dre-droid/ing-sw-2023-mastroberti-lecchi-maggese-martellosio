@@ -80,6 +80,9 @@ public class Player {
         scoringTokensList.add(t);
     }
 
+    public void setPersonalGoalCard(PersonalGoalCard personalGoalCard) {
+        this.personalGoalCard = personalGoalCard;
+    }
 
     //getters
     public Shelf getShelf() {

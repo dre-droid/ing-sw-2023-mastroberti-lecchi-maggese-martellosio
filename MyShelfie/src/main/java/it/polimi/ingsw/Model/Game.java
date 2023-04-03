@@ -1,6 +1,9 @@
 package main.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
+
+import java.util.Random;
 
 import java.util.*;
 
@@ -34,7 +37,9 @@ public class Game {
        setFirstPlayer();
        setBoard();
        chooseCommonGoals();
+       drawPersonalGoalCard();
     }
+
 
     /**
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
@@ -84,12 +89,14 @@ public class Game {
      * adds a new player to the lobby - fristPlayerSeat set to false by default
      * @param nick
      */
-    public void addPlayer(String nick){
+   /* public void addPlayer(String nick){
         Player player = new Player(nick, choosePersonalGoals(), false, board);
         playersList.add(player);
         leaderBoard.add(player);
     }
 
+
+    */
     /**
      * removes player with nickname nick
      * @param nick
@@ -123,9 +130,7 @@ public class Game {
         commonGoalCards.add(new CommonGoalCard(new EightofSameType(), playersList.size()));
     }
     //stub
-    private PersonalGoalCard choosePersonalGoals(){
-        return new PersonalGoalCard();
-    }
+
 
     private void setBoard(){
         board = new Board(playersList.size());
@@ -152,4 +157,69 @@ public class Game {
     public Board getBoard(){
         return this.board;
     }
+
+    /**
+     * @Author DiegoLecchi
+     * assigns a personal goal card randomly to each player in playerList
+     */
+
+
+    public void drawPersonalGoalCard() {
+        int[] numberAlreadyDrawn = new int[playersList.size()];
+        Random rand = new Random();
+        int randomNum = 0;
+        for (Player p: playersList) {
+            while(checkArrayForDuplicate(numberAlreadyDrawn, randomNum)){
+                randomNum = rand.nextInt((12 - 1) + 1) + 1;
+            }
+            switch(randomNum) {
+                case 1:
+                    p.setPersonalGoalCard(new PersonalGoalCard1());
+                    break;
+                case 2:
+                    p.setPersonalGoalCard(new PersonalGoalCard2());
+                    break;
+                case 3:
+                    p.setPersonalGoalCard(new PersonalGoalCard3());
+                    break;
+                case 4:
+                    p.setPersonalGoalCard(new PersonalGoalCard4());
+                    break;
+                case 5:
+                    p.setPersonalGoalCard(new PersonalGoalCard5());
+                    break;
+                case 6:
+                    p.setPersonalGoalCard(new PersonalGoalCard6());
+                    break;
+                case 7:
+                    p.setPersonalGoalCard(new PersonalGoalCard7());
+                    break;
+                case 8:
+                    p.setPersonalGoalCard(new PersonalGoalCard8());
+                    break;
+                case 9:
+                    p.setPersonalGoalCard(new PersonalGoalCard9());
+                    break;
+                case 10:
+                    p.setPersonalGoalCard(new PersonalGoalCard10());
+                    break;
+                case 11:
+                    p.setPersonalGoalCard(new PersonalGoalCard11());
+                    break;
+                case 12:
+                    p.setPersonalGoalCard(new PersonalGoalCard12());
+                    break;
+            }
+        }
+    }
+
+    public boolean checkArrayForDuplicate(int[] numberAlreadyDrawn, int randomNum){
+        for (int i = 0; i <playersList.size(); i++) {
+            if(randomNum == numberAlreadyDrawn[i])
+                return true;
+        }
+        return false;
+    }
+
 }
+

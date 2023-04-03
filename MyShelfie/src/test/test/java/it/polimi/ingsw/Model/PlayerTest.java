@@ -1,6 +1,7 @@
 package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard1;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class PlayerTest {
     @BeforeEach
     void setUp(){
         Board board = new Board(2);
-        player = new Player("test", new PersonalGoalCard(), false, board);
+        player = new Player("test", new PersonalGoalCard1(), false, board);
         //Bag bag = new Bag();
         list = new ArrayList<Tile>();
         list.add(new Tile(Type.CAT));

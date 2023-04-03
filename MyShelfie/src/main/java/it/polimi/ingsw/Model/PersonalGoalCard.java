@@ -8,13 +8,14 @@ import java.util.*;
  * @author Saverio Maggese
  */
 
-public class PersonalGoalCard{
+public abstract class PersonalGoalCard{
     /**
      * @param valildTiles è una shelf che contiene unicamente le Tile da matchare
      *
      */
-    private Shelf validTiles;
+    protected Shelf validTiles;
 
+    public PersonalGoalCard() {this.validTiles = new Shelf();}
 
     /**
      * @author Saverio Maggese
@@ -22,6 +23,7 @@ public class PersonalGoalCard{
      * @return an integer corresponding to the points associated with the matches
      */
     public int getPoints(Shelf shelf){
+        initializeValidTiles();
         int counter = 0;
         for(int i=0;i<6;i++){
             for(int j=0;j<5;j++){
@@ -50,4 +52,6 @@ public class PersonalGoalCard{
     public Shelf getValidTiles(){
         return this.validTiles;
     }
+
+    public abstract void initializeValidTiles();
 }
