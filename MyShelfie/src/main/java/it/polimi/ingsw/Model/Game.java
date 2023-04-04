@@ -245,47 +245,26 @@ public class Game {
         int[] numberAlreadyDrawn = new int[playersList.size()];
         Random rand = new Random();
         int randomNum = 0;
+        int i=0;
         for (Player p: playersList) {
             while(checkArrayForDuplicate(numberAlreadyDrawn, randomNum)){
                 randomNum = rand.nextInt((12 - 1) + 1) + 1;
             }
-            switch(randomNum) {
-                case 1:
-                    p.setPersonalGoalCard(new PersonalGoalCard1());
-                    break;
-                case 2:
-                    p.setPersonalGoalCard(new PersonalGoalCard2());
-                    break;
-                case 3:
-                    p.setPersonalGoalCard(new PersonalGoalCard3());
-                    break;
-                case 4:
-                    p.setPersonalGoalCard(new PersonalGoalCard4());
-                    break;
-                case 5:
-                    p.setPersonalGoalCard(new PersonalGoalCard5());
-                    break;
-                case 6:
-                    p.setPersonalGoalCard(new PersonalGoalCard6());
-                    break;
-                case 7:
-                    p.setPersonalGoalCard(new PersonalGoalCard7());
-                    break;
-                case 8:
-                    p.setPersonalGoalCard(new PersonalGoalCard8());
-                    break;
-                case 9:
-                    p.setPersonalGoalCard(new PersonalGoalCard9());
-                    break;
-                case 10:
-                    p.setPersonalGoalCard(new PersonalGoalCard10());
-                    break;
-                case 11:
-                    p.setPersonalGoalCard(new PersonalGoalCard11());
-                    break;
-                case 12:
-                    p.setPersonalGoalCard(new PersonalGoalCard12());
-                    break;
+            numberAlreadyDrawn[i]=randomNum;
+            i++;
+            switch (randomNum) {
+                case 1 -> p.setPersonalGoalCard(new PersonalGoalCard1());
+                case 2 -> p.setPersonalGoalCard(new PersonalGoalCard2());
+                case 3 -> p.setPersonalGoalCard(new PersonalGoalCard3());
+                case 4 -> p.setPersonalGoalCard(new PersonalGoalCard4());
+                case 5 -> p.setPersonalGoalCard(new PersonalGoalCard5());
+                case 6 -> p.setPersonalGoalCard(new PersonalGoalCard6());
+                case 7 -> p.setPersonalGoalCard(new PersonalGoalCard7());
+                case 8 -> p.setPersonalGoalCard(new PersonalGoalCard8());
+                case 9 -> p.setPersonalGoalCard(new PersonalGoalCard9());
+                case 10 -> p.setPersonalGoalCard(new PersonalGoalCard10());
+                case 11 -> p.setPersonalGoalCard(new PersonalGoalCard11());
+                case 12 -> p.setPersonalGoalCard(new PersonalGoalCard12());
             }
         }
     }
