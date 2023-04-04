@@ -115,9 +115,19 @@ public class Game {
      * @param nick
      */
    public void addPlayer(String nick){
-        Player player = new Player(nick, false, board);
-        playersList.add(player);
-        leaderBoard.add(player);
+       if(!hasGameStarted()){
+           Player player = new Player(nick, false, board);
+           playersList.add(player);
+           leaderBoard.add(player);
+           if(playersList.size()==numOfPlayers)
+               try{
+                   this.gameStartSetup();
+               }catch(Exception e){
+                   e.printStackTrace();
+               }
+       }
+
+
     }
 
     /**
