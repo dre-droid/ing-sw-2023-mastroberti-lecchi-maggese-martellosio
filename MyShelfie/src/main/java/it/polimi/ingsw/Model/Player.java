@@ -124,8 +124,9 @@ public class Player {
     }
     public void printShelf(){
         Tile[][] grid = shelf.getGrid();
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 4; j++){
+        System.out.println("Player " + this.nickname + "'s shelf");
+        for (int i = 5; i >= 0; i--) {
+            for (int j = 0; j < 5; j++){
                 if (grid[i][j] == null) System.out.printf("X ");
                 else System.out.printf("%s ", grid[i][j].toString());
             }
@@ -133,5 +134,12 @@ public class Player {
         }
         System.out.println();
     }
+    public boolean getFirstPlayerSeat(){
+        return firstPlayerSeat;
+    }
 
+    @Override
+    public String toString(){
+        return this.nickname;
+    }
 }

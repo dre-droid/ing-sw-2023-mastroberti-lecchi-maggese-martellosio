@@ -3,13 +3,14 @@ package main.java.it.polimi.ingsw.Model;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
 
+import java.sql.Array;
 import java.util.Random;
 
 import java.util.*;
 
 public class Game {
     public Player isPlaying;//should be private
-    private LinkedList<Player> playersList;
+    private ArrayList<Player> playersList;
     private List<Player> leaderBoard;
     private Iterator<Player> iterator;
     private List<CommonGoalCard> commonGoalCards;
@@ -22,7 +23,7 @@ public class Game {
      * Constructor - creates a new instance of a game
      */
     public Game(){
-        playersList = new LinkedList<>();
+        playersList = new ArrayList<>();
         leaderBoard = new ArrayList<>();
         commonGoalCards = new ArrayList<>();
         lastTurn = false;
@@ -38,8 +39,9 @@ public class Game {
        setBoard();
        chooseCommonGoals();
        drawPersonalGoalCard();
-    }
+       System.out.println("Players list " + playersList);
 
+    }
 
     /**
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
@@ -47,7 +49,9 @@ public class Game {
      */
     public void playTurn(int x, int y, int amount, Board.Direction direction, int column){
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
-        isPlaying.insertTiles(isPlaying.drawTiles(x, y, amount, direction), column);
+        List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
+        isPlaying.insertTiles(tiles, column);
+        isPlaying.printShelf();
         if (isPlaying.hasEndGameToken()) setLastTurnFlag();
 
         //check common goal and eventually give player token
@@ -69,7 +73,14 @@ public class Game {
         Collections.sort(leaderBoard, new scoreComparator());
 
         //next turn and end game logic
-        Player nextPlayer = iterator.next();
+        Player nextPlayer;
+        if (iterator.hasNext())
+            nextPlayer = iterator.next();
+        else {
+            iterator = playersList.iterator();
+            nextPlayer = iterator.next();
+        }
+        System.out.println("NEXT PLAYER: " + nextPlayer);
         if (isPlaying.hasEndGameToken()) setLastRoundFlag();
         if (lastRound && isPlaying.hasFirstPlayerSeat()){
             isPlaying = nextPlayer;
@@ -82,7 +93,7 @@ public class Game {
             getLeaderBoard();
         }
         isPlaying = nextPlayer;
-    };
+    }
 
 
     /**
@@ -94,13 +105,14 @@ public class Game {
         playersList.add(player);
         leaderBoard.add(player);
     }
+
     /**
      * removes player with nickname nick
      * @param nick
      */
     public void removePlayer(String nick){
         for (Player p: playersList)
-            if (p.getNickname() == nick) playersList.remove(p);
+            if (p.getNickname().equals(nick)) playersList.remove(p);
     }
 
     /** comparator is used to keep the leaderboard ordered by score */
@@ -116,8 +128,14 @@ public class Game {
     private void setFirstPlayer(){
         Random random = new Random();
         int starter = random.nextInt(playersList.size() - 1);
+        System.out.println("Starter: " + starter);
         playersList.get(starter).setFirstPlayerSeat();
+        System.out.println("starting player: " + playersList.get(starter));
+
         iterator = playersList.iterator();
+        while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname())) {
+            iterator.next();
+        }
         isPlaying = playersList.get(starter);
     }
 
@@ -126,13 +144,12 @@ public class Game {
         commonGoalCards.add(new CommonGoalCard(new Diagonal(), playersList.size()));
         commonGoalCards.add(new CommonGoalCard(new EightofSameType(), playersList.size()));
     }
-    //stub
-
 
     private void setBoard(){
         board = new Board(playersList.size());
-        for (Player p: playersList) p.setBoard(board);
+        for (Player p: playersList) p.setBoard(board); //sets players reference to board
     }
+
     private void setLastTurnFlag(){
         this.lastTurn = true;
     }
@@ -156,11 +173,9 @@ public class Game {
     }
 
     /**
-     * @Author DiegoLecchi
+     * @author DiegoLecchi
      * assigns a personal goal card randomly to each player in playerList
      */
-
-
     public void drawPersonalGoalCard() {
         int[] numberAlreadyDrawn = new int[playersList.size()];
         Random rand = new Random();
@@ -218,5 +233,8 @@ public class Game {
         return false;
     }
 
+    public List<Player> getPlayerList(){
+        return playersList;
+    }
 }
 
