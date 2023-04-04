@@ -11,6 +11,7 @@ import java.util.*;
 public class Game {
     public Player isPlaying;//should be private
     private ArrayList<Player> playersList;
+    private int numOfPlayers;
     private List<Player> leaderBoard;
     private Iterator<Player> iterator;
     private List<CommonGoalCard> commonGoalCards;
@@ -30,11 +31,21 @@ public class Game {
         lastRound = false;
     }
 
+    public Game(int numOfPlayers){
+        this.numOfPlayers = numOfPlayers;
+        playersList = new ArrayList<>();
+        leaderBoard = new ArrayList<>();
+        commonGoalCards = new ArrayList<>();
+        lastTurn = false;
+        lastRound = false;
+    }
+
     /**
      * after players have been added to the lobby,
      * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
      */
-    public void gameStartSetup(){
+    public void gameStartSetup() throws Exception{
+        if (!hasGameStarted()) throw new Exception("Not enough players have connected yet!");
        setFirstPlayer();
        setBoard();
        chooseCommonGoals();
@@ -95,6 +106,9 @@ public class Game {
         isPlaying = nextPlayer;
     }
 
+    public boolean hasGameStarted(){
+        return numOfPlayers == playersList.size();
+    }
 
     /**
      * adds a new player to the lobby - fristPlayerSeat set to false by default
@@ -128,9 +142,8 @@ public class Game {
     private void setFirstPlayer(){
         Random random = new Random();
         int starter = random.nextInt(playersList.size() - 1);
-        System.out.println("Starter: " + starter);
         playersList.get(starter).setFirstPlayerSeat();
-        System.out.println("starting player: " + playersList.get(starter));
+        System.out.println("Starting player: " + playersList.get(starter));
 
         iterator = playersList.iterator();
         while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname())) {
@@ -156,6 +169,7 @@ public class Game {
     private void setLastRoundFlag(){
         this.lastRound = true;
     }
+
 
     //***   getters   ***//
     //prints leaderboard to output

@@ -31,7 +31,12 @@ public class GameTest {
 
     @Test
     void playTurnTest_4P(){
-        g.gameStartSetup();
+        try {
+            g.gameStartSetup();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
         g.getBoard().printGridMap();
         System.out.println();
 
@@ -50,6 +55,8 @@ public class GameTest {
         g.playTurn(2, 6, 2, Board.Direction.LEFT, 0);
         g.getBoard().printGridMap();
         g.getLeaderBoard();
+
+
 
     }
 
