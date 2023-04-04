@@ -1,11 +1,8 @@
 package main.java.it.polimi.ingsw.Model;
-
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
-
 import java.util.List;
 import java.util.Random;
-
 import java.util.*;
 
 public class Game {
@@ -22,8 +19,7 @@ public class Game {
 
     /**
      * Constructor - creates a new instance of a game
-     * @param numOfPlayers - first player to connect and consequently create
-     *                       the game sets the number of players for such game
+     * @param numOfPlayers - first player to connect and consequently create the game sets the number of players for such game
      */
     public Game(int numOfPlayers){
         this.numOfPlayers = numOfPlayers;
@@ -34,7 +30,9 @@ public class Game {
         lastRound = false;
     }
 
+
     /**
+     * @author Andrea Mastroberti
      * after players have been added to the lobby,
      * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
      */
@@ -49,8 +47,14 @@ public class Game {
     }
 
     /**
+     * @author Andrea Mastroberti
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player
+     * @param x rows of game board [0 ... 9]
+     * @param y columns of game board [0 ... 9]
+     * @param amount amount of tiles to be drawn [0 ... 3]
+     * @param direction draw direction [RIGHT, LEFT, UP, DOWN]
+     * @param column shelf column to place drawn tiles [0 ... 5]
      */
     public void playTurn(int x, int y, int amount, Board.Direction direction, int column){
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
@@ -97,28 +101,29 @@ public class Game {
         else isPlaying = nextPlayer;
     }
 
+    /**
+     * @return true if playersList.size() has reache numOfPlayers
+     */
     public boolean hasGameStarted(){
         return numOfPlayers == playersList.size();
     }
 
     /**
-     * adds a new player to the lobby - fristPlayerSeat set to false by default
+     * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default
      * @param nick - nickname
      */
    public void addPlayer(String nick){
-       if(!hasGameStarted()){
+       if(!hasGameStarted()) {
            Player player = new Player(nick, false, board);
            playersList.add(player);
            leaderBoard.add(player);
-           if(playersList.size()==numOfPlayers)
-               try{
+           if (playersList.size() == numOfPlayers)
+               try {
                    this.gameStartSetup();
-               }catch(Exception e){
+               } catch (Exception e) {
                    e.printStackTrace();
                }
        }
-
-
     }
 
     /**
@@ -130,7 +135,9 @@ public class Game {
             if (p.getNickname().equals(nick)) playersList.remove(p);
     }
 
-    /** comparator is used to keep the leaderboard ordered by score */
+    /**
+     * comparator used to keep the leaderboard in descending ordered by score
+     */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){
             return p2.getScore() - p1.getScore();
@@ -140,9 +147,7 @@ public class Game {
 
     //***    setters     ***//
     /**
-     * picks random player to start the game
-     * sets the iterator to point to the selected player in the list
-     * sets isPlaying to the selected player
+     * Picks random player to start the game. Sets the iterator to point to such player in the list. Sets isPlaying to the selected player.
      */
     private void setFirstPlayer(){
         //get random value, set firstPlayerSeat
@@ -158,7 +163,7 @@ public class Game {
     }
 
     /**
-     * chooses two distinct and random common goal cards and adds them to the commonGoalCards list
+     * Chooses two random and distinct common goal cards and adds them to the commonGoalCards list
      */
     public void chooseCommonGoals(){
         int randNum1, randNum2;
@@ -195,6 +200,9 @@ public class Game {
         }
     }
 
+    /**
+     * Creates new board as a function of the number of players - also gives players a reference to the Board instance variable
+     */
     private void setBoard(){
         board = new Board(playersList.size());
         for (Player p: playersList) p.setBoard(board); //sets players reference to board
@@ -209,7 +217,16 @@ public class Game {
 
 
     //***   getters   ***//
-    //prints leaderboard to output
+    public Board getBoard(){
+        return this.board;
+    }
+    public List<Player> getPlayerList(){
+        return playersList;
+    }
+
+    /**
+     * Prints leaderboard to console
+     */
     public void getLeaderBoard(){
         int i = 0;
         for (Player p: leaderBoard) {
@@ -218,10 +235,7 @@ public class Game {
         }
         System.out.println();
     }
-
-    public Board getBoard(){
-        return this.board;
-    }
+    public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
 
     /**
      * @author DiegoLecchi
@@ -284,9 +298,5 @@ public class Game {
         return false;
     }
 
-    public List<Player> getPlayerList(){
-        return playersList;
-    }
-    public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
 }
 
