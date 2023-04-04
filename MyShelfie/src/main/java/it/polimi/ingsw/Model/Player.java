@@ -15,13 +15,11 @@ public class Player {
     private Board board;
 
     /**
-     * @param personalGoalCard - unique personal goal card is assigned when player joins the game
      * @param firstPlayerSeat - bool, true if player is the first to play
      * @param board - the board the player's playing on
      */
-    public Player(String nickname, PersonalGoalCard personalGoalCard, boolean firstPlayerSeat, Board board){
+    public Player(String nickname, boolean firstPlayerSeat, Board board){
         this.nickname = nickname;
-        this.personalGoalCard = personalGoalCard;
         this.board = board;
 
         this.shelf = new Shelf();
@@ -29,6 +27,9 @@ public class Player {
         this.scoringTokensList = new ArrayList<ScoringToken>();
         this.firstPlayerSeat = firstPlayerSeat;
         this.endGameToken = false;
+    }
+    public Player(){
+
     }
 
     /**
@@ -121,7 +122,6 @@ public class Player {
         for (ScoringToken t : scoringTokensList) sum += t.points;
         return sum;
     }
-
     public void printShelf(){
         Tile[][] grid = shelf.getGrid();
         for (int i = 0; i < 5; i++) {

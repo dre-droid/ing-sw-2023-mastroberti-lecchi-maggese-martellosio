@@ -16,7 +16,7 @@ public class PlayerTest {
     @BeforeEach
     void setUp(){
         Board board = new Board(2);
-        player = new Player("test", new PersonalGoalCard1(), false, board);
+        player = new Player("test", false, board);
         //Bag bag = new Bag();
         list = new ArrayList<Tile>();
         list.add(new Tile(Type.CAT));

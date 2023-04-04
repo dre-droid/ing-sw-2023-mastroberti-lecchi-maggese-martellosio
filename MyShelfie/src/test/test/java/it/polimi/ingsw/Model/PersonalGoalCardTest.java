@@ -1,4 +1,4 @@
-package test.test.java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard1;
@@ -9,7 +9,7 @@ public class PersonalGoalCardTest {
     @Test
     public void getPoints_0itemsEqualToPGC1_return0(){
         Shelf shelf = new Shelf();
-        Player p = new Player("Paolo", new PersonalGoalCard1(), true, new Board());
+        Player p = new Player("Paolo", true, new Board());
         assertEquals(0, p.getPersonalGoalCard().getPoints(shelf));
     }
 
@@ -20,7 +20,7 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[0][2]= new Tile(Type.FRAME);
         shelf.getGrid()[1][4]= new Tile(Type.CAT);
 
-        Player p = new Player("Paolo", new PersonalGoalCard1(), true, new Board());
+        Player p = new Player("Paolo", true, new Board());
         assertEquals(4, p.getPersonalGoalCard().getPoints(shelf));
     }
 
@@ -35,7 +35,7 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[5][2]= new Tile(Type.TROPHY);
 
 
-        Player p = new Player("Paolo", new PersonalGoalCard1(), true, new Board());
+        Player p = new Player("Paolo", true, new Board());
         assertEquals(12, p.getPersonalGoalCard().getPoints(shelf));
     }
 

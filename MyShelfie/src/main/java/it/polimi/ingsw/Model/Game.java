@@ -31,7 +31,7 @@ public class Game {
 
     /**
      * after players have been added to the lobby,
-     * game starts: sets first player, fills the board and chooses the common goal cards
+     * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
      */
     public void gameStartSetup(){
        setFirstPlayer();
@@ -89,14 +89,11 @@ public class Game {
      * adds a new player to the lobby - fristPlayerSeat set to false by default
      * @param nick
      */
-   /* public void addPlayer(String nick){
-        Player player = new Player(nick, choosePersonalGoals(), false, board);
+   public void addPlayer(String nick){
+        Player player = new Player(nick, false, board);
         playersList.add(player);
         leaderBoard.add(player);
     }
-
-
-    */
     /**
      * removes player with nickname nick
      * @param nick
@@ -213,7 +210,7 @@ public class Game {
         }
     }
 
-    public boolean checkArrayForDuplicate(int[] numberAlreadyDrawn, int randomNum){
+    private boolean checkArrayForDuplicate(int[] numberAlreadyDrawn, int randomNum){
         for (int i = 0; i <playersList.size(); i++) {
             if(randomNum == numberAlreadyDrawn[i])
                 return true;

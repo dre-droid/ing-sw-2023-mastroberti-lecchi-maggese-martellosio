@@ -13,14 +13,14 @@ public class GameTest {
     @BeforeEach
     void setUp(){
     }
-/*
+
     @Test
     void playTurnTest_4P(){
         g = new Game();
-        Player p1 = new Player("p1", new PersonalGoalCard1(), false, null);
-        Player p2 = new Player("p2", new PersonalGoalCard2(), false, null);
-        Player p3 = new Player("p3", new PersonalGoalCard3(), false, null);
-        Player p4 = new Player("p4", new PersonalGoalCard4(), false, null);
+        Player p1 = new Player("p1", false, null);
+        Player p2 = new Player("p2", false, null);
+        Player p3 = new Player("p3", false, null);
+        Player p4 = new Player("p4", false, null);
         g.addPlayer(p1.getNickname());
         g.addPlayer(p2.getNickname());
         g.addPlayer(p3.getNickname());
@@ -54,6 +54,5 @@ public class GameTest {
 
     }
 
- */
 }
 

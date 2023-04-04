@@ -11,7 +11,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void hasAlredyBeenRewarded_playerAlredyRewarded_returnTrue(){
-        Player player = new Player("Francesco", null, false,null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToAlredyBeenRewarded(player);
@@ -20,7 +20,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void hasAlredyBeenRewarded_playerNotRewardedYet_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         assertFalse(cgc.hasAlredyBeenRewarded(player));
@@ -28,7 +28,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void getReward_PlayerHasAllRightsToCollectReward_RewardIsCollected(){
-        Player player = new Player("Francesco", null, false,null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToWhoCompleted(player);
@@ -42,7 +42,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void getReward_PlayerHasAlredyCollectedThereward_CannotCollectRewardExceptionIsThrown(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToWhoCompleted(player);
@@ -55,7 +55,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void getReward_PlayerHasNotCompletedTheGoalYet_CannotCollectRewardExceptionIsThrown(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
 
@@ -66,7 +66,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void getReward_FirstPlayerToCompleteTheGoal_8ptsTokenReturned(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToWhoCompleted(player);
@@ -80,8 +80,8 @@ public class CommonGoalCardTest {
 
     @Test
     public void getReward_SecondPlayerToCompleteTheGoal_8ptsTokenReturned(){
-        Player player1 = new Player("Francesco", null, false, null);
-        Player player2 = new Player("Marco", null, false, null);
+        Player player1 = new Player("Francesco", false, null);
+        Player player2 = new Player("Marco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToWhoCompleted(player1);
@@ -98,7 +98,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_DiagonalStrategy_shelfMatchCommonGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         Diagonal diagonal = new Diagonal();
         CommonGoalCard cgc = new CommonGoalCard(diagonal, 3);
         Shelf shelf = player.getShelf();
@@ -111,7 +111,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_DiagonalStrategy_shelfDoesNotMatchCommonGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         Diagonal diagonal = new Diagonal();
         CommonGoalCard cgc = new CommonGoalCard(diagonal, 3);
         Shelf shelf = player.getShelf();
@@ -124,7 +124,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_eightOfTheSameType_shelfMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         EightofSameType eightofSameType = new EightofSameType();
         CommonGoalCard cgc = new CommonGoalCard(eightofSameType, 3);
         Shelf shelf = player.getShelf();
@@ -140,7 +140,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_eightOfTheSameType_onlySevenOfTheSameType_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         EightofSameType eightofSameType = new EightofSameType();
         CommonGoalCard cgc = new CommonGoalCard(eightofSameType, 3);
         Shelf shelf = player.getShelf();
@@ -154,7 +154,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourCornerOfTheSameType_shelfMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType fourCornerOfTheSameType = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(fourCornerOfTheSameType, 3);
         Shelf shelf = player.getShelf();
@@ -168,7 +168,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourCornerOfTheSameType_shelfDoesNotMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType fourCornerOfTheSameType = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(fourCornerOfTheSameType, 3);
         Shelf shelf = player.getShelf();
@@ -182,7 +182,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_TwoColumnsOfDifferentTypes_shelfMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null,false , null);
+        Player player = new Player("Francesco", false, null);
         TwoColumnsOfDifferentTypes twoColumnsOfDifferentTypes = new TwoColumnsOfDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(twoColumnsOfDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -206,7 +206,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_TwoColumnsOfDifferentTypes_shelfDoesNotMatchTheGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         TwoColumnsOfDifferentTypes twoColumnsOfDifferentTypes = new TwoColumnsOfDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(twoColumnsOfDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -230,7 +230,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_XShapedTiles_shelfMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         XShapedTiles xShapedTiles = new XShapedTiles();
         CommonGoalCard cgc = new CommonGoalCard(xShapedTiles, 3);
         Shelf shelf = player.getShelf();
@@ -245,7 +245,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_XShapedTiles_shelfDoesNotMatchTheGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         XShapedTiles xShapedTiles = new XShapedTiles();
         CommonGoalCard cgc = new CommonGoalCard(xShapedTiles, 3);
         Shelf shelf = player.getShelf();
@@ -260,7 +260,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_TwoLinesOfDifferentType_shelfMatchTheGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         TwoLinesOfDifferentTypes twoLinesOfDifferentTypes = new TwoLinesOfDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(twoLinesOfDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -282,7 +282,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_TwoLinesOfDifferentType_shelfDoesNotMatchTheGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         TwoLinesOfDifferentTypes twoLinesOfDifferentTypes = new TwoLinesOfDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(twoLinesOfDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -303,7 +303,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingColumnsStartingFrom5Height_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -319,7 +319,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingColumnsStartingFrom6Height_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -334,7 +334,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingColumnsStartingFrom6Height_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+        Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -349,7 +349,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingColumnsStartingFrom5Height_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -364,7 +364,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingHeightsButWithHoles_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -380,7 +380,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingHeightsButWithHoles_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -396,7 +396,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_SquaredShapedGroups_shelfMatchGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
         CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
         Shelf shelf = player.getShelf();
@@ -415,7 +415,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_SquaredShapedGroups_squaresOfDifferentTypes_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
         CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
         Shelf shelf = player.getShelf();
@@ -434,7 +434,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_SquaredShapedGroups_squaresOverlap_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
         CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
         Shelf shelf = player.getShelf();
@@ -453,7 +453,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_SixGroupsOfAtLeastTwoSameTypeTiles_shelfMatchGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         SixGroupsOfAtLeastTwoSameTypeTiles sixGroupsOfAtLeastTwoSameTypeTiles = new SixGroupsOfAtLeastTwoSameTypeTiles();
         CommonGoalCard cgc = new CommonGoalCard(sixGroupsOfAtLeastTwoSameTypeTiles, 3);
         Shelf shelf = player.getShelf();
@@ -491,7 +491,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_SixGroupsOfAtLeastTwoSameTypeTiles_shelfDoesNotMatchGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         SixGroupsOfAtLeastTwoSameTypeTiles sixGroupsOfAtLeastTwoSameTypeTiles = new SixGroupsOfAtLeastTwoSameTypeTiles();
         CommonGoalCard cgc = new CommonGoalCard(sixGroupsOfAtLeastTwoSameTypeTiles, 3);
         Shelf shelf = player.getShelf();
@@ -529,7 +529,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourGroupsOfAtLeastFourSameTypeTiles_shelfMatchGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         FourGroupsOfAtLeastFourSameTypeTiles fourGroupsOfAtLeastFourSameTypeTiles = new FourGroupsOfAtLeastFourSameTypeTiles();
         CommonGoalCard cgc = new CommonGoalCard(fourGroupsOfAtLeastFourSameTypeTiles, 3);
         Shelf shelf = player.getShelf();
@@ -561,7 +561,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourGroupsOfAtLeastFourSameTypeTiles_shelfDoesNotMatchGoal_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         FourGroupsOfAtLeastFourSameTypeTiles fourGroupsOfAtLeastFourSameTypeTiles = new FourGroupsOfAtLeastFourSameTypeTiles();
         CommonGoalCard cgc = new CommonGoalCard(fourGroupsOfAtLeastFourSameTypeTiles, 3);
         Shelf shelf = player.getShelf();
@@ -581,7 +581,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_ShelfMatchGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -604,7 +604,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_OnlyThreeRowsAreFull_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -626,7 +626,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_FourRowsOfMaxThreeDifferentTypes_ThreeRowsOkOneWith4DifferentTypes_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         FourRowsOfMaxThreeDifferentTypes fourRowsOfMaxThreeDifferentTypes = new FourRowsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(fourRowsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -651,7 +651,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_ShelfMatchGoal_returnTrue(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -673,7 +673,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_OnlyTwoColumnsAreFull_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
@@ -695,7 +695,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_ThreeColumnsOfMaxThreeDifferentTypes_TwoColumnsOkOneWith4DifferentTypes_returnFalse(){
-        Player player = new Player("Francesco", null, false, null);
+             Player player = new Player("Francesco", false, null);
         ThreeColumnsOfMaxThreeDifferentTypes threeColumnsOfMaxThreeDifferentTypes = new ThreeColumnsOfMaxThreeDifferentTypes();
         CommonGoalCard cgc = new CommonGoalCard(threeColumnsOfMaxThreeDifferentTypes, 3);
         Shelf shelf = player.getShelf();
