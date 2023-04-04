@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Player {
     private Shelf shelf;
-    public int score;
+    private int score;
     private List<Tile> currentTiles;
     private List<ScoringToken> scoringTokensList;
     private String nickname;
@@ -108,10 +108,7 @@ public class Player {
      * (personal goal is computed at the end of the game)
      */
     public void updateScore(){
-        Random random = new Random();
-        int starter = random.nextInt(10);
-        this.score = getTokensScore() + shelf.getAdjScore();
-        this.score = starter;
+        score = getTokensScore() + shelf.getAdjScore();
     }
     public void updateFinalScore(){
         score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
@@ -136,6 +133,9 @@ public class Player {
     }
     public boolean getFirstPlayerSeat(){
         return firstPlayerSeat;
+    }
+    public int getScore(){
+        return score;
     }
 
     @Override

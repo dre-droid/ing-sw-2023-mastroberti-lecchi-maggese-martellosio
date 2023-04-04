@@ -29,20 +29,20 @@ public class SixGroupsOfAtLeastTwoSameTypeTiles implements StrategyCommonGoal{
             for(int col = 0;col<5;col++){
                 if(grid[row][col]!=null){
                     alreadyChecked = alreadyChecked(row,col,alreadyCheckedPositions);
-                    System.out.println("cella: ("+row+","+col+")");
+                    //System.out.println("cella: ("+row+","+col+")");
                     if(!alreadyChecked){
                         positionsToBeChecked.add(new Coordinate(row,col));
 
                         do{
                             coord = positionsToBeChecked.remove(positionsToBeChecked.size()-1);
                             alreadyCheckedPositions.add(coord);
-                            System.out.println("---cella: ("+coord.x+","+coord.y+")");
+                            //System.out.println("---cella: ("+coord.x+","+coord.y+")");
                             //up
                             if(coord.x-1>0){
                                 if(grid[coord.x-1][coord.y]!=null && !alreadyChecked(coord.x-1,coord.y,alreadyCheckedPositions) && !alreadyChecked(coord.x-1,coord.y,positionsToBeChecked)){
                                     if(grid[coord.x-1][coord.y].getType() == grid[coord.x][coord.y].getType()){
                                         positionsToBeChecked.add(new Coordinate(coord.x-1,col));
-                                        System.out.println("UP");
+                                        //System.out.println("UP");
                                     }
 
                                 }
@@ -52,7 +52,7 @@ public class SixGroupsOfAtLeastTwoSameTypeTiles implements StrategyCommonGoal{
                                 if(grid[coord.x+1][coord.y]!=null && !alreadyChecked(coord.x+1,coord.y,alreadyCheckedPositions) && !alreadyChecked(coord.x+1,coord.y,positionsToBeChecked)){
                                     if(grid[coord.x+1][coord.y].getType() == grid[coord.x][coord.y].getType()){
                                         positionsToBeChecked.add(new Coordinate(coord.x+1,coord.y));
-                                        System.out.println("DOWN");
+                                        //System.out.println("DOWN");
                                     }
 
                                 }
@@ -61,7 +61,7 @@ public class SixGroupsOfAtLeastTwoSameTypeTiles implements StrategyCommonGoal{
                             if(coord.y-1>0){
                                 if(grid[coord.x][coord.y-1]!=null && !alreadyChecked(coord.x,coord.y-1,alreadyCheckedPositions) && !alreadyChecked(coord.x,coord.y-1,positionsToBeChecked)){
                                     if(grid[coord.x][coord.y-1].getType() == grid[coord.x][coord.y].getType()){
-                                        System.out.println("LEFT");
+                                        //System.out.println("LEFT");
                                         positionsToBeChecked.add(new Coordinate(coord.x,coord.y-1));
                                     }
                                 }
@@ -70,7 +70,7 @@ public class SixGroupsOfAtLeastTwoSameTypeTiles implements StrategyCommonGoal{
                             if(coord.y+1<5){
                                 if(grid[coord.x][coord.y+1]!=null && !alreadyChecked(coord.x,coord.y+1,alreadyCheckedPositions) && !alreadyChecked(coord.x,coord.y+1,positionsToBeChecked)){
                                     if(grid[coord.x][coord.y+1].getType() == grid[coord.x][coord.y].getType()){
-                                        System.out.println("RIGHT");
+                                        //System.out.println("RIGHT");
                                         positionsToBeChecked.add(new Coordinate(coord.x,coord.y+1));
                                     }
 
@@ -82,12 +82,12 @@ public class SixGroupsOfAtLeastTwoSameTypeTiles implements StrategyCommonGoal{
                         if(tilesInGroup>=2)
                             groupCounter+=1;
                         tilesInGroup=0;
-                        System.out.println("{");
+                        //System.out.println("{");
                         for(Coordinate c: alreadyCheckedPositions){
                             System.out.print("("+c.x+","+c.y+") ");
                         }
-                        System.out.println("}");
-                        System.out.println("Gruppi trovati finora:"+groupCounter);
+                        //System.out.println("}");
+                        //System.out.println("Gruppi trovati finora:"+groupCounter);
 
                     }
                 }

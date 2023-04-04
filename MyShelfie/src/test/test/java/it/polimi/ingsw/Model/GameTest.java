@@ -1,10 +1,6 @@
 package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard1;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard2;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard3;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard4;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testng.Assert;
@@ -17,7 +13,7 @@ public class GameTest {
     Player p4;
     @BeforeEach
     void setUp(){
-        g = new Game();
+        g = new Game(4);
         p1 = new Player("p1", false, null);
         p2 = new Player("p2", false, null);
         p3 = new Player("p3", false, null);
@@ -26,17 +22,22 @@ public class GameTest {
         g.addPlayer(p2.getNickname());
         g.addPlayer(p3.getNickname());
         g.addPlayer(p4.getNickname());
-
-    }
-
-    @Test
-    void playTurnTest_4P(){
         try {
             g.gameStartSetup();
         }
         catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    @Test
+    void playTurnTest_4P(){
+        Tile[][] test;
+        test = g.isPlaying.getShelf().getGrid();
+        test[0][0] = new Tile(Type.CAT);
+        test[0][1] = new Tile(Type.CAT);
+        test[0][2] = new Tile(Type.CAT);
+
         g.getBoard().printGridMap();
         System.out.println();
 
@@ -55,9 +56,6 @@ public class GameTest {
         g.playTurn(2, 6, 2, Board.Direction.LEFT, 0);
         g.getBoard().printGridMap();
         g.getLeaderBoard();
-
-
-
     }
 
     @Test
@@ -70,6 +68,11 @@ public class GameTest {
         }
         Assert.assertEquals(sum, 1);
 
+    }
+
+    @Test
+    void chooseCommonGoals_Test(){
+        Assert.assertEquals(g.getCommonGoalCards().size(), 2);
     }
 }
 

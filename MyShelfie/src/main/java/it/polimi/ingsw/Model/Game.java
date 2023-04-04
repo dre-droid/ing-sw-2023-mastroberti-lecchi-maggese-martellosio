@@ -3,18 +3,18 @@ package main.java.it.polimi.ingsw.Model;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
 
-import java.sql.Array;
+import java.util.List;
 import java.util.Random;
 
 import java.util.*;
 
 public class Game {
     public Player isPlaying;//should be private
-    private ArrayList<Player> playersList;
+    private final ArrayList<Player> playersList;
     private int numOfPlayers;
-    private List<Player> leaderBoard;
+    private final List<Player> leaderBoard;
     private Iterator<Player> iterator;
-    private List<CommonGoalCard> commonGoalCards;
+    private final List<CommonGoalCard> commonGoalCards;
     private Board board;
     private boolean lastTurn;
     private boolean lastRound;
@@ -22,15 +22,9 @@ public class Game {
 
     /**
      * Constructor - creates a new instance of a game
+     * @param numOfPlayers - first player to connect and consequently create
+     *                       the game sets the number of players for such game
      */
-    public Game(){
-        playersList = new ArrayList<>();
-        leaderBoard = new ArrayList<>();
-        commonGoalCards = new ArrayList<>();
-        lastTurn = false;
-        lastRound = false;
-    }
-
     public Game(int numOfPlayers){
         this.numOfPlayers = numOfPlayers;
         playersList = new ArrayList<>();
@@ -45,7 +39,7 @@ public class Game {
      * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
      */
     public void gameStartSetup() throws Exception{
-        if (!hasGameStarted()) throw new Exception("Not enough players have connected yet!");
+       if (!hasGameStarted()) throw new Exception("Not enough players have connected yet!");
        setFirstPlayer();
        setBoard();
        chooseCommonGoals();
@@ -85,25 +79,22 @@ public class Game {
 
         //next turn and end game logic
         Player nextPlayer;
-        if (iterator.hasNext())
-            nextPlayer = iterator.next();
-        else {
-            iterator = playersList.iterator();
-            nextPlayer = iterator.next();
-        }
+        if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
+        nextPlayer = iterator.next();
         System.out.println("NEXT PLAYER: " + nextPlayer);
-        if (isPlaying.hasEndGameToken()) setLastRoundFlag();
-        if (lastRound && isPlaying.hasFirstPlayerSeat()){
+
+        if (isPlaying.hasEndGameToken()) setLastRoundFlag();    //last round
+        if (lastRound && isPlaying.hasFirstPlayerSeat()){       //last turn
             isPlaying = nextPlayer;
             setLastTurnFlag();
         }
-        if (lastTurn) { //game end
+        if (lastTurn) { //game end                              //game end
             for (Player p: leaderBoard) {
                 p.updateFinalScore();
             }
             getLeaderBoard();
         }
-        isPlaying = nextPlayer;
+        else isPlaying = nextPlayer;
     }
 
     public boolean hasGameStarted(){
@@ -112,7 +103,7 @@ public class Game {
 
     /**
      * adds a new player to the lobby - fristPlayerSeat set to false by default
-     * @param nick
+     * @param nick - nickname
      */
    public void addPlayer(String nick){
        if(!hasGameStarted()){
@@ -132,7 +123,7 @@ public class Game {
 
     /**
      * removes player with nickname nick
-     * @param nick
+     * @param nick - nickname
      */
     public void removePlayer(String nick){
         for (Player p: playersList)
@@ -142,30 +133,66 @@ public class Game {
     /** comparator is used to keep the leaderboard ordered by score */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){
-            return p2.score - p1.score;
+            return p2.getScore() - p1.getScore();
         }
     }
 
 
     //***    setters     ***//
-    /** picks random player to start the game */
+    /**
+     * picks random player to start the game
+     * sets the iterator to point to the selected player in the list
+     * sets isPlaying to the selected player
+     */
     private void setFirstPlayer(){
+        //get random value, set firstPlayerSeat
         Random random = new Random();
         int starter = random.nextInt(playersList.size() - 1);
         playersList.get(starter).setFirstPlayerSeat();
         System.out.println("Starting player: " + playersList.get(starter));
 
+        //set iterator, isPlaying
         iterator = playersList.iterator();
-        while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname())) {
-            iterator.next();
-        }
+        while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname()));
         isPlaying = playersList.get(starter);
     }
 
-    //stub
-    private void chooseCommonGoals(){
-        commonGoalCards.add(new CommonGoalCard(new Diagonal(), playersList.size()));
-        commonGoalCards.add(new CommonGoalCard(new EightofSameType(), playersList.size()));
+    /**
+     * chooses two distinct and random common goal cards and adds them to the commonGoalCards list
+     */
+    public void chooseCommonGoals(){
+        int randNum1, randNum2;
+        randNum1 = new Random().nextInt(12);
+        randNum2 = new Random().nextInt(12);
+        while (randNum2 == randNum1) randNum2 = new Random().nextInt(12 - 1);   //makes sure the CGcards are distinct
+        switch (randNum1) {
+            case 0 -> commonGoalCards.add(new CommonGoalCard(new Diagonal(), this.numOfPlayers));
+            case 1 -> commonGoalCards.add(new CommonGoalCard(new EightofSameType(), this.numOfPlayers));
+            case 2 -> commonGoalCards.add(new CommonGoalCard(new FourCornerOfTheSameType(), this.numOfPlayers));
+            case 3 -> commonGoalCards.add(new CommonGoalCard(new FourGroupsOfAtLeastFourSameTypeTiles(), this.numOfPlayers));
+            case 4 -> commonGoalCards.add(new CommonGoalCard(new FourRowsOfMaxThreeDifferentTypes(), this.numOfPlayers));
+            case 5 -> commonGoalCards.add(new CommonGoalCard(new IncreasingOrDecreasingHeight(), this.numOfPlayers));
+            case 6 -> commonGoalCards.add(new CommonGoalCard(new SixGroupsOfAtLeastTwoSameTypeTiles(), this.numOfPlayers));
+            case 7 -> commonGoalCards.add(new CommonGoalCard(new SquaredShapedGroups(), this.numOfPlayers));
+            case 8 -> commonGoalCards.add(new CommonGoalCard(new ThreeColumnsOfMaxThreeDifferentTypes(), this.numOfPlayers));
+            case 9 -> commonGoalCards.add(new CommonGoalCard(new TwoColumnsOfDifferentTypes(), this.numOfPlayers));
+            case 10 -> commonGoalCards.add(new CommonGoalCard(new TwoLinesOfDifferentTypes(), this.numOfPlayers));
+            case 11 -> commonGoalCards.add(new CommonGoalCard(new XShapedTiles(), this.numOfPlayers));
+        }
+        switch(randNum2){
+            case 0 -> commonGoalCards.add(new CommonGoalCard(new Diagonal(), this.numOfPlayers));
+            case 1 -> commonGoalCards.add(new CommonGoalCard(new EightofSameType(), this.numOfPlayers));
+            case 2 -> commonGoalCards.add(new CommonGoalCard(new FourCornerOfTheSameType(), this.numOfPlayers));
+            case 3 -> commonGoalCards.add(new CommonGoalCard(new FourGroupsOfAtLeastFourSameTypeTiles(), this.numOfPlayers));
+            case 4 -> commonGoalCards.add(new CommonGoalCard(new FourRowsOfMaxThreeDifferentTypes(), this.numOfPlayers));
+            case 5 -> commonGoalCards.add(new CommonGoalCard(new IncreasingOrDecreasingHeight(), this.numOfPlayers));
+            case 6 -> commonGoalCards.add(new CommonGoalCard(new SixGroupsOfAtLeastTwoSameTypeTiles(), this.numOfPlayers));
+            case 7 -> commonGoalCards.add(new CommonGoalCard(new SquaredShapedGroups(), this.numOfPlayers));
+            case 8 -> commonGoalCards.add(new CommonGoalCard(new ThreeColumnsOfMaxThreeDifferentTypes(), this.numOfPlayers));
+            case 9 -> commonGoalCards.add(new CommonGoalCard(new TwoColumnsOfDifferentTypes(), this.numOfPlayers));
+            case 10 -> commonGoalCards.add(new CommonGoalCard(new TwoLinesOfDifferentTypes(), this.numOfPlayers));
+            case 11 -> commonGoalCards.add(new CommonGoalCard(new XShapedTiles(), this.numOfPlayers));
+        }
     }
 
     private void setBoard(){
@@ -186,7 +213,7 @@ public class Game {
     public void getLeaderBoard(){
         int i = 0;
         for (Player p: leaderBoard) {
-            System.out.println(i + ". " + p.getNickname() + ", score: " + p.score);
+            System.out.println(i + 1 + ". " + p.getNickname() + ", score: " + p.getScore());
             i++;
         }
         System.out.println();
@@ -200,7 +227,7 @@ public class Game {
      * @author DiegoLecchi
      * assigns a personal goal card randomly to each player in playerList
      */
-    public void drawPersonalGoalCard() {
+    private void drawPersonalGoalCard() {
         int[] numberAlreadyDrawn = new int[playersList.size()];
         Random rand = new Random();
         int randomNum = 0;
@@ -260,5 +287,6 @@ public class Game {
     public List<Player> getPlayerList(){
         return playersList;
     }
+    public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
 }
 

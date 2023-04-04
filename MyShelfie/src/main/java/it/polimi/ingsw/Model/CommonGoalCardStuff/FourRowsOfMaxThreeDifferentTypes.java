@@ -33,11 +33,11 @@ public class FourRowsOfMaxThreeDifferentTypes implements StrategyCommonGoal {
                 }
             }
             sum = flagCat + flagBook + flagFrame + flagPlant + flagTrophy + flagGame;
-            System.out.println("tipi diversi in questa linea: "+sum);
+            //System.out.println("tipi diversi in questa linea: "+sum);
             if(sum <= 3 && tilesInRow==5){
                 rowcount++;
             }
-            System.out.println("rowcount: "+ rowcount);
+            //System.out.println("rowcount: "+ rowcount);
             flagCat = 0;
             flagBook = 0;
             flagGame = 0;

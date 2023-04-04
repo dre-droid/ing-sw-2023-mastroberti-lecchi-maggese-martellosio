@@ -38,8 +38,8 @@ public class ThreeColumnsOfMaxThreeDifferentTypes implements StrategyCommonGoal 
             if(sum <= 3 && tilesInThisColumn==6){
                 colcount++;
             }
-            System.out.println("Different tiles in this column "+sum);
-            System.out.println("Colcount: "+colcount);
+            //System.out.println("Different tiles in this column "+sum);
+            //System.out.println("Colcount: "+colcount);
             flagCat = 0;
             flagBook = 0;
             flagGame = 0;
