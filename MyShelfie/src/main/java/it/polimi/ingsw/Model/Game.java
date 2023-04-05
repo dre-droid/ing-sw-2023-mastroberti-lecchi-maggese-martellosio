@@ -46,6 +46,26 @@ public class Game {
 
     }
 
+    public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,Player player) throws InvalidMoveException{
+        if(player.getNickname().equals(isPlaying.getNickname())) {
+            throw new InvalidMoveException(player.getNickname() + " it's not your turn!!!!");
+        }
+        List<Tile> tiles = player.drawTiles(x, y, amount, direction);
+        return tiles;
+    }
+
+    public void InsertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
+        if(!player.getNickname().equals(isPlaying.getNickname()))
+            throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
+        player.insertTiles(drawnTiles,column);
+
+        //end of turn works
+        if (isPlaying.hasEndGameToken()) setLastTurnFlag();
+
+    }
+
+
+
     /**
      * @author Andrea Mastroberti
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
@@ -112,18 +132,22 @@ public class Game {
      * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default
      * @param nick - nickname
      */
-   public void addPlayer(String nick){
+   public boolean addPlayer(String nick){
        if(!hasGameStarted()) {
-           Player player = new Player(nick, false, board);
-           playersList.add(player);
-           leaderBoard.add(player);
-           if (playersList.size() == numOfPlayers)
-               try {
-                   this.gameStartSetup();
-               } catch (Exception e) {
-                   e.printStackTrace();
-               }
+           if(playersList.stream().map(Player::getNickname).noneMatch(n->n.equals(nick))){
+               Player player = new Player(nick, false, board);
+               playersList.add(player);
+               leaderBoard.add(player);
+               if (playersList.size() == numOfPlayers)
+                   try {
+                       this.gameStartSetup();
+                   } catch (Exception e) {
+                       e.printStackTrace();
+                   }
+               return true;
+           }
        }
+       return false;
     }
 
     /**
