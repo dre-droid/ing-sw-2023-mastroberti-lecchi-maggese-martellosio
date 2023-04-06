@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
@@ -50,7 +51,7 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
             }
             if(game.hasGameStarted()){
                 for(ClientNotificationRecord clientNotificationRecord:clients){
-                    clientNotificationRecord.client.statingTheGame(game.isPlaying.getNickname());
+                    clientNotificationRecord.client.startingTheGame(game.isPlaying.getNickname());
                 }
             }
             return 0;
@@ -89,9 +90,91 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
 
 
     @Override
-    public boolean drawTilesFromBoard(String playerNickname, int gameId) throws java.rmi.RemoteException{
+    public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException, InvalidMoveException{
+        if(game.isPlaying.getNickname().equals(playerNickname)){
+            return game.isPlaying.drawTiles(x,y,amount,direction);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean hasGameStarted() throws RemoteException {
+        return game.hasGameStarted();
+    }
+
+    @Override
+    public Tile[][] getMyShelf(String playerNickname) throws RemoteException {
+        if(game.hasGameStarted()){
+            Tile[][] displayGrid = new Tile[6][5];
+            for(Player p: game.getPlayerList()){
+                if(p.getNickname().equals(playerNickname))
+                    displayGrid = p.getShelf().getGridForDisplay();
+            }
+            return displayGrid;
+        }
+        return null;
+    }
+
+    public boolean isMyTurn(String playerNickname) throws RemoteException{
+        return game.isPlaying.getNickname().equals(playerNickname);
+    }
+
+    @Override
+    public TilePlacingSpot[][] getBoard() throws RemoteException {
+        return game.getBoard().getBoardForDisplay();
+    }
+
+    @Override
+    public boolean insertTilesInShelf(String playernickName, List<Tile> tiles, int column) throws RemoteException{
+        if(playernickName.equals(game.isPlaying.getNickname())){
+            if(column<0 || column>5)
+                return false;
+            try{
+                game.insertTilesInShelf(tiles,column,game.isPlaying);
+            }catch(InvalidMoveException e){
+                clients.stream().filter(cl->cl.nickname.equals(playernickName)).toList().get(0).client.moveIsNotValid();
+                return false;
+            }
+
+        }
         return false;
     }
+
+    @Override
+    public void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
+        if(playerNickname.equals(game.isPlaying.getNickname())){
+            if(game.checkIfCommonGoalN1IsFulfilled(game.isPlaying))
+                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname);
+            if(game.checkIfCommonGoalN2IsFulfilled(game.isPlaying))
+                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname);
+        }
+    }
+
+    @Override
+    public void endOfTurn(String playerNickname) throws RemoteException {
+        if(playerNickname.equals(game.isPlaying.getNickname())){
+            game.endOfTurn(game.isPlaying);
+            for(ClientNotificationRecord c: clients){
+                c.client.aTurnHasEnded(playerNickname,game.isPlaying.getNickname());
+            }
+            if(game.hasTheGameEnded()){
+                for(ClientNotificationRecord c: clients)
+                    c.client.gameIsOver(game.getLeaderBoard());
+            }
+        }
+
+    }
+
+    @Override
+    public int getPoints(String playerNickname) throws RemoteException {
+        return game.getPlayerList().stream().filter(player -> player.getNickname().equals(playerNickname)).toList().get(0).getScore();
+    }
+
+    @Override
+    public boolean isGameOver() throws RemoteException {
+        return game.hasTheGameEnded();
+    }
+
 
     public static void main(String[] args){
         try{

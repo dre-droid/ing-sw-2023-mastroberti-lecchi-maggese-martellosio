@@ -1,6 +1,8 @@
 package main.java.it.polimi.ingsw.Model;
 
-public class Tile {
+import java.io.Serializable;
+
+public class Tile implements Serializable {
     private Type type;
 
     public Tile(){}

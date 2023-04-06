@@ -21,7 +21,7 @@ public class Player {
     public Player(String nickname, boolean firstPlayerSeat, Board board){
         this.nickname = nickname;
         this.board = board;
-
+        this.score = 0;
         this.shelf = new Shelf();
         this.currentTiles = new ArrayList<Tile>();
         this.scoringTokensList = new ArrayList<ScoringToken>();
@@ -36,14 +36,9 @@ public class Player {
      * encapsulates Board's drawTiles
      * @return the list of drawn tiles
      */
-    public List<Tile> drawTiles(int x, int y, int amount, Board.Direction direction) {
+    public List<Tile> drawTiles(int x, int y, int amount, Board.Direction direction) throws InvalidMoveException{
         List<Tile> list = new ArrayList<>();
-        try {
-            list = board.drawTiles(x, y, amount, direction);
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+        list = board.drawTiles(x, y, amount, direction);
         return list;
     }
 

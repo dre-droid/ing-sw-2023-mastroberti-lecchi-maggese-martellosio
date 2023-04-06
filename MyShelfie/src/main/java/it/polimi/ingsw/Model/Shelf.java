@@ -26,7 +26,7 @@ public class Shelf {
         int size = t.size();
         for (int i = 0; i < ROWS; i++)
             if (grid[i][column] == null){   //first available square
-                if ((ROWS - i) < size) throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles dont fit the column
+                if ((ROWS - i) < size) throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles don't fit the column
                 else {
                     for (int j = 0; j < size; j++, i++) grid[i][column] = t.remove(size - j - 1);   //add all tiles from the list
                     break;
@@ -41,7 +41,7 @@ public class Shelf {
     /**
      * @author Francesco Martellosio
      * This method is used to calculate the adjacence points of the shelf
-     * @return the points from the current adjacences
+     * @return the points from the current adjacencies
      */
     public int getAdjScore() {
         // for each element t in the array
@@ -219,5 +219,19 @@ public class Shelf {
             }
         }
         return true;
+    }
+
+    /**
+     * This method returns a copy of the grid
+     * @return a Tile matrix that is the copy of the grid of the shelf
+     */
+    public Tile[][] getGridForDisplay(){
+        Tile[][] displayGrid = new Tile[ROWS][COLUMNS];
+        for(int i=0;i<ROWS;i++)
+            for(int j=0;j<COLUMNS;j++){
+                if(grid[i][j]!=null)
+                    displayGrid[i][j] = new Tile(grid[i][j].getType());
+            }
+        return displayGrid;
     }
 }

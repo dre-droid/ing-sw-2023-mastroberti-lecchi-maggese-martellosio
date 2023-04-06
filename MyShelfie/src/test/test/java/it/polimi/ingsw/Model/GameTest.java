@@ -31,7 +31,7 @@ public class GameTest {
     }
 
     @Test
-    void playTurnTest_4P(){
+    void playTurnTest_4P() throws InvalidMoveException{
         Tile[][] test;
         test = g.isPlaying.getShelf().getGrid();
         test[0][0] = new Tile(Type.CAT);
@@ -43,19 +43,19 @@ public class GameTest {
 
         g.playTurn(0, 3, 2, Board.Direction.RIGHT, 0);
         g.getBoard().printGridMap();
-        g.getLeaderBoard();
+        g.printLeaderBoard();
 
         g.playTurn(1, 3, 3, Board.Direction.RIGHT, 0);
         g.getBoard().printGridMap();
-        g.getLeaderBoard();
+        g.printLeaderBoard();
 
         g.playTurn(2, 2, 3, Board.Direction.RIGHT, 0);
         g.getBoard().printGridMap();
-        g.getLeaderBoard();
+        g.printLeaderBoard();
 
         g.playTurn(2, 6, 2, Board.Direction.LEFT, 0);
         g.getBoard().printGridMap();
-        g.getLeaderBoard();
+        g.printLeaderBoard();
     }
 
     @Test

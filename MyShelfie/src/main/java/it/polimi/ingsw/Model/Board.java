@@ -329,6 +329,19 @@ public class Board{
             grid[x][y].positionTile(bag.pickRandomTile());
     }
 
+    /**
+     * This method returns a copy of the board to display
+     * @return a TilePlacingSpot[][] representing the state of the board
+     * */
+    public TilePlacingSpot[][] getBoardForDisplay(){
+        TilePlacingSpot[][] boardDisplay = new TilePlacingSpot[NumOfRows][NumOfColumns];
+        for(int i=0;i<NumOfRows;i++)
+            for(int j=0;j<NumOfColumns;j++){
+                boardDisplay[i][j] = new TilePlacingSpot(grid[i][j].showTileInThisPosition(),grid[i][j].isAvailable());
+            }
+        return boardDisplay;
+    }
+
 
 
 }

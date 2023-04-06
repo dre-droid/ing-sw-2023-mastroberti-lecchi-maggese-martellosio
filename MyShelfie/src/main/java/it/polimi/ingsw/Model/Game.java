@@ -16,6 +16,10 @@ public class Game {
     private boolean lastTurn;
     private boolean lastRound;
 
+    private boolean gameHasEnded;
+
+    private boolean gameHasStarted;
+
 
     /**
      * Constructor - creates a new instance of a game
@@ -28,8 +32,37 @@ public class Game {
         commonGoalCards = new ArrayList<>();
         lastTurn = false;
         lastRound = false;
+        gameHasEnded=false;
+        gameHasStarted=false;
     }
 
+    /**
+     * This method is used to check if this the game is in its last turn
+     * @return true if it's the last turn, false otherwise
+     */
+    public boolean isLastTurn(){
+        return lastTurn;
+    }
+
+    /**
+     * This method is used to check if the game is in its last round
+     * @return true if it's the last round, false otherwise
+     */
+    public boolean isLastRound(){
+        return lastRound;
+    }
+
+    /**
+     *this method is used to check if the game has ended
+     * @return true if the game is over, false otherwise
+     */
+    public boolean hasTheGameEnded(){
+        return gameHasEnded;
+    }
+
+    public void endGame(){
+        this.gameHasEnded=true;
+    }
 
     /**
      * @author Andrea Mastroberti
@@ -37,32 +70,132 @@ public class Game {
      * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
      */
     public void gameStartSetup() throws Exception{
-       if (!hasGameStarted()) throw new Exception("Not enough players have connected yet!");
-       setFirstPlayer();
+       if (numOfPlayers != playersList.size()) throw new Exception("Not enough players have connected yet!");
        setBoard();
+       setFirstPlayer();
        chooseCommonGoals();
        drawPersonalGoalCard();
+       this.gameHasStarted = true;
        System.out.println("Players list " + playersList);
 
     }
 
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,Player player) throws InvalidMoveException{
-        if(player.getNickname().equals(isPlaying.getNickname())) {
-            throw new InvalidMoveException(player.getNickname() + " it's not your turn!!!!");
+        if(!gameHasEnded){
+            if(player.getNickname().equals(isPlaying.getNickname())) {
+                throw new InvalidMoveException(player.getNickname() + " it's not your turn!!!!");
+            }
+            List<Tile> tiles = player.drawTiles(x, y, amount, direction);
+            return tiles;
         }
-        List<Tile> tiles = player.drawTiles(x, y, amount, direction);
-        return tiles;
+        return null;
     }
 
-    public void InsertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
-        if(!player.getNickname().equals(isPlaying.getNickname()))
-            throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
-        player.insertTiles(drawnTiles,column);
+    public void insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
+        if(!gameHasEnded){
+            if(!player.getNickname().equals(isPlaying.getNickname()))
+                throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
+            player.insertTiles(drawnTiles,column);
+        }
+    }
 
-        //end of turn works
-        if (isPlaying.hasEndGameToken()) setLastTurnFlag();
+    public boolean checkIfCommonGoalN1IsFulfilled(Player player){
+        if(!gameHasEnded){
+            if(player.getNickname().equals(isPlaying.getNickname())){
+                if (commonGoalCards.get(0).isSatisfiedBy(isPlaying)) {
+                    try {
+                        isPlaying.addScoringToken(commonGoalCards.get(0).getReward(isPlaying));
+                        return true;
+                    }
+                    catch (CannotCollectRewardException e) {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+        return false;
 
     }
+
+    public boolean checkIfCommonGoalN2IsFulfilled(Player player){
+        if(!gameHasEnded){
+            if(player.getNickname().equals(isPlaying.getNickname())){
+                if (commonGoalCards.get(1).isSatisfiedBy(isPlaying)) {
+                    try {
+                        isPlaying.addScoringToken(commonGoalCards.get(1).getReward(isPlaying));
+                        return true;
+                    }
+                    catch (CannotCollectRewardException e) {
+                        return false;
+                    }
+                }
+            }
+            return false;
+        }
+        return false;
+
+    }
+    /*
+    public boolean checkIfCommonGoalsAreFulfilled(Player player){
+        if(player.getNickname().equals(isPlaying.getNickname())){
+            for (CommonGoalCard c: commonGoalCards)
+                if (c.isSatisfiedBy(isPlaying)) {
+                    try {
+                        isPlaying.addScoringToken(c.getReward(isPlaying));
+                        return true;
+                    }
+                    catch (CannotCollectRewardException e) {
+                        e.printStackTrace();
+                    }
+                }
+            return false;
+        }
+        return false;
+    }*/
+
+    public void endOfTurn(Player player){
+        if(!gameHasEnded){
+            if(player.getNickname().equals(isPlaying.getNickname())){
+                //if someone's shelf is full then enter the last round
+                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
+                //check if someone has fulfilled a commongoal
+
+
+                //refill board if necessary
+                board.refill();
+
+                //update score and leaderboard
+                isPlaying.updateScore();
+                Collections.sort(leaderBoard, new scoreComparator());
+
+                //next turn and end game logic
+                Player nextPlayer;
+                if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
+                nextPlayer = iterator.next();
+
+                if (lastRound && isPlaying.hasFirstPlayerSeat()){       //last turn
+                    isPlaying = nextPlayer;
+                    setLastTurnFlag();
+                }
+                if (lastTurn) { //game end                              //game end
+                    for (Player p: leaderBoard) {
+                        p.updateFinalScore();
+                    }
+                    printLeaderBoard();
+                    endGame();
+                }
+                else isPlaying = nextPlayer;
+
+            }
+        }
+    }
+
+    public List<Player> getLeaderBoard(){
+        return this.leaderBoard;
+    }
+
+
 
 
 
@@ -76,7 +209,7 @@ public class Game {
      * @param direction draw direction [RIGHT, LEFT, UP, DOWN]
      * @param column shelf column to place drawn tiles [0 ... 5]
      */
-    public void playTurn(int x, int y, int amount, Board.Direction direction, int column){
+    public void playTurn(int x, int y, int amount, Board.Direction direction, int column) throws InvalidMoveException{
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
         isPlaying.insertTiles(tiles, column);
@@ -116,7 +249,7 @@ public class Game {
             for (Player p: leaderBoard) {
                 p.updateFinalScore();
             }
-            getLeaderBoard();
+            printLeaderBoard();
         }
         else isPlaying = nextPlayer;
     }
@@ -125,7 +258,7 @@ public class Game {
      * @return true if playersList.size() has reache numOfPlayers
      */
     public boolean hasGameStarted(){
-        return numOfPlayers == playersList.size();
+        return gameHasStarted;
     }
 
     /**
@@ -251,7 +384,7 @@ public class Game {
     /**
      * Prints leaderboard to console
      */
-    public void getLeaderBoard(){
+    public void printLeaderBoard(){
         int i = 0;
         for (Player p: leaderBoard) {
             System.out.println(i + 1 + ". " + p.getNickname() + ", score: " + p.getScore());

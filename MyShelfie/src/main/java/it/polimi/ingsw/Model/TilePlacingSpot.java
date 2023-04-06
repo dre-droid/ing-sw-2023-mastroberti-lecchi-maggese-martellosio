@@ -1,9 +1,11 @@
 package main.java.it.polimi.ingsw.Model;
 
+import java.io.Serializable;
+
 /**
  * @author Francesco Martellosio
  */
-public class TilePlacingSpot {
+public class TilePlacingSpot implements Serializable {
     private Tile tile;
     private boolean available;
 

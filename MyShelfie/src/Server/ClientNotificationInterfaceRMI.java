@@ -1,6 +1,9 @@
 package Server;
 
+import main.java.it.polimi.ingsw.Model.Player;
+
 import java.rmi.RemoteException;
+import java.util.List;
 
 public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void gameJoinedCorrectlyNotification() throws RemoteException;
@@ -12,6 +15,15 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void someoneJoinedTheGame(String nickname) throws RemoteException;
 
-    public void statingTheGame(String startingPlayer) throws RemoteException;
+    public void startingTheGame(String startingPlayer) throws RemoteException;
+
+    public void someoneHasCompletedACommonGoal(String playerNickname) throws RemoteException;
+
+    public void aTurnHasEnded(String currentPlayerNickname,String nextPlayerNickname) throws RemoteException;
+
+    public void gameIsOver(List<Player> leaderboard) throws RemoteException;
+
+    public void moveIsNotValid() throws RemoteException;
+
 
 }
