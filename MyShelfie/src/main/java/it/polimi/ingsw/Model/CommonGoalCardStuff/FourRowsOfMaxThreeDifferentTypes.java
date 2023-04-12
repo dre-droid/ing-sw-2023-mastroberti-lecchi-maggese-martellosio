@@ -50,4 +50,9 @@ public class FourRowsOfMaxThreeDifferentTypes implements StrategyCommonGoal {
         }
         return rowcount>=4;
     }
+
+    @Override
+    public String toString(){
+        return "Four lines each formed by 5 tiles of maximum three different types. One line can show the same or a different combination of another line.";
+    }
 }

@@ -14,7 +14,7 @@ public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
         for(int raw=0;raw<5;raw++){
             for(int i=0;i<5;i++){
                 for(int j=i+1;j<5;j++){
-                    if(shelfGrid[raw][i]== null && shelfGrid[raw][j]== null)
+                    if(shelfGrid[raw][i]== null || shelfGrid[raw][j]== null)
                         repeated = true;
                     else{
                         if(shelfGrid[raw][i].getType() == shelfGrid[raw][j].getType()){
@@ -32,6 +32,10 @@ public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
             return true ;
         else
             return false;
+    }
 
+    @Override
+    public String toString(){
+        return "Two lines each formed by 5 different types of tiles. One line can show the same or a different combination of the other line.";
     }
 }

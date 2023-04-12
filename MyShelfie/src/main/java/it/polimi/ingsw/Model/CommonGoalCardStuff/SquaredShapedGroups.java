@@ -38,12 +38,10 @@ public class SquaredShapedGroups implements StrategyCommonGoal {
             }
         }
         return false;
+    }
 
-
-
-
-
-
-
+    @Override
+    public String toString(){
+        return "Two groups each containing 4 tiles of the same type in a 2x2 square. The tiles of one square can be different from those of the other square.";
     }
 }

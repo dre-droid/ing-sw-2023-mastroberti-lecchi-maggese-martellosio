@@ -91,12 +91,14 @@ public class Game {
         return null;
     }
 
-    public void insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
+    public boolean insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
         if(!gameHasEnded){
             if(!player.getNickname().equals(isPlaying.getNickname()))
                 throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
-            player.insertTiles(drawnTiles,column);
+            if(player.insertTiles(drawnTiles,column))
+                return true;
         }
+        return false;
     }
 
     public boolean checkIfCommonGoalN1IsFulfilled(Player player){

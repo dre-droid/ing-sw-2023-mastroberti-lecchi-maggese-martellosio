@@ -2,17 +2,15 @@ package Server;
 
 import main.java.it.polimi.ingsw.Model.*;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
+    Timer timer;
     private Game game;
     private List<ClientNotificationRecord> clients;
 
@@ -21,6 +19,7 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
     protected ControllerRMI() throws RemoteException {super();
         game = null;
         clients = new ArrayList<ClientNotificationRecord>();
+        timer = new Timer();
     }
 
     @Override
@@ -43,6 +42,18 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
             return -2;
         }
         if(game.addPlayer(nickname)){
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+
+                    try{
+                        clients.stream().filter(client -> client.nickname.equals(game.isPlaying.getNickname())).toList().get(0).client.runOutOfTime();
+                        endOfTurn(game.isPlaying.getNickname());
+                    }catch (RemoteException e){
+                        e.printStackTrace();
+                    }
+                }
+            },60000);
             System.out.println(nickname+" joined the game");
             clientToBeNotified.gameJoinedCorrectlyNotification();
             clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
@@ -50,8 +61,15 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
                 clientNotificationRecord.client.someoneJoinedTheGame(nickname);
             }
             if(game.hasGameStarted()){
+                String commonGoals;
+                commonGoals = game.getCommonGoalCards().get(0).getDescription()+ "\n"+ game.getCommonGoalCards().get(1).getDescription();
                 for(ClientNotificationRecord clientNotificationRecord:clients){
                     clientNotificationRecord.client.startingTheGame(game.isPlaying.getNickname());
+                    clientNotificationRecord.client.announceCommonGoals(commonGoals);
+                    /*if(clientNotificationRecord.nickname.equals(game.isPlaying.getNickname())){
+                        clientNotificationRecord.client.myTurnIsStarting();
+                    }*/
+
                 }
             }
             return 0;
@@ -91,6 +109,7 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
 
     @Override
     public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException, InvalidMoveException{
+        timer.cancel();
         if(game.isPlaying.getNickname().equals(playerNickname)){
             return game.isPlaying.drawTiles(x,y,amount,direction);
         }
@@ -130,7 +149,10 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
             if(column<0 || column>5)
                 return false;
             try{
-                game.insertTilesInShelf(tiles,column,game.isPlaying);
+                if(game.insertTilesInShelf(tiles,column,game.isPlaying))
+                    return true;
+                else
+                    return false;
             }catch(InvalidMoveException e){
                 clients.stream().filter(cl->cl.nickname.equals(playernickName)).toList().get(0).client.moveIsNotValid();
                 return false;
@@ -162,6 +184,12 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
                     c.client.gameIsOver(game.getLeaderBoard());
             }
         }
+        /*for(ClientNotificationRecord cnr: clients){
+            if(cnr.nickname.equals(playerNickname))
+                cnr.client.myTurnIsOver();
+            if(cnr.nickname.equals(game.isPlaying.getNickname()))
+                cnr.client.myTurnIsStarting();
+        }*/
 
     }
 
@@ -174,6 +202,8 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
     public boolean isGameOver() throws RemoteException {
         return game.hasTheGameEnded();
     }
+
+
 
 
     public static void main(String[] args){

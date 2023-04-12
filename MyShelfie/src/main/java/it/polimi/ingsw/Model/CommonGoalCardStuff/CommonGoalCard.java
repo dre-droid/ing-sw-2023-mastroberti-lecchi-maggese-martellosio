@@ -116,5 +116,9 @@ public class CommonGoalCard {
         }
     }
 
+    public String getDescription(){
+        return this.strategy.toString();
+    }
+
 
 }

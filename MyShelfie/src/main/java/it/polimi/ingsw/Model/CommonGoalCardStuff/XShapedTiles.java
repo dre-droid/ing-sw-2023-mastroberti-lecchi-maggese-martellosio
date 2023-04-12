@@ -27,4 +27,9 @@ public class XShapedTiles implements StrategyCommonGoal {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "Five tiles of the same type forming an X.";
+    }
 }

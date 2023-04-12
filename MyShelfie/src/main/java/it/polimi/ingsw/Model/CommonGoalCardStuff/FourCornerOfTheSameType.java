@@ -12,5 +12,10 @@ public class FourCornerOfTheSameType implements StrategyCommonGoal{
                     if(shelfGrid[5][0].getType()==shelfGrid[5][4].getType())
                         return true;}
         return false;
-        }
+    }
+
+    @Override
+    public String toString(){
+        return "Four tiles of the same type in the four corners of the bookshelf.";
+    }
 }

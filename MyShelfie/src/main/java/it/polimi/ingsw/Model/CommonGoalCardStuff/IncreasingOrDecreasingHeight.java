@@ -74,4 +74,9 @@ public class IncreasingOrDecreasingHeight implements StrategyCommonGoal{
 
     }
 
+    @Override
+    public String toString(){
+        return "Five columns of increasing or decreasing height. Starting from the first column on the left or on the right, each next column must be made of exactly one more tile. Tiles can be of any type.";
+    }
+
 }

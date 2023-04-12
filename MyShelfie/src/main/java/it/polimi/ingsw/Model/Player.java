@@ -48,14 +48,16 @@ public class Player {
      * @param currentTiles - list of tiles to be added to shelf, max length 3
      * @param column - column where tiles will be inserted, column values range [1 ... 5]
      */
-    public void insertTiles(List<Tile> currentTiles, int column) {
+    public boolean insertTiles(List<Tile> currentTiles, int column) {
         try {
             shelf.insertTiles(currentTiles, column);
             if (shelf.isFull()) setEndGameToken();
+            return true;
         }
         catch (IndexOutOfBoundsException e) {
             System.out.println(e);
             System.out.println("Choose another column.");
+            return false;
         }
     }
 

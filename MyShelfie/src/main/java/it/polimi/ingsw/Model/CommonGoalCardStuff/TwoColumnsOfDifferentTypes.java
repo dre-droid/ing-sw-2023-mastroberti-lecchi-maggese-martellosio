@@ -37,5 +37,10 @@ public class TwoColumnsOfDifferentTypes implements StrategyCommonGoal{
             return false;
     }
 
+    @Override
+    public String toString(){
+        return "Two columns each formed by 6 different types of tiles.";
+    }
+
 
 }
