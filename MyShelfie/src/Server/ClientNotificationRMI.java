@@ -124,7 +124,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
             final boolean[] drawInTime = {true};
 
-            Registry registryServer = LocateRegistry.getRegistry("192.168.10.106");
+            Registry registryServer = LocateRegistry.getRegistry();
             RMIinterface serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
 
 
