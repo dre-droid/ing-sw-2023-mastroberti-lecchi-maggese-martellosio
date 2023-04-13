@@ -23,9 +23,9 @@ public interface RMIinterface extends java.rmi.Remote{
 
     public boolean insertTilesInShelf(String playerNickname,List<Tile> tiles,int column) throws RemoteException;
 
-    public void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException;
+    //public void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException;
 
-    public void endOfTurn(String playerNickname) throws RemoteException;
+    //public void endOfTurn(String playerNickname) throws RemoteException;
 
     public int getPoints(String playerNickname) throws RemoteException;
 

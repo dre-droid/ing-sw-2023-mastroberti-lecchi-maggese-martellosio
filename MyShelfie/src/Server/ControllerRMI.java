@@ -10,7 +10,11 @@ import java.util.*;
 
 public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
-    Timer timer;
+    Timer timerDraw;
+    Timer timerInsert;
+
+    private final int drawDelay= 60000;
+    private final int insertDelay = 70000;
     private Game game;
     private List<ClientNotificationRecord> clients;
 
@@ -19,7 +23,8 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
     protected ControllerRMI() throws RemoteException {super();
         game = null;
         clients = new ArrayList<ClientNotificationRecord>();
-        timer = new Timer();
+        timerDraw = new Timer();
+        timerInsert = new Timer();
     }
 
     @Override
@@ -42,18 +47,7 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
             return -2;
         }
         if(game.addPlayer(nickname)){
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-
-                    try{
-                        clients.stream().filter(client -> client.nickname.equals(game.isPlaying.getNickname())).toList().get(0).client.runOutOfTime();
-                        endOfTurn(game.isPlaying.getNickname());
-                    }catch (RemoteException e){
-                        e.printStackTrace();
-                    }
-                }
-            },60000);
+            startTimer(timerDraw,drawDelay);
             System.out.println(nickname+" joined the game");
             clientToBeNotified.gameJoinedCorrectlyNotification();
             clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
@@ -84,6 +78,8 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
 
     @Override
     public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException{
+        if(numOfPlayers<0 || numOfPlayers>4)
+            return false;
         ClientNotificationInterfaceRMI clientToBeNotified;
         try{
             Registry registry = LocateRegistry.getRegistry(port);
@@ -109,9 +105,17 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
 
     @Override
     public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException, InvalidMoveException{
-        timer.cancel();
+        List<Tile> toBeReturned = new ArrayList<Tile>();
         if(game.isPlaying.getNickname().equals(playerNickname)){
-            return game.isPlaying.drawTiles(x,y,amount,direction);
+            try{
+                toBeReturned = game.isPlaying.drawTiles(x,y,amount,direction);
+            }catch(Exception e){
+                return null;
+            }
+            timerDraw.cancel();
+            timerInsert = new Timer();
+            startTimer(timerInsert,insertDelay);
+            return toBeReturned;
         }
         return null;
     }
@@ -149,8 +153,11 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
             if(column<0 || column>5)
                 return false;
             try{
-                if(game.insertTilesInShelf(tiles,column,game.isPlaying))
+                if(game.insertTilesInShelf(tiles,column,game.isPlaying)){
+                    timerInsert.cancel();
+                    endOfTurn(game.isPlaying.getNickname());
                     return true;
+                }
                 else
                     return false;
             }catch(InvalidMoveException e){
@@ -162,23 +169,26 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
         return false;
     }
 
-    @Override
-    public void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
+
+    private void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
         if(playerNickname.equals(game.isPlaying.getNickname())){
             if(game.checkIfCommonGoalN1IsFulfilled(game.isPlaying))
-                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname);
+                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname,game.getCommonGoalCards().get(0).getDescription());
             if(game.checkIfCommonGoalN2IsFulfilled(game.isPlaying))
-                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname);
+                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname,game.getCommonGoalCards().get(1).getDescription());
         }
     }
 
-    @Override
-    public void endOfTurn(String playerNickname) throws RemoteException {
+
+    private void endOfTurn(String playerNickname) throws RemoteException {
         if(playerNickname.equals(game.isPlaying.getNickname())){
+            checkIfCommonGoalsHaveBeenFulfilled(game.isPlaying.getNickname());
             game.endOfTurn(game.isPlaying);
             for(ClientNotificationRecord c: clients){
                 c.client.aTurnHasEnded(playerNickname,game.isPlaying.getNickname());
             }
+            timerDraw = new Timer();
+            startTimer(timerDraw,drawDelay);
             if(game.hasTheGameEnded()){
                 for(ClientNotificationRecord c: clients)
                     c.client.gameIsOver(game.getLeaderBoard());
@@ -192,6 +202,24 @@ public class ControllerRMI extends java.rmi.server.UnicastRemoteObject implement
         }*/
 
     }
+
+    private void startTimer(Timer timer, int delay){
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                try{
+                    clients.stream().filter(client -> client.nickname.equals(game.isPlaying.getNickname())).toList().get(0).client.runOutOfTime();
+                    endOfTurn(game.isPlaying.getNickname());
+                }catch (RemoteException e){
+                    e.printStackTrace();
+                }
+            }
+        },delay);
+    }
+
+
+
 
     @Override
     public int getPoints(String playerNickname) throws RemoteException {

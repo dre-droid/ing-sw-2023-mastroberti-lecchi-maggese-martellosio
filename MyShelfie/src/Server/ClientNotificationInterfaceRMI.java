@@ -17,7 +17,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void startingTheGame(String startingPlayer) throws RemoteException;
 
-    public void someoneHasCompletedACommonGoal(String playerNickname) throws RemoteException;
+    public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException;
 
     public void aTurnHasEnded(String currentPlayerNickname,String nextPlayerNickname) throws RemoteException;
 
