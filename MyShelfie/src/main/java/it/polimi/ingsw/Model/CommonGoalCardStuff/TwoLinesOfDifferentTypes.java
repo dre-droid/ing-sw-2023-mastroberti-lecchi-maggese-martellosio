@@ -3,32 +3,33 @@ import main.java.it.polimi.ingsw.Model.*;
 
 /**
  * @author Saverio Maggese
- * checks if there are two raws containing tiles of all different types
+ * checks if there are two rows containing tiles of all different types
  */
 public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();
         boolean repeated=false;
-        int rawcount=0;
+        int rowcount=0;
 
-        for(int raw=0;raw<5;raw++){
+        for(int row=0;row<5;row++){
             for(int i=0;i<5;i++){
                 for(int j=i+1;j<5;j++){
-                    if(shelfGrid[raw][i]== null || shelfGrid[raw][j]== null)
+                    if(shelfGrid[row][i]== null || shelfGrid[row][j]== null)
                         repeated = true;
                     else{
-                        if(shelfGrid[raw][i].getType() == shelfGrid[raw][j].getType()){
-                            repeated=true;
+                        if (shelfGrid[row][i] != null && shelfGrid[row][j] != null)
+                            if(shelfGrid[row][i].getType() == shelfGrid[row][j].getType()){
+                                repeated=true;
                         }
                     }
                 }
             }
             if (!repeated)
-                rawcount++;
+                rowcount++;
             repeated = false;
 
         }
-        if (rawcount>=2)
+        if (rowcount>=2)
             return true ;
         else
             return false;
