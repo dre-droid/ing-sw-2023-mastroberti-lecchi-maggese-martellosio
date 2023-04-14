@@ -182,7 +182,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                             returnCode=0;
                         }
                         else{
-                            System.out.println("Somebody already created the game, try to join again");
+                            System.out.println("Somebody already created the game, try to join again, insert your nickname");
                         }
                     }break;
                     case -2:{
@@ -312,15 +312,11 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                         }
 
                         if(drawInTime[0]){
-                            try{
-                                drawnTiles = serverRMI.drawTilesFromBoard(nickname,x,y,amount,direction);
-                                if(drawnTiles !=null){
-                                    correctlyDrawn =true;
-                                }
-                                else {
-                                    System.out.println("You cannot draw those Tiles, try again!");
-                                }
-                            }catch(InvalidMoveException e){
+                            drawnTiles = serverRMI.drawTilesFromBoard(nickname,x,y,amount,direction);
+                            if(drawnTiles !=null){
+                                correctlyDrawn =true;
+                            }
+                            else {
                                 System.out.println("You cannot draw those Tiles, try again!");
                                 correctlyDrawn=false;
                             }
