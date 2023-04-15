@@ -17,7 +17,7 @@ public class Controller {
     public Controller(){
     }
 
-    public boolean createNewGame(String nickname, int numOfPlayers) throws java.rmi.RemoteException{
+    public boolean createNewGame(String nickname, int numOfPlayers){
         if(game==null){
             game = new Game(numOfPlayers);
             game.addPlayer(nickname);
