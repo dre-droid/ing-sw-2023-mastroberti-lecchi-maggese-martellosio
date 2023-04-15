@@ -36,6 +36,10 @@ public class Game {
         gameHasStarted=false;
     }
 
+    public int getNumOfPlayers() {
+        return numOfPlayers;
+    }
+
     /**
      * This method is used to check if this the game is in its last turn
      * @return true if it's the last turn, false otherwise
