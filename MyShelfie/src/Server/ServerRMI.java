@@ -140,11 +140,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
     private void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
-        if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
-            if(controller.checkIfCommonGoalN1IsFulfilled(playerNickname))
-                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname,controller.getCommonGoalCard1Description());
-            if(controller.checkIfCommonGoalN2IsFulfilled(playerNickname))
-                clients.stream().filter(cl -> cl.nickname.equals(playerNickname)).toList().get(0).client.someoneHasCompletedACommonGoal(playerNickname,controller.getCommonGoalCard2Description());
+        if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())) {
+            if (controller.checkIfCommonGoalN1IsFulfilled(playerNickname)) {
+                for (ClientNotificationRecord c : clients) {
+                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard1Description());
+                }
+            }
+            if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname))
+                for (ClientNotificationRecord c : clients) {
+                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
+                }
         }
     }
 
