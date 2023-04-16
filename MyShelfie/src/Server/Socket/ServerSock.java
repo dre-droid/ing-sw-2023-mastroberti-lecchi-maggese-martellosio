@@ -1,6 +1,7 @@
 package Server.Socket;
 
 
+import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
@@ -23,10 +24,9 @@ public class ServerSock {
     //private static final ArrayList<Game> game = new ArrayList<>();
 
 
-    public ServerSock(Server.Controller controller){
+    public void setController(Server.Controller controller){
         this.controller = controller;
     }
-
     public void runServer(){
         new Thread(() -> {
             ServerSocket serverSocket;
@@ -149,10 +149,20 @@ public class ServerSock {
             if (c.getName().equals(nickname)) playerSocket = c.getSocket();
 
         try {
-            System.out.println("ARRIVATO QUI");
             InputStream input = playerSocket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
+
+            Gson gson = new Gson();
+
+            String jsonBoard = gson.toJson(b);
+            out.println("[GSONBOARD]" + jsonBoard);
+
+            String jsonShelf = gson.toJson(shelf);
+            out.println("[GSONBOARD]" + jsonBoard);
+
+            String jsonLeaderboard = gson.toJson(leaderboard);
+            out.println("[GSONLEAD]" + jsonBoard);
 
             out.println("[REQUEST] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
             String line = reader.readLine();
