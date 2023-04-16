@@ -51,8 +51,8 @@ public class Board{
 
     /**
      * This method is used to draw tiles from the board
-     * @param x x coordinate of the starting position on the board
-     * @param y y coordinate of the starting position on the board
+     * @param x x coordinate of the starting position on the board [0 ... 8]
+     * @param y y coordinate of the starting position on the board [0 ... 8]
      * @param amount number of tiles to be drawn
      * @param direction the direction in which to move to draw the tiles
      * @return a list containing the tiles drawn

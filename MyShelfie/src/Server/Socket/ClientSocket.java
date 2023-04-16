@@ -96,7 +96,7 @@ public class ClientSocket {
     }
 
     private static void printTurn(){
-        System.out.println("********* Turn n." + " - " + nickname + " is playing." + "*********");
+        System.out.println("*********  " + nickname + ": your turn *********");
         board.printGridMap();
         System.out.println();
 

@@ -174,16 +174,22 @@ public class ServerSock {
             out.println("[GSONLEAD]" + jsonLeaderboard);
             //***************
 
-            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
+            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, RIGHT:2, LEFT:3]");
             String line = reader.readLine();
             line = line.replace(",", ""); //replaces all non digits to blanks
             line = line.replace("  ", " "); //replaces all multiple blanks to single blanks
             String[] numsArray = line.split( " ");
 
+            drawInfo.setX(Integer.parseInt(numsArray[0]));
+            drawInfo.setY(Integer.parseInt(numsArray[1]));
+            drawInfo.setAmount(Integer.parseInt(numsArray[2]));
+            drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(numsArray[3])]);
+
             out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
 
+            System.out.println("DRAWINFO " +  drawInfo.toString());
             return drawInfo;
         } catch(Exception e){
             e.printStackTrace();
