@@ -21,11 +21,9 @@ public class Server {
         while (true){
             Thread.sleep(1000);
             if (controller.hasGameStarted()) {
-                System.out.println("Game started");
                 controller.playTurn();
                 if (controller.hasTheGameEnded()) {}//game ending stuff}
             }
-            System.out.println("A");
         }
     }
 }

@@ -1,9 +1,12 @@
 package Server.Socket;
 
+import java.lang.reflect.Type;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import main.java.it.polimi.ingsw.Model.Board;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
@@ -17,7 +20,7 @@ import java.io.PrintWriter;
 public class ClientSocket {
     private static Board board;
     private static Shelf shelf;
-    private static List<Player> leaderboard;
+    private static List<String> leaderboard;
     private static String nickname;
     public static void main(String[] args) throws IOException {
         //System.out.println("Insert the port number: ");
@@ -51,30 +54,37 @@ public class ClientSocket {
                 boolean active = true;
 
                 while(active){
+                    Gson gson = new Gson();
                     line = reader.readLine();
                     if (line.startsWith("[GSONBOARD]")){
-                        line.replace("[GSONBOARD]", "");
-                        Gson gson = new Gson();
-                        board = gson.fromJson(line, Board.class);
+                        String gsonString = line.replace("[GSONBOARD]", "");
+                        board = gson.fromJson(gsonString, Board.class);
                     }
                     if (line.startsWith("[GSONSHELF]")){
-                        line.replace("[GSONSHELF]", "");
-                        Gson gson = new Gson();
-                        shelf = gson.fromJson(line, Shelf.class);
+                        String gsonString = line.replace("[GSONSHELF]", "");
+                        shelf = gson.fromJson(gsonString, Shelf.class);
                     }
                     if (line.startsWith("[GSONLEAD]")){
-                        line.replace("[GSONLEAD]", "");
-                        Gson gson = new Gson();
-                        leaderboard = gson.fromJson(line, List.class);
+                        String gsonString = line.replace("[GSONLEAD]", "");
+                        leaderboard = gson.fromJson(gsonString, List.class);
                     }
-
-                    System.out.println("********* Turn n." + " - " + isPlaying.getNickname() + " is playing." + "*********");
-
+                    if (line.startsWith("[NICKNAME]")){
+                        String gsonString = line.replace("[NICKNAME]", "");
+                        nickname = gsonString;
+                    }
                     if(line.startsWith("[REQUEST]")){
+                        System.out.println(line);
                         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                         message = bufferRead.readLine();
                         output.println(message);
                         }
+                    if(line.startsWith("[YOUR TURN]")){
+                        printTurn();
+                        System.out.println(line);
+                        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                        message = bufferRead.readLine();
+                        output.println(message);
+                    }
                     }
                 }
             catch (Exception e) {
@@ -85,8 +95,29 @@ public class ClientSocket {
         new Thread(serverListener).start();
     }
 
+    private static void printTurn(){
+        System.out.println("********* Turn n." + " - " + nickname + " is playing." + "*********");
+        board.printGridMap();
+        System.out.println();
 
+        for (int i = 5; i >= 0; i--) {
+            for (int j = 0; j < 5; j++){
+                if (shelf.getGrid()[i][j] == null) System.out.printf("X ");
+                else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
+            }
+            System.out.println();
+        }
+        System.out.println();
 
+        System.out.println("Leaderboard");
+        int i = 0;
+        for (String s: leaderboard) {
+            System.out.println(i + 1 + ". " + s);
+            i++;
+        }
+        System.out.println();
+        System.out.println("******************************\n");
+    }
 
 }
 

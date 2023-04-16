@@ -1,4 +1,5 @@
 package main.java.it.polimi.ingsw.Model;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

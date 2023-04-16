@@ -1,6 +1,7 @@
 package Server.Socket;
 
 
+import com.beust.ah.A;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
 import main.java.it.polimi.ingsw.Model.Player;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -161,12 +163,14 @@ public class ServerSock {
             out.println("[GSONBOARD]" + jsonBoard);
 
             String jsonShelf = gson.toJson(shelf);
-            out.println("[GSONBOARD]" + jsonBoard);
+            out.println("[GSONSHELF]" + jsonShelf);
 
-            String jsonLeaderboard = gson.toJson(leaderboard);
-            out.println("[GSONLEAD]" + jsonBoard);
+            ArrayList<String> stringLeaderboard = new ArrayList<String>();
+            for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
+            String jsonLeaderboard = gson.toJson(stringLeaderboard);
+            out.println("[GSONLEAD]" + jsonLeaderboard);
 
-            out.println("[REQUEST] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
+            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
             String line = reader.readLine();
             Integer.parseInt(line.replaceAll("[\\D]", "")); //replaces all non digits to blanks
             Scanner scanner = new Scanner(line);

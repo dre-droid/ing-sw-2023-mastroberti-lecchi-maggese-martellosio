@@ -8,7 +8,7 @@ import java.util.*;
 public class Game {
     public Player isPlaying;//should be private
     private final ArrayList<Player> playersList;
-    private int numOfPlayers;
+    private final int numOfPlayers;
     private final List<Player> leaderBoard;
     private Iterator<Player> iterator;
     private final List<CommonGoalCard> commonGoalCards;
