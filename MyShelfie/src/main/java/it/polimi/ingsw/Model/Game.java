@@ -212,7 +212,8 @@ public class Game {
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
         isPlaying.insertTiles(tiles, column);
-        isPlaying.printShelf();
+        System.out.println("Got here");
+        //isPlaying.printShelf();
         if (isPlaying.hasEndGameToken()) setLastTurnFlag();
 
         //check common goal and eventually give player token

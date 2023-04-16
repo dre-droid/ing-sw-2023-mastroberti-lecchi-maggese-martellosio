@@ -51,7 +51,6 @@ public class ServerSock {
                 e.printStackTrace();
             }
         }).start();
-        System.out.println("STEETETETT");
     }
 
     /**
@@ -114,6 +113,7 @@ public class ServerSock {
                 System.out.println(line);
                 controller.createNewGame(nickname, Integer.parseInt(line));     //create new game
                 out.println("Il numero di giocatori inserito è:  " + line);
+                clients.add(new socketClient(client, nickname));
                 return -1;
             }
 
@@ -148,13 +148,16 @@ public class ServerSock {
         drawInfo drawInfo = new drawInfo();
 
         for (socketClient c: clients)
-            if (c.getName().equals(nickname)) playerSocket = c.getSocket();
+            if (c.getName().equals(nickname)){
+                playerSocket = c.getSocket();
+            }
 
         try {
             InputStream input = playerSocket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
 
+            //*************** SERIALIZATION
             Gson gson = new Gson();
 
             out.println("[NICKNAME]" + nickname);
@@ -169,33 +172,22 @@ public class ServerSock {
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
             String jsonLeaderboard = gson.toJson(stringLeaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
+            //***************
 
-            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction, column) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
+            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
             String line = reader.readLine();
-            Integer.parseInt(line.replaceAll("[\\D]", "")); //replaces all non digits to blanks
-            Scanner scanner = new Scanner(line);
-
-            for (int i = 0; i < 4; i++){
-                switch(i){
-                    case 0: drawInfo.setX(scanner.nextInt());
-                    case 1: drawInfo.setY(scanner.nextInt());
-                    case 2: drawInfo.setAmount(scanner.nextInt());
-                    case 3: drawInfo.setDirection(Board.Direction.values()[scanner.nextInt()]);
-                }
-            }
-
-            System.out.println(drawInfo.getX());
-            System.out.println(drawInfo.getY());
-            System.out.println(drawInfo.getAmount());
-            System.out.println(drawInfo.getColumn());
-            System.out.println(drawInfo.getDirection());
+            line = line.replace(",", ""); //replaces all non digits to blanks
+            line = line.replace("  ", " "); //replaces all multiple blanks to single blanks
+            String[] numsArray = line.split( " ");
 
             out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
 
             return drawInfo;
-        } catch(Exception e){}
+        } catch(Exception e){
+            e.printStackTrace();
+        }
 
         return drawInfo;
     }

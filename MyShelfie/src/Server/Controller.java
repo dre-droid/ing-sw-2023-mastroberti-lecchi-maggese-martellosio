@@ -297,7 +297,10 @@ public class Controller {
             flag = true;
             try {
                 serverSock.printErrorToClient("Invalid choice! Choose another tile.", getNameOfPlayerWhoIsCurrentlyPlaying());
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            e.printStackTrace();
         }
         }while(flag);
 

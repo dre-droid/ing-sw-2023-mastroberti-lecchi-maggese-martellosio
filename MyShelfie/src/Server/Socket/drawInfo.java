@@ -56,5 +56,10 @@ public class drawInfo {
     public void setX(int x) {
         this.x = x;
     }
+
+    @Override
+    public String toString(){
+        return "x, y, amount, direction " + x + y +  amount + direction;
+    }
 }
 
