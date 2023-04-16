@@ -11,9 +11,13 @@ public class Server {
         ServerSock serverSocket = new ServerSock(controller);
         serverSocket.runServer();
         //run ServerRMI
-        //if (controller.hasGameStarted()) controller.gameStart
-        //controller.hasGameStarted()
-        //controller.
+        //fai giocare turno al primo giocatore
+        //if (controller.hasGameStarted()) controller.getFirstPlayer().playTurn();
+        //while (!controller.hasTheGameEnded())
+            //controller.getNextPlayer().playTurn;
+
+        //controlla fine partita
+
 
     }
 }

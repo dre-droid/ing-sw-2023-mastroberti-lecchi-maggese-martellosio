@@ -267,4 +267,10 @@ public class Controller {
         return null;
     }
 
+    public Player getFirstPlayer(){
+        for (Player p: game.getPlayerList())
+            if (p.hasFirstPlayerSeat()) return p;
+        return null;
+    }
+
 }

@@ -1,6 +1,10 @@
 package Server.Socket;
 
 
+import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.Player;
+import main.java.it.polimi.ingsw.Model.Shelf;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -9,10 +13,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.List;
 
 public class ServerSock {
 
-    private final ArrayList<Socket> clients = new ArrayList<>();
+    private final ArrayList<socketClient> clients = new ArrayList<>();
     private Server.Controller controller;
     //private static final ArrayList<Game> game = new ArrayList<>();
 
@@ -56,7 +61,6 @@ public class ServerSock {
 
                     if (resultValue == -3) repeat = true;   //invalid nickname
                     else if (resultValue == 0|| resultValue == -1) {    //successfully joined
-                        clients.add(client);
                         repeat = false;
                     }
                 };    //while nickname is not valid, keep trying for a new name
@@ -120,10 +124,29 @@ public class ServerSock {
 
             //successful
             case 0 -> {
+                clients.add(new socketClient(client, nickname));
                 return 0;
             }
         }
         return -4;  //should never reach!
+    }
+
+    /**
+     * Queries the client for info on his turn's drawn tiles
+     * @param nickname
+     * @param b
+     * @param shelf
+     * @return
+     */
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, int column, List<Player> leaderboard){
+        Socket playerSocket;
+        for (socketClient c: clients)
+            if (c.getName().equals(nickname)) playerSocket = c.getSocket();
+        return new drawInfo();
+    }
+
+    public drawInfo(){
+
     }
 
 }

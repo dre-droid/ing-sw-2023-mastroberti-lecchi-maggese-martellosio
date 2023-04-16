@@ -392,13 +392,6 @@ public class Game {
     }
 
     /**
-     * @return first player
-     */
-    public Player getStartingPlayer(){
-
-    }
-
-    /**
      * Prints leaderboard to console
      */
     public void printLeaderBoard(){
