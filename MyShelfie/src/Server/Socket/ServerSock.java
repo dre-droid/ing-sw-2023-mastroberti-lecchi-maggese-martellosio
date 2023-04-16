@@ -160,7 +160,7 @@ public class ServerSock {
                     case 0: drawInfo.setX(scanner.nextInt());
                     case 1: drawInfo.setY(scanner.nextInt());
                     case 2: drawInfo.setAmount(scanner.nextInt());
-                    case 3: drawInfo.setDirection(scanner.nextInt());
+                    case 3: drawInfo.setDirection(Board.Direction.values()[scanner.nextInt()]);
                 }
             }
 

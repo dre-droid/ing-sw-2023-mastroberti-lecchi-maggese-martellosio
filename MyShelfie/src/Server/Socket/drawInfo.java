@@ -1,11 +1,14 @@
 package Server.Socket;
 
+import main.java.it.polimi.ingsw.Model.Board;
+
 public class drawInfo {
-    int x, y, amount, direction, column;
+    int x, y, amount, column;
+    Board.Direction direction;
 
     public drawInfo(){}
 
-    public drawInfo(int x, int y, int amount, int direction, int column){
+    public drawInfo(int x, int y, int amount, Board.Direction direction, int column){
         this.x = x;
         this.y = y;
         this.amount = amount;
@@ -26,7 +29,7 @@ public class drawInfo {
         return x;
     }
 
-    public int getDirection() {
+    public Board.Direction getDirection() {
         return direction;
     }
 
@@ -42,7 +45,7 @@ public class drawInfo {
         this.amount = amount;
     }
 
-    public void setDirection(int direction) {
+    public void setDirection(Board.Direction direction) {
         this.direction = direction;
     }
 

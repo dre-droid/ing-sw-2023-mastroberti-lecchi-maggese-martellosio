@@ -387,6 +387,9 @@ public class Game {
     public Board getBoard(){
         return this.board;
     }
+    public Player getIsPlaying(){
+        return isPlaying;
+    }
     public List<Player> getPlayerList(){
         return playersList;
     }
