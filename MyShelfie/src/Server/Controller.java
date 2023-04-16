@@ -1,5 +1,6 @@
 package Server;
 
+import Server.Socket.drawInfo;
 import com.beust.ah.A;
 import main.java.it.polimi.ingsw.Model.*;
 
@@ -13,8 +14,12 @@ import java.util.Timer;
 
 public class Controller {
     private Game game;
+    private Server server;
 
     public Controller(){
+    }
+    public Controller(Server server){
+        this.server = server;
     }
 
     /**
@@ -271,6 +276,26 @@ public class Controller {
         for (Player p: game.getPlayerList())
             if (p.hasFirstPlayerSeat()) return p;
         return null;
+    }
+
+    /**
+     * this method is called
+     * @author Saverio Maggese
+     *
+     */
+
+    public void playTurn() throws InvalidMoveException{
+        drawInfo info;
+        boolean flag = false;
+        do {
+        info = server.serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
+        try{
+            game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
+        }catch (InvalidMoveException e) {
+            flag = true;
+        }
+        }while(flag);
+
     }
 
 }
