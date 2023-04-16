@@ -1,5 +1,6 @@
 package Server;
 
+import Server.Socket.ServerSock;
 import Server.Socket.drawInfo;
 import com.beust.ah.A;
 import main.java.it.polimi.ingsw.Model.*;
@@ -13,13 +14,13 @@ import java.util.List;
 import java.util.Timer;
 
 public class Controller {
-    private Game game;
-    private Server server;
+    Game game;
+    private ServerSock serverSock;
 
     public Controller(){
     }
-    public Controller(Server server){
-        this.server = server;
+    public Controller(ServerSock serverSock){
+        this.serverSock = serverSock;
     }
 
     /**
@@ -288,7 +289,7 @@ public class Controller {
         drawInfo info;
         boolean flag = false;
         do {
-        info = server.serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
+        info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
         try{
             game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
         }catch (InvalidMoveException e) {

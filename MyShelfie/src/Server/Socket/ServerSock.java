@@ -28,25 +28,28 @@ public class ServerSock {
     }
 
     public void runServer(){
-        ServerSocket serverSocket;
-        try {
-            serverSocket = new ServerSocket(59010);
+        new Thread(() -> {
+            ServerSocket serverSocket;
+            try {
+                serverSocket = new ServerSocket(59010);
 
-            System.out.println("Waiting for client connection...");
-            while (true){
-                try {
+                System.out.println("Waiting for client connection...");
+                while (true){
+                    try {
                         Socket client = serverSocket.accept();
                         acceptClient(client);
 
                     }
-                catch (IOException e) {
-                    System.out.println("Ded");  //lol
+                    catch (IOException e) {
+                        System.out.println("Ded");  //lol
+                    }
                 }
             }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+        System.out.println("STEETETETT");
     }
 
     /**
@@ -146,6 +149,7 @@ public class ServerSock {
             if (c.getName().equals(nickname)) playerSocket = c.getSocket();
 
         try {
+            System.out.println("ARRIVATO QUI");
             InputStream input = playerSocket.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);

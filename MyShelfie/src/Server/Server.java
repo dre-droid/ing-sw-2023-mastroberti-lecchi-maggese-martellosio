@@ -10,17 +10,18 @@ public class Server {
     static ServerSock serverSock;
     static ServerRMI serverRMI;
     public static void main(String[] args) throws InvalidMoveException {
-        Controller controller = new Controller();
+        Controller controller = new Controller(serverSock);
         ServerSock serverSocket = new ServerSock(controller);
         serverSocket.runServer();
         //run ServerRMI
+
         //fai giocare turno al primo giocatore
-        if (controller.hasGameStarted()) controller.playTurn();
-        while (!controller.hasTheGameEnded())
-            controller.playTurn();
-
-        //controlla fine partita
-
-
+        while (true){
+            if (controller.hasGameStarted()) {
+                System.out.println("Game started");
+                controller.playTurn();
+                if (controller.hasTheGameEnded()) {}//game ending stuff}
+            }
+        }
     }
 }
