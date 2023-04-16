@@ -170,7 +170,7 @@ public class ServerSock {
             String jsonLeaderboard = gson.toJson(stringLeaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
 
-            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
+            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction, column) - direction [UP:0, DOWN:1, LEFT:2, RIGHT:3]");
             String line = reader.readLine();
             Integer.parseInt(line.replaceAll("[\\D]", "")); //replaces all non digits to blanks
             Scanner scanner = new Scanner(line);
@@ -184,19 +184,28 @@ public class ServerSock {
                 }
             }
 
+            System.out.println(drawInfo.getX());
+            System.out.println(drawInfo.getY());
+            System.out.println(drawInfo.getAmount());
+            System.out.println(drawInfo.getColumn());
+            System.out.println(drawInfo.getDirection());
+
             out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
 
-            System.out.println(drawInfo.getX());
-            System.out.println(drawInfo.getY());
-            System.out.println(drawInfo.getDirection());
-            System.out.println(drawInfo.getAmount());
-            System.out.println(drawInfo.getColumn());
             return drawInfo;
         } catch(Exception e){}
 
         return drawInfo;
+    }
+
+    public void printErrorToClient(String message, String nickname) throws IOException{
+        for (socketClient s: clients)
+            if (s.getName().equals(nickname)) {
+                PrintWriter out = new PrintWriter(s.getSocket().getOutputStream(), true);
+                out.println(message);
+            }
     }
 
 }

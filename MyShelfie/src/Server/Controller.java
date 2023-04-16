@@ -5,6 +5,7 @@ import Server.Socket.drawInfo;
 import com.beust.ah.A;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -285,7 +286,7 @@ public class Controller {
      *
      */
 
-    public void playTurn() throws InvalidMoveException{
+    public void playTurn() throws InvalidMoveException {
         drawInfo info;
         boolean flag = false;
         do {
@@ -294,6 +295,9 @@ public class Controller {
             game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
         }catch (InvalidMoveException e) {
             flag = true;
+            try {
+                serverSock.printErrorToClient("Invalid choice! Choose another tile.", getNameOfPlayerWhoIsCurrentlyPlaying());
+            } catch (Exception ex) {}
         }
         }while(flag);
 
