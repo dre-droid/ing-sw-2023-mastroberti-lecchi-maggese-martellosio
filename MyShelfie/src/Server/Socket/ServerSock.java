@@ -155,6 +155,8 @@ public class ServerSock {
 
             Gson gson = new Gson();
 
+            out.println("[NICKNAME]" + nickname);
+
             String jsonBoard = gson.toJson(b);
             out.println("[GSONBOARD]" + jsonBoard);
 
