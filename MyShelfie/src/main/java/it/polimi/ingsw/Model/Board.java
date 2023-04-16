@@ -284,6 +284,7 @@ public class Board{
     }
 
     public void printGridMap(){
+        System.out.println("----- Board ------");
         for(int i = 0;i<NumOfRows;i++) {
             for (int j = 0; j < NumOfColumns; j++) {
                 if (grid[i][j].isAvailable() == false) System.out.print("X ");
@@ -303,7 +304,7 @@ public class Board{
 
                 }
             }
-            System.out.println("");
+            System.out.println();
         }
     }
 

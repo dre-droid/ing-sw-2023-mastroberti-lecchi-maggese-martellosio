@@ -13,14 +13,12 @@ import java.io.PrintWriter;
 public class ClientSocket {
     public static void main(String[] args) throws IOException {
         //System.out.println("Insert the port number: ");
-
         //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
         //String s = bufferRead.readLine();
-        String s = "1234";
-
 
         try{
-            Socket socket= new Socket("127.0.0.1", Integer.parseInt(s));
+            //connect to server
+            Socket socket= new Socket("127.0.0.1", 59010);
             socket.setKeepAlive(true);
 
             try{
@@ -29,11 +27,9 @@ public class ClientSocket {
                 throw new RuntimeException(e);
             }
 
-
         } catch (IOException e) {throw new RuntimeException(e);}
 
         }
-
 
 
     private static void serverListener(Socket socket) {

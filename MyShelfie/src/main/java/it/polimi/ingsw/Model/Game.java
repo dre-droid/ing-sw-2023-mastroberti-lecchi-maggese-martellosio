@@ -13,11 +13,10 @@ public class Game {
     private Iterator<Player> iterator;
     private final List<CommonGoalCard> commonGoalCards;
     private Board board;
+    private int turnCount;
     private boolean lastTurn;
     private boolean lastRound;
-
     private boolean gameHasEnded;
-
     private boolean gameHasStarted;
 
 
@@ -30,6 +29,7 @@ public class Game {
         playersList = new ArrayList<>();
         leaderBoard = new ArrayList<>();
         commonGoalCards = new ArrayList<>();
+        turnCount = 1;
         lastTurn = false;
         lastRound = false;
         gameHasEnded=false;
@@ -64,9 +64,7 @@ public class Game {
         return gameHasEnded;
     }
 
-    public void endGame(){
-        this.gameHasEnded=true;
-    }
+
 
     /**
      * @author Andrea Mastroberti
@@ -80,7 +78,8 @@ public class Game {
        chooseCommonGoals();
        drawPersonalGoalCard();
        this.gameHasStarted = true;
-       System.out.println("Players list " + playersList);
+       System.out.println("//gameStartSetup// Players list " + playersList);
+       System.out.println();
 
     }
 
@@ -197,14 +196,6 @@ public class Game {
         }
     }
 
-    public List<Player> getLeaderBoard(){
-        return this.leaderBoard;
-    }
-
-
-
-
-
     /**
      * @author Andrea Mastroberti
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
@@ -216,6 +207,8 @@ public class Game {
      * @param column shelf column to place drawn tiles [0 ... 5]
      */
     public void playTurn(int x, int y, int amount, Board.Direction direction, int column) throws InvalidMoveException{
+        System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
+
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
         isPlaying.insertTiles(tiles, column);
@@ -244,7 +237,6 @@ public class Game {
         Player nextPlayer;
         if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
         nextPlayer = iterator.next();
-        System.out.println("NEXT PLAYER: " + nextPlayer);
 
         if (isPlaying.hasEndGameToken()) setLastRoundFlag();    //last round
         if (lastRound && isPlaying.hasFirstPlayerSeat()){       //last turn
@@ -258,6 +250,14 @@ public class Game {
             printLeaderBoard();
         }
         else isPlaying = nextPlayer;
+
+        turnCount++;                                            //increase turnCount
+
+        getBoard().printGridMap();
+        System.out.println();
+        System.out.println("Leaderboard");
+        printLeaderBoard();
+        System.out.println("******************************\n");
     }
 
     /**
@@ -268,7 +268,9 @@ public class Game {
     }
 
     /**
-     * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default
+     * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default.
+     * When all players have joined, starts the game.
+     *
      * @param nick - nickname
      */
    public boolean addPlayer(String nick){
@@ -317,7 +319,7 @@ public class Game {
         Random random = new Random();
         int starter = random.nextInt(playersList.size() - 1);
         playersList.get(starter).setFirstPlayerSeat();
-        System.out.println("Starting player: " + playersList.get(starter));
+        System.out.println("//setFirstPlayer// Starting player: " + playersList.get(starter));
 
         //set iterator, isPlaying
         iterator = playersList.iterator();
@@ -370,12 +372,14 @@ public class Game {
         board = new Board(playersList.size());
         for (Player p: playersList) p.setBoard(board); //sets players reference to board
     }
-
     private void setLastTurnFlag(){
         this.lastTurn = true;
     }
     private void setLastRoundFlag(){
         this.lastRound = true;
+    }
+    public void endGame(){
+        this.gameHasEnded=true;
     }
 
 
@@ -388,6 +392,13 @@ public class Game {
     }
 
     /**
+     * @return first player
+     */
+    public Player getStartingPlayer(){
+
+    }
+
+    /**
      * Prints leaderboard to console
      */
     public void printLeaderBoard(){
@@ -397,6 +408,9 @@ public class Game {
             i++;
         }
         System.out.println();
+    }
+    public List<Player> getLeaderBoard(){
+        return this.leaderBoard;
     }
     public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
 

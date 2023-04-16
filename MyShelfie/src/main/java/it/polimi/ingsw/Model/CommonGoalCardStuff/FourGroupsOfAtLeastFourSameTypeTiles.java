@@ -83,9 +83,9 @@ public class FourGroupsOfAtLeastFourSameTypeTiles implements StrategyCommonGoal{
                             groupCounter+=1;
                         tilesInGroup=0;
                         //System.out.println("{");
-                        for(Coordinate c: alreadyCheckedPositions){
-                            System.out.print("("+c.x+","+c.y+") ");
-                        }
+                        //for(Coordinate c: alreadyCheckedPositions){
+                         //   System.out.print("("+c.x+","+c.y+") ");
+                        //}
                         //System.out.println("}");
                         //System.out.println("Gruppi trovati finora:"+groupCounter);
 

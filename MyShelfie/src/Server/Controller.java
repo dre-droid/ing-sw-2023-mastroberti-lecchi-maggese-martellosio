@@ -44,7 +44,7 @@ public class Controller {
      *          (-3) if the chosen nickname is already being used by someone else
      *          (0) if the player joined the game correctly
      */
-    public int joinGame(String nickname) {
+    public synchronized int joinGame(String nickname) {
         if (game == null) {
             System.out.println("There is no game to join, create a new one " + nickname);
             return -1;
@@ -72,6 +72,14 @@ public class Controller {
         }
         return false;
     }
+
+    /**
+     * @return true if first player has successfully joined and created a game
+     */
+    public boolean hasGameBeenCreated(){
+        return game != null;
+    }
+
 
     /**
      * This method is used to get a copy of the shelf of the player with name "playerNickname" to send to the client so that it can
