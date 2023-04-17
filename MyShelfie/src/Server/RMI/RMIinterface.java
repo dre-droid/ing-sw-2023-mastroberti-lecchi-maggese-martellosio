@@ -1,4 +1,4 @@
-package Server;
+package Server.RMI;
 
 import main.java.it.polimi.ingsw.Model.*;
 

@@ -1,4 +1,4 @@
-package Server;
+package Server.RMI;
 
 public class ClientNotificationRecord {
         public String nickname;

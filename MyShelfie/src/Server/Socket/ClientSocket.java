@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import main.java.it.polimi.ingsw.Model.Board;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
@@ -78,6 +77,7 @@ public class ClientSocket {
                         message = bufferRead.readLine();
                         output.println(message);
                         }
+                    //personal goal, common goal
                     if(line.startsWith("[YOUR TURN]")){
                         printTurn();
                         System.out.println(line);

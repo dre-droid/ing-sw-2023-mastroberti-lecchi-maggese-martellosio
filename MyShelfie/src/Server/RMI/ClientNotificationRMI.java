@@ -1,4 +1,4 @@
-package Server;
+package Server.RMI;
 
 import main.java.it.polimi.ingsw.Model.*;
 
@@ -6,7 +6,6 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 

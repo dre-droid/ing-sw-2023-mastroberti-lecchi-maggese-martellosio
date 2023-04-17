@@ -54,4 +54,9 @@ public abstract class PersonalGoalCard{
     }
 
     public abstract void initializeValidTiles();
+
+    @Override
+    public String toString(){
+        return "TO DO";
+    }
 }

@@ -120,5 +120,8 @@ public class CommonGoalCard {
         return this.strategy.toString();
     }
 
-
+    @Override
+    public String toString(){
+        return "TODO";
+    }
 }

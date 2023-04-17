@@ -1,11 +1,8 @@
 package Server;
 
+import Server.RMI.ServerRMI;
 import Server.Socket.ServerSock;
 import main.java.it.polimi.ingsw.Model.InvalidMoveException;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.Timer;
 
 public class Server {
     static ServerRMI serverRMI;
@@ -19,10 +16,10 @@ public class Server {
 
         //fai giocare turno al primo giocatore
         while (true){
-            Thread.sleep(1000);
+            Thread.sleep(500);
             if (controller.hasGameStarted()) {
                 controller.playTurn();
-                if (controller.hasTheGameEnded()) {}//game ending stuff}
+                if (controller.hasTheGameEnded()) {}//game ending stuff
             }
         }
     }

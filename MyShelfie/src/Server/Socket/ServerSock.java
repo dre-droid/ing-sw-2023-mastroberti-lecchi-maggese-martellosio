@@ -168,6 +168,8 @@ public class ServerSock {
             String jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
+            //personal goal, common goal
+
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
             String jsonLeaderboard = gson.toJson(stringLeaderboard);

@@ -1,5 +1,6 @@
-package Server;
+package Server.RMI;
 
+import Server.Controller;
 import main.java.it.polimi.ingsw.Model.*;
 
 import java.rmi.NotBoundException;
