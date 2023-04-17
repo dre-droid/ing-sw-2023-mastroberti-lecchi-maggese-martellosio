@@ -21,14 +21,16 @@ import java.util.Scanner;
 
 public class ServerSock {
 
-    private final ArrayList<socketClient> clients = new ArrayList<>();
+    private final ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Server.Controller controller;
-    //private static final ArrayList<Game> game = new ArrayList<>();
-
 
     public void setController(Server.Controller controller){
         this.controller = controller;
     }
+
+    /**
+     * Creates a thread to accept clients.
+     */
     public void runServer(){
         new Thread(() -> {
             ServerSocket serverSocket;
@@ -54,7 +56,8 @@ public class ServerSock {
     }
 
     /**
-     * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to clients list if successful
+     * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
+     * List<socketNickStruct> clients if successful
      * @param client
      */
     private void acceptClient(Socket client) {
@@ -81,20 +84,13 @@ public class ServerSock {
     }
 
     /**
-     * Lets player pick a nickname and - if first to join - create a new game
+     * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
      * @param client
      * @throws IOException
+     * @return result of controller.joinGame()
      */
     private int playerJoin(Socket client) throws IOException {
         String nickname;
-        /*
-        for (Game g:game) {
-            if(g.getPlayerList().size()<g.getNumOfPlayers()){
-                System.out.println("fai tutte cose");
-                return;
-            }
-        }
-         */
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
@@ -113,23 +109,21 @@ public class ServerSock {
                 System.out.println(line);
                 controller.createNewGame(nickname, Integer.parseInt(line));     //create new game
                 out.println("Il numero di giocatori inserito è:  " + line);
-                clients.add(new socketClient(client, nickname));
+                clients.add(new socketNickStruct(client, nickname));
                 return -1;
             }
-
             //game has started
             case -2 -> {
                 return -2;
             }
-
             //name in use
             case -3 -> {
+                out.println("[INFO]: Nickname già in uso, scegline un altro.");
                 return -3;
             }
-
             //successful
             case 0 -> {
-                clients.add(new socketClient(client, nickname));
+                clients.add(new socketNickStruct(client, nickname));
                 return 0;
             }
         }
@@ -138,16 +132,16 @@ public class ServerSock {
 
     /**
      * Queries the client for info on his turn's drawn tiles
-     * @param nickname
-     * @param b
-     * @param shelf
-     * @return
+     * @param nickname - the nickname of the client to query
+     * @param b - game's board
+     * @param shelf - client's board
+     * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
     public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, List<Player> leaderboard){
         Socket playerSocket = null;
         drawInfo drawInfo = new drawInfo();
 
-        for (socketClient c: clients)
+        for (socketNickStruct c: clients)
             if (c.getName().equals(nickname)){
                 playerSocket = c.getSocket();
             }
@@ -191,7 +185,6 @@ public class ServerSock {
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
 
-            System.out.println("DRAWINFO " +  drawInfo.toString());
             return drawInfo;
         } catch(Exception e){
             e.printStackTrace();
@@ -200,11 +193,12 @@ public class ServerSock {
         return drawInfo;
     }
 
+
     public void printErrorToClient(String message, String nickname) throws IOException{
-        for (socketClient s: clients)
+        for (socketNickStruct s: clients)
             if (s.getName().equals(nickname)) {
                 PrintWriter out = new PrintWriter(s.getSocket().getOutputStream(), true);
-                out.println(message);
+                out.println("[INVALID MOVE]" + message);
             }
     }
 

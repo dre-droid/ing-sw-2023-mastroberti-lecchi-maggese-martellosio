@@ -2,7 +2,6 @@ package Server;
 
 import Server.Socket.ServerSock;
 import Server.Socket.drawInfo;
-import com.beust.ah.A;
 import main.java.it.polimi.ingsw.Model.*;
 
 import java.io.IOException;
@@ -288,20 +287,21 @@ public class Controller {
 
     public void playTurn() throws InvalidMoveException {
         drawInfo info;
-        boolean flag = false;
+        boolean flag;
         do {
-        info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
-        try{
-            game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
-        }catch (InvalidMoveException e) {
-            flag = true;
-            try {
-                serverSock.printErrorToClient("Invalid choice! Choose another tile.", getNameOfPlayerWhoIsCurrentlyPlaying());
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            flag = false;
+            info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
+            try{
+                game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
+            }catch (InvalidMoveException e) {
+                flag = true;
+                try {
+                    serverSock.printErrorToClient("Invalid choice! Choose another tile.", getNameOfPlayerWhoIsCurrentlyPlaying());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                e.printStackTrace();
             }
-            e.printStackTrace();
-        }
         }while(flag);
 
     }

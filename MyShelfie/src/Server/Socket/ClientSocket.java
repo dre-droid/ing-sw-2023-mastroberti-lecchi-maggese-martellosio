@@ -55,6 +55,8 @@ public class ClientSocket {
                 while(active){
                     Gson gson = new Gson();
                     line = reader.readLine();
+
+                    // ************* DESERIALIZATION ****************
                     if (line.startsWith("[GSONBOARD]")){
                         String gsonString = line.replace("[GSONBOARD]", "");
                         board = gson.fromJson(gsonString, Board.class);
@@ -78,12 +80,23 @@ public class ClientSocket {
                         output.println(message);
                         }
                     //personal goal, common goal
+                    // ********************************************
+
                     if(line.startsWith("[YOUR TURN]")){
                         printTurn();
                         System.out.println(line);
                         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                         message = bufferRead.readLine();
                         output.println(message);
+                    }
+                    if(line.startsWith("[INVALID MOVE]")){
+                        System.out.println("Non puoi selezionare queste tessere. Riprova.\n");
+                        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                        message = bufferRead.readLine();
+                        output.println(message);
+                    }
+                    if (line.startsWith("[INFO]")){
+                        System.out.println(line);
                     }
                     }
                 }
@@ -96,7 +109,7 @@ public class ClientSocket {
     }
 
     private static void printTurn(){
-        System.out.println("*********  " + nickname + ": your turn *********");
+        System.out.println("*********  " + nickname + ": your turn  *********");
         board.printGridMap();
         System.out.println();
 
