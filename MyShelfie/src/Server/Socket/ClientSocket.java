@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Scanner;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
 
@@ -19,6 +21,8 @@ import java.io.PrintWriter;
 public class ClientSocket {
     private static Board board;
     private static Shelf shelf;
+    private static String personalGoalCard;
+    private static String commonGoalCard;
     private static List<String> leaderboard;
     private static String nickname;
     public static void main(String[] args) throws IOException {
@@ -69,19 +73,27 @@ public class ClientSocket {
                         String gsonString = line.replace("[GSONLEAD]", "");
                         leaderboard = gson.fromJson(gsonString, List.class);
                     }
+                    if (line.startsWith("[GSONPGC]")){
+                        String gsonString = line.replace("[GSONPGC]", "");
+                        personalGoalCard = gson.fromJson(gsonString, String.class);
+                    }
+                    /*if (line.startsWith("[GSONCGC]")){
+                        String gsonString = line.replace("[GSONLEAD]", "");
+                        commonGoalCard = gson.fromJson(gsonString, String.class);
+                    }*/
                     if (line.startsWith("[NICKNAME]")){
                         String gsonString = line.replace("[NICKNAME]", "");
                         nickname = gsonString;
                     }
+                    //personal goal, common goal
+                    // ********************************************
+
                     if(line.startsWith("[REQUEST]")){
                         System.out.println(line);
                         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                         message = bufferRead.readLine();
                         output.println(message);
-                        }
-                    //personal goal, common goal
-                    // ********************************************
-
+                    }
                     if(line.startsWith("[YOUR TURN]")){
                         printTurn();
                         System.out.println(line);
@@ -110,26 +122,33 @@ public class ClientSocket {
 
     private static void printTurn(){
         System.out.println("*********  " + nickname + ": your turn  *********");
-        board.printGridMap();
-        System.out.println();
 
+        //shelf & personalGoal print
+        Scanner scanner = new Scanner(personalGoalCard);
+
+        System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 5; i >= 0; i--) {
+            System.out.print("   ");
             for (int j = 0; j < 5; j++){
-                if (shelf.getGrid()[i][j] == null) System.out.printf("X ");
+                if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
                 else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
             }
-            System.out.println();
+            System.out.print("   ");
+            System.out.println(scanner.nextLine());
         }
         System.out.println();
 
+        //board print
+        board.printGridMap();
+        System.out.println();
+
+        //leaderboard print
         System.out.println("Leaderboard");
         int i = 0;
         for (String s: leaderboard) {
             System.out.println(i + 1 + ". " + s);
             i++;
         }
-        System.out.println();
-
 
         System.out.println("******************************\n");
     }

@@ -290,7 +290,7 @@ public class Controller {
         boolean flag;
         do {
             flag = false;
-            info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.isPlaying.getShelf(),this.getLeaderboard());
+            info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
             try{
                 game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
             }catch (InvalidMoveException e) {

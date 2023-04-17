@@ -440,6 +440,7 @@ public class Game {
                 case 11 -> p.setPersonalGoalCard(new PersonalGoalCard11());
                 case 12 -> p.setPersonalGoalCard(new PersonalGoalCard12());
             }
+            p.getPersonalGoalCard().initializeValidTiles();
         }
     }
 

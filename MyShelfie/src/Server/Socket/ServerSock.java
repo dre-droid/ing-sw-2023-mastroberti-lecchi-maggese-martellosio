@@ -4,6 +4,8 @@ package Server.Socket;
 import com.beust.ah.A;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
 
@@ -104,11 +106,17 @@ public class ServerSock {
         switch (controller.joinGame(nickname)) {
             //no existing game
             case -1 -> {
-                out.println("[REQUEST] Inserisci il numero di giocatori: ");
-                String line = reader.readLine();
-                System.out.println(line);
-                controller.createNewGame(nickname, Integer.parseInt(line));     //create new game
-                out.println("Il numero di giocatori inserito è:  " + line);
+                String line;
+                int counter = 0;
+                do {
+                    if (counter > 0) out.println("[INFO]: Numero di giocatori per la partita non valido. Riprova.");
+                    out.println("[REQUEST] Inserisci il numero di giocatori: ");
+                    line = reader.readLine();
+                    System.out.println("Number of players selected: " + line);
+                    counter++;
+                }while (Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
+                controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
+                out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
                 clients.add(new socketNickStruct(client, nickname));
                 return -1;
             }
@@ -137,7 +145,7 @@ public class ServerSock {
      * @param shelf - client's board
      * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
-    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, List<Player> leaderboard){
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
         Socket playerSocket = null;
         drawInfo drawInfo = new drawInfo();
 
@@ -162,7 +170,11 @@ public class ServerSock {
             String jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
-            //personal goal, common goal
+            String jsonPersonalGoal = gson.toJson(pgc.toString());
+            out.println("[GSONPGC]" + jsonPersonalGoal);
+
+            //String jsonCommonGoal = gson.toJson(cgc.toString());
+            //out.println("[GSONCGC]" + jsonCommonGoal);
 
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());

@@ -56,7 +56,6 @@ public abstract class PersonalGoalCard{
     public String toString() {
         String string = new String();
         Tile[][] s = getValidTiles().getGrid();
-        string += "*** Personal Goal Card ***\n";
         for (Tile[] i : s) {
             string += "       ";
             for (Tile j : i) {
