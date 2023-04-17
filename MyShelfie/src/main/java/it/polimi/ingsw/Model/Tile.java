@@ -16,6 +16,6 @@ public class Tile implements Serializable {
 
     @Override
     public String toString(){
-        return this.type.name();
+        return this.type.name().substring(0, 1);
     }
 }

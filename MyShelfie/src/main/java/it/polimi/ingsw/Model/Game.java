@@ -318,7 +318,7 @@ public class Game {
     private void setFirstPlayer(){
         //get random value, set firstPlayerSeat
         Random random = new Random();
-        int starter = random.nextInt(playersList.size() - 1);
+        int starter = random.nextInt(playersList.size());
         playersList.get(starter).setFirstPlayerSeat();
         System.out.println("//setFirstPlayer// Starting player: " + playersList.get(starter));
 
@@ -440,6 +440,7 @@ public class Game {
                 case 11 -> p.setPersonalGoalCard(new PersonalGoalCard11());
                 case 12 -> p.setPersonalGoalCard(new PersonalGoalCard12());
             }
+            p.getPersonalGoalCard().initializeValidTiles();
         }
     }
 

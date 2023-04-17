@@ -4,6 +4,8 @@ package Server.Socket;
 import com.beust.ah.A;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
 
@@ -21,14 +23,16 @@ import java.util.Scanner;
 
 public class ServerSock {
 
-    private final ArrayList<socketClient> clients = new ArrayList<>();
+    private final ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Server.Controller controller;
-    //private static final ArrayList<Game> game = new ArrayList<>();
-
 
     public void setController(Server.Controller controller){
         this.controller = controller;
     }
+
+    /**
+     * Creates a thread to accept clients.
+     */
     public void runServer(){
         new Thread(() -> {
             ServerSocket serverSocket;
@@ -54,7 +58,8 @@ public class ServerSock {
     }
 
     /**
-     * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to clients list if successful
+     * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
+     * List<socketNickStruct> clients if successful
      * @param client
      */
     private void acceptClient(Socket client) {
@@ -81,20 +86,13 @@ public class ServerSock {
     }
 
     /**
-     * Lets player pick a nickname and - if first to join - create a new game
+     * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
      * @param client
      * @throws IOException
+     * @return result of controller.joinGame()
      */
     private int playerJoin(Socket client) throws IOException {
         String nickname;
-        /*
-        for (Game g:game) {
-            if(g.getPlayerList().size()<g.getNumOfPlayers()){
-                System.out.println("fai tutte cose");
-                return;
-            }
-        }
-         */
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
@@ -108,28 +106,32 @@ public class ServerSock {
         switch (controller.joinGame(nickname)) {
             //no existing game
             case -1 -> {
-                out.println("[REQUEST] Inserisci il numero di giocatori: ");
-                String line = reader.readLine();
-                System.out.println(line);
-                controller.createNewGame(nickname, Integer.parseInt(line));     //create new game
-                out.println("Il numero di giocatori inserito è:  " + line);
-                clients.add(new socketClient(client, nickname));
+                String line;
+                int counter = 0;
+                do {
+                    if (counter > 0) out.println("[INFO]: Numero di giocatori per la partita non valido. Riprova.");
+                    out.println("[REQUEST] Inserisci il numero di giocatori: ");
+                    line = reader.readLine();
+                    System.out.println("Number of players selected: " + line);
+                    counter++;
+                }while (Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
+                controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
+                out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
+                clients.add(new socketNickStruct(client, nickname));
                 return -1;
             }
-
             //game has started
             case -2 -> {
                 return -2;
             }
-
             //name in use
             case -3 -> {
+                out.println("[INFO]: Nickname già in uso, scegline un altro.");
                 return -3;
             }
-
             //successful
             case 0 -> {
-                clients.add(new socketClient(client, nickname));
+                clients.add(new socketNickStruct(client, nickname));
                 return 0;
             }
         }
@@ -138,16 +140,16 @@ public class ServerSock {
 
     /**
      * Queries the client for info on his turn's drawn tiles
-     * @param nickname
-     * @param b
-     * @param shelf
-     * @return
+     * @param nickname - the nickname of the client to query
+     * @param b - game's board
+     * @param shelf - client's board
+     * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
-    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, List<Player> leaderboard){
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
         Socket playerSocket = null;
         drawInfo drawInfo = new drawInfo();
 
-        for (socketClient c: clients)
+        for (socketNickStruct c: clients)
             if (c.getName().equals(nickname)){
                 playerSocket = c.getSocket();
             }
@@ -168,7 +170,11 @@ public class ServerSock {
             String jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
-            //personal goal, common goal
+            String jsonPersonalGoal = gson.toJson(pgc.toString());
+            out.println("[GSONPGC]" + jsonPersonalGoal);
+
+            //String jsonCommonGoal = gson.toJson(cgc.toString());
+            //out.println("[GSONCGC]" + jsonCommonGoal);
 
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
@@ -191,7 +197,6 @@ public class ServerSock {
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
 
-            System.out.println("DRAWINFO " +  drawInfo.toString());
             return drawInfo;
         } catch(Exception e){
             e.printStackTrace();
@@ -200,11 +205,12 @@ public class ServerSock {
         return drawInfo;
     }
 
+
     public void printErrorToClient(String message, String nickname) throws IOException{
-        for (socketClient s: clients)
+        for (socketNickStruct s: clients)
             if (s.getName().equals(nickname)) {
                 PrintWriter out = new PrintWriter(s.getSocket().getOutputStream(), true);
-                out.println(message);
+                out.println("[INVALID MOVE]" + message);
             }
     }
 

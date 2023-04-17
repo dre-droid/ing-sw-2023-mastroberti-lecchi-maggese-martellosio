@@ -93,4 +93,10 @@ public class PersonalGoalCardTest {
         assertEquals(12, p.getPersonalGoalCard().getPoints(shelf));
     }
 
+    @Test
+    public void toStringTest(){
+        PersonalGoalCard p1 = new PersonalGoalCard7();
+        p1.initializeValidTiles();
+        System.out.println(p1);
+    }
 }

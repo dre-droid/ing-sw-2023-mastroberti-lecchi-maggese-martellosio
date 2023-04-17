@@ -44,9 +44,6 @@ public abstract class PersonalGoalCard{
 
 
         }
-
-
-
     }
 
     public Shelf getValidTiles(){
@@ -56,7 +53,17 @@ public abstract class PersonalGoalCard{
     public abstract void initializeValidTiles();
 
     @Override
-    public String toString(){
-        return "TO DO";
+    public String toString() {
+        String string = new String();
+        Tile[][] s = getValidTiles().getGrid();
+        for (Tile[] i : s) {
+            string += "       ";
+            for (Tile j : i) {
+                if (j == null) string += "x ";
+                else string += j + " ";
+            }
+            string += "\n";
+        }
+        return string;
     }
 }
