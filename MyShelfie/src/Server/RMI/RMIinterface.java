@@ -30,4 +30,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public int getPoints(String playerNickname) throws RemoteException;
 
     public boolean isGameOver() throws RemoteException;
+
+    public boolean reconnect(String playerNickname, int port) throws RemoteException;
 }

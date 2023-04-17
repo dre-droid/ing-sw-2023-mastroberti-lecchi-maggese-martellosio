@@ -18,12 +18,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     private final int drawDelay= 60000;
     private final int insertDelay = 70000;
-    private List<ClientNotificationRecord> clients;
+    //private List<ClientNotificationRecord> clients;
+
+    private Map<String, ClientNotificationInterfaceRMI> clients;
 
 
 
     protected ServerRMI() throws RemoteException {super();
-        clients = new ArrayList<ClientNotificationRecord>();
+        clients = new HashMap<>();
         timerDraw = new Timer();
         timerInsert = new Timer();
         controller = new Controller();
@@ -42,21 +44,28 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         switch (outcome){
             case 0: {
                 clientToBeNotified.gameJoinedCorrectlyNotification();
-                clients.add(new ClientNotificationRecord(nickname, clientToBeNotified));
-                for (ClientNotificationRecord clientNotificationRecord : clients) {
+                clients.put(nickname, clientToBeNotified);
+                //clients.add(new ClientNotificationRecord(nickname, clientToBeNotified));
+                /*for (ClientNotificationRecord clientNotificationRecord : clients) {
                     clientNotificationRecord.client.someoneJoinedTheGame(nickname);
+                }*/
+                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                    client.getValue().someoneJoinedTheGame(nickname);
                 }
                 if (controller.hasGameStarted()) {
                     startTimer(timerDraw, drawDelay);
                     String commonGoals;
                     commonGoals = controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description();
-                    for (ClientNotificationRecord clientNotificationRecord : clients) {
+                    for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                        client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                        client.getValue().announceCommonGoals(commonGoals);
+                    }
+                    /*for (ClientNotificationRecord clientNotificationRecord : clients) {
                         clientNotificationRecord.client.startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                         clientNotificationRecord.client.announceCommonGoals(commonGoals);
-                    }
-                    break;
+                    }*/
                 }
-            }
+            }break;
             case -1: {
                 clientToBeNotified.problemInJoiningGame("There is no game to join");
             }break;
@@ -84,7 +93,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
         if(controller.createNewGame(nickname, numOfPlayers)){
             clientToBeNotified.gameCreatedCorrectly();
-            clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
+            //clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
+            clients.put(nickname, clientToBeNotified);
             System.out.println("Created new game by "+nickname);
             return true;
         }
@@ -98,7 +108,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException{
         List<Tile> drawnTiles = controller.drawFromBoard(playerNickname, x, y, amount, direction);
         if(drawnTiles==null){
-            clients.stream().filter(client->client.nickname.equals(playerNickname)).toList().get(0).client.moveIsNotValid();
+            //clients.stream().filter(client->client.nickname.equals(playerNickname)).toList().get(0).client.moveIsNotValid();
+            clients.get(playerNickname).moveIsNotValid();
             return null;
         }
         timerDraw.cancel();
@@ -134,7 +145,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             return true;
         }
         else {
-            clients.stream().filter(cl->cl.nickname.equals(playernickName)).toList().get(0).client.moveIsNotValid();
+            clients.get(playernickName).moveIsNotValid();
+            //clients.stream().filter(cl->cl.nickname.equals(playernickName)).toList().get(0).client.moveIsNotValid();
             return false;
         }
     }
@@ -143,14 +155,26 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     private void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())) {
             if (controller.checkIfCommonGoalN1IsFulfilled(playerNickname)) {
-                for (ClientNotificationRecord c : clients) {
+
+                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard1Description());
+                }
+
+                /*for (ClientNotificationRecord c : clients) {
                     c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard1Description());
-                }
+                }*/
             }
-            if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname))
-                for (ClientNotificationRecord c : clients) {
-                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
+            if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname)){
+
+                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
                 }
+
+                /*for (ClientNotificationRecord c : clients) {
+                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
+                }*/
+            }
+
         }
     }
 
@@ -159,12 +183,21 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
             controller.endOfTurn(playerNickname);
-            for(ClientNotificationRecord c: clients){
-                c.client.aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+
+            for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
+
+            /*for(ClientNotificationRecord c: clients){
+                c.client.aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            }*/
             if(controller.hasTheGameEnded()){
-                for(ClientNotificationRecord c: clients)
-                    c.client.gameIsOver(controller.getLeaderboard());
+                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                    client.getValue().gameIsOver(controller.getLeaderboard());
+                }
+
+                /*for(ClientNotificationRecord c: clients)
+                    c.client.gameIsOver(controller.getLeaderboard());*/
             }
             else{
                 timerDraw = new Timer();
@@ -178,7 +211,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             @Override
             public void run() {
                 try{
-                    clients.stream().filter(client -> client.nickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())).toList().get(0).client.runOutOfTime();
+                    //clients.stream().filter(client -> client.nickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())).toList().get(0).client.runOutOfTime();
+                    clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).runOutOfTime();
                     endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                 }catch (RemoteException e){
                     e.printStackTrace();
@@ -200,7 +234,34 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return controller.hasTheGameEnded();
     }
 
-
+    @Override
+    public boolean reconnect(String playerNickname, int port)  throws RemoteException{
+        //we check if there is a player with this name in the game
+        if(clients.containsKey(playerNickname)){
+            //we check if the client is already connected with a ping, if the client is not connected we proceed to the reconnection
+            try{
+                clients.get(playerNickname).ping();
+                System.out.println("I can still ping "+playerNickname);
+                return false;
+            } catch (RemoteException e) {
+                //we update the list of the clients with the new client if we can connect to it
+                ClientNotificationInterfaceRMI clientToBeNotified;
+                try{
+                    Registry registry = LocateRegistry.getRegistry(port);
+                    clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
+                } catch (NotBoundException | java.rmi.RemoteException  ex) {
+                    System.out.println("Cannot connect to the new client");
+                    return false;
+                }
+                clients.put(playerNickname, clientToBeNotified);
+                System.out.println("Connected to the new client");
+                return true;
+            }
+        }
+        else{
+            return false;
+        }
+    }
 
 
     public static void main(String[] args){
