@@ -30,6 +30,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         timerInsert = new Timer();
         controller = new Controller();
     }
+    public ServerRMI(Controller controller) throws RemoteException {super();
+        clients = new HashMap();
+        timerDraw = new Timer();
+        timerInsert = new Timer();
+        this.controller = controller;
+
+    }
 
     @Override
     public int joinGame(String nickname,int port) throws java.rmi.RemoteException {
