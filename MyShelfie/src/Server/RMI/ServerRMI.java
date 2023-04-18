@@ -1,6 +1,7 @@
 package Server.RMI;
 
 import Server.Controller;
+import Server.Server;
 import main.java.it.polimi.ingsw.Model.*;
 
 import java.rmi.NotBoundException;
@@ -14,6 +15,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     Timer timerDraw;
     Timer timerInsert;
 
+    Server server;
+
     Controller controller;
 
     private final int drawDelay= 60000;
@@ -24,17 +27,18 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
 
-    protected ServerRMI() throws RemoteException {super();
+    public ServerRMI() throws RemoteException {super();
         clients = new HashMap<>();
         timerDraw = new Timer();
         timerInsert = new Timer();
         controller = new Controller();
     }
-    public ServerRMI(Controller controller) throws RemoteException {super();
+    public ServerRMI(Controller controller, Server server) throws RemoteException {super();
         clients = new HashMap();
         timerDraw = new Timer();
         timerInsert = new Timer();
         this.controller = controller;
+        this.server = server;
 
     }
 
@@ -56,6 +60,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 /*for (ClientNotificationRecord clientNotificationRecord : clients) {
                     clientNotificationRecord.client.someoneJoinedTheGame(nickname);
                 }*/
+                server.addPlayerToRecord(nickname, Server.connectionType.RMI);
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     client.getValue().someoneJoinedTheGame(nickname);
                 }
@@ -102,6 +107,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             clientToBeNotified.gameCreatedCorrectly();
             //clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
             clients.put(nickname, clientToBeNotified);
+            server.addPlayerToRecord(nickname, Server.connectionType.RMI);
             System.out.println("Created new game by "+nickname);
             return true;
         }

@@ -12,9 +12,32 @@ import java.util.concurrent.TimeUnit;
 public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI, Runnable{
 
     Object turnEnabler;
+    RMIinterface RMIserver;
+    ClientNotificationRMI notifications;
     protected ClientNotificationRMI() throws RemoteException {
         super();
         turnEnabler = new Object();
+    }
+
+    public boolean connectToRMIserver(String url){
+        try{
+            Registry registryServer = LocateRegistry.getRegistry(url);
+            RMIserver = (RMIinterface) registryServer.lookup("MyShelfie");
+        }catch(RemoteException | NotBoundException e){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean startClientNotificationServer(int port){
+        try{
+            notifications = new ClientNotificationRMI();
+            Registry clientRegistry = LocateRegistry.createRegistry(port);
+            clientRegistry.rebind("Client",notifications);
+        }catch (RemoteException e){
+            return false;
+        }
+        return true;
     }
 
     @Override

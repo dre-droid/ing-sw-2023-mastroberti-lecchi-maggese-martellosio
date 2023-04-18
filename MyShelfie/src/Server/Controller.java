@@ -4,6 +4,7 @@ import Server.Socket.ServerSock;
 import Server.Socket.drawInfo;
 import main.java.it.polimi.ingsw.Model.*;
 
+import javax.naming.ldap.Control;
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -17,7 +18,18 @@ public class Controller {
     Game game;
     private ServerSock serverSock;
 
+    private Server server;
+
     public Controller(){
+    }
+
+    public Controller(Server server){
+        this.server = server;
+
+    }
+
+    public void setServerSock(ServerSock s){
+        this.serverSock = s;
     }
     public Controller(ServerSock serverSock){
         this.serverSock = serverSock;

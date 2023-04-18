@@ -13,6 +13,5 @@ public class ClientRMI {
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

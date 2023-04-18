@@ -1,6 +1,8 @@
 package Server.Socket;
 
 
+import Server.Controller;
+import Server.Server;
 import com.beust.ah.A;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
@@ -23,12 +25,23 @@ import java.util.Scanner;
 
 public class ServerSock {
 
-    private final ArrayList<socketNickStruct> clients = new ArrayList<>();
-    private Server.Controller controller;
 
-    public void setController(Server.Controller controller){
+    private final ArrayList<socketNickStruct> clients = new ArrayList<>();
+    private Controller controller;
+
+    private Server server;
+
+    public ServerSock(){
+
+    }
+    public ServerSock(Controller controller, Server server){
+        this.controller = controller;
+        this.server = server;
+    }
+    public void setController(Controller controller){
         this.controller = controller;
     }
+
 
     /**
      * Creates a thread to accept clients.
@@ -118,6 +131,8 @@ public class ServerSock {
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
                 out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
                 clients.add(new socketNickStruct(client, nickname));
+                server.addPlayerToRecord(nickname, Server.connectionType.Socket);
+
                 return -1;
             }
             //game has started
@@ -132,6 +147,7 @@ public class ServerSock {
             //successful
             case 0 -> {
                 clients.add(new socketNickStruct(client, nickname));
+                server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                 return 0;
             }
         }
