@@ -196,6 +196,8 @@ public class Game {
         }
     }
 
+
+
     /**
      * @author Andrea Mastroberti
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
@@ -206,13 +208,53 @@ public class Game {
      * @param direction draw direction [RIGHT, LEFT, UP, DOWN]
      * @param column shelf column to place drawn tiles [0 ... 5]
      */
-    public void playTurn(int x, int y, int amount, Board.Direction direction, int column) throws InvalidMoveException{
+    public void playTurn(int x, int y, int amount, Board.Direction direction, int column, int order) throws InvalidMoveException{
         System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
 
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
+        List<Tile> rearrangedTiles = tiles;
+        switch (order){
+            case 123:{}
+            case 132:{
+                rearrangedTiles.set(0, tiles.get(0));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(2));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(1));
+                }
+                break;
+            }
+            case 213:{
+                rearrangedTiles.set(0, tiles.get(1));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(0));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(2));
+                }
+            }
+            case 231:{
+                rearrangedTiles.set(0, tiles.get(1));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(2));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(0));
+                }
+            }
+            case 312:{
+                rearrangedTiles.set(0, tiles.get(2));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(0));
+                    if (amount > 2)rearrangedTiles.set(2, tiles.get(1));
+                }
+            }
+            case 321:{
+                rearrangedTiles.set(0, tiles.get(2));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(1));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(0));
+                }
+            }
+        }
+
         isPlaying.insertTiles(tiles, column);
-        System.out.println("Got here");
         //isPlaying.printShelf();
         if (isPlaying.hasEndGameToken()) setLastTurnFlag();
 

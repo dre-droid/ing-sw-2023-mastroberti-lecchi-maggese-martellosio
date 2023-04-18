@@ -304,7 +304,7 @@ public class Controller {
             flag = false;
             info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
             try{
-                game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn());
+                game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn(), info.getOrder());
             }catch (InvalidMoveException e) {
                 flag = true;
                 try {

@@ -4,7 +4,6 @@ import Server.RMI.ServerRMI;
 import Server.Socket.ServerSock;
 import main.java.it.polimi.ingsw.Model.InvalidMoveException;
 
-import javax.sound.midi.SysexMessage;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
@@ -16,13 +15,12 @@ public class Server {
         RMI, Socket
     }
 
-
     public ServerRMI serverRMI;
     public ServerSock serverSock;
     private Map<String, connectionType> clients;
     private Controller controller;
 
-    public void run(){
+    private void run(){
         clients = new HashMap<>();
         controller = new Controller(this);
         try{
@@ -36,17 +34,15 @@ public class Server {
         serverSock.runServer();
         controller.setServerSock(serverSock);
         //serverSock.setController(controller);
-        clients.forEach((k,v)->System.out.println(k+", "+v));
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        //clients.forEach((k,v)->System.out.println(k+", "+v));
         while(!controller.hasGameStarted()){
             try {
-                Thread.sleep(10000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-        clients.forEach((k,v)->System.out.println(k+", "+v));
+        //clients.forEach((k,v)->System.out.println(k+", "+v));
         try{
             while (!controller.hasTheGameEnded()) {
                 Thread.sleep(500);

@@ -5,11 +5,8 @@ import Server.Controller;
 import Server.Server;
 import com.beust.ah.A;
 import com.google.gson.Gson;
-import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
-import main.java.it.polimi.ingsw.Model.Player;
-import main.java.it.polimi.ingsw.Model.Shelf;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -214,6 +211,22 @@ public class ServerSock {
             out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
             line = reader.readLine();
             drawInfo.setColumn(Integer.parseInt(line));
+
+            List<Tile> drawnTiles;
+            TilePlacingSpot[][] grid = b.getBoardForDisplay();
+            drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+
+            String string = "[INFO]: Hai pescato le seguenti tessere: ";
+            int i = 1;
+            for (Tile t: drawnTiles){
+                string += i + ")" + t + " " ;
+                i++;
+            }
+            out.println(string);
+
+            out.println("[REQUEST] Inserisci l'ordine in cui inserire le tessere nella shelf: [CGT -> TCG: 312]");
+            line = reader.readLine();
+            drawInfo.setOrder(Integer.parseInt(line));
 
             return drawInfo;
         } catch(Exception e){
