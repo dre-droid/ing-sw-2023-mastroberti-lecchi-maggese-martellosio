@@ -33,6 +33,8 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void runOutOfTime() throws RemoteException;
 
+    public void ping() throws RemoteException;
+
 
 
 }

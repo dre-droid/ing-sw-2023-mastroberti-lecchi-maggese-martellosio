@@ -107,6 +107,11 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     }
 
     @Override
+    public void ping() throws RemoteException {
+        System.out.println("Server checking if client is alive");
+    }
+
+    @Override
     public void run() {
         try{
             int x,y,amount,directionInput,column,tileToBeRearranged;
@@ -150,51 +155,76 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
 
 
-
-
-
+            System.out.println("Enter (1) if you want to join a game, (2) if you are trying to reconnect to a game");
+            int typeOfConnection=-1;
+            do{
+                try{
+                    typeOfConnection = Integer.parseInt(userInput.nextLine());
+                }catch (Exception e){
+                    //typeOfConnection = -1;
+                    System.out.println("Insert (1) or (2)!");
+                }
+                if(typeOfConnection<1 || typeOfConnection>2){
+                    System.out.println("Insert (1) or (2)!");
+                    typeOfConnection=-1;
+                }
+            }while(typeOfConnection==-1);
 
             System.out.println("Now insert the nickname for the game: ");
             int returnCode;
             String nickname;
 
-            do{
-                nickname = userInput.nextLine();
-                returnCode = serverRMI.joinGame(nickname,myport);
-                switch(returnCode){
-                    case -1: {
-                        System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
-                        int numPlayers;
-                        do{
-                            numPlayers=-1;
-                            try{
-                                numPlayers = Integer.parseInt(userInput.nextLine());
-                            }catch (Exception e){
+            if(typeOfConnection==1){
+                do{
+                    nickname = userInput.nextLine();
+                    returnCode = serverRMI.joinGame(nickname,myport);
+                    switch(returnCode){
+                        case -1: {
+                            System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
+                            int numPlayers;
+                            do{
                                 numPlayers=-1;
+                                try{
+                                    numPlayers = Integer.parseInt(userInput.nextLine());
+                                }catch (Exception e){
+                                    numPlayers=-1;
+                                }
+                                if(numPlayers<2 || numPlayers>4)
+                                    System.out.println("Insert a valid value for the number of players (2, 3, 4)");
+                            }while(numPlayers<2 || numPlayers>4);
+
+
+                            if(serverRMI.createNewGame(nickname,numPlayers,myport)){
+                                returnCode=0;
                             }
-                            if(numPlayers<2 || numPlayers>4)
-                                System.out.println("Insert a valid value for the number of players (2, 3, 4)");
-                        }while(numPlayers<2 || numPlayers>4);
+                            else{
+                                System.out.println("Somebody already created the game, try to join again, insert your nickname");
+                            }
+                        }break;
+                        case -2:{
+                            System.out.println("Try again later");
+                        }break;
+                        case -3:{
+                            System.out.println("Try a different nickname");
+                        }break;
+                        default:;
+                    }
+                }while(returnCode!=0);
+                if(!serverRMI.hasGameStarted())
+                    System.out.println("waiting for players...");
+            }
+            else{
+                nickname = userInput.nextLine();
+                boolean reconnected = false;
+                do{
+                    reconnected= serverRMI.reconnect(nickname, myport);
+                    if(!reconnected){
+                        System.out.println("Cannot reconnect to the game, someone is already connected with this nickname");
+                    }
+                }while(!reconnected);
+                System.out.println("You reconnected to the game, wait for your turn now");
+            }
 
-
-                        if(serverRMI.createNewGame(nickname,numPlayers,myport)){
-                            returnCode=0;
-                        }
-                        else{
-                            System.out.println("Somebody already created the game, try to join again, insert your nickname");
-                        }
-                    }break;
-                    case -2:{
-                        System.out.println("Try again later");
-                    }break;
-                    case -3:{
-                        System.out.println("Try a different nickname");
-                    }break;
-                    default:;
-                }
-            }while(returnCode!=0);
-            if(!serverRMI.hasGameStarted())
-                System.out.println("waiting for players...");
 
 
             /*synchronized (turnEnabler){
@@ -208,17 +238,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
             while(!serverRMI.isGameOver()){
                 while(serverRMI.isMyTurn(nickname)){
-                    /*while (!serverRMI.isMyTurn(nickname)){
-                        synchronized (turnEnabler){
-                            try{
-                                turnEnabler.wait();
-                            }catch (InterruptedException e){ e.printStackTrace();}
-                        }
-
-                    }*/
-
                     userInput = new Scanner(System.in);
-
                     waitForNotifications();
                     rearrangedTiles = new ArrayList<>();
                     drawnTiles = new ArrayList<>();
