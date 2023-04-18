@@ -173,8 +173,10 @@ public class ServerSock {
             String jsonPersonalGoal = gson.toJson(pgc.toString());
             out.println("[GSONPGC]" + jsonPersonalGoal);
 
-            //String jsonCommonGoal = gson.toJson(cgc.toString());
-            //out.println("[GSONCGC]" + jsonCommonGoal);
+            String jsonCommonGoal = cgc.get(0).getDescription() + "\n";
+            jsonCommonGoal += cgc.get(1).getDescription() + "\n";
+            jsonCommonGoal = gson.toJson(jsonCommonGoal);
+            out.println("[GSONCGC]" + jsonCommonGoal);
 
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());

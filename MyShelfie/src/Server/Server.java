@@ -19,7 +19,9 @@ public class Server {
             Thread.sleep(500);
             if (controller.hasGameStarted()) {
                 controller.playTurn();
-                if (controller.hasTheGameEnded()) {}//game ending stuff
+                if (controller.hasTheGameEnded()) {
+
+                }//game ending stuff
             }
         }
     }

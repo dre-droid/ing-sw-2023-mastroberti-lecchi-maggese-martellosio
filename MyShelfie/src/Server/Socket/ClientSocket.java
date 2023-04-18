@@ -77,15 +77,14 @@ public class ClientSocket {
                         String gsonString = line.replace("[GSONPGC]", "");
                         personalGoalCard = gson.fromJson(gsonString, String.class);
                     }
-                    /*if (line.startsWith("[GSONCGC]")){
-                        String gsonString = line.replace("[GSONLEAD]", "");
+                    if (line.startsWith("[GSONCGC]")){
+                        String gsonString = line.replace("[GSONCGC]", "");
                         commonGoalCard = gson.fromJson(gsonString, String.class);
-                    }*/
+                    }
                     if (line.startsWith("[NICKNAME]")){
                         String gsonString = line.replace("[NICKNAME]", "");
                         nickname = gsonString;
                     }
-                    //personal goal, common goal
                     // ********************************************
 
                     if(line.startsWith("[REQUEST]")){
@@ -124,7 +123,8 @@ public class ClientSocket {
         System.out.println("*********  " + nickname + ": your turn  *********");
 
         //shelf & personalGoal print
-        Scanner scanner = new Scanner(personalGoalCard);
+        Scanner scannerpg = new Scanner(personalGoalCard);
+        Scanner scannercg = new Scanner(commonGoalCard);
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 5; i >= 0; i--) {
@@ -134,7 +134,10 @@ public class ClientSocket {
                 else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
             }
             System.out.print("   ");
-            System.out.println(scanner.nextLine());
+            System.out.print(scannerpg.nextLine());
+            System.out.print("   ");
+            if (scannercg.hasNextLine()) System.out.print(scannercg.nextLine());
+            System.out.println();
         }
         System.out.println();
 
