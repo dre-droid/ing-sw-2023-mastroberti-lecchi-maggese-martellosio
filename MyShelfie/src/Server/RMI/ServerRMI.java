@@ -12,8 +12,8 @@ import java.util.*;
 
 public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
-    Timer timerDraw;
-    Timer timerInsert;
+    //Timer timerDraw;
+    //Timer timerInsert;
 
     Server server;
 
@@ -29,14 +29,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     public ServerRMI() throws RemoteException {super();
         clients = new HashMap<>();
-        timerDraw = new Timer();
-        timerInsert = new Timer();
+        //timerDraw = new Timer();
+        //timerInsert = new Timer();
         controller = new Controller();
     }
     public ServerRMI(Controller controller, Server server) throws RemoteException {super();
         clients = new HashMap();
-        timerDraw = new Timer();
-        timerInsert = new Timer();
+        //timerDraw = new Timer();
+        //timerInsert = new Timer();
         this.controller = controller;
         this.server = server;
 
@@ -65,7 +65,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     client.getValue().someoneJoinedTheGame(nickname);
                 }
                 if (controller.hasGameStarted()) {
-                    startTimer(timerDraw, drawDelay);
+                    /*startTimer(timerDraw, drawDelay);*/
                     String commonGoals;
                     commonGoals = controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description();
                     for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
@@ -125,9 +125,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             clients.get(playerNickname).moveIsNotValid();
             return null;
         }
-        timerDraw.cancel();
+        /*timerDraw.cancel();
         timerInsert = new Timer();
-        startTimer(timerInsert,insertDelay);
+        startTimer(timerInsert,insertDelay);*/
         return drawnTiles;
     }
 
@@ -153,7 +153,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public boolean insertTilesInShelf(String playernickName, List<Tile> tiles, int column) throws RemoteException{
         if(controller.insertTilesInShelf(playernickName, tiles, column)){
-            timerInsert.cancel();
+            //timerInsert.cancel();
             endOfTurn(playernickName);
             return true;
         }
@@ -212,14 +212,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 /*for(ClientNotificationRecord c: clients)
                     c.client.gameIsOver(controller.getLeaderboard());*/
             }
-            else{
+            /*else{
                 timerDraw = new Timer();
                 startTimer(timerDraw,drawDelay);
-            }
+            }*/
         }
     }
 
-    private void startTimer(Timer timer, int delay){
+    /*private void startTimer(Timer timer, int delay){
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -232,7 +232,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 }
             }
         },delay);
-    }
+    }*/
 
 
 

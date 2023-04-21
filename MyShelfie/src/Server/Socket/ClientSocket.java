@@ -43,7 +43,22 @@ public class ClientSocket {
 
         } catch (IOException e) {throw new RuntimeException(e);}
 
-        }
+    }
+
+    public void runServer(){
+        try{
+            //connect to server
+            Socket socket= new Socket("127.0.0.1", 59010);
+            socket.setKeepAlive(true);
+
+            try{
+                serverListener(socket);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (IOException e) {throw new RuntimeException(e);}
+    }
 
 
     private static void serverListener(Socket socket) {

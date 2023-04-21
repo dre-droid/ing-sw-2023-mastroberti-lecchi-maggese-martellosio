@@ -11,34 +11,17 @@ import java.util.concurrent.TimeUnit;
 
 public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI, Runnable{
 
-    Object turnEnabler;
-    RMIinterface RMIserver;
-    ClientNotificationRMI notifications;
-    protected ClientNotificationRMI() throws RemoteException {
+    //Object turnEnabler;
+    private RMIinterface serverRMI;
+    private ClientNotificationRMI notifications;
+
+    private String playerNickname;
+
+    public ClientNotificationRMI() throws RemoteException {
         super();
-        turnEnabler = new Object();
     }
 
-    public boolean connectToRMIserver(String url){
-        try{
-            Registry registryServer = LocateRegistry.getRegistry(url);
-            RMIserver = (RMIinterface) registryServer.lookup("MyShelfie");
-        }catch(RemoteException | NotBoundException e){
-            return false;
-        }
-        return true;
-    }
 
-    public boolean startClientNotificationServer(int port){
-        try{
-            notifications = new ClientNotificationRMI();
-            Registry clientRegistry = LocateRegistry.createRegistry(port);
-            clientRegistry.rebind("Client",notifications);
-        }catch (RemoteException e){
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public void gameJoinedCorrectlyNotification() throws RemoteException{
@@ -82,28 +65,6 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println(currentPlayerNickname+"'s turn has ended, now it's "+nextPlayerNickname+"'s turn!");
     }
 
-   /* @Override
-    public void myTurnIsOver() throws RemoteException{
-        synchronized (turnEnabler){
-            try{
-                turnEnabler.wait();
-            }catch(InterruptedException e){
-                e.printStackTrace();
-            }
-        }
-
-    }*/
-
-
-
-   /* @Override
-    public void  myTurnIsStarting() throws RemoteException{
-        synchronized (turnEnabler){
-            turnEnabler.notifyAll();
-            System.out.println("enabled to play");
-        }
-
-    }*/
 
 
     @Override
@@ -134,6 +95,82 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println("Server checking if client is alive");
     }
 
+    private boolean connectToRMIserver(String url){
+        try{
+            Registry registryServer = LocateRegistry.getRegistry(url);
+            serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
+        }catch(RemoteException | NotBoundException e){
+            return false;
+        }
+        return true;
+    }
+
+    private boolean startClientNotificationServer(int port){
+        try{
+            notifications = new ClientNotificationRMI();
+            Registry clientRegistry = LocateRegistry.createRegistry(port);
+            clientRegistry.rebind("Client",notifications);
+        }catch (RemoteException e){
+            return false;
+        }
+        return true;
+    }
+
+    private void joinGame(Scanner userInput,int port) throws RemoteException {
+        int returnCode;
+        do{
+            playerNickname = userInput.nextLine();
+            returnCode = serverRMI.joinGame(playerNickname,port);
+            switch(returnCode){
+                case -1: {
+                    System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
+                    int numPlayers;
+                    do{
+                        numPlayers=-1;
+                        try{
+                            numPlayers = Integer.parseInt(userInput.nextLine());
+                        }catch (Exception e){
+                            numPlayers=-1;
+                        }
+                        if(numPlayers<2 || numPlayers>4)
+                            System.out.println("Insert a valid value for the number of players (2, 3, 4)");
+                    }while(numPlayers<2 || numPlayers>4);
+
+
+                    if(serverRMI.createNewGame(playerNickname,numPlayers,port)){
+                        returnCode=0;
+                    }
+                    else{
+                        System.out.println("Somebody already created the game, try to join again, insert your nickname");
+                    }
+                }break;
+                case -2:{
+                    System.out.println("Try again later");
+                }break;
+                case -3:{
+                    System.out.println("Try a different nickname");
+                }break;
+            }
+        }while(returnCode!=0);
+
+    }
+
+    private int checkedInputForIntValues(Scanner scanner, int min, int max, String ErrorMessage){
+        int value=-1;
+        do{
+            try{
+                value = Integer.parseInt(scanner.nextLine());
+            }catch (Exception e){
+                System.out.println(ErrorMessage);
+            }
+            if(value<min || value>max){
+                System.out.println(ErrorMessage);
+                value=-1;
+            }
+        }while(value==-1);
+        return value;
+    }
+
     @Override
     public void run() {
         try{
@@ -146,14 +183,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
             boolean correctlyRearranged = false;
             List<Tile> rearrangedTiles=null;
 
-            boolean drawIsOver=false;
-            boolean insertIsOver=false;
 
-            final boolean[] drawInTime = {true};
-
-            Registry registryServer = LocateRegistry.getRegistry();
-            RMIinterface serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
-
+            if(connectToRMIserver(null))
+                System.out.println("Connected to the server");
 
             Scanner userInput = new Scanner(System.in);
             int myport=-1;
@@ -166,77 +198,27 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                 }catch(Exception e){
                     myport=-1;
                 }
-                try{
-                    registryNotifications = LocateRegistry.createRegistry(myport);
-                    registryNotifications.rebind("Client",notifications);
-                }catch (Exception e){
-                    myport=-1;
-                }
                 if(myport==-1)
                     System.out.println("Insert a valid value for the port number!");
-            }while (myport==-1);
+            }while (!startClientNotificationServer(myport));
 
 
 
             System.out.println("Enter (1) if you want to join a game, (2) if you are trying to reconnect to a game");
-            int typeOfConnection=-1;
-            do{
-                try{
-                    typeOfConnection = Integer.parseInt(userInput.nextLine());
-                }catch (Exception e){
-                    //typeOfConnection = -1;
-                    System.out.println("Insert (1) or (2)!");
-                }
-                if(typeOfConnection<1 || typeOfConnection>2){
-                    System.out.println("Insert (1) or (2)!");
-                    typeOfConnection=-1;
-                }
-            }while(typeOfConnection==-1);
+            int typeOfConnection = checkedInputForIntValues(userInput, 1, 2,"Insert (1) or (2)!");
 
             System.out.println("Now insert the nickname for the game: ");
             int returnCode;
             String nickname;
 
             if(typeOfConnection==1){
-                do{
-                    nickname = userInput.nextLine();
-                    returnCode = serverRMI.joinGame(nickname,myport);
-                    switch(returnCode){
-                        case -1: {
-                            System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
-                            int numPlayers;
-                            do{
-                                numPlayers=-1;
-                                try{
-                                    numPlayers = Integer.parseInt(userInput.nextLine());
-                                }catch (Exception e){
-                                    numPlayers=-1;
-                                }
-                                if(numPlayers<2 || numPlayers>4)
-                                    System.out.println("Insert a valid value for the number of players (2, 3, 4)");
-                            }while(numPlayers<2 || numPlayers>4);
-
-
-                            if(serverRMI.createNewGame(nickname,numPlayers,myport)){
-                                returnCode=0;
-                            }
-                            else{
-                                System.out.println("Somebody already created the game, try to join again, insert your nickname");
-                            }
-                        }break;
-                        case -2:{
-                            System.out.println("Try again later");
-                        }break;
-                        case -3:{
-                            System.out.println("Try a different nickname");
-                        }break;
-                        default:;
-                    }
-                }while(returnCode!=0);
+                //join the game
+                joinGame(userInput, myport);
                 if(!serverRMI.hasGameStarted())
                     System.out.println("waiting for players...");
             }
             else{
+                //reconnect to the game
                 nickname = userInput.nextLine();
                 boolean reconnected = false;
                 do{
@@ -248,19 +230,20 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                 System.out.println("You reconnected to the game, wait for your turn now");
             }
 
-
-
-            /*synchronized (turnEnabler){
+            //wait for the game to start
+            while(!serverRMI.hasGameStarted()){
                 try{
-                    turnEnabler.wait();
-                }catch (InterruptedException e){ e.printStackTrace();}
-            }*/
-
-            while(!serverRMI.hasGameStarted()){}
+                    Thread.sleep(500);
+                }catch(InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
             //the game starts!
 
+            //we continue to play until the game is over
             while(!serverRMI.isGameOver()){
-                while(serverRMI.isMyTurn(nickname)){
+                //we do stuff only when it's our turn
+                while(serverRMI.isMyTurn(playerNickname)){
                     userInput = new Scanner(System.in);
                     waitForNotifications();
                     rearrangedTiles = new ArrayList<>();
@@ -268,199 +251,90 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                     System.out.println("Here is the board: ");
                     printBoard(serverRMI.getBoard());
 
-                    Timer timerForTheDrawing = new Timer();
-                    drawInTime[0]=true;
-                    timerForTheDrawing.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            drawInTime[0] =false;
-                        }
-                    },60000);
+                    //Draw tiles from board
                     do{
                         //read value for the row
                         System.out.println("Select the row from which to draw from:");
-                        x = -1;
-                        if(drawInTime[0]){
-                            do{
-                                x=-1;
-                                try {
-                                    x = Integer.parseInt(userInput.nextLine());
-                                } catch (Exception e) {
-                                    //System.out.println("Insert a valid value for the row (0, 1, 2, ..., 8)");
-                                }
-                                if((x<0 || x>8) && drawInTime[0])
-                                    System.out.println("Insert a valid value for the row (0, 1, 2, ..., 8)");
-                            } while((x<0 || x>8) && drawInTime[0]);
-                        }
-
+                        x = checkedInputForIntValues(userInput, 0, 8, "Insert a valid value for the row (0, 1, 2, ..., 8)");
 
                         //read value for the column
                         System.out.println("Select the column from which to draw from:");
-                        y = -1;
-                        if(drawInTime[0]){
-                            do{
-                                y=-1;
-                                try {
-                                    y = Integer.parseInt(userInput.nextLine());
-                                } catch (Exception e) {
-                                    //System.out.println("Insert a valid value for the column (0, 1, 2, ..., 8)");
-                                }
-                                if((y<0 || y>8) && drawInTime[0])
-                                    System.out.println("Insert a valid value for the column (0, 1, 2, ..., 8)");
-                            } while((y<0 || y>8) && drawInTime[0]);
-                        }
+                        y = checkedInputForIntValues(userInput, 0, 8, "Insert a valid value for the column (0, 1, 2, ..., 8)");
 
                         //read the value for the amount
                         System.out.println("How many tiles do you want to draw?");
-                        amount = -1;
-                        if(drawInTime[0]){
-                            do{
-                                amount=-1;
-                                try {
-                                    amount = Integer.parseInt(userInput.nextLine());
-                                } catch (Exception e) {
-                                    //System.out.println("Insert a valid value for the amount (1, 2, .., 6)");
-                                }
-                                if((amount<0 || amount>6) && drawInTime[0])
-                                    System.out.println("Insert a valid value for the amount (1, 2, .., 6)");
-                            } while((amount<0 || amount>6) && drawInTime[0]);
-                        }
-
+                        amount = checkedInputForIntValues(userInput, 1, 3, "Insert a valid value for the amount (1, 2, 3)");
 
                         //read the value for the direction
-
                         System.out.println("In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                        directionInput = -1;
-                        if(drawInTime[0]){
-                            do{
-                                directionInput=-1;
-                                try {
-                                    directionInput = Integer.parseInt(userInput.nextLine());
-                                } catch (Exception e) {
-                                    //System.out.println("Insert a valid value for the direction (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                                }
-                                if((directionInput<0 || directionInput>3) && drawInTime[0])
-                                    System.out.println("Insert a valid value for the direction (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-
-                            } while((directionInput<0 || directionInput>3) && drawInTime[0]);
-                        }
-                        if(drawInTime[0]){
-                            switch(directionInput){
-                                case 0: direction = Board.Direction.UP;break;
-                                case 1: direction = Board.Direction.DOWN;break;
-                                case 2: direction = Board.Direction.RIGHT;break;
-                                case 3: direction = Board.Direction.LEFT;break;
-                            }
+                        directionInput = checkedInputForIntValues(userInput, 0, 3, "Insert a valid value for the direction (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                        switch(directionInput){
+                            case 0: direction = Board.Direction.UP;break;
+                            case 1: direction = Board.Direction.DOWN;break;
+                            case 2: direction = Board.Direction.RIGHT;break;
+                            case 3: direction = Board.Direction.LEFT;break;
                         }
 
-                        if(drawInTime[0]){
-                            drawnTiles = serverRMI.drawTilesFromBoard(nickname,x,y,amount,direction);
-                            if(drawnTiles !=null){
-                                correctlyDrawn =true;
-                            }
-                            else {
-                                System.out.println("You cannot draw those Tiles, try again!");
-                                correctlyDrawn=false;
-                            }
+                        //now we try to draw the tiles
+                        drawnTiles = serverRMI.drawTilesFromBoard(playerNickname,x,y,amount,direction);
+                        if(drawnTiles !=null){
+                            //the tiles are correctly drawn
+                            correctlyDrawn =true;
                         }
-                    }while(!correctlyDrawn && drawInTime[0]);
-                    timerForTheDrawing.cancel();
-
-
-                    //if the first action has been completed in time we continue with the rest of the turn
-                    if(correctlyDrawn){
-                        final boolean[] insertInTime = {true};
-                        Timer timerForTheInsert = new Timer();
-                        timerForTheInsert.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                insertInTime[0] =false;
-                            }
-                        },70000);
-                        waitForNotifications();
-                        System.out.println("Here are your tiles");
-                        for(int i=0;i<drawnTiles.size();i++){
-                            System.out.print((i+1)+") "+drawnTiles.get(i).getType()+"  ");
+                        else {
+                            //the tiles we have chosen cannot be drawn
+                            System.out.println("You cannot draw those Tiles, try again!");
+                            correctlyDrawn=false;
                         }
-                        System.out.println();
-                        System.out.println("Here is your Shelf: ");
-                        printShelf(serverRMI.getMyShelf(nickname));
+                    }while(!correctlyDrawn);
 
-                        do{
-                            alreadyInsertedTiles = new ArrayList<Integer>();
-                            //read the value for the column
-                            column = -1;
-                            if(insertInTime[0]){
-                                System.out.println("Choose in which column you want to insert the tiles: ");
-                                do{
-                                    column=-1;
-                                    try {
-                                        column = Integer.parseInt(userInput.nextLine());
-                                    } catch (Exception e) {
-                                        //System.out.println("Insert a valid value for the column (0, 1, 2, ..., 8)");
-                                    }
-                                    if(!insertInTime[0])
-                                        System.out.println("Type anything to conclude the turn");
-                                    if((column<1 || column>5) && insertInTime[0])
-                                        System.out.println("Insert a valid value for the column (1, 2, ..., 5)");
-                                } while((column<1 || column>5) && insertInTime[0]);
-                            }
-
-                            if(insertInTime[0]){
-                                System.out.println("Now choose in which order you want to insert the tiles");
-                                for(int i=0;i<drawnTiles.size();i++){
-                                    if(insertInTime[0]){
-                                        do{
-                                            System.out.println("Select the next to insert in the column: ");
-                                            do{
-                                                tileToBeRearranged=-1;
-                                                try{
-                                                    tileToBeRearranged = Integer.parseInt(userInput.nextLine());
-                                                }catch(Exception e){
-                                                    System.out.println("Choose a valid tile by using the number connected to those (check the previous lines)");
-
-                                                }
-                                                if(!insertInTime[0])
-                                                    System.out.println("Time has run out, type anything to end your turn");
-                                                if((tileToBeRearranged<0 || tileToBeRearranged >amount) && insertInTime[0])
-                                                    System.out.println("Insert a number between 1 and "+amount);
-                                            }while((tileToBeRearranged<0 || tileToBeRearranged >amount) && insertInTime[0]);
-
-                                            if(insertInTime[0]){
-                                                int finalTileToBeRearranged = tileToBeRearranged;
-                                                if(alreadyInsertedTiles.stream().noneMatch((num)->(num== finalTileToBeRearranged))){
-                                                    alreadyInsertedTiles.add(tileToBeRearranged);
-                                                    rearrangedTiles.add(0,drawnTiles.get(tileToBeRearranged-1));
-                                                    correctlyRearranged=true;
-                                                }else{
-                                                    System.out.println("You already inserted this tile, try again");
-                                                }
-                                            }
-
-                                        }while(!correctlyRearranged && insertInTime[0]);
-                                        correctlyRearranged=false;
-                                    }
-                                }
-                            }
-                            if(insertInTime[0]){
-                                correctlyInserted= serverRMI.insertTilesInShelf(nickname,rearrangedTiles,column-1);
-                            }
-
-                            //System.out.println(correctlyInserted);
-                        }while(!correctlyInserted && insertInTime[0]);
-                        timerForTheInsert.cancel();
-                        waitForNotifications();
-                        if(correctlyDrawn && correctlyInserted){
-                            System.out.println("Shelf at the end of the turn: ");
-                            printShelf(serverRMI.getMyShelf(nickname));
-                            //serverRMI.checkIfCommonGoalsHaveBeenFulfilled(nickname);;
-                        }
-                        waitForNotifications();
-                        System.out.println("Your turn has ended, you now have "+serverRMI.getPoints(nickname)+" pts");
+                    waitForNotifications();
+                    System.out.println("Here are your tiles");
+                    for(int i=0;i<drawnTiles.size();i++){
+                        System.out.print((i+1)+") "+drawnTiles.get(i).getType()+"  ");
                     }
+                    System.out.println();
+                    System.out.println("Here is your Shelf: ");
+                    printShelf(serverRMI.getMyShelf(playerNickname));
+
+                    do{
+                        alreadyInsertedTiles = new ArrayList<Integer>();
+
+                        //read the value for the column
+                        System.out.println("Choose in which column you want to insert the tiles: ");
+                        column = checkedInputForIntValues(userInput, 1, 5, "Insert a valid value for the column (1, 2, ..., 5)");
+
+                        //rearrange the drawn tiles
+                        System.out.println("Now choose in which order you want to insert the tiles");
+                        for(int i=0;i<drawnTiles.size();i++){
+                            do{
+                                System.out.println("Select the next tile to insert in the column: ");
+                                tileToBeRearranged=checkedInputForIntValues(userInput, 1, amount, "Insert a number between 1 and "+amount);
+
+                                int finalTileToBeRearranged = tileToBeRearranged;
+                                if(alreadyInsertedTiles.stream().noneMatch((num)->(num== finalTileToBeRearranged))){
+                                    alreadyInsertedTiles.add(tileToBeRearranged);
+                                    rearrangedTiles.add(0,drawnTiles.get(tileToBeRearranged-1));
+                                    correctlyRearranged=true;
+                                }else{
+                                    System.out.println("You already inserted this tile, try again");
+                                }
+                            }while(!correctlyRearranged);
+                            correctlyRearranged=false;
+                        }
+                        //inser the tiles in the shelf
+                        correctlyInserted= serverRMI.insertTilesInShelf(playerNickname,rearrangedTiles,column-1);
+
+                        }while(!correctlyInserted);
+                        waitForNotifications();
+
+                    System.out.println("Shelf at the end of the turn: ");
+                    printShelf(serverRMI.getMyShelf(playerNickname));
+                    waitForNotifications();
+                    System.out.println("Your turn has ended, you now have "+serverRMI.getPoints(playerNickname)+" pts");
                 }
             }
-        }catch(RemoteException | NotBoundException e){
+        }catch(RemoteException e){
             e.printStackTrace();
         }
     }
@@ -511,7 +385,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
     public static void waitForNotifications(){
         try{
-            TimeUnit.MILLISECONDS.sleep(300);
+            Thread.sleep(300);
         }catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
