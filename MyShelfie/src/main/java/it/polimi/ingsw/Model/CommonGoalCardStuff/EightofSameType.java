@@ -4,7 +4,7 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 import main.java.it.polimi.ingsw.Model.*;
 /**
  * @author Saverio Maggese
- * checks if there are at least tiles of the same type
+ * checks if there are at least 8 tiles of the same type
  */
 
 public class EightofSameType implements StrategyCommonGoal{
@@ -19,23 +19,30 @@ public class EightofSameType implements StrategyCommonGoal{
         int countPlant=0;
         for(int i=0;i<6;i++){
             for(int j=0;j<5;j++){
-                if(shelfGrid[i][j]!= null)
+                if(shelfGrid[i][j]!= null) {
                     switch (shelfGrid[i][j].getType()) {
-                        case CAT:countCat++;
-                        case BOOK:countBook++;
-                        case GAME:countGame++;
-                        case FRAME:countFrame++;
-                        case PLANT:countPlant++;
-                        case TROPHY:countTrophy++;
+                        case CAT:
+                            countCat++;
+                        case BOOK:
+                            countBook++;
+                        case GAME:
+                            countGame++;
+                        case FRAME:
+                            countFrame++;
+                        case PLANT:
+                            countPlant++;
+                        case TROPHY:
+                            countTrophy++;
 
                     }
-                if(countCat >=8 || countBook>=8 || countFrame>=8 || countTrophy>=8 || countPlant>=8 || countGame>=8){
-                    return true;
+
+
                 }
 
-
-
             }
+        }
+        if(countCat >=8 || countBook>=8 || countFrame>=8 || countTrophy>=8 || countPlant>=8 || countGame>=8){
+            return true;
         }
         return false;
 
