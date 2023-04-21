@@ -118,13 +118,15 @@ public class ServerSock {
             case -1 -> {
                 String line;
                 int counter = 0;
+
                 do {
-                    if (counter > 0) out.println("[INFO]: Numero di giocatori per la partita non valido. Riprova.");
+                    if (counter > 0) out.println("[INFO]: Input non valido. Riprova inserendo un numero da 2 a 4.");
                     out.println("[REQUEST] Inserisci il numero di giocatori: ");
                     line = reader.readLine();
                     System.out.println("Number of players selected: " + line);
                     counter++;
-                }while (Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
+                }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
+
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
                 out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
                 clients.add(new socketNickStruct(client, nickname));
@@ -245,4 +247,12 @@ public class ServerSock {
             }
     }
 
+    public static boolean isNumeric(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch(NumberFormatException e){
+            return false;
+        }
+    }
 }
