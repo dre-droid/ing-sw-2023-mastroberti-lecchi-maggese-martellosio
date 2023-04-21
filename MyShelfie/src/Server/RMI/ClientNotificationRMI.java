@@ -161,7 +161,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
             try{
                 value = Integer.parseInt(scanner.nextLine());
             }catch (Exception e){
-                System.out.println(ErrorMessage);
+                //System.out.println(ErrorMessage);
             }
             if(value<min || value>max){
                 System.out.println(ErrorMessage);
