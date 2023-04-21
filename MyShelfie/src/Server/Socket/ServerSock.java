@@ -199,16 +199,61 @@ public class ServerSock {
             out.println("[GSONLEAD]" + jsonLeaderboard);
             //***************
 
-            out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, RIGHT:2, LEFT:3]");
+            /*out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, RIGHT:2, LEFT:3]");
             String line = reader.readLine();
             line = line.replace(",", ""); //replaces all non digits to blanks
             line = line.replace("  ", " "); //replaces all multiple blanks to single blanks
             String[] numsArray = line.split( " ");
-
             drawInfo.setX(Integer.parseInt(numsArray[0]));
             drawInfo.setY(Integer.parseInt(numsArray[1]));
             drawInfo.setAmount(Integer.parseInt(numsArray[2]));
             drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(numsArray[3])]);
+
+             */
+
+            int imbecille = 0;
+            String line;
+            out.println("[INFO] It's your turn!");
+
+            do {
+                out.println("[YOUR TURN] Select the row from which to draw from:");
+                if(imbecille > 0)
+                    out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                line = reader.readLine();
+                imbecille++;
+            }while(!isNumeric(line));
+            drawInfo.setX(Integer.parseInt(line));
+            imbecille = 0;
+
+            do {
+                out.println("[REQUEST] Select the column from which to draw from:");
+                if(imbecille > 0)
+                    out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
+                line = reader.readLine();
+                imbecille++;
+            }while(!isNumeric(line));
+            drawInfo.setY(Integer.parseInt(line));
+            imbecille = 0;
+
+            do {
+                out.println("[REQUEST] Select the How many tiles do you want to draw?");
+                if(imbecille > 0)
+                    out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
+                line = reader.readLine();
+                imbecille++;
+            }while(!isNumeric(line));
+            drawInfo.setAmount(Integer.parseInt(line));
+            imbecille = 0;
+
+            do {
+                out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                if(imbecille > 0)
+                    out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                line = reader.readLine();
+                imbecille++;
+            }while(!isNumeric(line));
+            drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
+
 
             out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
             line = reader.readLine();
