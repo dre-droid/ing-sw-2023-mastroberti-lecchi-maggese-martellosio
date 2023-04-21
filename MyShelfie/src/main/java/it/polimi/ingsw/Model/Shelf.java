@@ -178,6 +178,14 @@ public class Shelf {
 
     }
 
+    /**
+     *These checkX functions check if the tileType of the Tile that we are looking at is equals to the one at its left/right
+     * or the one above/below
+     * @param j line
+     * @param k column
+     * @param tileType type of the current Tile
+     * @return true if the tileType of the current tile is equal to the checked one
+     */
     public boolean checkUp(int j, int k, Type tileType){
         if(j-1<0) return false;
         if(grid[j-1][k] != null)

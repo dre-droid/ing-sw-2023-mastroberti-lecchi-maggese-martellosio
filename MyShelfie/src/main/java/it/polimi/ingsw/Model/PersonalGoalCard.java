@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
 /**
- *  class PersonalGoalCard
- * @author Saverio Maggese
+ *  class PersonalGoalCard is extended by PersonalGoalCardN (N from 1 to 12)
+ * @author Saverio Maggese, Diego Lecchi
  */
 
 public abstract class PersonalGoalCard{
     /**
-     * @param valildTiles è una shelf che contiene unicamente le Tile da matchare
+     * @param valildTiles is a shelf that contains only the tiles that the player has to match in order to obtain points
      *
      */
     protected Shelf validTiles;
@@ -50,6 +50,11 @@ public abstract class PersonalGoalCard{
         return this.validTiles;
     }
 
+    /**
+     * this function is implemented by the classes PersonalGoalCardN (N from 1 to 12) to initialize the shelf validTiles with the
+     * correct tiles to be matched by the player
+     * @author Diego Lecchi
+     */
     public abstract void initializeValidTiles();
 
     @Override

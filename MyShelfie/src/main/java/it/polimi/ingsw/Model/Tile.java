@@ -2,6 +2,10 @@ package main.java.it.polimi.ingsw.Model;
 
 import java.io.Serializable;
 
+/**
+ * class Tile represents a single tile
+ */
+
 public class Tile implements Serializable {
     private Type type;
 
