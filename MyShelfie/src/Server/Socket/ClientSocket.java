@@ -37,6 +37,7 @@ public class ClientSocket {
 
             try{
                 serverListener(socket);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -70,10 +71,12 @@ public class ClientSocket {
                 String line;
                 String message;
                 boolean active = true;
+                clientSpeaker(socket);
 
                 while(active){
                     Gson gson = new Gson();
                     line = reader.readLine();
+
 
                     // ************* DESERIALIZATION ****************
                     if (line.startsWith("[GSONBOARD]")){
@@ -104,22 +107,22 @@ public class ClientSocket {
 
                     if(line.startsWith("[REQUEST]")){
                         System.out.println(line);
-                        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        message = bufferRead.readLine();
-                        output.println(message);
+                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                        //message = bufferRead.readLine();
+                       // output.println(message);
                     }
                     if(line.startsWith("[YOUR TURN]")){
                         printTurn();
                         System.out.println(line);
-                        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        message = bufferRead.readLine();
-                        output.println(message);
+                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                        //message = bufferRead.readLine();
+                        //output.println(message);
                     }
                     if(line.startsWith("[INVALID MOVE]")){
                         System.out.println("Non puoi selezionare queste tessere. Riprova.\n");
-                        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        message = bufferRead.readLine();
-                        output.println(message);
+                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                        //message = bufferRead.readLine();
+                        //output.println(message);
                     }
                     if (line.startsWith("[INFO]")){
                         System.out.println(line);
@@ -169,6 +172,26 @@ public class ClientSocket {
         }
 
         System.out.println("******************************\n");
+    }
+
+    private static void clientSpeaker(Socket socket){
+        Runnable clientSpeaker = () ->{
+            try{
+                String message;
+
+                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                boolean active = true;
+                while(active){
+                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+                    message = bufferRead.readLine();
+                    output.println(message);
+                }
+
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        };
+        new Thread(clientSpeaker).start();
     }
 
 }

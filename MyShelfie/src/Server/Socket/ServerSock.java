@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.concurrent.*;
 
 public class ServerSock {
 
@@ -237,9 +238,9 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
                 else
                     out.println("[YOUR TURN] Select the row from which to draw from:");
-                line = reader.readLine();
+                line = clientListener(playerSocket);
                 imbecille++;
-            }while(!isNumeric(line));
+            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setX(Integer.parseInt(line));
             imbecille = 0;
 
@@ -248,9 +249,9 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                 else
                     out.println("[REQUEST] Select the column from which to draw from:");
-                line = reader.readLine();
+                line = clientListener(playerSocket);
                 imbecille++;
-            }while(!isNumeric(line));
+            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setY(Integer.parseInt(line));
             imbecille = 0;
 
@@ -259,7 +260,7 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
                 else
                     out.println("[REQUEST] How many tiles do you want to draw?");
-                line = reader.readLine();
+                line = clientListener(playerSocket);
                 imbecille++;
             }while(!isNumeric(line));
             drawInfo.setAmount(Integer.parseInt(line));
@@ -270,9 +271,9 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                 else
                     out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                line = reader.readLine();
+                line = clientListener(playerSocket);
                 imbecille++;
-            }while(!isNumeric(line));
+            }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
             drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
             imbecille = 0;
 
@@ -297,9 +298,9 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                line = reader.readLine();
+                line = clientListener(playerSocket);
                 imbecille++;
-            }while(!isNumeric(line));
+            }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
             drawInfo.setColumn(Integer.parseInt(line));
             imbecille = 0;
 
@@ -310,7 +311,7 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Now choose in which order you want to insert the tiles: [CGT -> TCG: 312]");
                     imbecille = 0;
-                    line = reader.readLine();
+                    line = clientListener(playerSocket);
 
                     if (!isNumeric(line))
                         imbecille = 1;
@@ -357,4 +358,69 @@ public class ServerSock {
             return false;
         }
     }
+
+
+    /**
+     * clientListener listens to messages incoming from client
+     * @param client
+     * @return line to drawInquiry if it doesn't start with /c, otherwise it will call chatHandler
+     */
+    /*public String clientListener(Socket client){
+        ExecutorService pool = Executors.newFixedThreadPool(1);
+
+        Callable<String> clientListener = () -> {
+            try{
+                InputStream input = client.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                String line;
+                boolean active = true;
+                while(active){
+                    line = reader.readLine();
+                    if(line.startsWith("/c")){
+                        System.out.println("è stata chiamata la chat");//call chat handler
+                    }
+                    else
+                        return line;
+                }
+            }catch (IOException e){
+                System.out.println("Wut the hell? Ooh ma god, no waayayaayyy");
+            }
+            return null;
+        };
+
+        Future<String> future = pool.submit(clientListener);
+        try{
+            return future.get();
+        }catch(InterruptedException | ExecutionException e){
+            System.out.println("boh callable");
+
+        }
+        return null;
+    }
+
+     */
+    public String clientListener(Socket client){
+        String line = "";
+        try{
+            InputStream input = client.getInputStream();
+
+            boolean active = true;
+            while(active){
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                line = reader.readLine();
+
+
+                if(!line.startsWith("/c"))
+                    active = false;
+                else
+                    System.out.println("chiamando chat"); //chiamata a chat
+            }
+
+        }catch(IOException e){
+            System.out.println("Wut the hell? Ooh ma god, no waayAyaayYy");
+        }
+        return line;
+    }
+
+
 }
