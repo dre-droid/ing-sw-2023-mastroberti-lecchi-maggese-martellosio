@@ -2,8 +2,10 @@ package Server.RMI;
 
 import Server.Controller;
 import Server.Server;
+import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -212,10 +214,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 /*for(ClientNotificationRecord c: clients)
                     c.client.gameIsOver(controller.getLeaderboard());*/
             }
-            /*else{
-                timerDraw = new Timer();
-                startTimer(timerDraw,drawDelay);
-            }*/
+            //saveGameProgress();
+
         }
     }
 
@@ -276,6 +276,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
     }
 
+    @Override
+    public Tile[][] getMyPersonalGoal(String playerNickname) throws RemoteException {
+        return controller.getMyPersonalCard(playerNickname);
+    }
+
+    @Override
+    public String getCommonGoalCardDescription() throws RemoteException {
+        return controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description();
+    }
+
 
     public static void main(String[] args){
         try{
@@ -286,6 +296,15 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             e.printStackTrace();
 
         }
-
     }
+
+    private void saveGameProgress() {
+        try {
+            controller.saveGameProgress();
+        } catch (IOException e) {
+            System.out.println("-----Problem in saving the game progress-----");
+        }
+    }
+
+
 }

@@ -1,6 +1,14 @@
 package main.java.it.polimi.ingsw.Model;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
+
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Random;
 import java.util.*;
@@ -83,12 +91,12 @@ public class Game {
 
     }
 
-    public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,Player player) throws InvalidMoveException{
+    public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
-            if(player.getNickname().equals(isPlaying.getNickname())) {
-                throw new InvalidMoveException(player.getNickname() + " it's not your turn!!!!");
+            if(playerNickname.equals(isPlaying.getNickname())) {
+                throw new InvalidMoveException(playerNickname + " it's not your turn!!!!");
             }
-            List<Tile> tiles = player.drawTiles(x, y, amount, direction);
+            List<Tile> tiles = board.drawTiles(x, y, amount, direction);
             return tiles;
         }
         return null;
@@ -212,7 +220,7 @@ public class Game {
         System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
 
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
-        List<Tile> tiles = isPlaying.drawTiles(x, y, amount, direction);
+        List<Tile> tiles = board.drawTiles(x, y, amount, direction);
         List<Tile> rearrangedTiles = tiles;
         switch (order){
             case 123:{}
@@ -413,7 +421,7 @@ public class Game {
      */
     private void setBoard(){
         board = new Board(playersList.size());
-        for (Player p: playersList) p.setBoard(board); //sets players reference to board
+        //for (Player p: playersList) p.setBoard(board); //sets players reference to board
     }
     private void setLastTurnFlag(){
         this.lastTurn = true;
@@ -468,21 +476,9 @@ public class Game {
             }
             numberAlreadyDrawn[i]=randomNum;
             i++;
-            switch (randomNum) {
-                case 1 -> p.setPersonalGoalCard(new PersonalGoalCard1());
-                case 2 -> p.setPersonalGoalCard(new PersonalGoalCard2());
-                case 3 -> p.setPersonalGoalCard(new PersonalGoalCard3());
-                case 4 -> p.setPersonalGoalCard(new PersonalGoalCard4());
-                case 5 -> p.setPersonalGoalCard(new PersonalGoalCard5());
-                case 6 -> p.setPersonalGoalCard(new PersonalGoalCard6());
-                case 7 -> p.setPersonalGoalCard(new PersonalGoalCard7());
-                case 8 -> p.setPersonalGoalCard(new PersonalGoalCard8());
-                case 9 -> p.setPersonalGoalCard(new PersonalGoalCard9());
-                case 10 -> p.setPersonalGoalCard(new PersonalGoalCard10());
-                case 11 -> p.setPersonalGoalCard(new PersonalGoalCard11());
-                case 12 -> p.setPersonalGoalCard(new PersonalGoalCard12());
-            }
-            p.getPersonalGoalCard().initializeValidTiles();
+            PersonalGoalCard pg = new PersonalGoalCard();
+            pg.initializeValidTiles(randomNum);
+            p.setPersonalGoalCard(pg);
         }
     }
 
@@ -493,6 +489,67 @@ public class Game {
         }
         return false;
     }
+
+    public void saveGameProgress(String filePath) {
+        FileWriter jsonFile;
+        Gson gson = new Gson();
+        gson.serializeNulls();
+        try{
+            jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",true);
+            System.out.println("player playing: "+isPlaying.getNickname());
+            //we save the players
+            gson.toJson(isPlaying, isPlaying.getClass(), jsonFile);
+            //we save the board
+            gson.toJson(board, Board.class, jsonFile);
+            //we save the players
+            gson.toJson(playersList, playersList.getClass(), jsonFile);
+            //we save the commongoals
+            gson.toJson(commonGoalCards, commonGoalCards.getClass(),jsonFile);
+
+            jsonFile.close();
+        }catch(IOException e){
+            System.out.println("Error in saving the game progress in json file");
+        }
+
+
+
+    }
+
+    public boolean loadGameProgress(String filePath){
+        Gson gson = new Gson();
+        try{
+            JsonReader reader = new JsonReader(new FileReader("MyShelfie/src/Server/GameProgress.json"));
+            //reader.setLenient(true);
+            Player p = gson.fromJson(reader, Player.class);
+            System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
+            Board b = gson.fromJson(reader, Board.class);
+            b.printGridMap();
+            List<Player> players = new ArrayList<Player>();
+            Type listType = new TypeToken<List<Player>>() {}.getType();
+            players = gson.fromJson(reader, listType);
+            players.stream().forEach(player->System.out.println(player.getNickname()));
+
+            List<CommonGoalCard> commonGoalCardList = new ArrayList<CommonGoalCard>();
+            Type commongoalType = new TypeToken<List<CommonGoalCard>>(){}.getType();
+            commonGoalCardList = gson.fromJson(reader, commongoalType);
+            commonGoalCardList.stream().forEach(commonGoalCard -> System.out.println(commonGoalCard.getDescription()));
+
+
+        }catch(IOException e){
+            System.out.println("Error in loading the game progress from file");
+        }
+        return false;
+    }
+
+    public static void main(String args[]) throws Exception {
+        Game game = new Game(2);
+        game.addPlayer("p1");
+        game.addPlayer("p2");
+        game.saveGameProgress("");
+        game.loadGameProgress("");
+
+    }
+
 
 }
 

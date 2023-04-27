@@ -7,4 +7,6 @@ public interface StrategyCommonGoal {
 
     @Override
     public String toString();
+
+    public int getClassID();
 }

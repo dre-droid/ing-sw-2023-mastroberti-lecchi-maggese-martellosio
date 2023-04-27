@@ -32,4 +32,8 @@ public class XShapedTiles implements StrategyCommonGoal {
     public String toString() {
         return "Five tiles of the same type forming an X.";
     }
+
+    public int getClassID(){
+        return 12;
+    }
 }

@@ -2,10 +2,17 @@ package Server;
 
 import Server.Socket.ServerSock;
 import Server.Socket.drawInfo;
+import com.google.gson.*;
+import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
 
 import javax.naming.ldap.Control;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.lang.reflect.Type;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -44,6 +51,10 @@ public class Controller {
      */
     public boolean createNewGame(String nickname, int numOfPlayers){
         if(game==null){
+            /*if(loadGameProgress()){
+                System.out.println("Loaded game from file!");
+                return false;
+            }*/
             game = new Game(numOfPlayers);
             game.addPlayer(nickname);
             System.out.println("Created new game by "+nickname);
@@ -197,7 +208,7 @@ public class Controller {
         List<Tile> toBeReturned = new ArrayList<>();
         if(game.isPlaying.getNickname().equals(playerNickname)){
             try{
-                toBeReturned = game.isPlaying.drawTiles(x,y,amount,direction);
+                toBeReturned = game.drawsFromBoard(x,y,amount,direction, playerNickname);
             }catch(Exception e){
                 return null;
             }
@@ -316,6 +327,33 @@ public class Controller {
             }
         }while(flag);
 
+    }
+
+    /**
+     * this method is used to get the personal goal card for the specified player
+     * @param playerNickname name of the specified player
+     * @return null if there isn't any player with the name "playerNickname", if there is a player with that name returns its personal goal card
+     */
+    public Tile[][] getMyPersonalCard(String playerNickname){
+        if(game.getPlayerList().stream().noneMatch(player -> player.getNickname().equals(playerNickname)))
+            return null;
+        return game.getPlayerList().stream().filter(player->(player.getNickname().equals(playerNickname))).toList().get(0).getPersonalGoalCard().getValidTiles().getGridForDisplay();
+    }
+
+    public void saveGameProgress() throws IOException {
+        Gson gson = new Gson();
+        gson.toJson(game, new FileWriter("MyShelfie/src/Server/GameProgress.json"));
+    }
+
+    public boolean loadGameProgress(){
+        Gson gson =  new Gson();
+        try{
+            JsonReader reader = new JsonReader(new FileReader("MyShelfie/src/Server/GameProgress.json"));
+            game = gson.fromJson(reader, Game.class);
+            return true;
+        }catch(IOException ex){
+            return false;
+        }
     }
 
 }

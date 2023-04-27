@@ -52,4 +52,8 @@ public class EightofSameType implements StrategyCommonGoal{
     public String toString(){
         return "Eight tiles of the same type. There’s no restriction about the position of these tiles.";
     }
+
+    public int getClassID(){
+        return 2;
+    }
 }

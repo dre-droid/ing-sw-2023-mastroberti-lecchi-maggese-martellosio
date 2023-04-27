@@ -189,18 +189,30 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
             Scanner userInput = new Scanner(System.in);
             int myport=-1;
+            boolean connected;
+
             ClientNotificationRMI notifications = new ClientNotificationRMI();
             Registry registryNotifications;
             System.out.println("Insert the port number (to receive notifications): ");
             do{
+                do{
+                    try{
+                        myport = Integer.parseInt(userInput.nextLine());
+                    }catch(Exception e){
+                        myport=-1;
+                    }
+                    if(myport==-1)
+                        System.out.println("Insert a valid value for the port number!");
+                }while (myport==-1);
                 try{
-                    myport = Integer.parseInt(userInput.nextLine());
+                    connected = startClientNotificationServer(myport);
                 }catch(Exception e){
-                    myport=-1;
+                    connected = false;
                 }
-                if(myport==-1)
-                    System.out.println("Insert a valid value for the port number!");
-            }while (!startClientNotificationServer(myport));
+                if(!connected)
+                    System.out.println("Try a different port");
+            }while(!connected);
+
 
 
 
@@ -248,6 +260,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
                     waitForNotifications();
                     rearrangedTiles = new ArrayList<>();
                     drawnTiles = new ArrayList<>();
+
+                    printStartOfTurn();
+
                     System.out.println("Here is the board: ");
                     printBoard(serverRMI.getBoard());
 
@@ -339,7 +354,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         }
     }
 
-    public static void printShelf(Tile[][] grid){
+    private void printShelf(Tile[][] grid){
         for(int i = 5;i>=0;i--) {
             for (int j = 0; j < 5; j++) {
                 if (grid[i][j]==null) System.out.print("O ");
@@ -359,7 +374,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println("");
     }
 
-    public static void printBoard(TilePlacingSpot[][] grid){
+    private void printBoard(TilePlacingSpot[][] grid){
         for(int i = 0;i<9;i++) {
             for (int j = 0; j < 9; j++) {
                 if (!grid[i][j].isAvailable()) System.out.print("X ");
@@ -383,11 +398,88 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         }
     }
 
-    public static void waitForNotifications(){
+    private void waitForNotifications(){
         try{
             Thread.sleep(300);
         }catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
+
+    private void printStartOfTurn() throws RemoteException {
+        System.out.println("*********  " + playerNickname + ": your turn  *********");
+
+        Tile[][] shelf = serverRMI.getMyShelf(playerNickname);
+        Tile[][] pgCard = serverRMI.getMyPersonalGoal(playerNickname);
+
+        System.out.println("Your shelf:      Your Personal goal:");
+        for(int row=0;row<6;row++){
+            for(int column =0;column<5;column++) {
+                if (shelf[row][column]==null) System.out.print("O ");
+                else{
+                    switch(shelf[row][column].getType()){
+                        case CAT: System.out.print("C ");break;
+                        case BOOK:System.out.print("B ");break;
+                        case GAME:System.out.print("G ");break;
+                        case FRAME:System.out.print("F ");break;
+                        case PLANT:System.out.print("P ");break;
+                        case TROPHY:System.out.print("T ");break;
+                    }
+                }
+            }
+            System.out.print("          ");
+            for(int column =0;column<5;column++) {
+                if (pgCard[row][column]==null) System.out.print("O ");
+                else{
+                    switch(pgCard[row][column].getType()){
+                        case CAT: System.out.print("C ");break;
+                        case BOOK:System.out.print("B ");break;
+                        case GAME:System.out.print("G ");break;
+                        case FRAME:System.out.print("F ");break;
+                        case PLANT:System.out.print("P ");break;
+                        case TROPHY:System.out.print("T ");break;
+                    }
+                }
+            }
+            System.out.println("");
+        }
+        System.out.println("");
+        System.out.println("Here are the common goals: ");
+        System.out.println(serverRMI.getCommonGoalCardDescription());
+
+        /*
+        //shelf & personalGoal print
+        Scanner scannerpg = new Scanner(serverRMI.getMyPersonalGoal(playerNickname));
+        Scanner scannercg = new Scanner(commonGoalCard);
+
+        System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
+        for (int i = 5; i >= 0; i--) {
+            System.out.print("   ");
+            for (int j = 0; j < 5; j++){
+                if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
+                else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
+            }
+            System.out.print("   ");
+            System.out.print(scannerpg.nextLine());
+            System.out.print("   ");
+            if (scannercg.hasNextLine()) System.out.print(scannercg.nextLine());
+            System.out.println();
+        }
+        System.out.println();
+
+        //board print
+        board.printGridMap();
+        System.out.println();
+
+        //leaderboard print
+        System.out.println("Leaderboard");
+        int i = 0;
+        for (String s: leaderboard) {
+            System.out.println(i + 1 + ". " + s);
+            i++;
+        }
+
+        System.out.println("******************************\n");*/
+    }
+
 }

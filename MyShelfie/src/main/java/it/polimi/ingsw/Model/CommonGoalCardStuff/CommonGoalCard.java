@@ -11,10 +11,10 @@ import java.util.List;
  * This class represent the common goals that the player must fulfill in order to gain points
  */
 public class CommonGoalCard {
-    StrategyCommonGoal strategy;
-    List<ScoringToken> tokens;
-    List<String> playersWhoCompleted;
-    List<String> playersAlredyRewarded;
+    private StrategyCommonGoal strategy;
+    private List<ScoringToken> tokens;
+    private List<String> playersWhoCompleted;
+    private List<String> playersAlredyRewarded;
 
     public CommonGoalCard(StrategyCommonGoal strategy, int numOfPlayers) {
         this.strategy = strategy;
@@ -121,4 +121,7 @@ public class CommonGoalCard {
         return this.strategy.toString();
     }
 
+    public int getStrategyID(){
+        return strategy.getClassID();
+    }
 }

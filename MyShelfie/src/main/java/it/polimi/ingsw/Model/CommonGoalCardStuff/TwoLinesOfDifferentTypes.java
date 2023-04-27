@@ -39,4 +39,8 @@ public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
     public String toString(){
         return "Two lines each formed by 5 different types of tiles. One line can show the same or a different combination of the other line.";
     }
+
+    public int getClassID(){
+        return 11;
+    }
 }

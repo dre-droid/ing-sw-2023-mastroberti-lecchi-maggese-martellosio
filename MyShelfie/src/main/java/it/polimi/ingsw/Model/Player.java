@@ -13,7 +13,7 @@ public class Player {
     private PersonalGoalCard personalGoalCard;
     private boolean endGameToken;
     private boolean firstPlayerSeat;
-    private Board board;
+    //private Board board;
 
     /**
      * @param firstPlayerSeat - bool, true if player is the first to play
@@ -21,7 +21,7 @@ public class Player {
      */
     public Player(String nickname, boolean firstPlayerSeat, Board board){
         this.nickname = nickname;
-        this.board = board;
+        //this.board = board;
         this.score = 0;
         this.shelf = new Shelf();
         this.currentTiles = new ArrayList<Tile>();
@@ -37,11 +37,11 @@ public class Player {
      * encapsulates Board's drawTiles
      * @return the list of drawn tiles
      */
-    public List<Tile> drawTiles(int x, int y, int amount, Board.Direction direction) throws InvalidMoveException{
+    /*public List<Tile> drawTiles(int x, int y, int amount, Board.Direction direction) throws InvalidMoveException{
         List<Tile> list = new ArrayList<>();
         list = board.drawTiles(x, y, amount, direction);
         return list;
-    }
+    }*/
 
     /**
      * @author Andrea Mastroberti
@@ -67,9 +67,9 @@ public class Player {
     }
 
     //setters
-    public void setBoard(Board b){
+    /*public void setBoard(Board b){
         this.board = b;
-    }
+    }*/
     public void setCurrentTiles(List<Tile> list){
         this.currentTiles = list;
     }

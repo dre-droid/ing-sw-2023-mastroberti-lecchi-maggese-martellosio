@@ -56,4 +56,8 @@ public class ThreeColumnsOfMaxThreeDifferentTypes implements StrategyCommonGoal 
     public String toString(){
         return "Three columns each formed by 6 tiles of maximum three different types. One column can show the same or a different combination of another column.";
     }
+
+    public int getClassID(){
+        return 9;
+    }
 }

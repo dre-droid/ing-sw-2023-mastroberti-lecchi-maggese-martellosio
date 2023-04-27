@@ -19,4 +19,8 @@ public class FourCornerOfTheSameType implements StrategyCommonGoal{
     public String toString(){
         return "Four tiles of the same type in the four corners of the bookshelf.";
     }
+
+    public int getClassID(){
+        return 3;
+    }
 }

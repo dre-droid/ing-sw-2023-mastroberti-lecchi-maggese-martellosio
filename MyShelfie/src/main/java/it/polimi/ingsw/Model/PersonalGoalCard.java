@@ -8,7 +8,7 @@ import java.util.*;
  * @author Saverio Maggese, Diego Lecchi
  */
 
-public abstract class PersonalGoalCard{
+public class PersonalGoalCard{
     /**
      * @param valildTiles is a shelf that contains only the tiles that the player has to match in order to obtain points
      *
@@ -17,13 +17,113 @@ public abstract class PersonalGoalCard{
 
     public PersonalGoalCard() {this.validTiles = new Shelf();}
 
+    public void initializeValidTiles(int type){
+        switch(type){
+            case 1:{
+                this.validTiles.getGrid()[0][0] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[0][2] = new Tile(Type.FRAME);
+                this.validTiles.getGrid()[1][4] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[2][3] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[3][1] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[5][2] = new Tile(Type.TROPHY);
+            }break;
+            case 2:{
+                this.validTiles.getGrid()[1][1] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[2][0] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[2][2] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[3][4] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[4][3] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[5][4] = new Tile(Type.FRAME);
+            }break;
+            case 3:{
+                this.validTiles.getGrid()[2][2] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[3][1] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[1][3] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[5][0] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[3][4] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[1][0] = new Tile(Type.FRAME);
+            }break;
+            case 4:{
+                this.validTiles.getGrid()[3][3] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[4][2] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[0][4] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[4][1] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[2][0] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[2][2] = new Tile(Type.FRAME);
+            }break;
+            case 5:{
+                this.validTiles.getGrid()[4][4] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[5][3] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[5][0] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[3][2] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[1][1] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[3][1] = new Tile(Type.FRAME);
+            }break;
+            case 6:{
+                this.validTiles.getGrid()[5][0] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[0][4] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[4][1] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[2][3] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[0][2] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[4][3] = new Tile(Type.FRAME);
+            }break;
+            case 7:{
+                this.validTiles.getGrid()[2][1] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[0][0] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[4][4] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[5][2] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[3][0] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[1][3] = new Tile(Type.FRAME);
+            }break;
+            case 8:{
+                this.validTiles.getGrid()[3][0] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[1][1] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[5][3] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[4][3] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[2][2] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[0][4] = new Tile(Type.FRAME);
+            }break;
+            case 9:{
+                this.validTiles.getGrid()[4][4] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[2][2] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[0][2] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[3][4] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[4][1] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[5][0] = new Tile(Type.FRAME);
+            }break;
+            case 10:{
+                this.validTiles.getGrid()[5][3] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[3][3] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[1][1] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[2][0] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[0][4] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[4][1] = new Tile(Type.FRAME);
+            }break;
+            case 11:{
+                this.validTiles.getGrid()[0][2] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[4][4] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[2][0] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[1][1] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[5][3] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[3][2] = new Tile(Type.FRAME);
+            }break;
+            case 12:{
+                this.validTiles.getGrid()[1][1] = new Tile(Type.PLANT);
+                this.validTiles.getGrid()[5][0] = new Tile(Type.CAT);
+                this.validTiles.getGrid()[4][4] = new Tile(Type.GAME);
+                this.validTiles.getGrid()[0][2] = new Tile(Type.BOOK);
+                this.validTiles.getGrid()[3][3] = new Tile(Type.TROPHY);
+                this.validTiles.getGrid()[2][2] = new Tile(Type.FRAME);
+            }break;
+        }
+    }
+
     /**
      * @author Saverio Maggese
      * @param shelf is the player shelf that has to be checked for matches
      * @return an integer corresponding to the points associated with the matches
      */
     public int getPoints(Shelf shelf){
-        initializeValidTiles();
         int counter = 0;
         for(int i=0;i<6;i++){
             for(int j=0;j<5;j++){
@@ -46,16 +146,11 @@ public abstract class PersonalGoalCard{
         }
     }
 
+
     public Shelf getValidTiles(){
         return this.validTiles;
     }
 
-    /**
-     * this function is implemented by the classes PersonalGoalCardN (N from 1 to 12) to initialize the shelf validTiles with the
-     * correct tiles to be matched by the player
-     * @author Diego Lecchi
-     */
-    public abstract void initializeValidTiles();
 
     @Override
     public String toString() {

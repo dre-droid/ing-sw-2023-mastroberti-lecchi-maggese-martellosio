@@ -66,4 +66,8 @@ public class Diagonal implements StrategyCommonGoal {
     public String toString(){
         return "Five tiles of the same type forming a diagonal";
     }
+
+    public int getClassID(){
+        return 1;
+    }
 }

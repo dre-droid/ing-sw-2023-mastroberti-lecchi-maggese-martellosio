@@ -42,5 +42,8 @@ public class TwoColumnsOfDifferentTypes implements StrategyCommonGoal{
         return "Two columns each formed by 6 different types of tiles.";
     }
 
+    public int getClassID(){
+        return 10;
+    }
 
 }
