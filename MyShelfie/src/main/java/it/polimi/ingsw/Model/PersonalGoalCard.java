@@ -16,7 +16,7 @@ public class PersonalGoalCard{
     protected Shelf validTiles;
 
     public PersonalGoalCard() {this.validTiles = new Shelf();}
-
+/*
     public void initializeValidTiles(int type){
         switch(type){
             case 1:{
@@ -117,6 +117,8 @@ public class PersonalGoalCard{
             }break;
         }
     }
+
+ */
 
     /**
      * @author Saverio Maggese

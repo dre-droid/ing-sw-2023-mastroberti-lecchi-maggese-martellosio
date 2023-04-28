@@ -5,7 +5,6 @@ import Server.Socket.drawInfo;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.*;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
 
 import javax.naming.ldap.Control;
 import java.io.FileReader;

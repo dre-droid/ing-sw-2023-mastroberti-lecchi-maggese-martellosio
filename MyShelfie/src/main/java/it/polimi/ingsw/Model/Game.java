@@ -3,7 +3,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.*;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -20,6 +19,7 @@ public class Game {
     private final List<Player> leaderBoard;
     private Iterator<Player> iterator;
     private final List<CommonGoalCard> commonGoalCards;
+    private final HashMap<Integer, PersonalGoalCard> validTilesMap = new HashMap<>();
     private Board board;
     private int turnCount;
     private boolean lastTurn;
@@ -82,6 +82,7 @@ public class Game {
     public void gameStartSetup() throws Exception{
        if (numOfPlayers != playersList.size()) throw new Exception("Not enough players have connected yet!");
        setBoard();
+       fillValidTileMap();
        setFirstPlayer();
        chooseCommonGoals();
        drawPersonalGoalCard();
@@ -477,9 +478,120 @@ public class Game {
             numberAlreadyDrawn[i]=randomNum;
             i++;
             PersonalGoalCard pg = new PersonalGoalCard();
-            pg.initializeValidTiles(randomNum);
-            p.setPersonalGoalCard(pg);
+            //pg.initializeValidTiles(randomNum);
+
+            p.setPersonalGoalCard(validTilesMap.get(randomNum));
         }
+    }
+    public void fillValidTileMap(){
+        PersonalGoalCard personalGoalCard1 = new PersonalGoalCard();
+        personalGoalCard1.validTiles.getGrid()[0][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard1.validTiles.getGrid()[0][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        personalGoalCard1.validTiles.getGrid()[1][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard1.validTiles.getGrid()[2][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard1.validTiles.getGrid()[3][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard1.validTiles.getGrid()[5][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        validTilesMap.put(1, personalGoalCard1);
+
+        PersonalGoalCard personalGoalCard2 = new PersonalGoalCard();
+        personalGoalCard2.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard2.validTiles.getGrid()[2][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard2.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard2.validTiles.getGrid()[3][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard2.validTiles.getGrid()[4][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard2.validTiles.getGrid()[5][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(2, personalGoalCard2);
+
+        PersonalGoalCard personalGoalCard3 = new PersonalGoalCard();
+        personalGoalCard3.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard3.validTiles.getGrid()[3][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard3.validTiles.getGrid()[1][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard3.validTiles.getGrid()[5][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard3.validTiles.getGrid()[3][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard3.validTiles.getGrid()[1][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(3, personalGoalCard3);
+
+        PersonalGoalCard personalGoalCard4 = new PersonalGoalCard();
+        personalGoalCard4.validTiles.getGrid()[3][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard4.validTiles.getGrid()[4][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard4.validTiles.getGrid()[0][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard4.validTiles.getGrid()[4][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard4.validTiles.getGrid()[2][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard4.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(4, personalGoalCard4);
+
+        PersonalGoalCard personalGoalCard5 = new PersonalGoalCard();
+        personalGoalCard5.validTiles.getGrid()[4][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard5.validTiles.getGrid()[5][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard5.validTiles.getGrid()[5][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard5.validTiles.getGrid()[3][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard5.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard5.validTiles.getGrid()[3][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(5, personalGoalCard5);
+
+        PersonalGoalCard personalGoalCard6 = new PersonalGoalCard();
+        personalGoalCard6.validTiles.getGrid()[5][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard6.validTiles.getGrid()[0][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard6.validTiles.getGrid()[4][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard6.validTiles.getGrid()[2][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard6.validTiles.getGrid()[0][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard6.validTiles.getGrid()[4][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(6, personalGoalCard6);
+
+        PersonalGoalCard personalGoalCard7 = new PersonalGoalCard();
+        personalGoalCard7.validTiles.getGrid()[2][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard7.validTiles.getGrid()[0][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard7.validTiles.getGrid()[4][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard7.validTiles.getGrid()[5][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard7.validTiles.getGrid()[3][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard7.validTiles.getGrid()[1][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(7, personalGoalCard7);
+
+        PersonalGoalCard personalGoalCard8 = new PersonalGoalCard();
+        personalGoalCard8.validTiles.getGrid()[3][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard8.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard8.validTiles.getGrid()[5][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard8.validTiles.getGrid()[4][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard8.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard8.validTiles.getGrid()[0][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(8, personalGoalCard8);
+
+        PersonalGoalCard personalGoalCard9 = new PersonalGoalCard();
+        personalGoalCard9.validTiles.getGrid()[4][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard9.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard9.validTiles.getGrid()[0][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard9.validTiles.getGrid()[3][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard9.validTiles.getGrid()[4][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard9.validTiles.getGrid()[5][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(9, personalGoalCard9);
+
+        PersonalGoalCard personalGoalCard10 = new PersonalGoalCard();
+        personalGoalCard10.validTiles.getGrid()[5][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard10.validTiles.getGrid()[3][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard10.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard10.validTiles.getGrid()[2][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard10.validTiles.getGrid()[0][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard10.validTiles.getGrid()[4][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(10, personalGoalCard10);
+
+        PersonalGoalCard personalGoalCard11 = new PersonalGoalCard();
+        personalGoalCard11.validTiles.getGrid()[0][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard11.validTiles.getGrid()[4][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard11.validTiles.getGrid()[2][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard11.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard11.validTiles.getGrid()[5][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard11.validTiles.getGrid()[3][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(11, personalGoalCard11);
+
+        PersonalGoalCard personalGoalCard12 = new PersonalGoalCard();
+        personalGoalCard12.validTiles.getGrid()[1][1] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
+        personalGoalCard12.validTiles.getGrid()[5][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.CAT);
+        personalGoalCard12.validTiles.getGrid()[4][4] = new Tile(main.java.it.polimi.ingsw.Model.Type.GAME);
+        personalGoalCard12.validTiles.getGrid()[0][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.BOOK);
+        personalGoalCard12.validTiles.getGrid()[3][3] = new Tile(main.java.it.polimi.ingsw.Model.Type.TROPHY);
+        personalGoalCard12.validTiles.getGrid()[2][2] = new Tile(main.java.it.polimi.ingsw.Model.Type.FRAME);
+        validTilesMap.put(12, personalGoalCard12);
+
     }
 
     private boolean checkArrayForDuplicate(int[] numberAlreadyDrawn, int randomNum){
