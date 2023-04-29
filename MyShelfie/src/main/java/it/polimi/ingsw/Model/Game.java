@@ -94,10 +94,12 @@ public class Game {
 
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
-            if(playerNickname.equals(isPlaying.getNickname())) {
+            if(!playerNickname.equals(isPlaying.getNickname())) {
+                System.out.println("problem in the model");
                 throw new InvalidMoveException(playerNickname + " it's not your turn!!!!");
             }
             List<Tile> tiles = board.drawTiles(x, y, amount, direction);
+            System.out.println("model is ok");
             return tiles;
         }
         return null;
