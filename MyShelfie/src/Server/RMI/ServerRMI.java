@@ -73,6 +73,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                         client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                         client.getValue().announceCommonGoals(commonGoals);
+                        if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
+                            client.getValue().startTurn();
                     }
                     /*for (ClientNotificationRecord clientNotificationRecord : clients) {
                         clientNotificationRecord.client.startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
@@ -203,16 +205,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
 
-            /*for(ClientNotificationRecord c: clients){
-                c.client.aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            }*/
+            ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            if(clientToBeNotified!=null)
+                clientToBeNotified.startTurn();
+
             if(controller.hasTheGameEnded()){
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     client.getValue().gameIsOver(controller.getLeaderboard());
                 }
-
-                /*for(ClientNotificationRecord c: clients)
-                    c.client.gameIsOver(controller.getLeaderboard());*/
             }
             //saveGameProgress();
 

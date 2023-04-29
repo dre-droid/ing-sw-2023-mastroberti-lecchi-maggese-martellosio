@@ -1,6 +1,7 @@
 package Server;
 
 import Server.RMI.ClientNotificationRMI;
+import Server.RMI.ClientRMI;
 import Server.Socket.ClientSocket;
 
 import java.rmi.RemoteException;
@@ -25,13 +26,9 @@ public class ClientWithChoice {
 
         if(connectionType==1){
             //RMI CLIENT
-            try {
-                ClientNotificationRMI clientRMI = new ClientNotificationRMI();
-                Thread thread = new Thread(clientRMI);
-                thread.start();
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
+            ClientRMI clientRMI = new ClientRMI();
+            Thread thread = new Thread(clientRMI);
+            thread.start();
         }
         else{
             //SOCKET CLIENT
