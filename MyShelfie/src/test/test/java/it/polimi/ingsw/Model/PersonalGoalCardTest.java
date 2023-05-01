@@ -2,17 +2,30 @@ package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PersonalGoalCardTest {
-    /*
+    Game g;
+    Player p1, p2;
+    @BeforeEach
+    void setUp(){
+        g = new Game(2);
+        p1 = new Player("p1", true, null);
+        p2 = new Player("p2", false, null);
+        g.fillValidTileMap();
+        g.addPlayer(p1.getNickname());
+        g.addPlayer(p2.getNickname());
+
+
+    }
     @Test
     public void getPoints_0itemsEqualToPGC1_return0(){
         Shelf shelf = new Shelf();
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard1());
-        assertEquals(0, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+        assertEquals(0, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
@@ -20,9 +33,8 @@ public class PersonalGoalCardTest {
         Shelf shelf = new Shelf();
         shelf.getGrid()[0][0]= new Tile(Type.PLANT);
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard1());
-        assertEquals(1, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+        assertEquals(1, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
@@ -31,9 +43,8 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[0][0]= new Tile(Type.PLANT);
         shelf.getGrid()[1][4]= new Tile(Type.CAT);
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard1());
-        assertEquals(2, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+        assertEquals(2, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
 
@@ -45,9 +56,8 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[0][2]= new Tile(Type.FRAME);
         shelf.getGrid()[1][4]= new Tile(Type.CAT);
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard1());
-        assertEquals(4, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+        assertEquals(4, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
@@ -58,9 +68,9 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[2][0]= new Tile(Type.CAT);
         shelf.getGrid()[3][4]= new Tile(Type.BOOK);
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard2());
-        assertEquals(6, p.getPersonalGoalCard().getPoints(shelf));
+
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(2));
+        assertEquals(6, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
@@ -72,9 +82,8 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[0][2]= new Tile(Type.BOOK);
         shelf.getGrid()[3][3]= new Tile(Type.TROPHY);
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard12());
-        assertEquals(9, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(12));
+        assertEquals(9, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
@@ -88,15 +97,16 @@ public class PersonalGoalCardTest {
         shelf.getGrid()[5][2]= new Tile(Type.TROPHY);
 
 
-        Player p = new Player("Paolo", true, new Board());
-        p.setPersonalGoalCard(new PersonalGoalCard1());
-        assertEquals(12, p.getPersonalGoalCard().getPoints(shelf));
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+        assertEquals(12, p1.getPersonalGoalCard().getPoints(shelf));
     }
 
     @Test
     public void toStringTest(){
-        PersonalGoalCard p1 = new PersonalGoalCard7();
-        p1.initializeValidTiles();
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
+
         System.out.println(p1);
-    }*/
+    }
+
+
 }
