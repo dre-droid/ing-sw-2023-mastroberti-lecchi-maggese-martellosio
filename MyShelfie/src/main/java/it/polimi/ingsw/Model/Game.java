@@ -44,9 +44,6 @@ public class Game {
         gameHasStarted=false;
     }
 
-    public int getNumOfPlayers() {
-        return numOfPlayers;
-    }
 
     /**
      * This method is used to check if this the game is in its last turn
@@ -458,6 +455,10 @@ public class Game {
     public List<Player> getPlayerList(){
         return playersList;
     }
+    public HashMap<Integer, PersonalGoalCard> getValidTilesMap() {return validTilesMap;}
+    public int getNumOfPlayers() {
+        return numOfPlayers;
+    }
 
     /**
      * Prints leaderboard to console
@@ -486,7 +487,7 @@ public class Game {
         int i=0;
         for (Player p: playersList) {
             while(checkArrayForDuplicate(numberAlreadyDrawn, randomNum)){
-                randomNum = rand.nextInt((12 - 1) + 1) + 1;
+                randomNum = rand.nextInt((validTilesMap.size() - 1) + 1) + 1;
             }
             numberAlreadyDrawn[i]=randomNum;
             i++;
@@ -496,6 +497,11 @@ public class Game {
             p.setPersonalGoalCard(validTilesMap.get(randomNum));
         }
     }
+
+    /**
+     * @author DiegoLecchi
+     * fills map validTilesMap with every personalGoalCard. Extendable with new personal goal cards in the future
+     */
     public void fillValidTileMap(){
         PersonalGoalCard personalGoalCard1 = new PersonalGoalCard();
         personalGoalCard1.validTiles.getGrid()[0][0] = new Tile(main.java.it.polimi.ingsw.Model.Type.PLANT);
@@ -607,6 +613,12 @@ public class Game {
 
     }
 
+    /**
+     * Used by drawPersonalGoalCard to check if a number has already been drawn
+     * @param numberAlreadyDrawn vector of already drawn numbers
+     * @param randomNum random generated number
+     * @return true if randomNum equals to another number in vector numberAlreadyDrawn, false otherwise
+     */
     private boolean checkArrayForDuplicate(int[] numberAlreadyDrawn, int randomNum){
         for (int i = 0; i <playersList.size(); i++) {
             if(randomNum == numberAlreadyDrawn[i])
