@@ -18,6 +18,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 
 public class Controller {
@@ -74,18 +75,18 @@ public class Controller {
      */
     public synchronized int joinGame(String nickname) {
         if (game == null) {
-            System.out.println("There is no game to join, create a new one " + nickname);
+            //System.out.println("There is no game to join, create a new one " + nickname);
             return -1;
         }
         if (game.hasGameStarted()) {
-            System.out.println("The game has alredy started, " + nickname + " can't join");
+            //System.out.println("The game has alredy started, " + nickname + " can't join");
             return -2;
         }
         if (game.addPlayer(nickname)) {
-            System.out.println(nickname + " joined the game");
+            //System.out.println(nickname + " joined the game");
             return 0;
         }else{
-            System.out.println("Nickname already used");
+            //System.out.println("Nickname already used");
             return -3;
         }
     }
@@ -295,37 +296,27 @@ public class Controller {
         return null;
     }
 
-    public Player getFirstPlayer(){
-        for (Player p: game.getPlayerList())
-            if (p.hasFirstPlayerSeat()) return p;
-        return null;
-    }
-
     /**
      * this method is called
      * @author Saverio Maggese
      *
      */
-
-    public void playTurn() throws InvalidMoveException {
+    public void playTurn() {
+        Player thisTurnsPlayer = game.isPlaying;
         drawInfo info;
-        boolean flag;
-        do {
-            flag = false;
-            info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
-            try{
-                game.playTurn(info.getX(),info.getY(),info.getAmount(),info.getDirection(),info.getColumn(), info.getOrder());
-            }catch (InvalidMoveException e) {
-                flag = true;
-                try {
-                    serverSock.printErrorToClient("Invalid choice! Choose another tile.", getNameOfPlayerWhoIsCurrentlyPlaying());
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+        info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
+        if (!Objects.isNull(info)) {
+            try {
+                game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getOrder());
+                serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
+            } catch (InvalidMoveException e) {
                 e.printStackTrace();
             }
-        }while(flag);
+        }else endGame();
+    }
 
+    public void endGame(){
+        game.endGame();
     }
 
     /**

@@ -18,7 +18,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     //Timer timerInsert;
 
     Server server;
-
     Controller controller;
 
     private final int drawDelay= 60000;
@@ -26,7 +25,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     //private List<ClientNotificationRecord> clients;
 
     private Map<String, ClientNotificationInterfaceRMI> clients;
-
 
 
     public ServerRMI() throws RemoteException {super();
@@ -196,7 +194,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
-    private void endOfTurn(String playerNickname) throws RemoteException {
+    public void endOfTurn(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
             controller.endOfTurn(playerNickname);
@@ -296,6 +294,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             e.printStackTrace();
 
         }
+    }
+
+    public void flushServer(){
+
     }
 
     private void saveGameProgress() {

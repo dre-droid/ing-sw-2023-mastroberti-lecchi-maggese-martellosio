@@ -87,7 +87,7 @@ public class Game {
        chooseCommonGoals();
        drawPersonalGoalCard();
        this.gameHasStarted = true;
-       System.out.println("//gameStartSetup// Players list " + playersList);
+       System.out.println("Game is starting... Players list: " + playersList);
        System.out.println();
 
     }
@@ -206,8 +206,6 @@ public class Game {
             }
         }
     }
-
-
 
     /**
      * @author Andrea Mastroberti
@@ -373,7 +371,6 @@ public class Game {
         Random random = new Random();
         int starter = random.nextInt(playersList.size());
         playersList.get(starter).setFirstPlayerSeat();
-        System.out.println("//setFirstPlayer// Starting player: " + playersList.get(starter));
 
         //set iterator, isPlaying
         iterator = playersList.iterator();
@@ -479,7 +476,6 @@ public class Game {
             }
             numberAlreadyDrawn[i]=randomNum;
             i++;
-            PersonalGoalCard pg = new PersonalGoalCard();
             //pg.initializeValidTiles(randomNum);
 
             p.setPersonalGoalCard(validTilesMap.get(randomNum));

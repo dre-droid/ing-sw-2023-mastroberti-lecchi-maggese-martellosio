@@ -25,27 +25,8 @@ public class ClientSocket {
     private static String commonGoalCard;
     private static List<String> leaderboard;
     private static String nickname;
-    public static void main(String[] args) throws IOException {
-        //System.out.println("Insert the port number: ");
-        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-        //String s = bufferRead.readLine();
 
-        try{
-            //connect to server
-            Socket socket= new Socket("127.0.0.1", 59010);
-            socket.setKeepAlive(true);
-
-            try{
-                serverListener(socket);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        } catch (IOException e) {throw new RuntimeException(e);}
-
-    }
-
+    //used by ClientWithChoice
     public void runServer(){
         try{
             //connect to server
@@ -61,6 +42,22 @@ public class ClientSocket {
         } catch (IOException e) {throw new RuntimeException(e);}
     }
 
+    //run directly socket client
+    public static void main(String[] args) throws IOException {
+        try{
+            //connect to server
+            Socket socket= new Socket("127.0.0.1", 59010);
+            socket.setKeepAlive(true);
+
+            try{
+                serverListener(socket);
+
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        } catch (IOException e) {throw new RuntimeException(e);}
+    }
 
     private static void serverListener(Socket socket) {
         Runnable serverListener = () -> {
@@ -69,14 +66,12 @@ public class ClientSocket {
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 String line;
-                String message;
                 boolean active = true;
                 clientSpeaker(socket);
 
                 while(active){
                     Gson gson = new Gson();
                     line = reader.readLine();
-
 
                     // ************* DESERIALIZATION ****************
                     if (line.startsWith("[GSONBOARD]")){
@@ -104,28 +99,29 @@ public class ClientSocket {
                         nickname = gsonString;
                     }
                     // ********************************************
-
-                    if(line.startsWith("[REQUEST]")){
-                        System.out.println(line);
-                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        //message = bufferRead.readLine();
-                       // output.println(message);
-                    }
-                    if(line.startsWith("[YOUR TURN]")){
+                    if (line.startsWith("[YOUR TURN]")){
                         printTurn();
                         System.out.println(line);
-                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        //message = bufferRead.readLine();
-                        //output.println(message);
                     }
                     if(line.startsWith("[INVALID MOVE]")){
                         System.out.println("Non puoi selezionare queste tessere. Riprova.\n");
-                        //BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                        //message = bufferRead.readLine();
-                        //output.println(message);
                     }
-                    if (line.startsWith("[INFO]")){
+                    if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]")){
                         System.out.println(line);
+                    }
+                    if (line.startsWith("[SHELF]")){
+                        System.out.println(line);
+                        printShelf();
+                    }
+                    if (line.startsWith("[TURNEND]")){
+                        printShelf();
+                        System.out.println();
+                        System.out.println(line);
+                        System.out.println("******************************");
+                    }
+                    if (line.startsWith("[GAMEEND]")){
+                        System.out.println(line);
+                        System.exit(0);
                     }
                     }
                 }
@@ -138,6 +134,7 @@ public class ClientSocket {
     }
 
     private static void printTurn(){
+        System.out.println();
         System.out.println("*********  " + nickname + ": your turn  *********");
 
         //shelf & personalGoal print
@@ -170,8 +167,19 @@ public class ClientSocket {
             System.out.println(i + 1 + ". " + s);
             i++;
         }
+        System.out.println();
+    }
 
-        System.out.println("******************************\n");
+    private static void printShelf(){
+        System.out.println("*** Shelf ***");
+        for (int i = 5; i >= 0; i--) {
+            for (int j = 0; j < 5; j++) {
+                if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
+                else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
+            }
+            System.out.println();
+        }
+        System.out.println("*************");
     }
 
     private static void clientSpeaker(Socket socket){

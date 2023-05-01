@@ -20,49 +20,41 @@ import java.util.concurrent.*;
 
 public class ServerSock {
 
-
-    private final ArrayList<socketNickStruct> clients = new ArrayList<>();
+    private ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
-
     private Server server;
+    private Thread runServer, acceptClient;
 
-    public ServerSock(){
-
-    }
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
         this.server = server;
     }
-    public void setController(Controller controller){
-        this.controller = controller;
-    }
-
 
     /**
      * Creates a thread to accept clients.
      */
     public void runServer(){
-        new Thread(() -> {
-            ServerSocket serverSocket;
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(59010);
+
+            System.out.println("Socket server up and running...");
+        }catch (IOException e) {e.printStackTrace();}
+
+        ServerSocket finalServerSocket = serverSocket;
+        runServer = new Thread(() -> {
+            while (true){
             try {
-                serverSocket = new ServerSocket(59010);
+                    Socket client = finalServerSocket.accept();
+                    acceptClient(client);
 
-                System.out.println("Waiting for client connection...");
-                while (true){
-                    try {
-                        Socket client = serverSocket.accept();
-                        acceptClient(client);
-
-                    }
-                    catch (IOException e) {
-                        System.out.println("Ded");  //lol
-                    }
+                }
+                catch (IOException e) {
+                    System.out.println("Ded");  //lol
                 }
             }
-            catch (Exception e){
-                e.printStackTrace();
-            }
-        }).start();
+        });
+        runServer.start();
     }
 
     /**
@@ -71,10 +63,12 @@ public class ServerSock {
      * @param client
      */
     private void acceptClient(Socket client) {
-        Runnable acceptClient = () -> {
+        acceptClient = new Thread(() -> {
             try {
                 boolean repeat = true;
                 while (repeat){
+                    PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+                    out.println("[INFO]: Welcome to MyShelfie! Press 'q' to quit.");
                     int resultValue = playerJoin(client);
 
                     if (resultValue == -3) repeat = true;   //invalid nickname
@@ -87,10 +81,8 @@ public class ServerSock {
                 catch (IOException ex) {ex.printStackTrace();}
                 finally {System.out.println("Client failed to join");}
             }
-        };
-
-        Thread thread = new Thread(acceptClient);
-        thread.start();
+        });
+        acceptClient.start();
     }
 
     /**
@@ -129,6 +121,7 @@ public class ServerSock {
                 out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
                 clients.add(new socketNickStruct(client, nickname));
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);
+                out.println("[INFO]: In attesa di altri giocatori.");
 
                 return -1;
             }
@@ -162,17 +155,16 @@ public class ServerSock {
         Socket playerSocket = null;
         drawInfo drawInfo = new drawInfo();
 
+        //find client's socket
         for (socketNickStruct c: clients)
             if (c.getName().equals(nickname)){
                 playerSocket = c.getSocket();
             }
 
         try {
-            InputStream input = playerSocket.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
 
-            //*************** SERIALIZATION
+            //*************** SERIALIZATION ***************
             Gson gson = new Gson();
 
             out.println("[NICKNAME]" + nickname);
@@ -195,87 +187,62 @@ public class ServerSock {
             for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
             String jsonLeaderboard = gson.toJson(stringLeaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
-            //***************
+            //*********************************************
 
-            /*out.println("[YOUR TURN] Pesca tessere dalla tavola: (x, y, amount, direction) - direction [UP:0, DOWN:1, RIGHT:2, LEFT:3]");
-            String line = reader.readLine();
-            line = line.replace(",", ""); //replaces all non digits to blanks
-            line = line.replace("  ", " "); //replaces all multiple blanks to single blanks
-            String[] numsArray = line.split( " ");
-            drawInfo.setX(Integer.parseInt(numsArray[0]));
-            drawInfo.setY(Integer.parseInt(numsArray[1]));
-            drawInfo.setAmount(Integer.parseInt(numsArray[2]));
-            drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(numsArray[3])]);
-
-            out.println("[REQUEST] Inserisci la colonna della shelf in cui inserire le tessere pescate: [0 ... 4]");
-            line = reader.readLine();
-            drawInfo.setColumn(Integer.parseInt(line));
-
-            List<Tile> drawnTiles;
-            TilePlacingSpot[][] grid = b.getBoardForDisplay();
-            drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
-
-            String string = "[INFO]: Here are your tiles: ";
-            int i = 1;
-            for (Tile t: drawnTiles){
-                string += i + ")" + t + " " ;
-                i++;
-            }
-            out.println(string);
-
-            out.println("[REQUEST] Inserisci l'ordine in cui inserire le tessere nella shelf: [CGT -> TCG: 312]");
-            line = reader.readLine();
-            drawInfo.setOrder(Integer.parseInt(line));
-             */
-
-
-            int imbecille = 0;
+            boolean imbecille = false;
             String line;
-            out.println("[INFO] It's your turn!");
 
+            //asks for row
             do {
-                if(imbecille > 0)
+                if(imbecille)
                     out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
                 else
                     out.println("[YOUR TURN] Select the row from which to draw from:");
                 line = clientListener(playerSocket);
-                imbecille++;
+                if (line.equals("q")) return null;
+                imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setX(Integer.parseInt(line));
-            imbecille = 0;
+            imbecille = false;
 
+            //asks for column
             do {
-                if(imbecille > 0)
+                if(imbecille)
                     out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                 else
                     out.println("[REQUEST] Select the column from which to draw from:");
                 line = clientListener(playerSocket);
-                imbecille++;
+                if (line.equals("q")) return null;
+                imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setY(Integer.parseInt(line));
-            imbecille = 0;
+            imbecille = false;
 
+            //asks for tile quantity to be drawn
             do {
-                if(imbecille > 0)
+                if(imbecille)
                     out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
                 else
                     out.println("[REQUEST] How many tiles do you want to draw?");
                 line = clientListener(playerSocket);
-                imbecille++;
+                if (line.equals("q")) return null;
+                imbecille = true;
             }while(!isNumeric(line));
             drawInfo.setAmount(Integer.parseInt(line));
-            imbecille = 0;
+            imbecille = false;
 
+            //asks for tile direction
             do {
-                if(imbecille > 0)
+                if(imbecille)
                     out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                 else
                     out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                 line = clientListener(playerSocket);
-                imbecille++;
+                if (line.equals("q")) return null;
+                imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
             drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
-            imbecille = 0;
+            imbecille = false;
 
             List<Tile> drawnTiles;
             TilePlacingSpot[][] grid = b.getBoardForDisplay();
@@ -289,51 +256,49 @@ public class ServerSock {
             }
             out.println(string);
 
-            out.println("[INFO] Here is your Shelf: ");
+            out.println("[SHELF] Here is your Shelf: ");
             jsonShelf = gson.toJson(shelf);
-            out.println("[GSONSHELF]" + jsonShelf);         //not working atm
+            out.println("[GSONSHELF]" + jsonShelf);
 
             do {
-                if(imbecille > 0)
+                if(imbecille)
                     out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
                 line = clientListener(playerSocket);
-                imbecille++;
+                if (line.equals("q")) return null;
+                imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
             drawInfo.setColumn(Integer.parseInt(line));
-            imbecille = 0;
+            imbecille = false;
 
             if(drawInfo.getAmount() != 1) {
                 do {
-                    if (imbecille != 0)
-                        out.println("[REQUEST] Invalid Input! Choose in which order you want to insert the tiles: [CGT -> TCG: 312]");
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! Choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
                     else
-                        out.println("[REQUEST] Now choose in which order you want to insert the tiles: [CGT -> TCG: 312]");
-                    imbecille = 0;
+                        out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
+                    imbecille = false;
                     line = clientListener(playerSocket);
+                    if (line.equals("q")) return null;
 
                     if (!isNumeric(line))
-                        imbecille = 1;
+                        imbecille = true;
                     else {
                         if (drawInfo.getAmount() == 2) {
                             if (!Objects.equals(line, "12") && !Objects.equals(line, "21"))
-                                imbecille = 1;
+                                imbecille = true;
                         }
                         if (drawInfo.getAmount() == 3) {
                             if (!Objects.equals(line, "123") && !Objects.equals(line, "132") && !Objects.equals(line, "213") && !Objects.equals(line, "231") && !Objects.equals(line, "312") && !Objects.equals(line, "321"))
-                                imbecille = 1;
+                                imbecille = true;
                         }
                     }
 
-                } while (imbecille != 0);
+                } while (imbecille);
                 drawInfo.setOrder(Integer.parseInt(line));
             }
 
-
-
-
-            return drawInfo;
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -341,6 +306,32 @@ public class ServerSock {
         return drawInfo;
     }
 
+    /**
+     * This method is used to update the client on their turn - it informs the turn has succesfully ended and shows them their updated shelf
+     * @param updatedShelf
+     * @param nickname
+     */
+    public void turnEnd(Shelf updatedShelf, String nickname){
+        Socket playerSocket = null;
+        Gson gson = new Gson();
+
+        //find client's socket
+        for (socketNickStruct c: clients)
+            if (c.getName().equals(nickname))
+                playerSocket = c.getSocket();
+
+        try {
+            PrintWriter pw = new PrintWriter(playerSocket.getOutputStream(), true);
+            String jsonShelf = gson.toJson(updatedShelf);
+            pw.println("[GSONSHELF]" + jsonShelf);
+            pw.println("[TURNEND] Your turn has ended! Waiting for next player.");
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+    }
 
     public void printErrorToClient(String message, String nickname) throws IOException{
         for (socketNickStruct s: clients)
@@ -410,10 +401,12 @@ public class ServerSock {
                 line = reader.readLine();
 
 
-                if(!line.startsWith("/c"))
-                    active = false;
-                else
+                if(line.startsWith("/c"))
                     System.out.println("chiamando chat"); //chiamata a chat
+                if (line.equals("q"))
+                    return line;
+                else
+                    active = false;
             }
 
         }catch(IOException e){
@@ -422,5 +415,43 @@ public class ServerSock {
         return line;
     }
 
+    public boolean hasDisconnectionOccurred(){
+        for (socketNickStruct c: clients){
+            if (c.getSocket().isClosed()){
+                controller.endGame();
+                return true;
+            }
+        }
+        return false;
+    }
 
+    public String getNameOfDisconnection(){
+        for (socketNickStruct c: clients)
+            if (c.getSocket().isClosed()) return c.getName();
+        return null;
+    }
+
+    /**
+     * notifies all socket players of game ending
+     * @param nick - the nickname of the player who quit or disconnected
+     * @throws IOException
+     */
+    public void notifyGameEnd(String nick) throws IOException {
+        //find client's socket
+        for (socketNickStruct c: clients){
+            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
+            c.getSocket().close();
+        }
+
+    }
+
+    /**
+     *  Creates new instance of clients array
+     */
+    public void flushServer(){
+            clients = new ArrayList<>();
+    }
+
+    public void setController(Controller c){ this.controller = c;}
 }

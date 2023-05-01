@@ -324,36 +324,26 @@ public class Board {
     }
 
     public void printGridMap() {
-        System.out.println("----- Board ------");
-        for (int i = 0; i < NumOfRows; i++) {
-            for (int j = 0; j < NumOfColumns; j++) {
-                if (grid[i][j].isAvailable() == false) System.out.print("X ");
-                else {
-                    if (grid[i][j].isEmpty()) System.out.print("e ");
+        System.out.println(" ----- Board ------");
+        for (int i = -1; i < NumOfRows; i++) {
+            for (int j = -1; j < NumOfColumns; j++) {
+                if (i == -1 || j == -1){
+                    if (i == -1 && j == -1) {
+                        System.out.println("- 0 1 2 3 4 5 6 7 8");
+                        System.out.print("0 ");
+                        i++;
+                    }
+                    else System.out.printf("%d ", i);
+                }
+                else{
+                    if (grid[i][j].isAvailable() == false) System.out.print("X ");
                     else {
-                        Tile t = grid[i][j].showTileInThisPosition();
-                        switch (t.getType()) {
-                            case CAT:
-                                System.out.print("C ");
-                                break;
-                            case BOOK:
-                                System.out.print("B ");
-                                break;
-                            case GAME:
-                                System.out.print("G ");
-                                break;
-                            case FRAME:
-                                System.out.print("F ");
-                                break;
-                            case PLANT:
-                                System.out.print("P ");
-                                break;
-                            case TROPHY:
-                                System.out.print("T ");
-                                break;
+                        if (grid[i][j].isEmpty()) System.out.print("e ");
+                        else {
+                            Tile t = grid[i][j].showTileInThisPosition();
+                            System.out.print(t + " ");
                         }
                     }
-
                 }
             }
             System.out.println();

@@ -1,7 +1,6 @@
 package test.java.it.polimi.ingsw.Model;
 
 import main.java.it.polimi.ingsw.Model.*;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCards.PersonalGoalCard1;
 import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
