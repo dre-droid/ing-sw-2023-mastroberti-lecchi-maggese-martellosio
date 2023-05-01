@@ -35,6 +35,8 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void ping() throws RemoteException;
 
+    public void startTurn() throws RemoteException;
+
 
 
 }
