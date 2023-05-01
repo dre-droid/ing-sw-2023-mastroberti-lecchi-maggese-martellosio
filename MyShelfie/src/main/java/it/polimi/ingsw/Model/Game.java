@@ -226,7 +226,14 @@ public class Game {
         List<Tile> tiles = board.drawTiles(x, y, amount, direction);
         List<Tile> rearrangedTiles = tiles;
         switch (order){
-            case 123:{}
+            case 123:{
+                rearrangedTiles.set(0, tiles.get(0));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(1));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(2));
+                }
+                break;
+            }
             case 132:{
                 rearrangedTiles.set(0, tiles.get(0));
                 if (amount > 1) {
@@ -241,20 +248,23 @@ public class Game {
                     rearrangedTiles.set(1, tiles.get(0));
                     if (amount > 2) rearrangedTiles.set(2, tiles.get(2));
                 }
+                break;
             }
             case 231:{
-                rearrangedTiles.set(0, tiles.get(1));
-                if (amount > 1) {
-                    rearrangedTiles.set(1, tiles.get(2));
-                    if (amount > 2) rearrangedTiles.set(2, tiles.get(0));
-                }
-            }
-            case 312:{
                 rearrangedTiles.set(0, tiles.get(2));
                 if (amount > 1) {
                     rearrangedTiles.set(1, tiles.get(0));
-                    if (amount > 2)rearrangedTiles.set(2, tiles.get(1));
+                    if (amount > 2) rearrangedTiles.set(2, tiles.get(1));
                 }
+                break;
+            }
+            case 312:{
+                rearrangedTiles.set(0, tiles.get(1));
+                if (amount > 1) {
+                    rearrangedTiles.set(1, tiles.get(2));
+                    if (amount > 2)rearrangedTiles.set(2, tiles.get(0));
+                }
+                break;
             }
             case 321:{
                 rearrangedTiles.set(0, tiles.get(2));
@@ -262,6 +272,7 @@ public class Game {
                     rearrangedTiles.set(1, tiles.get(1));
                     if (amount > 2) rearrangedTiles.set(2, tiles.get(0));
                 }
+                break;
             }
         }
 
@@ -315,7 +326,7 @@ public class Game {
     }
 
     /**
-     * @return true if playersList.size() has reache numOfPlayers
+     * @return true if playersList.size() has reached numOfPlayers
      */
     public boolean hasGameStarted(){
         return gameHasStarted;
