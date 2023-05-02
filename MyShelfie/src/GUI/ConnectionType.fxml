@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="366.0" prefWidth="568.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <CheckBox fx:id="RMICheckBox" layoutX="89.0" layoutY="162.0" mnemonicParsing="false" text="RMI" />
+      <CheckBox fx:id="SocketCheckBox" layoutX="89.0" layoutY="246.0" mnemonicParsing="false" text="Socket" />
+      <Label layoutX="149.0" layoutY="51.0" text="Select your connection type">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
