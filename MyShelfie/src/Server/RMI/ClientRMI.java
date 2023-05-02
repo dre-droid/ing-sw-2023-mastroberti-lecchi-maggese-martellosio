@@ -168,8 +168,7 @@ public class ClientRMI implements Runnable{
 
             if(typeOfConnection==1){
                 //join the game
-                joinGame(userInput
-                );
+                joinGame(userInput);
                 if(!serverRMI.hasGameStarted())
                     System.out.println("waiting for players...");
             }
@@ -200,6 +199,7 @@ public class ClientRMI implements Runnable{
             while(!EndGameFlag){
                 //we do stuff only when it's our turn
                 Thread.sleep(500);
+                System.out.println("IS my turn? "+ MyTurnFlag);
                 while(MyTurnFlag){
                     userInput = new Scanner(System.in);
                     waitForNotifications();
