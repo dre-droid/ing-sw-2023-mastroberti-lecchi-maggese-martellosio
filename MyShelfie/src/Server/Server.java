@@ -38,7 +38,7 @@ public class Server {
             controller = new Controller(this);
             serverSock.setController(controller);
             controller.setServerSock(serverSock);
-            //serverRMI.setController(controller);
+            serverRMI.setController(controller);
 
             //waits that all players connect
             while (!controller.hasGameStarted()) {

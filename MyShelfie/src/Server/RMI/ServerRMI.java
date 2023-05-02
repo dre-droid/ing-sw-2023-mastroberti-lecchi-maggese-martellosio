@@ -27,12 +27,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     private Map<String, ClientNotificationInterfaceRMI> clients;
 
 
-    public ServerRMI() throws RemoteException {super();
-        clients = new HashMap<>();
-        //timerDraw = new Timer();
-        //timerInsert = new Timer();
-        controller = new Controller();
-    }
+
     public ServerRMI(Controller controller, Server server) throws RemoteException {super();
         clients = new HashMap();
         //timerDraw = new Timer();
@@ -66,14 +61,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 }
                 if (controller.hasGameStarted()) {
                     /*startTimer(timerDraw, drawDelay);*/
-                    String commonGoals;
-                    commonGoals = controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description();
-                    for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                        client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        client.getValue().announceCommonGoals(commonGoals);
-                        if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
-                            client.getValue().startTurn();
-                    }
+                    notifyStartOfGame();
                     /*for (ClientNotificationRecord clientNotificationRecord : clients) {
                         clientNotificationRecord.client.startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                         clientNotificationRecord.client.announceCommonGoals(commonGoals);
@@ -197,15 +185,15 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void endOfTurn(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
-            controller.endOfTurn(playerNickname);
 
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                 client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
 
-            ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            if(clientToBeNotified!=null)
-                clientToBeNotified.startTurn();
+            //ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            /*if(clientToBeNotified!=null)
+                clientToBeNotified.startTurn();*/
+            controller.endOfTurn(playerNickname);
 
             if(controller.hasTheGameEnded()){
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
@@ -285,18 +273,22 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
-    public static void main(String[] args){
-        try{
-            ServerRMI server = new ServerRMI();
-            Registry registry = LocateRegistry.createRegistry(1099);
-            registry.rebind("MyShelfie",server);
-        }catch(Exception e){
-            e.printStackTrace();
+    public void flushServer(){
 
-        }
     }
 
-    public void flushServer(){
+    public void notifyStartOfTurn(String playerNickname){
+        try{
+            ClientNotificationInterfaceRMI clientToBeNotified;
+            clientToBeNotified = clients.get(playerNickname);
+            if(clientToBeNotified!=null){
+                clientToBeNotified.startTurn();
+                System.out.println("Notified "+ playerNickname +"to start the turn");
+            }
+
+        } catch (RemoteException e) {
+            System.out.println("Cannot notify client: "+playerNickname);
+        }
 
     }
 
@@ -306,6 +298,24 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         } catch (IOException e) {
             System.out.println("-----Problem in saving the game progress-----");
         }
+    }
+
+    public void notifyStartOfGame() {
+        try{
+            for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+                client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                client.getValue().announceCommonGoals(controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description());
+                if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
+                    notifyStartOfTurn(client.getKey());
+            }
+        } catch (RemoteException e) {
+            System.out.println("Cannot notify client");
+        }
+
+    }
+
+    public void setController(Controller controller){
+        this.controller = controller;
     }
 
 

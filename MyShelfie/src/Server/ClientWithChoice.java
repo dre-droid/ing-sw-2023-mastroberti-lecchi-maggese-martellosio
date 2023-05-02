@@ -18,7 +18,6 @@ public class ClientWithChoice {
             try{
                 connectionType = Integer.parseInt(userInput.nextLine());
             }catch(Exception e){
-                System.out.println("Insert 1 for RMI, 2 for Socket");
             }
             if(connectionType<1 || connectionType>2)
                 System.out.println("Insert 1 for RMI, 2 for Socket");

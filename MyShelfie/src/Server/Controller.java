@@ -84,6 +84,9 @@ public class Controller {
         }
         if (game.addPlayer(nickname)) {
             //System.out.println(nickname + " joined the game");
+            if(game.hasGameStarted()){
+                server.serverRMI.notifyStartOfGame();
+            }
             return 0;
         }else{
             //System.out.println("Nickname already used");
@@ -275,6 +278,7 @@ public class Controller {
     public void endOfTurn(String playerNickname){
         if(playerNickname.equals(game.isPlaying.getNickname())){
             game.endOfTurn(game.isPlaying);
+            server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
         }
     }
 
@@ -308,6 +312,7 @@ public class Controller {
         if (!Objects.isNull(info)) {
             try {
                 game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getOrder());
+                server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                 serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
             } catch (InvalidMoveException e) {
                 e.printStackTrace();
