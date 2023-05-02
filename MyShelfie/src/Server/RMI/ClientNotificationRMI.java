@@ -100,5 +100,15 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println("your turn has started, press enter to play your turn");
     }
 
+    @Override
+    public void receiveMessage(String text, String sender) throws RemoteException {
+        System.out.println("*"+sender+"*: "+text);
+    }
+
+    @Override
+    public void invalidCommandSent() throws RemoteException {
+        System.out.println("The command you sent has invalid parameters");
+    }
+
 
 }

@@ -333,5 +333,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         controller.endGame();
     }
 
+    @Override
+    public void chatMessage(String senderName, String text, String receiverName) throws RemoteException {
+        if(clients.get(receiverName)==null){
+            clients.get(senderName).invalidCommandSent();
+        }
+        else{
+            clients.get(receiverName).receiveMessage(text, senderName);
+        }
+
+    }
+
 
 }
