@@ -303,7 +303,7 @@ public class ServerSock {
                 string = "";
                 if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
-            }while(!isNumeric(line) || !controller.hasTheGameEnded());
+            }while(!isNumeric(line));
             drawInfo.setAmount(Integer.parseInt(line));
             imbecille = false;
 
@@ -365,8 +365,10 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
                     imbecille = false;
-                    while(Objects.equals(string, "") || !controller.hasTheGameEnded())
+                    while(Objects.equals(string, "")){
+                        if (controller.hasTheGameEnded()) break;
                         Thread.sleep(50);
+                    }
                     line = string;
                     string = "";
                     if (line.equals("q") || controller.hasTheGameEnded()) return null;

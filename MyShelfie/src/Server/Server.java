@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class Server {
-    public enum connectionType{
+    public enum connectionType {
         RMI, Socket
     }
 
@@ -22,7 +22,7 @@ public class Server {
     private Map<String, connectionType> clientsMap;
     private Controller controller;
 
-    public void run(){
+    public void run() {
         //run Socket and RMI servers
         serverSock = new ServerSock(controller, this);
         serverSock.runServer();
@@ -36,6 +36,7 @@ public class Server {
 
         //server iterates do-while for every new game
         do {
+            //resets clients and creates new controller (hence new game)
             clientsMap = new HashMap<>();
             controller = new Controller(this);
             serverSock.setController(controller);
@@ -55,12 +56,9 @@ public class Server {
                 while (!controller.hasTheGameEnded()) {
                     Thread.sleep(500);
                     if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
-                        System.out.println(controller.getNameOfPlayerWhoIsCurrentlyPlaying() + " starting the turn");
                         controller.playTurn();
                     }
                 }
-                //if (!Objects.isNull(serverSock.getNameOfDisconnection())) gameEnd(serverSock.getNameOfDisconnection());
-                //else gameEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -69,25 +67,16 @@ public class Server {
             System.out.println("Game has ended. Accepting players for new game...");
             serverSock.flushServer();
             serverRMI.flushServer();    //needs implementation
-        }while(true);
+        } while (true);
     }
+
     public static void main(String[] args) throws InvalidMoveException, InterruptedException {
         Server server = new Server();
         server.run();
     }
 
-    public void addPlayerToRecord(String nickname, connectionType conn){
-        clientsMap.put(nickname,conn);
-    }
-
-    /**
-     * handles player quitting game: results in game ending, all players should be notified of the event
-     * @param nick - the nick of the player who quit or disconnected
-     * @throws IOException
-     */
-    private void gameEnd(String nick) throws IOException {
-        //rmi notify
-        //serverSock.notifyGameEnd(nick);
+    public void addPlayerToRecord(String nickname, connectionType conn) {
+        clientsMap.put(nickname, conn);
     }
 
 }
