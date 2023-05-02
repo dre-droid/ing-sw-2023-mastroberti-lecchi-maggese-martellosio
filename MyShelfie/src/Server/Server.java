@@ -2,6 +2,7 @@ package Server;
 
 import Server.RMI.ServerRMI;
 import Server.Socket.ServerSock;
+import Server.Socket.socketNickStruct;
 import main.java.it.polimi.ingsw.Model.InvalidMoveException;
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
@@ -16,7 +17,7 @@ public class Server {
 
     public ServerRMI serverRMI;
     public ServerSock serverSock;
-    private Map<String, connectionType> clients;
+    private Map<String, connectionType> clientsMap;
     private Controller controller;
 
     public void run(){
@@ -33,7 +34,7 @@ public class Server {
 
         //server iterates do-while for every new game
         do {
-            clients = new HashMap<>();
+            clientsMap = new HashMap<>();
             controller = new Controller(this);
             serverSock.setController(controller);
             controller.setServerSock(serverSock);
@@ -47,12 +48,15 @@ public class Server {
                     throw new RuntimeException(e);
                 }
             }
-
+            for (socketNickStruct c: serverSock.clients)
+                    serverSock.clientListener(c.getSocket(), c.getName());
             //plays turns
             try {
+
+
                 while (!controller.hasTheGameEnded()) {
                     Thread.sleep(500);
-                    if (clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
+                    if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                         System.out.println(controller.getNameOfPlayerWhoIsCurrentlyPlaying() + " starting the turn");
                         controller.playTurn();
                     }
@@ -77,7 +81,7 @@ public class Server {
     }
 
     public void addPlayerToRecord(String nickname, connectionType conn){
-        clients.put(nickname,conn);
+        clientsMap.put(nickname,conn);
     }
 
     /**

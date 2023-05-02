@@ -3,7 +3,6 @@ package Server.Socket;
 
 import Server.Controller;
 import Server.Server;
-import com.beust.ah.A;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
@@ -16,14 +15,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.concurrent.*;
 
 public class ServerSock {
 
-    private ArrayList<socketNickStruct> clients = new ArrayList<>();
+    public ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
     private Server server;
     private Thread runServer, acceptClient;
+    public String string = "";
+    public boolean isFirstTurn;
+    public int nTry;
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -198,7 +199,10 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
                 else
                     out.println("[YOUR TURN] Select the row from which to draw from:");
-                line = clientListener(playerSocket);
+                while(Objects.equals(string, ""))
+                    Thread.sleep(50);
+                line = string;
+                string = "";
                 if (line.equals("q")) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
@@ -211,7 +215,10 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                 else
                     out.println("[REQUEST] Select the column from which to draw from:");
-                line = clientListener(playerSocket);
+                while(Objects.equals(string, ""))
+                    Thread.sleep(50);
+                line = string;
+                string = "";
                 if (line.equals("q")) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
@@ -224,7 +231,10 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
                 else
                     out.println("[REQUEST] How many tiles do you want to draw?");
-                line = clientListener(playerSocket);
+                while(Objects.equals(string, ""))
+                    Thread.sleep(50);
+                line = string;
+                string = "";
                 if (line.equals("q")) return null;
                 imbecille = true;
             }while(!isNumeric(line));
@@ -237,7 +247,10 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                 else
                     out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                line = clientListener(playerSocket);
+                while(Objects.equals(string, ""))
+                    Thread.sleep(50);
+                line = string;
+                string = "";
                 if (line.equals("q")) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
@@ -248,13 +261,13 @@ public class ServerSock {
             TilePlacingSpot[][] grid = b.getBoardForDisplay();
             drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
 
-            String string = "[INFO]: Here are your tiles: ";
+            String stringa = "[INFO]: Here are your tiles: ";
             int i = 1;
             for (Tile t: drawnTiles){
-                string += i + ")" + t + " " ;
+                stringa += i + ")" + t + " " ;
                 i++;
             }
-            out.println(string);
+            out.println(stringa);
 
             out.println("[SHELF] Here is your Shelf: ");
             jsonShelf = gson.toJson(shelf);
@@ -265,7 +278,10 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                line = clientListener(playerSocket);
+                while(Objects.equals(string, ""))
+                    Thread.sleep(50);
+                line = string;
+                string = "";
                 if (line.equals("q")) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
@@ -279,7 +295,10 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
                     imbecille = false;
-                    line = clientListener(playerSocket);
+                    while(Objects.equals(string, ""))
+                        Thread.sleep(50);
+                    line = string;
+                    string = "";
                     if (line.equals("q")) return null;
 
                     if (!isNumeric(line))
@@ -353,7 +372,7 @@ public class ServerSock {
 
     /**
      * clientListener listens to messages incoming from client
-     * @param client
+     * @param
      * @return line to drawInquiry if it doesn't start with /c, otherwise it will call chatHandler
      */
     /*public String clientListener(Socket client){
@@ -390,6 +409,7 @@ public class ServerSock {
     }
 
      */
+    /*
     public String clientListener(Socket client){
         String line = "";
         try{
@@ -414,6 +434,8 @@ public class ServerSock {
         }
         return line;
     }
+
+     */
 
     public boolean hasDisconnectionOccurred(){
         for (socketNickStruct c: clients){
@@ -454,4 +476,29 @@ public class ServerSock {
     }
 
     public void setController(Controller c){ this.controller = c;}
+
+    public void clientListener(Socket client, String nickname){
+        Runnable clientListener = () -> {
+            try {
+                String line = "";
+                InputStream input = client.getInputStream();
+                boolean active = true;
+                while (active) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    line = reader.readLine();
+
+                    if (controller.isMyTurn(nickname) && !line.startsWith("/c "))
+                        string = line;
+
+                    if (line.startsWith("/c"))
+                        System.out.println("chiamando chat"); //chiamata a chat
+
+
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        new Thread(clientListener).start();
+    }
 }
