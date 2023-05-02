@@ -125,9 +125,12 @@ public class ClientRMI implements Runnable{
 
     private int checkedInputForIntValues(Scanner scanner, int min, int max, String ErrorMessage){
         int value=-1;
+        String userInput;
         do{
             try{
-                value = Integer.parseInt(scanner.nextLine());
+                userInput = scanner.nextLine();
+                checkForCommand(userInput);
+                value = Integer.parseInt(userInput);
             }catch (Exception e){
                 //System.out.println(ErrorMessage);
             }
@@ -135,8 +138,30 @@ public class ClientRMI implements Runnable{
                 System.out.println(ErrorMessage);
                 value=-1;
             }
-        }while(value==-1);
+        }while(value==-1 && !EndGameFlag);
         return value;
+    }
+
+    private boolean checkForCommand(String userInput) throws RemoteException {
+        if(userInput.equals("/quit")){
+            System.out.println("Quit command sent to the server");
+            serverRMI.quitGame(playerNickname);
+            return true;
+        }else if(userInput.startsWith("/chat")){
+            System.out.println("Chat message sent");
+            String sender, text, receiver;
+            int atIndex = userInput.indexOf('@');
+            receiver = userInput.substring(atIndex+1);
+            atIndex = receiver.indexOf(' ');
+            text = receiver.substring(atIndex+1);
+            receiver = receiver.substring(0, atIndex);
+            //System.out.println(receiver);
+            //System.out.println(text);
+            serverRMI.chatMessage(playerNickname, text, receiver);
+            return true;
+        }else{
+            return false;
+        }
     }
 
     @Override
@@ -203,12 +228,8 @@ public class ClientRMI implements Runnable{
                 System.out.println("To quit enter /quit, to chat with others enter /chat @playerNickname your_message");
                 while(!MyTurnFlag){
                     String input = userInput.nextLine();
-                    if(input.equals("/quit")){
-                        System.out.println("Quit command sent to the server");
-                        serverRMI.quitGame(playerNickname);
-                    }else{
-                        System.out.println("Not a valid command");
-                    }
+                    if(!checkForCommand(input))
+                        System.out.println("Not a valid command!");
                 }
 
 
@@ -258,7 +279,7 @@ public class ClientRMI implements Runnable{
                             System.out.println("You cannot draw those Tiles, try again!");
                             correctlyDrawn=false;
                         }
-                    }while(!correctlyDrawn);
+                    }while(!correctlyDrawn && !EndGameFlag);
 
                     waitForNotifications();
                     System.out.println("Here are your tiles");
@@ -297,7 +318,7 @@ public class ClientRMI implements Runnable{
                         //inser the tiles in the shelf
                         correctlyInserted= serverRMI.insertTilesInShelf(playerNickname,rearrangedTiles,column-1);
 
-                    }while(!correctlyInserted);
+                    }while(!correctlyInserted && !EndGameFlag);
                     waitForNotifications();
 
                     System.out.println("Shelf at the end of the turn: ");
