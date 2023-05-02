@@ -66,11 +66,11 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
 
     @Override
-    public void gameIsOver(List<Player> leaderboard) throws RemoteException {
+    public void gameIsOver(List<String> leaderboard) throws RemoteException {
         System.out.println("The game has ended, here is the leaderboard: ");
         clientRMI.setEndGameFlag(true);
         for(int i=0;i<leaderboard.size();i++){
-            System.out.println((i+1)+") "+leaderboard.get(i).getScore());
+            System.out.println((i+1)+") "+leaderboard.get(i));
         }
     }
 
@@ -97,7 +97,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     @Override
     public void startTurn() throws RemoteException {
         clientRMI.setMyTurnFlag(true);
-        System.out.println("YOUR TURN HAS STARTED COME ONNN ");
+        System.out.println("your turn has started, press enter to play your turn");
     }
 
 

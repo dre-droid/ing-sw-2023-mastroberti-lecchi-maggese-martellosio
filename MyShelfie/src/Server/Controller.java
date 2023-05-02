@@ -321,7 +321,9 @@ public class Controller {
     }
 
     public void endGame(){
+        server.serverRMI.notifyEndOfGame();
         game.endGame();
+
     }
 
     /**

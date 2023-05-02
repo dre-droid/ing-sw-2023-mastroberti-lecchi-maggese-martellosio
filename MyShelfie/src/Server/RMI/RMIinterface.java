@@ -36,4 +36,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public Tile[][] getMyPersonalGoal(String playerNickname) throws  RemoteException;
 
     public String getCommonGoalCardDescription() throws RemoteException;
+
+    public void quitGame(String playerNickname) throws RemoteException;
 }

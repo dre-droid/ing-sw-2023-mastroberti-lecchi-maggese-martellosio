@@ -199,7 +199,19 @@ public class ClientRMI implements Runnable{
             while(!EndGameFlag){
                 //we do stuff only when it's our turn
                 Thread.sleep(500);
-                System.out.println("IS my turn? "+ MyTurnFlag);
+                System.out.println("While it is not your turn you can chat with other players or quit the game");
+                System.out.println("To quit enter /quit, to chat with others enter /chat @playerNickname your_message");
+                while(!MyTurnFlag){
+                    String input = userInput.nextLine();
+                    if(input.equals("/quit")){
+                        System.out.println("Quit command sent to the server");
+                        serverRMI.quitGame(playerNickname);
+                    }else{
+                        System.out.println("Not a valid command");
+                    }
+                }
+
+
                 while(MyTurnFlag){
                     userInput = new Scanner(System.in);
                     waitForNotifications();
