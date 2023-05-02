@@ -5,6 +5,7 @@ import Server.Socket.ServerSock;
 import Server.Socket.socketNickStruct;
 import main.java.it.polimi.ingsw.Model.InvalidMoveException;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
@@ -69,7 +70,6 @@ public class Server {
             serverRMI.flushServer();    //needs implementation
         } while (true);
     }
-
     public static void main(String[] args) throws InvalidMoveException, InterruptedException {
         Server server = new Server();
         server.run();
@@ -77,6 +77,34 @@ public class Server {
 
     public void addPlayerToRecord(String nickname, connectionType conn) {
         clientsMap.put(nickname, conn);
+    }
+
+    /**
+     * handles player quitting game: results in game ending, all players should be notified of the event
+     * @param nick - the nick of the player who quit or disconnected
+     * @throws IOException
+     */
+    private void gameEnd(String nick) throws IOException {
+        //rmi notify
+        serverSock.notifyGameEnd(nick);
+    }
+
+    public void chatMessage(String sender, String text, String receiver){
+        if(clientsMap.get(receiver)!=null){
+            if(clientsMap.get(receiver)==connectionType.RMI){
+                try{
+                    serverRMI.chatMessage(sender, text, receiver);
+                } catch (RemoteException e) {
+                    System.out.println("Cannot send message to "+receiver);
+                }
+            }else{
+                try {
+                    serverSock.sendChatMessageToClient(sender, text, receiver);
+                } catch (IOException e) {
+                    System.out.println("Cannot send message to"+receiver);
+                }
+            }
+        }
     }
 
 }

@@ -336,12 +336,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public void chatMessage(String senderName, String text, String receiverName) throws RemoteException {
         if(clients.get(receiverName)==null){
-            clients.get(senderName).invalidCommandSent();
+            server.chatMessage(senderName, text, receiverName);
         }
         else{
             clients.get(receiverName).receiveMessage(text, senderName);
         }
-
     }
 
 

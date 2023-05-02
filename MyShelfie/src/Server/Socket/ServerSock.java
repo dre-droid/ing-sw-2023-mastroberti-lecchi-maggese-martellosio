@@ -170,13 +170,21 @@ public class ServerSock {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     line = reader.readLine();
 
-                    if (controller.isMyTurn(nickname) && !line.startsWith("/c "))
+                    if (controller.isMyTurn(nickname) && !line.startsWith("/chat"))
                         string = line;
 
-                    if (line.startsWith("/c"))
+                    if (line.startsWith("/chat")){
+                        String sender, text, receiver;
+                        int atIndex = line.indexOf('@');
+                        receiver = line.substring(atIndex+1);
+                        atIndex = receiver.indexOf(' ');
+                        text = receiver.substring(atIndex+1);
+                        receiver = receiver.substring(0, atIndex);
+                        sendChatMessageToClient(nickname, text, receiver);
+                    }
                         System.out.println("chiamando chat"); //chiamata a chat
 
-                    if (line.equals("q")) {                  //game quit
+                    if (line.equals("/quit")) {//game quit
                         //if (!controller.hasGameBeenCreated()) client.close();   //not right way of handling
                         //else {
                             controller.endGame();
@@ -487,4 +495,19 @@ public class ServerSock {
     public void setController(Controller c){ this.controller = c;}
 
     public void setQuitter(String s){ quitter = s;}
+
+    public void sendChatMessageToClient(String sender, String text, String receiver) throws IOException {
+        if(clients.stream().noneMatch(client->client.getName().equals(receiver)))
+            server.chatMessage(sender, text, receiver);
+        else
+            for (socketNickStruct c: clients){
+                if(c.getName().equals(receiver)){
+                    /*System.out.println(sender);
+                    System.out.println(text);
+                    System.out.println(receiver);*/
+                    PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+                    out.println("[MESSAGE_FROM_"+sender+"]: "+text);
+                }
+            }
+    }
 }

@@ -125,6 +125,9 @@ public class ClientSocket {
                         System.out.println(line);
                         System.exit(0);
                     }
+                    if(line.startsWith("[MESSAGE")){
+                        System.out.println(line);
+                    }
                     }
                 }
             catch (SocketException e) {
