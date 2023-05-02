@@ -9,12 +9,14 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Server {
     public enum connectionType{
         RMI, Socket
     }
 
+    public boolean disconnection;
     public ServerRMI serverRMI;
     public ServerSock serverSock;
     private Map<String, connectionType> clientsMap;
@@ -48,24 +50,18 @@ public class Server {
                     throw new RuntimeException(e);
                 }
             }
-            for (socketNickStruct c: serverSock.clients)
-                    serverSock.clientListener(c.getSocket(), c.getName());
             //plays turns
             try {
-
-
                 while (!controller.hasTheGameEnded()) {
                     Thread.sleep(500);
                     if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                         System.out.println(controller.getNameOfPlayerWhoIsCurrentlyPlaying() + " starting the turn");
                         controller.playTurn();
                     }
-                    serverSock.hasDisconnectionOccurred();
                 }
-                if (serverSock.hasDisconnectionOccurred())
-                    gameEnd(serverSock.getNameOfDisconnection());
-                else gameEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            } catch (InterruptedException | IOException e) {
+                //if (!Objects.isNull(serverSock.getNameOfDisconnection())) gameEnd(serverSock.getNameOfDisconnection());
+                //else gameEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
 
@@ -91,7 +87,7 @@ public class Server {
      */
     private void gameEnd(String nick) throws IOException {
         //rmi notify
-        serverSock.notifyGameEnd(nick);
+        //serverSock.notifyGameEnd(nick);
     }
 
 }

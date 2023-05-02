@@ -2,6 +2,7 @@ package Server.Socket;
 
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -32,6 +33,7 @@ public class ClientSocket {
             //connect to server
             Socket socket= new Socket("127.0.0.1", 59010);
             socket.setKeepAlive(true);
+            //pinger(socket);
 
             try{
                 serverListener(socket);
@@ -48,6 +50,7 @@ public class ClientSocket {
             //connect to server
             Socket socket= new Socket("127.0.0.1", 59010);
             socket.setKeepAlive(true);
+            //pinger(socket);
 
             try{
                 serverListener(socket);
@@ -63,7 +66,6 @@ public class ClientSocket {
         Runnable serverListener = () -> {
             try {
                 InputStream input = socket.getInputStream();
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                 String line;
                 boolean active = true;
@@ -125,9 +127,10 @@ public class ClientSocket {
                     }
                     }
                 }
-            catch (Exception e) {
-                throw new RuntimeException(e);
+            catch (SocketException e) {
+                System.out.println("Socket closed.");
             }
+            catch (IOException e) {e.printStackTrace();}
         };
 
         new Thread(serverListener).start();
@@ -201,7 +204,21 @@ public class ClientSocket {
         };
         new Thread(clientSpeaker).start();
     }
+    /*
+    private static void pinger(Socket s){
+        new Thread(() -> {
+            try {
+                PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+                out.println("[PING]");
+                Thread.sleep(4000);
 
+            } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }).start();
+    }
+    */
 }
 
 

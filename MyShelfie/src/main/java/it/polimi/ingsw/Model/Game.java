@@ -44,37 +44,10 @@ public class Game {
         gameHasStarted=false;
     }
 
-
     /**
-     * This method is used to check if this the game is in its last turn
-     * @return true if it's the last turn, false otherwise
-     */
-    public boolean isLastTurn(){
-        return lastTurn;
-    }
-
-    /**
-     * This method is used to check if the game is in its last round
-     * @return true if it's the last round, false otherwise
-     */
-    public boolean isLastRound(){
-        return lastRound;
-    }
-
-    /**
-     *this method is used to check if the game has ended
-     * @return true if the game is over, false otherwise
-     */
-    public boolean hasTheGameEnded(){
-        return gameHasEnded;
-    }
-
-
-
-    /**
-     * @author Andrea Mastroberti
      * after players have been added to the lobby,
-     * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
+     * game starts: sets first player, assigns personal goal cards, fills the board and chooses the common goal cards
+     * @author Andrea Mastroberti
      */
     public void gameStartSetup() throws Exception{
        if (numOfPlayers != playersList.size()) throw new Exception("Not enough players have connected yet!");
@@ -92,11 +65,9 @@ public class Game {
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
             if(!playerNickname.equals(isPlaying.getNickname())) {
-                System.out.println("problem in the model");
                 throw new InvalidMoveException(playerNickname + " it's not your turn!!!!");
             }
             List<Tile> tiles = board.drawTiles(x, y, amount, direction);
-            System.out.println("model is ok");
             return tiles;
         }
         return null;
@@ -205,7 +176,6 @@ public class Game {
     }
 
     /**
-     * @author Andrea Mastroberti
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player
      * @param x rows of game board [0 ... 9]
@@ -213,6 +183,7 @@ public class Game {
      * @param amount amount of tiles to be drawn [0 ... 3]
      * @param direction draw direction [RIGHT, LEFT, UP, DOWN]
      * @param column shelf column to place drawn tiles [0 ... 5]
+     * @author Andrea Mastroberti
      */
     public void playTurn(int x, int y, int amount, Board.Direction direction, int column, int order) throws InvalidMoveException{
         System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
@@ -271,7 +242,7 @@ public class Game {
             }
         }
 
-        isPlaying.insertTiles(tiles, column);
+        isPlaying.insertTiles(rearrangedTiles, column);
         //isPlaying.printShelf();
         if (isPlaying.hasEndGameToken()) setLastTurnFlag();
 
@@ -303,7 +274,7 @@ public class Game {
             isPlaying = nextPlayer;
             setLastTurnFlag();
         }
-        if (lastTurn) { //game end                              //game end
+        if (lastTurn) { //game end
             for (Player p: leaderBoard) {
                 p.updateFinalScore();
             }
@@ -320,12 +291,6 @@ public class Game {
         System.out.println("******************************\n");
     }
 
-    /**
-     * @return true if playersList.size() has reached numOfPlayers
-     */
-    public boolean hasGameStarted(){
-        return gameHasStarted;
-    }
 
     /**
      * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default.
@@ -335,7 +300,7 @@ public class Game {
      */
    public boolean addPlayer(String nick){
        if(!hasGameStarted()) {
-           if(playersList.stream().map(Player::getNickname).noneMatch(n->n.equals(nick))){
+           if(playersList.stream().map(Player::getNickname).noneMatch(n->n.equals(nick)) && !nick.isBlank()){
                Player player = new Player(nick, false, board);
                playersList.add(player);
                leaderBoard.add(player);
@@ -349,15 +314,6 @@ public class Game {
            }
        }
        return false;
-    }
-
-    /**
-     * removes player with nickname nick
-     * @param nick - nickname
-     */
-    public void removePlayer(String nick){
-        for (Player p: playersList)
-            if (p.getNickname().equals(nick)) playersList.remove(p);
     }
 
     /**
@@ -385,7 +341,6 @@ public class Game {
         while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname()));
         isPlaying = playersList.get(starter);
     }
-
     /**
      * Chooses two random and distinct common goal cards and adds them to the commonGoalCards list
      */
@@ -423,7 +378,6 @@ public class Game {
             case 11 -> commonGoalCards.add(new CommonGoalCard(new XShapedTiles(), this.numOfPlayers));
         }
     }
-
     /**
      * Creates new board as a function of the number of players - also gives players a reference to the Board instance variable
      */
@@ -453,9 +407,24 @@ public class Game {
         return playersList;
     }
     public HashMap<Integer, PersonalGoalCard> getValidTilesMap() {return validTilesMap;}
-    public int getNumOfPlayers() {
-        return numOfPlayers;
+    /**
+     *this method is used to check if the game has ended
+     * @return true if the game is over, false otherwise
+     */
+    public boolean hasTheGameEnded(){
+        return gameHasEnded;
     }
+    /**
+     * @return true if playersList.size() has reached numOfPlayers
+     */
+    public boolean hasGameStarted(){
+        return gameHasStarted;
+    }
+    public List<Player> getLeaderBoard(){
+        return this.leaderBoard;
+    }
+    public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
+
 
     /**
      * Prints leaderboard to console
@@ -468,10 +437,6 @@ public class Game {
         }
         System.out.println();
     }
-    public List<Player> getLeaderBoard(){
-        return this.leaderBoard;
-    }
-    public List<CommonGoalCard> getCommonGoalCards(){return commonGoalCards;}
 
     /**
      * @author DiegoLecchi
@@ -644,8 +609,6 @@ public class Game {
             System.out.println("Error in saving the game progress in json file");
         }
 
-
-
     }
 
     public boolean loadGameProgress(String filePath){
@@ -680,9 +643,7 @@ public class Game {
         game.addPlayer("p2");
         game.saveGameProgress("");
         game.loadGameProgress("");
-
     }
-
 
 }
 

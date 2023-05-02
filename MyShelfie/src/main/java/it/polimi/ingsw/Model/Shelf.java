@@ -237,8 +237,14 @@ public class Shelf {
         Tile[][] displayGrid = new Tile[ROWS][COLUMNS];
         for(int i=0;i<ROWS;i++)
             for(int j=0;j<COLUMNS;j++){
-                if(grid[i][j]!=null)
+                if(grid[i][j]!=null){
+                    System.out.print(grid[i][j]+ " ");
                     displayGrid[i][j] = new Tile(grid[i][j].getType());
+                }
+                else{
+                    System.out.print("x ");
+                }
+                System.out.println();
             }
         return displayGrid;
     }

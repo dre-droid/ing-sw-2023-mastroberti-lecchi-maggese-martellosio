@@ -317,7 +317,9 @@ public class Controller {
             } catch (InvalidMoveException e) {
                 e.printStackTrace();
             }
-        }else endGame();
+        }else {
+            endGame();
+        }
     }
 
     public void endGame(){

@@ -9,6 +9,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +23,9 @@ public class ServerSock {
     private Controller controller;
     private Server server;
     private Thread runServer, acceptClient;
+    private List<Thread> clientListeners;
     public String string = "";
+    private String quitter;
     public boolean isFirstTurn;
     public int nTry;
 
@@ -36,6 +39,7 @@ public class ServerSock {
      */
     public void runServer(){
         ServerSocket serverSocket = null;
+        clientListeners = new ArrayList<>();
         try {
             serverSocket = new ServerSocket(59010);
 
@@ -60,7 +64,7 @@ public class ServerSock {
 
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
-     * List<socketNickStruct> clients if successful
+     * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
      * @param client
      */
     private void acceptClient(Socket client) {
@@ -75,9 +79,14 @@ public class ServerSock {
                     if (resultValue == -3) repeat = true;   //invalid nickname
                     else if (resultValue == 0|| resultValue == -1) {    //successfully joined
                         repeat = false;
+                        clientListener(client, getNickFromSocket(client));
                     }
                 };    //while nickname is not valid, keep trying for a new name
-            } catch (IOException e) {
+            }
+            catch (SocketException s) {
+                System.out.println("You quit.");
+            }
+            catch (IOException e) {
                 try {client.close();}
                 catch (IOException ex) {ex.printStackTrace();}
                 finally {System.out.println("Client failed to join");}
@@ -85,7 +94,6 @@ public class ServerSock {
         });
         acceptClient.start();
     }
-
     /**
      * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
      * @param client
@@ -146,6 +154,54 @@ public class ServerSock {
     }
 
     /**
+     * creates a thread to listen to the clients' messages. If client's turn, writes clients messages to global variable string. If message starts with
+     * '/c' processes message for chat, otherwise output is ignored.
+     * @param client
+     * @param nickname
+     */
+    public void clientListener(Socket client, String nickname){
+        Thread clientListener = new Thread(() -> {
+            try {
+                String line = "";
+                InputStream input = client.getInputStream();
+                boolean active = true;
+                while (active) {
+                    Thread.sleep(50);
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    line = reader.readLine();
+
+                    if (controller.isMyTurn(nickname) && !line.startsWith("/c "))
+                        string = line;
+
+                    if (line.startsWith("/c"))
+                        System.out.println("chiamando chat"); //chiamata a chat
+
+                    if (line.equals("q")) {                  //game quit
+                        //if (!controller.hasGameBeenCreated()) client.close();   //not right way of handling
+                        //else {
+                            controller.endGame();
+                            for (socketNickStruct c : clients) {
+                                PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                                pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
+                                c.getSocket().close();
+                            }
+                        //}
+
+                    }
+
+                }
+            } catch (SocketException e){
+                System.out.println(nickname + "'s socket has been closed.");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        clientListener.start();
+    }
+
+    /**
      * Queries the client for info on his turn's drawn tiles
      * @param nickname - the nickname of the client to query
      * @param b - game's board
@@ -195,16 +251,22 @@ public class ServerSock {
 
             //asks for row
             do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
-                else
-                    out.println("[YOUR TURN] Select the row from which to draw from:");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                Thread.sleep(50);
+                if (!controller.hasTheGameEnded()) {
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                    else
+                        out.println("[YOUR TURN] Select the row from which to draw from:");
+                }
+                while(Objects.equals(string, "")){
+                    if (controller.hasTheGameEnded()) break;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
+                System.out.println("PRINT DIOC");
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setX(Integer.parseInt(line));
             imbecille = false;
@@ -215,11 +277,13 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                 else
                     out.println("[REQUEST] Select the column from which to draw from:");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                while(Objects.equals(string, "")){
+                    if (controller.hasTheGameEnded()) break;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
             drawInfo.setY(Integer.parseInt(line));
@@ -231,13 +295,15 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
                 else
                     out.println("[REQUEST] How many tiles do you want to draw?");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                while(Objects.equals(string, "")){
+                    if (controller.hasTheGameEnded()) break;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
-            }while(!isNumeric(line));
+            }while(!isNumeric(line) || !controller.hasTheGameEnded());
             drawInfo.setAmount(Integer.parseInt(line));
             imbecille = false;
 
@@ -247,11 +313,13 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                 else
                     out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                while(Objects.equals(string, "")){
+                    if (controller.hasTheGameEnded()) break;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
             drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
@@ -278,11 +346,13 @@ public class ServerSock {
                     out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                while(Objects.equals(string, "")){
+                    if (controller.hasTheGameEnded()) break;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
                 imbecille = true;
             }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
             drawInfo.setColumn(Integer.parseInt(line));
@@ -295,12 +365,11 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
                     imbecille = false;
-                    while(Objects.equals(string, ""))
+                    while(Objects.equals(string, "") || !controller.hasTheGameEnded())
                         Thread.sleep(50);
                     line = string;
                     string = "";
-                    if (line.equals("q")) return null;
-
+                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
                     if (!isNumeric(line))
                         imbecille = true;
                     else {
@@ -314,13 +383,15 @@ public class ServerSock {
                         }
                     }
 
-                } while (imbecille);
+                } while (imbecille || !controller.hasTheGameEnded());
                 drawInfo.setOrder(Integer.parseInt(line));
             }
 
-        } catch(Exception e){
+        } catch(SocketException e){
             e.printStackTrace();
         }
+        catch (Exception e) {
+            e.printStackTrace();};
 
         return drawInfo;
     }
@@ -352,15 +423,7 @@ public class ServerSock {
 
     }
 
-    public void printErrorToClient(String message, String nickname) throws IOException{
-        for (socketNickStruct s: clients)
-            if (s.getName().equals(nickname)) {
-                PrintWriter out = new PrintWriter(s.getSocket().getOutputStream(), true);
-                out.println("[INVALID MOVE]" + message);
-            }
-    }
-
-    public static boolean isNumeric(String str) {
+    private static boolean isNumeric(String str) {
         try {
             Integer.parseInt(str);
             return true;
@@ -368,74 +431,6 @@ public class ServerSock {
             return false;
         }
     }
-
-
-    /**
-     * clientListener listens to messages incoming from client
-     * @param
-     * @return line to drawInquiry if it doesn't start with /c, otherwise it will call chatHandler
-     */
-    /*public String clientListener(Socket client){
-        ExecutorService pool = Executors.newFixedThreadPool(1);
-
-        Callable<String> clientListener = () -> {
-            try{
-                InputStream input = client.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                String line;
-                boolean active = true;
-                while(active){
-                    line = reader.readLine();
-                    if(line.startsWith("/c")){
-                        System.out.println("è stata chiamata la chat");//call chat handler
-                    }
-                    else
-                        return line;
-                }
-            }catch (IOException e){
-                System.out.println("Wut the hell? Ooh ma god, no waayayaayyy");
-            }
-            return null;
-        };
-
-        Future<String> future = pool.submit(clientListener);
-        try{
-            return future.get();
-        }catch(InterruptedException | ExecutionException e){
-            System.out.println("boh callable");
-
-        }
-        return null;
-    }
-
-     */
-    /*
-    public String clientListener(Socket client){
-        String line = "";
-        try{
-            InputStream input = client.getInputStream();
-
-            boolean active = true;
-            while(active){
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                line = reader.readLine();
-
-
-                if(line.startsWith("/c"))
-                    System.out.println("chiamando chat"); //chiamata a chat
-                if (line.equals("q"))
-                    return line;
-                else
-                    active = false;
-            }
-
-        }catch(IOException e){
-            System.out.println("Wut the hell? Ooh ma god, no waayAyaayYy");
-        }
-        return line;
-    }
-
-     */
 
     public boolean hasDisconnectionOccurred(){
         for (socketNickStruct c: clients){
@@ -447,12 +442,24 @@ public class ServerSock {
         return false;
     }
 
+    /**
+     * @return the name of the player that disconnected if present
+     */
     public String getNameOfDisconnection(){
         for (socketNickStruct c: clients)
             if (c.getSocket().isClosed()) return c.getName();
         return null;
     }
 
+    /**
+     * @return the name of the corresponding client, null if not present
+     */
+    private String getNickFromSocket(Socket client){
+        for (socketNickStruct c: clients) if (c.getSocket().equals(client)) return c.getName();
+        return null;
+    }
+
+    /*
     /**
      * notifies all socket players of game ending
      * @param nick - the nickname of the player who quit or disconnected
@@ -465,8 +472,8 @@ public class ServerSock {
             out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
             c.getSocket().close();
         }
-
     }
+    /*
 
     /**
      *  Creates new instance of clients array
@@ -477,28 +484,5 @@ public class ServerSock {
 
     public void setController(Controller c){ this.controller = c;}
 
-    public void clientListener(Socket client, String nickname){
-        Runnable clientListener = () -> {
-            try {
-                String line = "";
-                InputStream input = client.getInputStream();
-                boolean active = true;
-                while (active) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    line = reader.readLine();
-
-                    if (controller.isMyTurn(nickname) && !line.startsWith("/c "))
-                        string = line;
-
-                    if (line.startsWith("/c"))
-                        System.out.println("chiamando chat"); //chiamata a chat
-
-
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        new Thread(clientListener).start();
-    }
+    public void setQuitter(String s){ quitter = s;}
 }
