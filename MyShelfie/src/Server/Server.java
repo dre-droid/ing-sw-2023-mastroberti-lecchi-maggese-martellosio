@@ -1,5 +1,6 @@
 package Server;
 
+import Server.RMI.ClientNotificationInterfaceRMI;
 import Server.RMI.ServerRMI;
 import Server.Socket.ServerSock;
 import Server.Socket.socketNickStruct;
@@ -90,14 +91,37 @@ public class Server {
     }
 
     public void chatMessage(String sender, String text, String receiver){
+        //broadcast message
+        if(receiver.equals("all")){
+            for(Map.Entry<String, connectionType> client: clientsMap.entrySet()){
+                if(!client.getKey().equals(sender))
+                    if(client.getValue()==connectionType.RMI){
+                        try{
+                            serverRMI.chatMessage(sender, text, client.getKey());
+                        } catch (RemoteException e) {
+                            System.out.println("Cannot send message to "+receiver);
+                        }
+                    }else{
+                        try {
+                            serverSock.sendChatMessageToClient(sender, text, client.getKey());
+                        } catch (IOException e) {
+                            System.out.println("Cannot send message to"+receiver);
+                        }
+                    }
+            }
+        }
+        //if the receiver is a player in the game
         if(clientsMap.get(receiver)!=null){
+            //send message to rmi player
             if(clientsMap.get(receiver)==connectionType.RMI){
                 try{
                     serverRMI.chatMessage(sender, text, receiver);
                 } catch (RemoteException e) {
                     System.out.println("Cannot send message to "+receiver);
                 }
-            }else{
+            }
+            //send message to socket client
+            else{
                 try {
                     serverSock.sendChatMessageToClient(sender, text, receiver);
                 } catch (IOException e) {
