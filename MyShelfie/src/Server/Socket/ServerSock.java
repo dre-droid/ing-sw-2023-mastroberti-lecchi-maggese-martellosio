@@ -170,8 +170,9 @@ public class ServerSock {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     line = reader.readLine();
 
-                    if (controller.isMyTurn(nickname) && !line.startsWith("/chat"))
-                        string = line;
+                    if (controller.hasGameStarted())
+                        if (controller.isMyTurn(nickname) && !line.startsWith("/chat"))
+                            string = line;
 
                     if (line.startsWith("/chat")){
                         String sender, text, receiver;
@@ -185,6 +186,7 @@ public class ServerSock {
                         System.out.println("chiamando chat"); //chiamata a chat
 
                     if (line.equals("/quit")) {//game quit
+                        //asks for confirmation
                         //if (!controller.hasGameBeenCreated()) client.close();   //not right way of handling
                         //else {
                             controller.endGame();
@@ -216,13 +218,14 @@ public class ServerSock {
      * @param shelf - client's board
      * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
-    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard) throws InvalidMoveException {
         Socket playerSocket = null;
+        List<Tile> drawnTiles = new ArrayList<>();
         drawInfo drawInfo = new drawInfo();
 
         //find client's socket
-        for (socketNickStruct c: clients)
-            if (c.getName().equals(nickname)){
+        for (socketNickStruct c : clients)
+            if (c.getName().equals(nickname)) {
                 playerSocket = c.getSocket();
             }
 
@@ -249,98 +252,115 @@ public class ServerSock {
             out.println("[GSONCGC]" + jsonCommonGoal);
 
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
-            for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
+            for (Player p : leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
             String jsonLeaderboard = gson.toJson(stringLeaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
             //*********************************************
 
             boolean imbecille = false;
             String line;
+            boolean invalidMoveFlag = false;
 
-            //asks for row
+            //do-while block handles correctly drawing tiles from board
             do {
-                Thread.sleep(50);
-                if (!controller.hasTheGameEnded()) {
+                //asks for row
+                do {
+                    Thread.sleep(50);
+                    if (!controller.hasTheGameEnded()) {
+                        if (imbecille)
+                            out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                        else if (invalidMoveFlag)
+                            out.println("[REQUEST] You cannot draw those tiles. Try again, insert row: ");
+                        else
+                            out.println("[YOUR TURN] Select the row from which to draw from:");
+                    }
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
+                drawInfo.setX(Integer.parseInt(line));
+                imbecille = false;
+
+                //asks for column
+                do {
                     if (imbecille)
-                        out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                        out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                     else
-                        out.println("[YOUR TURN] Select the row from which to draw from:");
-                }
-                while(Objects.equals(string, "")){
-                    if (controller.hasTheGameEnded()) break;
-                    Thread.sleep(100);
-                }
-                line = string;
-                string = "";
-                if (line.equals("q") || controller.hasTheGameEnded()) return null;
-                imbecille = true;
-                System.out.println("PRINT DIOC");
-            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
-            drawInfo.setX(Integer.parseInt(line));
-            imbecille = false;
+                        out.println("[REQUEST] Select the column from which to draw from:");
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
+                drawInfo.setY(Integer.parseInt(line));
+                imbecille = false;
 
-            //asks for column
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
-                else
-                    out.println("[REQUEST] Select the column from which to draw from:");
-                while(Objects.equals(string, "")){
-                    if (controller.hasTheGameEnded()) break;
-                    Thread.sleep(100);
-                }
-                line = string;
-                string = "";
-                if (line.equals("q") || controller.hasTheGameEnded()) return null;
-                imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
-            drawInfo.setY(Integer.parseInt(line));
-            imbecille = false;
+                //asks for tile quantity to be drawn
+                do {
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
+                    else
+                        out.println("[REQUEST] How many tiles do you want to draw?");
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                drawInfo.setAmount(Integer.parseInt(line));
+                imbecille = false;
 
-            //asks for tile quantity to be drawn
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
-                else
-                    out.println("[REQUEST] How many tiles do you want to draw?");
-                while(Objects.equals(string, "")){
-                    if (controller.hasTheGameEnded()) break;
-                    Thread.sleep(100);
+                //asks for tile direction
+                if (drawInfo.getAmount() > 1) {
+                    do {
+                        if (imbecille)
+                            out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                        else
+                            out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                        while (Objects.equals(string, "")) {
+                            if (controller.hasTheGameEnded()) return null;
+                            Thread.sleep(100);
+                        }
+                        line = string;
+                        string = "";
+                        imbecille = true;
+                    } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 0);
+                    drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
+                    imbecille = false;
+                    try {
+                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+                        invalidMoveFlag = false;
+                    } catch (InvalidMoveException e) {
+                        invalidMoveFlag = true;
+                    }
                 }
-                line = string;
-                string = "";
-                if (line.equals("q") || controller.hasTheGameEnded()) return null;
-                imbecille = true;
-            }while(!isNumeric(line));
-            drawInfo.setAmount(Integer.parseInt(line));
-            imbecille = false;
-
-            //asks for tile direction
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                else
-                    out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                while(Objects.equals(string, "")){
-                    if (controller.hasTheGameEnded()) break;
-                    Thread.sleep(100);
+                else {
+                    drawInfo.setDirection(Board.Direction.RIGHT);
+                    try {
+                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+                        invalidMoveFlag = false;
+                    } catch (InvalidMoveException e) {
+                        invalidMoveFlag = true;
+                    }
                 }
-                line = string;
-                string = "";
-                if (line.equals("q") || controller.hasTheGameEnded()) return null;
-                imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
-            drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
-            imbecille = false;
+            }while (invalidMoveFlag);
 
-            List<Tile> drawnTiles;
-            TilePlacingSpot[][] grid = b.getBoardForDisplay();
-            drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
 
             String stringa = "[INFO]: Here are your tiles: ";
             int i = 1;
-            for (Tile t: drawnTiles){
-                stringa += i + ")" + t + " " ;
+            for (Tile t : drawnTiles) {
+                stringa += i + ")" + t + " ";
                 i++;
             }
             out.println(stringa);
@@ -349,60 +369,90 @@ public class ServerSock {
             jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
+            //asks shelf column to insert tiles
+            boolean tooManyTiles = false;
             do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
+                if (imbecille) {
+                    if (tooManyTiles) out.println("[REQUEST]: The tiles won't fit there! Try again: ");
+                    else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
+                }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                while(Objects.equals(string, "")){
-                    if (controller.hasTheGameEnded()) break;
+                while (Objects.equals(string, "")) {
+                    if (controller.hasTheGameEnded()) return null;
                     Thread.sleep(100);
                 }
                 line = string;
                 string = "";
                 if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
+            } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
             imbecille = false;
 
-            if(drawInfo.getAmount() != 1) {
-                do {
-                    if (imbecille)
-                        out.println("[REQUEST] Invalid Input! Choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
-                    else
-                        out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
+            //ask in which order to insert the tiles
+            List<Tile> reorderedTiles  = new ArrayList<>();
+            List<Integer> insertedValues = new ArrayList<>();
+            if (drawInfo.getAmount() > 1)
+                for (i = 0; i < drawInfo.getAmount(); i++) {
                     imbecille = false;
-                    while(Objects.equals(string, "")){
-                        if (controller.hasTheGameEnded()) break;
-                        Thread.sleep(50);
+                    if (i == 0) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert first: [e.g. 1)C 2)G 3)T -> type 1 to insert C]");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                        insertedValues.add(Integer.parseInt(line));
                     }
-                    line = string;
-                    string = "";
-                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
-                    if (!isNumeric(line))
-                        imbecille = true;
-                    else {
-                        if (drawInfo.getAmount() == 2) {
-                            if (!Objects.equals(line, "12") && !Objects.equals(line, "21"))
-                                imbecille = true;
-                        }
-                        if (drawInfo.getAmount() == 3) {
-                            if (!Objects.equals(line, "123") && !Objects.equals(line, "132") && !Objects.equals(line, "213") && !Objects.equals(line, "231") && !Objects.equals(line, "312") && !Objects.equals(line, "321"))
-                                imbecille = true;
-                        }
+                    if (i == 1) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert next");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                        insertedValues.add(Integer.parseInt(line));
                     }
-
-                } while (imbecille || !controller.hasTheGameEnded());
-                drawInfo.setOrder(Integer.parseInt(line));
-            }
-
-        } catch(SocketException e){
-            e.printStackTrace();
+                    if (i == 2) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert next");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                    }
+                }
+            else reorderedTiles = drawnTiles;
+            drawInfo.setTiles(reorderedTiles);
+        } catch(IOException | InterruptedException e){
+                e.printStackTrace();
         }
-        catch (Exception e) {
-            e.printStackTrace();};
-
         return drawInfo;
     }
 

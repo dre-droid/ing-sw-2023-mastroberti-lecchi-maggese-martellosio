@@ -1,66 +1,62 @@
 package Server.Socket;
 
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.Tile;
+
+import java.util.List;
 
 public class drawInfo {
-    int x, y, amount, column, order;
+    int x, y, amount, column;
     Board.Direction direction;
+    List<Tile> tiles;
 
     public drawInfo(){}
 
-    public drawInfo(int x, int y, int amount, Board.Direction direction, int column, int order){
+    public drawInfo(int x, int y, int amount, Board.Direction direction, int column, List<Tile> tiles){
         this.x = x;
         this.y = y;
         this.amount = amount;
         this.direction = direction;
         this.column = column;
-        this.order = order;
+        this.tiles = tiles;
     }
 
-    //getters and setters
+    //getters
     public int getColumn() {
         return column;
     }
-
     public int getAmount() {
         return amount;
     }
-
     public int getX() {
         return x;
     }
-
     public Board.Direction getDirection() {
         return direction;
     }
-
     public int getY() {
         return y;
     }
-    public int getOrder(){return order;}
+    public List<Tile> getTiles(){ return this.tiles;}
 
+    //setters
     public void setColumn(int column) {
         this.column = column;
     }
-
     public void setAmount(int amount) {
         this.amount = amount;
     }
-
     public void setDirection(Board.Direction direction) {
         this.direction = direction;
     }
-
     public void setY(int y) {
         this.y = y;
     }
-
     public void setX(int x) {
         this.x = x;
     }
-
-    public void setOrder(int order) {
-        this.order = order;
+    public void setTiles(List<Tile> reorderedTiles) {
+        this.tiles = reorderedTiles;
     }
 
     @Override

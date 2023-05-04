@@ -2,6 +2,7 @@ package main.java.it.polimi.ingsw.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Diego Lecchi
@@ -227,6 +228,18 @@ public class Shelf {
             }
         }
         return true;
+    }
+
+    /**
+     * @param amountOfTiles - the amount of tiles you're trying to insert
+     * @param column - in which column to insert
+     * @return - true if the tiles can fit, false otherwise
+     */
+    public boolean canItFit(int amountOfTiles, int column) {
+        for (int i = 0; i < ROWS; i++)
+            if (Objects.isNull(this.grid[i][column]))
+                return ROWS - i >= amountOfTiles;
+        return false;
     }
 
     /**
