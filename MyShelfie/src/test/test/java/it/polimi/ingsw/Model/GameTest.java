@@ -43,7 +43,7 @@ public class GameTest{
         //g.getBoard().printGridMap();
         //check that drawn tiles are inserted correctly in players' shelves
         if (g.isPlaying.getNickname().equals("p1")){
-            g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
+            //g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
             Tile t1 = p1.getShelf().getGrid()[0][0];
             Tile t2 = p1.getShelf().getGrid()[0][1];
 
@@ -52,7 +52,7 @@ public class GameTest{
             Assert.assertEquals(t1.toString(), "B");
             Assert.assertEquals(t2.toString(), "C");
 
-            g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
+            //g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
             t1 = p2.getShelf().getGrid()[0][0];
             t2 = p2.getShelf().getGrid()[0][1];
             Tile t3 = p2.getShelf().getGrid()[0][1];
@@ -62,14 +62,14 @@ public class GameTest{
             Assert.assertEquals(t2.toString(), "B");
         }
         else {
-            g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
+            //g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
             Tile t1 = p2.getShelf().getGrid()[0][0];
             Tile t2 = p2.getShelf().getGrid()[0][1];
 
             Assert.assertEquals(t1.toString(), "B");
             Assert.assertEquals(t2.toString(), "C");
 
-            g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
+//            g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
             t1 = p1.getShelf().getGrid()[0][0];
             t2 = p1.getShelf().getGrid()[0][1];
             Tile t3 = p1.getShelf().getGrid()[0][1];

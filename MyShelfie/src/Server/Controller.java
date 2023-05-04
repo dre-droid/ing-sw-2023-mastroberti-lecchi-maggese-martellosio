@@ -95,6 +95,14 @@ public class Controller {
     }
 
     /**
+     * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
+     * Should only be called if game hasn't started.
+     */
+    public void removePlayer(String nick) {
+        game.removePlayer(nick);
+    }
+
+    /**
      * this method is used to check if the game has already started
      * @return true if the game has already started, false otherwise
      */

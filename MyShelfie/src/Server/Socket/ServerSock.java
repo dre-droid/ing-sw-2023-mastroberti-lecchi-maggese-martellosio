@@ -21,13 +21,8 @@ public class ServerSock {
 
     public ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
-    private Server server;
-    private Thread runServer, acceptClient;
-    private List<Thread> clientListeners;
-    public String string = "";
-    private String quitter;
-    public boolean isFirstTurn;
-    public int nTry;
+    private final Server server;
+    public String string = "";  //used to communicate with playing player
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -38,92 +33,78 @@ public class ServerSock {
      * Creates a thread to accept clients.
      */
     public void runServer(){
-        ServerSocket serverSocket = null;
-        clientListeners = new ArrayList<>();
-        try {
-            serverSocket = new ServerSocket(59010);
-
             System.out.println("Socket server up and running...");
-        }catch (IOException e) {e.printStackTrace();}
-
-        ServerSocket finalServerSocket = serverSocket;
-        runServer = new Thread(() -> {
-            while (true){
-            try {
-                    Socket client = finalServerSocket.accept();
-                    acceptClient(client);
-
-                }
-                catch (IOException e) {
-                    System.out.println("Ded");  //lol
-                }
-            }
-        });
-        runServer.start();
+            Thread runServer = new Thread(() -> {
+                try (ServerSocket serverSocket = new ServerSocket(59010)) {
+                    while (true) {
+                        Socket client = serverSocket.accept();
+                        acceptClient(client);
+                    }
+                }catch (IOException e) {e.printStackTrace();}
+            });
+            runServer.start();
     }
 
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
      * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
-     * @param client
+     * When clients successfully joins, thread terminates.
+     * @param client - the client's socket
      */
     private void acceptClient(Socket client) {
-        acceptClient = new Thread(() -> {
+        Thread acceptClient = new Thread(() -> {
             try {
                 boolean repeat = true;
-                while (repeat){
+                while (repeat) {
                     PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-                    out.println("[INFO]: Welcome to MyShelfie! Press 'q' to quit.");
-                    int resultValue = playerJoin(client);
+                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat' to chat with other players..");
 
-                    if (resultValue == -3) repeat = true;   //invalid nickname
-                    else if (resultValue == 0|| resultValue == -1) {    //successfully joined
+                    int resultValue = playerJoin(client);
+                    if (resultValue == 0 || resultValue == -1) {    //successfully joined
                         repeat = false;
                         clientListener(client, getNickFromSocket(client));
                     }
-                };    //while nickname is not valid, keep trying for a new name
-            }
-            catch (SocketException s) {
-                System.out.println("You quit.");
-            }
-            catch (IOException e) {
-                try {client.close();}
-                catch (IOException ex) {ex.printStackTrace();}
-                finally {System.out.println("Client failed to join");}
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
             }
         });
         acceptClient.start();
     }
     /**
      * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
-     * @param client
-     * @throws IOException
      * @return result of controller.joinGame()
      */
-    private int playerJoin(Socket client) throws IOException {
+    private int playerJoin(Socket client) throws IOException, InterruptedException {
         String nickname;
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
         //asks player nickname
+        boolean imbecille = false;
         out.println("[REQUEST] Inserisci un nickname:");
-        nickname = reader.readLine();
-        out.println("Il nickname inserito è:  "+ nickname);
+        do {
+            if (imbecille)
+                out.println("[REQUEST] Nickname is too long! Try a shorter one:");
+            nickname = reader.readLine();
+            imbecille = true;
+        } while (nickname.length() > 15);
+        out.println("Il nickname inserito è: "+ nickname);
 
 
         switch (controller.joinGame(nickname)) {
             //no existing game
             case -1 -> {
                 String line;
-                int counter = 0;
-
+                imbecille = false;
                 do {
-                    if (counter > 0) out.println("[INFO]: Input non valido. Riprova inserendo un numero da 2 a 4.");
-                    out.println("[REQUEST] Inserisci il numero di giocatori: ");
+                    if (imbecille)
+                        out.println("[REQUEST]: Invalid input, you can choose between 2 and 4 players: ");
+                    else
+                        out.println("[REQUEST]: Choose the number of players for the game: ");
                     line = reader.readLine();
-                    System.out.println("Number of players selected: " + line);
-                    counter++;
+                    imbecille = true;
                 }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
 
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
@@ -154,19 +135,15 @@ public class ServerSock {
     }
 
     /**
-     * creates a thread to listen to the clients' messages. If client's turn, writes clients messages to global variable string. If message starts with
+     * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
      * '/c' processes message for chat, otherwise output is ignored.
-     * @param client
-     * @param nickname
      */
     public void clientListener(Socket client, String nickname){
         Thread clientListener = new Thread(() -> {
             try {
-                String line = "";
+                String line;
                 InputStream input = client.getInputStream();
-                boolean active = true;
-                while (active) {
-                    Thread.sleep(50);
+                while (true) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     line = reader.readLine();
 
@@ -183,28 +160,30 @@ public class ServerSock {
                         receiver = receiver.substring(0, atIndex);
                         sendChatMessageToClient(nickname, text, receiver);
                     }
-                        System.out.println("chiamando chat"); //chiamata a chat
 
-                    if (line.equals("/quit")) {//game quit
-                        //asks for confirmation
-                        //if (!controller.hasGameBeenCreated()) client.close();   //not right way of handling
-                        //else {
-                            controller.endGame();
-                            for (socketNickStruct c : clients) {
-                                PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                                pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
-                                c.getSocket().close();
+                    if (line.equals("/quit")) {
+                        PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
+                        pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
+                        line = reader.readLine();
+                        if (line.equals("y")) {
+                            if (!controller.hasGameStarted()) {
+                                controller.removePlayer(nickname);
+                                pw.println("[GAMEEND]: You quit.");
+                            } else {
+                                controller.endGame();
+                                for (socketNickStruct c : clients) {
+                                    pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                                    pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
+                                    c.getSocket().close();
+                                }
                             }
-                        //}
-
+                            break;  //closes listener on confirmed quit
+                        }
                     }
-
                 }
             } catch (SocketException e){
                 System.out.println(nickname + "'s socket has been closed.");
             } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -457,9 +436,9 @@ public class ServerSock {
     }
 
     /**
-     * This method is used to update the client on their turn - it informs the turn has succesfully ended and shows them their updated shelf
-     * @param updatedShelf
-     * @param nickname
+     * This method is used to update the client at the end of their turn - it informs them the turn has successfully ended and shows them their updated shelf
+     * @param updatedShelf client's shelf after tiles drawn from board are inserted
+     * @param nickname client's nick
      */
     public void turnEnd(Shelf updatedShelf, String nickname){
         Socket playerSocket = null;
@@ -492,6 +471,40 @@ public class ServerSock {
         }
     }
 
+
+    public void notifyGameStart(String nickname) {
+        try {
+            for (socketNickStruct c : clients) {
+                PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     *  Creates new instance of clients array
+     */
+    public void flushServer(){
+            clients = new ArrayList<>();
+    }
+    public void setController(Controller c){ this.controller = c;}
+
+    public void sendChatMessageToClient(String sender, String text, String receiver) throws IOException {
+        if(clients.stream().noneMatch(client->client.getName().equals(receiver)))
+            server.chatMessage(sender, text, receiver);
+        else
+            for (socketNickStruct c: clients){
+                if(c.getName().equals(receiver)){
+                    /*System.out.println(sender);
+                    System.out.println(text);
+                    System.out.println(receiver);*/
+                    PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+                    out.println("[MESSAGE_FROM_"+sender+"]: "+text);
+                }
+            }
+    }
+
     public boolean hasDisconnectionOccurred(){
         for (socketNickStruct c: clients){
             if (c.getSocket().isClosed()){
@@ -517,47 +530,5 @@ public class ServerSock {
     private String getNickFromSocket(Socket client){
         for (socketNickStruct c: clients) if (c.getSocket().equals(client)) return c.getName();
         return null;
-    }
-
-    /*
-    /**
-     * notifies all socket players of game ending
-     * @param nick - the nickname of the player who quit or disconnected
-     * @throws IOException
-     */
-    public void notifyGameEnd(String nick) throws IOException {
-        //find client's socket
-        for (socketNickStruct c: clients){
-            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
-            c.getSocket().close();
-        }
-    }
-    /*
-
-    /**
-     *  Creates new instance of clients array
-     */
-    public void flushServer(){
-            clients = new ArrayList<>();
-    }
-
-    public void setController(Controller c){ this.controller = c;}
-
-    public void setQuitter(String s){ quitter = s;}
-
-    public void sendChatMessageToClient(String sender, String text, String receiver) throws IOException {
-        if(clients.stream().noneMatch(client->client.getName().equals(receiver)))
-            server.chatMessage(sender, text, receiver);
-        else
-            for (socketNickStruct c: clients){
-                if(c.getName().equals(receiver)){
-                    /*System.out.println(sender);
-                    System.out.println(text);
-                    System.out.println(receiver);*/
-                    PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-                    out.println("[MESSAGE_FROM_"+sender+"]: "+text);
-                }
-            }
     }
 }

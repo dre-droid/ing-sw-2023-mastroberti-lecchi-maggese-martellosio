@@ -272,7 +272,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
     public void flushServer(){
-
+        clients = new HashMap<>();
     }
 
     public void notifyStartOfTurn(String playerNickname){

@@ -24,7 +24,7 @@ public class Server {
     private Map<String, connectionType> clientsMap;
     private Controller controller;
 
-    public void run() {
+    public void run() throws InterruptedException {
         //run Socket and RMI servers
         serverSock = new ServerSock(controller, this);
         serverSock.runServer();
@@ -53,24 +53,22 @@ public class Server {
                     throw new RuntimeException(e);
                 }
             }
-            //plays turns
-            try {
-                while (!controller.hasTheGameEnded()) {
-                    Thread.sleep(500);
-                    if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
-                        controller.playTurn();
-                    }
+
+            serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            while (!controller.hasTheGameEnded()) {
+                Thread.sleep(500);
+                if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
+                    controller.playTurn();
                 }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
 
             //game end handling
             System.out.println("Game has ended. Accepting players for new game...");
             serverSock.flushServer();
-            serverRMI.flushServer();    //needs implementation
+            serverRMI.flushServer();    //needs testing
         } while (true);
     }
+
     public static void main(String[] args) throws InvalidMoveException, InterruptedException {
         Server server = new Server();
         server.run();
@@ -78,16 +76,6 @@ public class Server {
 
     public void addPlayerToRecord(String nickname, connectionType conn) {
         clientsMap.put(nickname, conn);
-    }
-
-    /**
-     * handles player quitting game: results in game ending, all players should be notified of the event
-     * @param nick - the nick of the player who quit or disconnected
-     * @throws IOException
-     */
-    private void gameEnd(String nick) throws IOException {
-        //rmi notify
-        serverSock.notifyGameEnd(nick);
     }
 
     public void chatMessage(String sender, String text, String receiver){

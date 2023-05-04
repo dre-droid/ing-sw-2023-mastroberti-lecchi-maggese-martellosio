@@ -220,6 +220,17 @@ public class Game {
     }
 
     /**
+     * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
+     * Should only be called if game hasn't started.
+     */
+    public void removePlayer(String nick) {
+       for (Player p: playersList) if (p.getNickname().equals(nick)){
+           playersList.remove(p);
+           leaderBoard.remove(p);
+       }
+    }
+
+    /**
      * comparator used to keep the leaderboard in descending ordered by score
      */
     private class scoreComparator implements Comparator<Player>{
