@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="MatchTypePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="366.0" prefWidth="568.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.MatchTypeController">
+   <children>
+      <Label layoutX="82.0" layoutY="59.0" text="No Game to join? Select match type: " textFill="#fffafa">
+         <font>
+            <Font size="28.0" />
+         </font>
+      </Label>
+      <RadioButton layoutX="53.0" layoutY="210.0" mnemonicParsing="false" text="2p" textFill="#fcfcfc">
+         <toggleGroup>
+            <ToggleGroup fx:id="MatchTypeGroup" />
+         </toggleGroup>
+         <font>
+            <Font size="20.0" />
+         </font>
+      </RadioButton>
+      <RadioButton layoutX="255.0" layoutY="210.0" mnemonicParsing="false" text="3p" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
+         <font>
+            <Font size="20.0" />
+         </font></RadioButton>
+      <RadioButton layoutX="431.0" layoutY="209.0" mnemonicParsing="false" text="4p" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
+         <font>
+            <Font size="22.0" />
+         </font></RadioButton>
+      <Button fx:id="CreateGameButton" layoutX="230.0" layoutY="294.0" mnemonicParsing="false" onAction="#switchtoGameScene" text="Create GAME" />
+   </children>
+</AnchorPane>
