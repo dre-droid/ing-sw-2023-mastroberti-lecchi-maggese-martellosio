@@ -9,6 +9,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,11 +21,8 @@ public class ServerSock {
 
     public ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
-    private Server server;
-    private Thread runServer, acceptClient;
-    public String string = "";
-    public boolean isFirstTurn;
-    public int nTry;
+    private final Server server;
+    public String string = "";  //used to communicate with playing player
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -35,87 +33,78 @@ public class ServerSock {
      * Creates a thread to accept clients.
      */
     public void runServer(){
-        ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket(59010);
-
             System.out.println("Socket server up and running...");
-        }catch (IOException e) {e.printStackTrace();}
-
-        ServerSocket finalServerSocket = serverSocket;
-        runServer = new Thread(() -> {
-            while (true){
-            try {
-                    Socket client = finalServerSocket.accept();
-                    acceptClient(client);
-
-                }
-                catch (IOException e) {
-                    System.out.println("Ded");  //lol
-                }
-            }
-        });
-        runServer.start();
+            Thread runServer = new Thread(() -> {
+                try (ServerSocket serverSocket = new ServerSocket(59010)) {
+                    while (true) {
+                        Socket client = serverSocket.accept();
+                        acceptClient(client);
+                    }
+                }catch (IOException e) {e.printStackTrace();}
+            });
+            runServer.start();
     }
 
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
-     * List<socketNickStruct> clients if successful
-     * @param client
+     * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
+     * When clients successfully joins, thread terminates.
+     * @param client - the client's socket
      */
     private void acceptClient(Socket client) {
-        acceptClient = new Thread(() -> {
+        Thread acceptClient = new Thread(() -> {
             try {
                 boolean repeat = true;
-                while (repeat){
+                while (repeat) {
                     PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-                    out.println("[INFO]: Welcome to MyShelfie! Press 'q' to quit.");
-                    int resultValue = playerJoin(client);
+                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat' to chat with other players..");
 
-                    if (resultValue == -3) repeat = true;   //invalid nickname
-                    else if (resultValue == 0|| resultValue == -1) {    //successfully joined
+                    int resultValue = playerJoin(client);
+                    if (resultValue == 0 || resultValue == -1) {    //successfully joined
                         repeat = false;
+                        clientListener(client, getNickFromSocket(client));
                     }
-                };    //while nickname is not valid, keep trying for a new name
-            } catch (IOException e) {
-                try {client.close();}
-                catch (IOException ex) {ex.printStackTrace();}
-                finally {System.out.println("Client failed to join");}
+                }
+            } catch (InterruptedException | IOException e) {
+                e.printStackTrace();
             }
         });
         acceptClient.start();
     }
-
     /**
      * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
-     * @param client
-     * @throws IOException
      * @return result of controller.joinGame()
      */
-    private int playerJoin(Socket client) throws IOException {
+    private int playerJoin(Socket client) throws IOException, InterruptedException {
         String nickname;
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
 
         //asks player nickname
+        boolean imbecille = false;
         out.println("[REQUEST] Inserisci un nickname:");
-        nickname = reader.readLine();
-        out.println("Il nickname inserito è:  "+ nickname);
+        do {
+            if (imbecille)
+                out.println("[REQUEST] Nickname is too long! Try a shorter one:");
+            nickname = reader.readLine();
+            imbecille = true;
+        } while (nickname.length() > 15);
+        out.println("Il nickname inserito è: "+ nickname);
 
 
         switch (controller.joinGame(nickname)) {
             //no existing game
             case -1 -> {
                 String line;
-                int counter = 0;
-
+                imbecille = false;
                 do {
-                    if (counter > 0) out.println("[INFO]: Input non valido. Riprova inserendo un numero da 2 a 4.");
-                    out.println("[REQUEST] Inserisci il numero di giocatori: ");
+                    if (imbecille)
+                        out.println("[REQUEST]: Invalid input, you can choose between 2 and 4 players: ");
+                    else
+                        out.println("[REQUEST]: Choose the number of players for the game: ");
                     line = reader.readLine();
-                    System.out.println("Number of players selected: " + line);
-                    counter++;
+                    imbecille = true;
                 }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
 
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
@@ -146,19 +135,76 @@ public class ServerSock {
     }
 
     /**
+     * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
+     * '/c' processes message for chat, otherwise output is ignored.
+     */
+    public void clientListener(Socket client, String nickname){
+        Thread clientListener = new Thread(() -> {
+            try {
+                String line;
+                InputStream input = client.getInputStream();
+                while (true) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    line = reader.readLine();
+
+                    if (controller.hasGameStarted())
+                        if (controller.isMyTurn(nickname) && !line.startsWith("/chat"))
+                            string = line;
+
+                    if (line.startsWith("/chat")){
+                        String sender, text, receiver;
+                        int atIndex = line.indexOf('@');
+                        receiver = line.substring(atIndex+1);
+                        atIndex = receiver.indexOf(' ');
+                        text = receiver.substring(atIndex+1);
+                        receiver = receiver.substring(0, atIndex);
+                        sendChatMessageToClient(nickname, text, receiver);
+                    }
+
+                    if (line.equals("/quit")) {
+                        PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
+                        pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
+                        line = reader.readLine();
+                        if (line.equals("y")) {
+                            if (!controller.hasGameStarted()) {
+                                controller.removePlayer(nickname);
+                                pw.println("[GAMEEND]: You quit.");
+                            } else {
+                                controller.endGame();
+                                for (socketNickStruct c : clients) {
+                                    pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                                    pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
+                                    c.getSocket().close();
+                                }
+                            }
+                            break;  //closes listener on confirmed quit
+                        }
+                    }
+                }
+            } catch (SocketException e){
+                System.out.println(nickname + "'s socket has been closed.");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        clientListener.start();
+    }
+
+    /**
      * Queries the client for info on his turn's drawn tiles
      * @param nickname - the nickname of the client to query
      * @param b - game's board
      * @param shelf - client's board
      * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
-    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard) throws InvalidMoveException {
         Socket playerSocket = null;
+        List<Tile> drawnTiles = new ArrayList<>();
         drawInfo drawInfo = new drawInfo();
 
         //find client's socket
-        for (socketNickStruct c: clients)
-            if (c.getName().equals(nickname)){
+        for (socketNickStruct c : clients)
+            if (c.getName().equals(nickname)) {
                 playerSocket = c.getSocket();
             }
 
@@ -185,86 +231,115 @@ public class ServerSock {
             out.println("[GSONCGC]" + jsonCommonGoal);
 
             ArrayList<String> stringLeaderboard = new ArrayList<String>();
-            for (Player p: leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
+            for (Player p : leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
             String jsonLeaderboard = gson.toJson(stringLeaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
             //*********************************************
 
             boolean imbecille = false;
             String line;
+            boolean invalidMoveFlag = false;
 
-            //asks for row
+            //do-while block handles correctly drawing tiles from board
             do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
-                else
-                    out.println("[YOUR TURN] Select the row from which to draw from:");
-                while(Objects.equals(string, ""))
+                //asks for row
+                do {
                     Thread.sleep(50);
-                line = string;
-                string = "";
-                if (line.equals("q")) return null;
-                imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
-            drawInfo.setX(Integer.parseInt(line));
-            imbecille = false;
+                    if (!controller.hasTheGameEnded()) {
+                        if (imbecille)
+                            out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                        else if (invalidMoveFlag)
+                            out.println("[REQUEST] You cannot draw those tiles. Try again, insert row: ");
+                        else
+                            out.println("[YOUR TURN] Select the row from which to draw from:");
+                    }
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
+                drawInfo.setX(Integer.parseInt(line));
+                imbecille = false;
 
-            //asks for column
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
-                else
-                    out.println("[REQUEST] Select the column from which to draw from:");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
-                line = string;
-                string = "";
-                if (line.equals("q")) return null;
-                imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>8 || Integer.parseInt(line)<0);
-            drawInfo.setY(Integer.parseInt(line));
-            imbecille = false;
+                //asks for column
+                do {
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
+                    else
+                        out.println("[REQUEST] Select the column from which to draw from:");
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
+                drawInfo.setY(Integer.parseInt(line));
+                imbecille = false;
 
-            //asks for tile quantity to be drawn
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
-                else
-                    out.println("[REQUEST] How many tiles do you want to draw?");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
-                line = string;
-                string = "";
-                if (line.equals("q")) return null;
-                imbecille = true;
-            }while(!isNumeric(line));
-            drawInfo.setAmount(Integer.parseInt(line));
-            imbecille = false;
+                //asks for tile quantity to be drawn
+                do {
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
+                    else
+                        out.println("[REQUEST] How many tiles do you want to draw?");
+                    while (Objects.equals(string, "")) {
+                        if (controller.hasTheGameEnded()) return null;
+                        Thread.sleep(100);
+                    }
+                    line = string;
+                    string = "";
+                    imbecille = true;
+                } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                drawInfo.setAmount(Integer.parseInt(line));
+                imbecille = false;
 
-            //asks for tile direction
-            do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                else
-                    out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
-                line = string;
-                string = "";
-                if (line.equals("q")) return null;
-                imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>3 || Integer.parseInt(line)<0);
-            drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
-            imbecille = false;
+                //asks for tile direction
+                if (drawInfo.getAmount() > 1) {
+                    do {
+                        if (imbecille)
+                            out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                        else
+                            out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                        while (Objects.equals(string, "")) {
+                            if (controller.hasTheGameEnded()) return null;
+                            Thread.sleep(100);
+                        }
+                        line = string;
+                        string = "";
+                        imbecille = true;
+                    } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 0);
+                    drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
+                    imbecille = false;
+                    try {
+                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+                        invalidMoveFlag = false;
+                    } catch (InvalidMoveException e) {
+                        invalidMoveFlag = true;
+                    }
+                }
+                else {
+                    drawInfo.setDirection(Board.Direction.RIGHT);
+                    try {
+                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+                        invalidMoveFlag = false;
+                    } catch (InvalidMoveException e) {
+                        invalidMoveFlag = true;
+                    }
+                }
+            }while (invalidMoveFlag);
 
-            List<Tile> drawnTiles;
-            TilePlacingSpot[][] grid = b.getBoardForDisplay();
-            drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
 
             String stringa = "[INFO]: Here are your tiles: ";
             int i = 1;
-            for (Tile t: drawnTiles){
-                stringa += i + ")" + t + " " ;
+            for (Tile t : drawnTiles) {
+                stringa += i + ")" + t + " ";
                 i++;
             }
             out.println(stringa);
@@ -273,62 +348,97 @@ public class ServerSock {
             jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
+            //asks shelf column to insert tiles
+            boolean tooManyTiles = false;
             do {
-                if(imbecille)
-                    out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
+                if (imbecille) {
+                    if (tooManyTiles) out.println("[REQUEST]: The tiles won't fit there! Try again: ");
+                    else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
+                }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                while(Objects.equals(string, ""))
-                    Thread.sleep(50);
+                while (Objects.equals(string, "")) {
+                    if (controller.hasTheGameEnded()) return null;
+                    Thread.sleep(100);
+                }
                 line = string;
                 string = "";
-                if (line.equals("q")) return null;
+                if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
-            }while(!isNumeric(line) || Integer.parseInt(line)>4 || Integer.parseInt(line)<0);
+            } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
             imbecille = false;
 
-            if(drawInfo.getAmount() != 1) {
-                do {
-                    if (imbecille)
-                        out.println("[REQUEST] Invalid Input! Choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
-                    else
-                        out.println("[REQUEST] Now choose in which order you want to insert the tiles: [e.g. CGT -> TCG: 312]");
+            //ask in which order to insert the tiles
+            List<Tile> reorderedTiles  = new ArrayList<>();
+            List<Integer> insertedValues = new ArrayList<>();
+            if (drawInfo.getAmount() > 1)
+                for (i = 0; i < drawInfo.getAmount(); i++) {
                     imbecille = false;
-                    while(Objects.equals(string, ""))
-                        Thread.sleep(50);
-                    line = string;
-                    string = "";
-                    if (line.equals("q")) return null;
-
-                    if (!isNumeric(line))
-                        imbecille = true;
-                    else {
-                        if (drawInfo.getAmount() == 2) {
-                            if (!Objects.equals(line, "12") && !Objects.equals(line, "21"))
-                                imbecille = true;
-                        }
-                        if (drawInfo.getAmount() == 3) {
-                            if (!Objects.equals(line, "123") && !Objects.equals(line, "132") && !Objects.equals(line, "213") && !Objects.equals(line, "231") && !Objects.equals(line, "312") && !Objects.equals(line, "321"))
-                                imbecille = true;
-                        }
+                    if (i == 0) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert first: [e.g. 1)C 2)G 3)T -> type 1 to insert C]");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                        insertedValues.add(Integer.parseInt(line));
                     }
-
-                } while (imbecille);
-                drawInfo.setOrder(Integer.parseInt(line));
-            }
-
-        } catch(Exception e){
-            e.printStackTrace();
+                    if (i == 1) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert next");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                        insertedValues.add(Integer.parseInt(line));
+                    }
+                    if (i == 2) {
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
+                            else
+                                out.println("[REQUEST]: Choose which tile to insert next");
+                            while (Objects.equals(string, "")) {
+                                if (controller.hasTheGameEnded()) return null;
+                                Thread.sleep(100);
+                            }
+                            line = string;
+                            string = "";
+                            imbecille = true;
+                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                    }
+                }
+            else reorderedTiles = drawnTiles;
+            drawInfo.setTiles(reorderedTiles);
+        } catch(IOException | InterruptedException e){
+                e.printStackTrace();
         }
-
         return drawInfo;
     }
 
     /**
-     * This method is used to update the client on their turn - it informs the turn has succesfully ended and shows them their updated shelf
-     * @param updatedShelf
-     * @param nickname
+     * This method is used to update the client at the end of their turn - it informs them the turn has successfully ended and shows them their updated shelf
+     * @param updatedShelf client's shelf after tiles drawn from board are inserted
+     * @param nickname client's nick
      */
     public void turnEnd(Shelf updatedShelf, String nickname){
         Socket playerSocket = null;
@@ -352,15 +462,7 @@ public class ServerSock {
 
     }
 
-    public void printErrorToClient(String message, String nickname) throws IOException{
-        for (socketNickStruct s: clients)
-            if (s.getName().equals(nickname)) {
-                PrintWriter out = new PrintWriter(s.getSocket().getOutputStream(), true);
-                out.println("[INVALID MOVE]" + message);
-            }
-    }
-
-    public static boolean isNumeric(String str) {
+    private static boolean isNumeric(String str) {
         try {
             Integer.parseInt(str);
             return true;
@@ -370,72 +472,38 @@ public class ServerSock {
     }
 
 
+    public void notifyGameStart(String nickname) {
+        try {
+            for (socketNickStruct c : clients) {
+                PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
-     * clientListener listens to messages incoming from client
-     * @param
-     * @return line to drawInquiry if it doesn't start with /c, otherwise it will call chatHandler
+     *  Creates new instance of clients array
      */
-    /*public String clientListener(Socket client){
-        ExecutorService pool = Executors.newFixedThreadPool(1);
+    public void flushServer(){
+            clients = new ArrayList<>();
+    }
+    public void setController(Controller c){ this.controller = c;}
 
-        Callable<String> clientListener = () -> {
-            try{
-                InputStream input = client.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                String line;
-                boolean active = true;
-                while(active){
-                    line = reader.readLine();
-                    if(line.startsWith("/c")){
-                        System.out.println("è stata chiamata la chat");//call chat handler
-                    }
-                    else
-                        return line;
+    public void sendChatMessageToClient(String sender, String text, String receiver) throws IOException {
+        if(clients.stream().noneMatch(client->client.getName().equals(receiver)))
+            server.chatMessage(sender, text, receiver);
+        else
+            for (socketNickStruct c: clients){
+                if(c.getName().equals(receiver)){
+                    /*System.out.println(sender);
+                    System.out.println(text);
+                    System.out.println(receiver);*/
+                    PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+                    out.println("[MESSAGE_FROM_"+sender+"]: "+text);
                 }
-            }catch (IOException e){
-                System.out.println("Wut the hell? Ooh ma god, no waayayaayyy");
             }
-            return null;
-        };
-
-        Future<String> future = pool.submit(clientListener);
-        try{
-            return future.get();
-        }catch(InterruptedException | ExecutionException e){
-            System.out.println("boh callable");
-
-        }
-        return null;
     }
-
-     */
-    /*
-    public String clientListener(Socket client){
-        String line = "";
-        try{
-            InputStream input = client.getInputStream();
-
-            boolean active = true;
-            while(active){
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                line = reader.readLine();
-
-
-                if(line.startsWith("/c"))
-                    System.out.println("chiamando chat"); //chiamata a chat
-                if (line.equals("q"))
-                    return line;
-                else
-                    active = false;
-            }
-
-        }catch(IOException e){
-            System.out.println("Wut the hell? Ooh ma god, no waayAyaayYy");
-        }
-        return line;
-    }
-
-     */
 
     public boolean hasDisconnectionOccurred(){
         for (socketNickStruct c: clients){
@@ -447,6 +515,9 @@ public class ServerSock {
         return false;
     }
 
+    /**
+     * @return the name of the player that disconnected if present
+     */
     public String getNameOfDisconnection(){
         for (socketNickStruct c: clients)
             if (c.getSocket().isClosed()) return c.getName();
@@ -454,51 +525,10 @@ public class ServerSock {
     }
 
     /**
-     * notifies all socket players of game ending
-     * @param nick - the nickname of the player who quit or disconnected
-     * @throws IOException
+     * @return the name of the corresponding client, null if not present
      */
-    public void notifyGameEnd(String nick) throws IOException {
-        //find client's socket
-        for (socketNickStruct c: clients){
-            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
-            c.getSocket().close();
-        }
-
-    }
-
-    /**
-     *  Creates new instance of clients array
-     */
-    public void flushServer(){
-            clients = new ArrayList<>();
-    }
-
-    public void setController(Controller c){ this.controller = c;}
-
-    public void clientListener(Socket client, String nickname){
-        Runnable clientListener = () -> {
-            try {
-                String line = "";
-                InputStream input = client.getInputStream();
-                boolean active = true;
-                while (active) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    line = reader.readLine();
-
-                    if (controller.isMyTurn(nickname) && !line.startsWith("/c "))
-                        string = line;
-
-                    if (line.startsWith("/c"))
-                        System.out.println("chiamando chat"); //chiamata a chat
-
-
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        };
-        new Thread(clientListener).start();
+    private String getNickFromSocket(Socket client){
+        for (socketNickStruct c: clients) if (c.getSocket().equals(client)) return c.getName();
+        return null;
     }
 }

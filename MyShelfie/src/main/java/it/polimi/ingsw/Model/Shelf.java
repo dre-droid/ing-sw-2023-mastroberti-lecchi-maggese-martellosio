@@ -2,6 +2,7 @@ package main.java.it.polimi.ingsw.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Diego Lecchi
@@ -230,6 +231,18 @@ public class Shelf {
     }
 
     /**
+     * @param amountOfTiles - the amount of tiles you're trying to insert
+     * @param column - in which column to insert
+     * @return - true if the tiles can fit, false otherwise
+     */
+    public boolean canItFit(int amountOfTiles, int column) {
+        for (int i = 0; i < ROWS; i++)
+            if (Objects.isNull(this.grid[i][column]))
+                return ROWS - i >= amountOfTiles;
+        return false;
+    }
+
+    /**
      * This method returns a copy of the grid
      * @return a Tile matrix that is the copy of the grid of the shelf
      */
@@ -237,8 +250,14 @@ public class Shelf {
         Tile[][] displayGrid = new Tile[ROWS][COLUMNS];
         for(int i=0;i<ROWS;i++)
             for(int j=0;j<COLUMNS;j++){
-                if(grid[i][j]!=null)
+                if(grid[i][j]!=null){
+                    System.out.print(grid[i][j]+ " ");
                     displayGrid[i][j] = new Tile(grid[i][j].getType());
+                }
+                else{
+                    System.out.print("x ");
+                }
+                System.out.println();
             }
         return displayGrid;
     }

@@ -374,6 +374,33 @@ public class Board {
     }
 
     /**
+     * ONLY FOR TESTING
+     * @param x
+     * @param y
+     */
+    public void setTileBOOK(int x, int y){
+        grid[x][y].positionTile(new Tile(Type.BOOK));
+    }
+
+    /**
+     * ONLY FOR TESTING
+     * @param x
+     * @param y
+     */
+    public void setTilePLANT(int x, int y){
+        grid[x][y].positionTile(new Tile(Type.PLANT));
+    }
+
+    /**
+     * ONLY FOR TESTING
+     * @param x
+     * @param y
+     */
+    public void setTileCAT(int x, int y){
+        grid[x][y].positionTile(new Tile(Type.CAT));
+    }
+
+    /**
      * This method returns a copy of the board to display
      *
      * @return a TilePlacingSpot[][] representing the state of the board

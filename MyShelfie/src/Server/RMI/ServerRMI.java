@@ -272,7 +272,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
     public void flushServer(){
-
+        clients = new HashMap<>();
     }
 
     public void notifyStartOfTurn(String playerNickname){
@@ -331,6 +331,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void quitGame(String playerNickname) throws RemoteException{
         System.out.println("Server received quit command");
         controller.endGame();
+    }
+
+    @Override
+    public void chatMessage(String senderName, String text, String receiverName) throws RemoteException {
+        if(clients.get(receiverName)==null){
+            server.chatMessage(senderName, text, receiverName);
+        }
+        else{
+            clients.get(receiverName).receiveMessage(text, senderName);
+        }
     }
 
 

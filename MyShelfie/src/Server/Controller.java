@@ -95,6 +95,14 @@ public class Controller {
     }
 
     /**
+     * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
+     * Should only be called if game hasn't started.
+     */
+    public void removePlayer(String nick) {
+        game.removePlayer(nick);
+    }
+
+    /**
      * this method is used to check if the game has already started
      * @return true if the game has already started, false otherwise
      */
@@ -306,18 +314,25 @@ public class Controller {
      *
      */
     public void playTurn() {
+        boolean invalidMoveFlag = false;
         Player thisTurnsPlayer = game.isPlaying;
         drawInfo info;
-        info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(),game.getBoard(),game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
-        if (!Objects.isNull(info)) {
+
+        do {
             try {
-                game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getOrder());
-                server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
-                serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
+                info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
+                if (!Objects.isNull(info)) {    //null object is passed when game ends
+                    game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getTiles());
+                    server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
+                    serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
+                    invalidMoveFlag = false;
+                } else
+                    endGame();
             } catch (InvalidMoveException e) {
+                invalidMoveFlag = true;
                 e.printStackTrace();
             }
-        }else endGame();
+        }while(invalidMoveFlag);
     }
 
     public void endGame(){
