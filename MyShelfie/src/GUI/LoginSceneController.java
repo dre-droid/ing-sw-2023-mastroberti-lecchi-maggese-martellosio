@@ -5,8 +5,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
@@ -22,16 +20,6 @@ public class LoginSceneController {
     Button LoginButton;
     @FXML
     javafx.scene.control.TextField usernameText;
-    @FXML
-    RadioButton RMIButton;
-    @FXML
-    RadioButton SOCKETButton;
-    @FXML
-    Label ConnectionLabel;
-    @FXML
-    ToggleGroup ConnectionType;
-
-
 
 
     private Stage stage;
@@ -46,12 +34,11 @@ public class LoginSceneController {
 
     public void switchtoConnectionTypeScene(ActionEvent event){
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
             stage = (Stage)((Node)event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
