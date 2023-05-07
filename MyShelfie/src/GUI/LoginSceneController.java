@@ -35,13 +35,13 @@ public class LoginSceneController {
     public void switchtoConnectionTypeScene(ActionEvent event){
         try {
             Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
+            stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
 
 
 

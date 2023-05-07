@@ -10,12 +10,12 @@
 
 <AnchorPane fx:id="AnchorePane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
    <children>
-      <Label fx:id="TopLabel" layoutX="198.0" layoutY="43.0" text="Insert your username">
+      <Label id="TopLabel" layoutX="198.0" layoutY="43.0" text="Insert your username">
          <font>
             <Font size="22.0" />
          </font>
       </Label>
-      <Button fx:id="LoginButton" layoutX="268.0" layoutY="281.0" mnemonicParsing="false" onAction="#switchtoConnectionTypeScene" text="Login">
+      <Button id="LoginButton" layoutX="268.0" layoutY="281.0" mnemonicParsing="false" onAction="#switchtoConnectionTypeScene" text="Login">
          <font>
             <Font size="20.0" />
          </font>
