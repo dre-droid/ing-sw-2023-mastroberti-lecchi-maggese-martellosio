@@ -26,15 +26,16 @@ public class LoginSceneController {
     private Scene scene;
     private Parent root;
 
+    /*
     public void login(ActionEvent event) throws IOException{
             String username = usernameText.getText();
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Scene2.fxml"));
             root = loader.load();
-    }
+    }*/
 
     public void switchtoConnectionTypeScene(ActionEvent event){
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
             stage = (Stage)((Node)event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);
