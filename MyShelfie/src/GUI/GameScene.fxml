@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.scene.image.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="GameAnchor" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
+<AnchorPane fx:id="GameAnchor" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
    <children>
       <ImageView fx:id="BoardID" fitHeight="394.0" fitWidth="402.0" layoutX="95.0" layoutY="80.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/boards/livingroom.png" />
+            <Image url="@../../Resources/boards/livingroom.png" />
          </image>
          <cursor>
             <Cursor fx:constant="DEFAULT" />
@@ -22,32 +23,32 @@
       </ImageView>
       <ImageView fx:id="Opp1Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="619.0" layoutY="139.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/boards/bookshelf.png" />
+            <Image url="@../../Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="Opp2Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="619.0" layoutY="342.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/boards/bookshelf.png" />
+            <Image url="@../../Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="CG1" fitHeight="150.0" fitWidth="200.0" layoutX="820.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/common%20goal%20cards/1.jpg" />
+            <Image url="@../../Resources/common_goal_cards/1.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="CG2" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/common%20goal%20cards/2.jpg" />
+            <Image url="@../../Resources/common_goal_cards/2.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="95.0" layoutY="514.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/boards/bookshelf.png" />
+            <Image url="@../../Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="MyPGC" fitHeight="150.0" fitWidth="200.0" layoutX="467.0" layoutY="681.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../../../Downloads/SE1/SE1_provafinale/17_MyShelfie_BGA/personal%20goal%20cards/Personal_Goals12.png" />
+            <Image url="@../../Resources/personal_goal_cards/Personal_Goals12.png" />
          </image>
       </ImageView>
       <Label layoutX="660.0" layoutY="262.0" text="Player1" textFill="#c0c614">

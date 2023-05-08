@@ -1,12 +1,12 @@
 #GameAnchor{
-    -fx-background-image: url('../Resources/sfondoparquet.jpg');
+    -fx-background-image: url('../../Resources/misc/sfondo_parquet.jpg');
     -fx-background-size:cover ;
 }
 #LogInAnchorePane{
-    -fx-background-image: url('../Resources/Display_1.jpg');
+    -fx-background-image: url('../../Resources/Publisher_material/Display_1.jpg');
     -fx-background-size:cover ;
 }
 #MatchTypePane{
-    -fx-background-image: url('../Resources/Display_2.jpg');
+    -fx-background-image: url('../../Resources/Publisher_material/Display_2.jpg');
     -fx-background-size:cover ;
 }
