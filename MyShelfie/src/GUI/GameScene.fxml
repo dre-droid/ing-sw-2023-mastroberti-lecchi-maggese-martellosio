@@ -231,7 +231,7 @@
           <TableColumn minWidth="0.0" prefWidth="84.00006103515625" text="Score" />
         </columns>
       </TableView>
-      <Text layoutX="801.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Who was in Paris?">
+      <Text layoutX="801.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="It's Player1 turn">
          <font>
             <Font size="40.0" />
          </font>
