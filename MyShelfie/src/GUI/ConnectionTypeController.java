@@ -3,6 +3,7 @@ package GUI;
 import Server.ClientWithChoice;
 import Server.RMI.ClientRMI;
 import Server.Socket.ClientSocket;
+import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,17 +15,14 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Objects;
 
-public class ConnectionTypeController {
+public class ConnectionTypeController  {
     @FXML
     ToggleGroup MatchTypeGroup;
     @FXML
     Label ConnectionLabel;
     @FXML
-    RadioButton ButtonSocket;
-    @FXML
-    RadioButton ButtonRMI;
-    @FXML
-    Button CreateGameButton;
+    Button CreateCreateGameButton;
+
 
     public void switchToLoginScene(ActionEvent event){
         Scene scene;

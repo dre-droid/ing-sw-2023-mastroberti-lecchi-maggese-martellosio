@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
@@ -25,6 +26,9 @@ public class LoginSceneController {
     Button LoginButton;
     @FXML
     javafx.scene.control.TextField usernameText;
+    @FXML
+    AnchorPane LoginAnchorPane;
+
 
 
     private Stage stage;
@@ -56,7 +60,7 @@ public class LoginSceneController {
                 }
             }).start();
 
-            Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             scene = new Scene(root);
             stage.setScene(scene);

@@ -23,8 +23,6 @@ public class MainGUI extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
         Scene scene1 = new Scene(root);
         stage.setScene(scene1);
-        Image icon = new Image("Publisher_material/Icon.png");
-        stage.getIcons().add(icon);
         stage.setTitle("MyShelfie");
 
         stage.show();
