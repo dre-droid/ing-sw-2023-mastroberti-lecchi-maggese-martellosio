@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import java.util.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="GUI.LoginSceneController"
-            prefHeight="400.0" prefWidth="600.0">
-
+<AnchorPane fx:id="EndSceneAnchor" prefHeight="400.0" prefWidth="600.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
+   <children>
+      <TableView fx:id="Table" editable="true" layoutX="164.0" layoutY="106.0" prefHeight="228.0" prefWidth="272.0" tableMenuButtonVisible="true">
+        <columns>
+          <TableColumn prefWidth="75.0" text="Rank" />
+          <TableColumn prefWidth="136.0" text="Nickname" />
+            <TableColumn prefWidth="75.0" text="Points" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+      <Text fill="#1ed100" layoutX="26.0" layoutY="81.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Player XXX is the winner">
+         <font>
+            <Font size="40.0" />
+         </font>
+      </Text>
+   </children>
 </AnchorPane>
