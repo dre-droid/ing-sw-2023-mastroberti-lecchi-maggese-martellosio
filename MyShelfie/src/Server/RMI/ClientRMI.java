@@ -168,9 +168,9 @@ public class ClientRMI implements Runnable{
             System.out.println("Quit command sent to the server");
             serverRMI.quitGame(playerNickname);
             return true;
-        }else if(userInput.startsWith("/chat")){
+        }else if(userInput.startsWith("/chat ")){
             System.out.println("Chat message sent");
-            String sender, text, receiver;
+            /*String sender, text, receiver;
             int atIndex = userInput.indexOf('@');
             receiver = userInput.substring(atIndex+1);
             atIndex = receiver.indexOf(' ');
@@ -178,6 +178,20 @@ public class ClientRMI implements Runnable{
             receiver = receiver.substring(0, atIndex);
             //System.out.println(receiver);
             //System.out.println(text);
+             */
+            String text = "", receiver = "";
+            int atIndex = userInput.indexOf('@');
+            if(atIndex!=-1) {
+                receiver = userInput.substring(atIndex + 1);
+                atIndex = receiver.indexOf(' ');
+                text = receiver.substring(atIndex + 1);
+                receiver = receiver.substring(0, atIndex);
+            }
+            else {
+                receiver = "all";
+                atIndex = userInput.indexOf(' ');
+                text = userInput.substring(atIndex + 1);
+            }
             serverRMI.chatMessage(playerNickname, text, receiver);
             return true;
         }else{

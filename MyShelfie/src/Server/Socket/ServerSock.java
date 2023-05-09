@@ -66,7 +66,7 @@ public class ServerSock {
                 boolean repeat = true;
                 while (repeat) {
                     PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat' to chat with other players..");
+                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
 
                     int resultValue = playerJoin(client);
                     if (resultValue == 0 || resultValue == -1) {    //successfully joined
@@ -152,7 +152,7 @@ public class ServerSock {
 
     /**
      * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
-     * '/c' processes message for chat, otherwise output is ignored.
+     * '/chat ' processes message for chat, otherwise output is ignored.
      */
     public void clientListener(Socket client, String nickname){
         Thread clientListener = new Thread(() -> {
@@ -164,16 +164,23 @@ public class ServerSock {
                     line = reader.readLine();
 
                     if (controller.hasGameStarted())
-                        if (controller.isMyTurn(nickname) && !line.startsWith("/chat"))
+                        if (controller.isMyTurn(nickname) && !line.startsWith("/chat "))
                             string = line;
 
-                    if (line.startsWith("/chat")){
-                        String sender, text, receiver;
+                    if (line.startsWith("/chat ")){
+                        String text = "", receiver = "";
                         int atIndex = line.indexOf('@');
-                        receiver = line.substring(atIndex+1);
-                        atIndex = receiver.indexOf(' ');
-                        text = receiver.substring(atIndex+1);
-                        receiver = receiver.substring(0, atIndex);
+                        if(atIndex!=-1) {
+                            receiver = line.substring(atIndex + 1);
+                            atIndex = receiver.indexOf(' ');
+                            text = receiver.substring(atIndex + 1);
+                            receiver = receiver.substring(0, atIndex);
+                        }
+                        else {
+                            receiver = "all";
+                            atIndex = line.indexOf(' ');
+                            text = line.substring(atIndex + 1);
+                        }
                         sendChatMessageToClient(nickname, text, receiver);
                     }
 
