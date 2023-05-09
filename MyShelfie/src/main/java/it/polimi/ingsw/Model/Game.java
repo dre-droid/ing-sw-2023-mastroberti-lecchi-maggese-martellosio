@@ -1,9 +1,11 @@
 package main.java.it.polimi.ingsw.Model;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,7 +20,7 @@ public class Game {
     private int numOfPlayers;
     private List<Player> leaderBoard;
     private Iterator<Player> iterator;
-    private final List<CommonGoalCard> commonGoalCards;
+    private List<CommonGoalCard> commonGoalCards;
     private final HashMap<Integer, PersonalGoalCard> validTilesMap = new HashMap<>();
     private Board board;
     private int turnCount;
@@ -42,6 +44,17 @@ public class Game {
         lastRound = false;
         gameHasEnded=false;
         gameHasStarted=false;
+    }
+
+    /**
+     * This constructor is used to load the game progress from a json file
+     * @param savedProgressFilePath the file path of the json file where the game progress has been saved
+     */
+    public Game(String savedProgressFilePath){
+        playersList = new ArrayList<>();
+        leaderBoard = new ArrayList<>();
+        commonGoalCards = new ArrayList<>();
+        loadGameProgress(savedProgressFilePath);
     }
 
     /**
@@ -555,45 +568,72 @@ public class Game {
 
     public void saveGameProgress(String filePath) {
         FileWriter jsonFile;
-        Gson gson = new Gson();
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(StrategyCommonGoal.class, new JsonStrategyConverter());
+        Gson gson = builder.create();
         gson.serializeNulls();
+        File file = new File("MyShelfie/src/Server/GameProgress.json");
         try{
-            jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",true);
-            System.out.println("player playing: "+isPlaying.getNickname());
+            if(file.exists()){
+                jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",false);
+                System.out.println("File opened in overwriting");
+            }
+            else{
+                jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",true);
+                System.out.println("File opened in append");
+            }
+            //System.out.println("player playing: "+isPlaying.getNickname());
             //we save the players
             gson.toJson(isPlaying, isPlaying.getClass(), jsonFile);
+            jsonFile.close();
+            jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",true);
             //we save the board
             gson.toJson(board, Board.class, jsonFile);
             //we save the players
             gson.toJson(playersList, playersList.getClass(), jsonFile);
             //we save the commongoals
+            //commonGoalCards.stream().forEach(commonGoalCard -> System.out.println(commonGoalCard.getDescription()));
             gson.toJson(commonGoalCards, commonGoalCards.getClass(),jsonFile);
-
+            //we save the flags
+            boolean[] flags = {lastTurn, lastRound, gameHasEnded, gameHasStarted};
+            gson.toJson(flags, flags.getClass(), jsonFile);
             jsonFile.close();
         }catch(IOException e){
             System.out.println("Error in saving the game progress in json file");
         }
 
+
+
     }
 
     public boolean loadGameProgress(String filePath){
-        Gson gson = new Gson();
+        File jsonFile = new File(filePath);
+        if(!jsonFile.exists()){
+            System.out.println("the file does not exists");
+            return false;
+        }
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(StrategyCommonGoal.class, new JsonStrategyConverter());
+        Gson gson = builder.create();
+        turnCount = 1;
         try{
-            JsonReader reader = new JsonReader(new FileReader("MyShelfie/src/Server/GameProgress.json"));
+            JsonReader reader = new JsonReader(new FileReader(filePath));
             //reader.setLenient(true);
-            Player p = gson.fromJson(reader, Player.class);
-            System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
-            Board b = gson.fromJson(reader, Board.class);
-            b.printGridMap();
-            List<Player> players = new ArrayList<Player>();
+            isPlaying = gson.fromJson(reader, Player.class);
+            //System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
+            board= gson.fromJson(reader, Board.class);
+            //b.printGridMap();
             Type listType = new TypeToken<List<Player>>() {}.getType();
-            players = gson.fromJson(reader, listType);
-            players.stream().forEach(player->System.out.println(player.getNickname()));
+            playersList = gson.fromJson(reader, listType);
+            //players.stream().forEach(player->System.out.println(player.getNickname()));
 
-            List<CommonGoalCard> commonGoalCardList = new ArrayList<CommonGoalCard>();
+            //playersList.stream().forEach(player->System.out.println(player.getNickname()));
+            numOfPlayers = playersList.size();
+            iterator = playersList.iterator();
+            while (!iterator.next().getNickname().equals(isPlaying.getNickname()));
+
             Type commongoalType = new TypeToken<List<CommonGoalCard>>(){}.getType();
-            commonGoalCardList = gson.fromJson(reader, commongoalType);
-            commonGoalCardList.stream().forEach(commonGoalCard -> System.out.println(commonGoalCard.getDescription()));
+            commonGoalCards = gson.fromJson(reader, commongoalType);
 
             boolean[] flags = gson.fromJson(reader, boolean[].class);
             lastTurn = flags[0];
@@ -604,8 +644,9 @@ public class Game {
 
         }catch(IOException e){
             System.out.println("Error in loading the game progress from file");
+            return false;
         }
-        return false;
+        return true;
     }
 
     public static void main(String args[]) throws Exception {

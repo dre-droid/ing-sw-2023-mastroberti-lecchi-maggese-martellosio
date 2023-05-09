@@ -7,10 +7,7 @@ import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.*;
 
 import javax.naming.ldap.Control;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -286,6 +283,7 @@ public class Controller {
     public void endOfTurn(String playerNickname){
         if(playerNickname.equals(game.isPlaying.getNickname())){
             game.endOfTurn(game.isPlaying);
+            saveGameProgress();
             server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
         }
     }
@@ -323,6 +321,7 @@ public class Controller {
                 info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
                 if (!Objects.isNull(info)) {    //null object is passed when game ends
                     game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getTiles());
+                    saveGameProgress();
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
                     invalidMoveFlag = false;
@@ -338,6 +337,7 @@ public class Controller {
     public void endGame(){
         server.serverRMI.notifyEndOfGame();
         game.endGame();
+        deleteProgress();
 
     }
 
@@ -352,20 +352,33 @@ public class Controller {
         return game.getPlayerList().stream().filter(player->(player.getNickname().equals(playerNickname))).toList().get(0).getPersonalGoalCard().getValidTiles().getGridForDisplay();
     }
 
-    public void saveGameProgress() throws IOException {
-        Gson gson = new Gson();
-        gson.toJson(game, new FileWriter("MyShelfie/src/Server/GameProgress.json"));
+    private void saveGameProgress(){
+        game.saveGameProgress("MyShelfie/src/Server/GameProgress.json");
     }
 
     public boolean loadGameProgress(){
-        Gson gson =  new Gson();
-        try{
-            JsonReader reader = new JsonReader(new FileReader("MyShelfie/src/Server/GameProgress.json"));
-            game = gson.fromJson(reader, Game.class);
+        if(checkForSavedGameProgress() && game==null){
+            game = new Game("MyShelfie/src/Server/GameProgress.json");
+            game.getPlayerList().stream().forEach(player->server.serverRMI.addClient(player.getNickname()));
+            game.getPlayerList().stream().forEach(player -> server.addPlayerToRecord(player.getNickname(),null));
             return true;
-        }catch(IOException ex){
-            return false;
         }
+        else
+            return false;
+    }
+
+    private void deleteProgress(){
+        File toBeDeleted = new File("MyShelfie/src/Server/GameProgress.json");
+        if(toBeDeleted.delete())
+            System.out.println("File deleted correctly");
+        else System.out.println("File not deleted");
+    }
+
+    private boolean checkForSavedGameProgress(){
+        File toBeChecked = new File("MyShelfie/src/Server/GameProgress.json");
+        if(toBeChecked.exists())
+            return true;
+        else return false;
     }
 
 }

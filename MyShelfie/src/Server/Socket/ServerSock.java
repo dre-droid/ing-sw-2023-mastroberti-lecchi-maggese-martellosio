@@ -45,6 +45,15 @@ public class ServerSock {
             runServer.start();
     }
 
+    public void notifyGameEnd(String nick) throws IOException {
+        //find client's socket
+        for (socketNickStruct c: clients){
+            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
+            c.getSocket().close();
+        }
+    }
+
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
      * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.

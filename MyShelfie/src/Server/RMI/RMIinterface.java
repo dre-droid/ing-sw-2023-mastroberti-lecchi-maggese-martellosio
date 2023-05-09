@@ -40,4 +40,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public void quitGame(String playerNickname) throws RemoteException;
 
     public void chatMessage(String senderName, String text, String receiverName) throws RemoteException;
+
+    public boolean loadGameProgressFromFile() throws RemoteException;
 }

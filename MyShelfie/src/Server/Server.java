@@ -46,7 +46,7 @@ public class Server {
             serverRMI.setController(controller);
 
             //waits that all players connect
-            while (!controller.hasGameStarted()) {
+            while (!controller.hasGameStarted() && isEveryoneConnected()) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -117,6 +117,19 @@ public class Server {
                 }
             }
         }
+    }
+
+    public boolean isEveryoneConnected(){
+        for(Map.Entry<String, connectionType> client: clientsMap.entrySet()){
+            if(client.getValue()==null)
+                return false;
+        }
+        return true;
+    }
+
+    private void gameEnd(String nick) throws IOException {
+        //rmi notify
+        serverSock.notifyGameEnd(nick);
     }
 
 }

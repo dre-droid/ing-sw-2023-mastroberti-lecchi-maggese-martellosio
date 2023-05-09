@@ -251,13 +251,13 @@ public class Shelf {
         for(int i=0;i<ROWS;i++)
             for(int j=0;j<COLUMNS;j++){
                 if(grid[i][j]!=null){
-                    System.out.print(grid[i][j]+ " ");
+                    //System.out.print(grid[i][j]+ " ");
                     displayGrid[i][j] = new Tile(grid[i][j].getType());
                 }
                 else{
-                    System.out.print("x ");
+                    //System.out.print("x ");
                 }
-                System.out.println();
+                //System.out.println();
             }
         return displayGrid;
     }

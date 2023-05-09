@@ -37,6 +37,15 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     }
 
+    /**
+     * This method is called to join the game, if the controller added the player correctly it alerts the client and add it to the
+     * clients list, if the controller cannot add the player to the game (oucome=-1,-2,-3) it sends a message to the client with the
+     * corresponding error
+     * @param nickname name of the player that wants to join the game
+     * @param port used to connect to the rmi client
+     * @return 0 if the player has been added to the game, -1, -2, -3 if there has been an error in the joining of the game
+     * @throws java.rmi.RemoteException
+     */
     @Override
     public int joinGame(String nickname,int port) throws java.rmi.RemoteException {
         ClientNotificationInterfaceRMI clientToBeNotified;
@@ -82,6 +91,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
+    /**
+     * This method is called to create a new game that can host a number of player equals to numOfPlayers
+     * @param nickname name of the player that is creating the match
+     * @param numOfPlayers parameter indicating the number of players that can join the created game
+     * @param port of the rmi client
+     * @return true if the game is created correctly, false if there are any problems and the game is not created
+     * @throws java.rmi.RemoteException
+     */
     @Override
     public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException{
         if(numOfPlayers<0 || numOfPlayers>4)
@@ -107,6 +124,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
+    /**
+     * This method is used to draw the tiles from the board
+     * @param playerNickname name of the player doing this action
+     * @param x x coordinate on the board
+     * @param y y coordinate on the board
+     * @param amount number of tiles to draw
+     * @param direction direction in which to draw
+     * @return the list of tiles drawn if the move is valid, if the move is not valid it returns null
+     * @throws java.rmi.RemoteException
+     */
     @Override
     public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException{
         List<Tile> drawnTiles = controller.drawFromBoard(playerNickname, x, y, amount, direction);
@@ -121,16 +148,35 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return drawnTiles;
     }
 
+    /**
+     * this method is used to check if the game has started
+     * @return true if the game has started, false otherwise
+     * @throws RemoteException
+     */
     @Override
     public boolean hasGameStarted() throws RemoteException {
         return controller.hasGameStarted();
     }
 
+
+    /**
+     * this method is used to get a copy of the shelf of the player with the nickname passed in the parameter
+     * @param playerNickname name of the player
+     * @return a matrix of tile representing the shelf of the player
+     * @throws RemoteException
+     */
     @Override
     public Tile[][] getMyShelf(String playerNickname) throws RemoteException {
         return controller.getMyShelf(playerNickname);
     }
 
+
+    /**
+     * This method is used to check if it is someone's turn
+     * @param playerNickname name of the player
+     * @return true if it's the turn of the player with nickname equal to playerNickname, false otherwise
+     * @throws RemoteException
+     */
     public boolean isMyTurn(String playerNickname) throws RemoteException{
         return controller.isMyTurn(playerNickname);
     }
@@ -144,10 +190,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public boolean insertTilesInShelf(String playernickName, List<Tile> tiles, int column) throws RemoteException{
         if(controller.insertTilesInShelf(playernickName, tiles, column)){
             //timerInsert.cancel();
+            System.out.println("ServerRMI-->tiles correctly inserted");
             endOfTurn(playernickName);
             return true;
         }
         else {
+            System.out.println("ServerRMI-->problem in inserting tiles");
             clients.get(playernickName).moveIsNotValid();
             //clients.stream().filter(cl->cl.nickname.equals(playernickName)).toList().get(0).client.moveIsNotValid();
             return false;
@@ -236,12 +284,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         //we check if there is a player with this name in the game
         if(clients.containsKey(playerNickname)){
             //we check if the client is already connected with a ping, if the client is not connected we proceed to the reconnection
-            try{
-                clients.get(playerNickname).ping();
-                System.out.println("I can still ping "+playerNickname);
-                return false;
-            } catch (RemoteException e) {
-                //we update the list of the clients with the new client if we can connect to it
+            System.out.println("Correct nickname");
+            //we update the list of the clients with the new client if we can connect to it
+            if(clients.get(playerNickname)==null){
                 ClientNotificationInterfaceRMI clientToBeNotified;
                 try{
                     Registry registry = LocateRegistry.getRegistry(port);
@@ -251,13 +296,30 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     return false;
                 }
                 clients.put(playerNickname, clientToBeNotified);
+                server.addPlayerToRecord(playerNickname, Server.connectionType.RMI);
+                if(server.isEveryoneConnected()){
+                    for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                        client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                        if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
+                            client.getValue().startTurn();
+                    }
+                }
+
                 System.out.println("Connected to the new client");
                 return true;
             }
+            return false;
+
+            //}
         }
         else{
+            System.out.println("nickname not correct");
             return false;
         }
+    }
+
+    public boolean loadGameProgressFromFile() throws RemoteException{
+        return controller.loadGameProgress();
     }
 
     @Override
@@ -272,7 +334,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
     public void flushServer(){
-        clients = new HashMap<>();
+
     }
 
     public void notifyStartOfTurn(String playerNickname){
@@ -281,21 +343,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             clientToBeNotified = clients.get(playerNickname);
             if(clientToBeNotified!=null){
                 clientToBeNotified.startTurn();
-                System.out.println("Notified "+ playerNickname +"to start the turn");
+                System.out.println("Notified "+ playerNickname +" to start the turn");
             }
 
         } catch (RemoteException e) {
             System.out.println("Cannot notify client: "+playerNickname);
         }
 
-    }
-
-    private void saveGameProgress() {
-        try {
-            controller.saveGameProgress();
-        } catch (IOException e) {
-            System.out.println("-----Problem in saving the game progress-----");
-        }
     }
 
     public void notifyStartOfGame() {
@@ -341,6 +395,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         else{
             clients.get(receiverName).receiveMessage(text, senderName);
         }
+    }
+
+    public void addClient(String playerName){
+        clients.put(playerName, null);
     }
 
 

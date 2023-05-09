@@ -91,19 +91,22 @@ public class ClientRMI implements Runnable{
             returnCode = serverRMI.joinGame(playerNickname,myport);
             switch(returnCode){
                 case -1: {
-                    System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
-                    int numPlayers;
-                    do{
-                        numPlayers=-1;
-                        try{
-                            numPlayers = Integer.parseInt(userInput.nextLine());
-                        }catch (Exception e){
-                            numPlayers=-1;
+                    System.out.println("Enter 1 if you want to load the saved game progress, 2 if you want to create a new game");
+                    int decisionAboutNewGame=-1;
+                    decisionAboutNewGame=checkedInputForIntValues(userInput,1,2,"Enter 1 if you want to load the saved game progress, 2 if you want to create a new game");
+                    if(decisionAboutNewGame==1){
+                        if(serverRMI.loadGameProgressFromFile()){
+                            System.out.println("Loaded the saved game progress on the server");
+                            reconnectToGame(userInput);
+                            return;
                         }
-                        if(numPlayers<2 || numPlayers>4)
-                            System.out.println("Insert a valid value for the number of players (2, 3, 4)");
-                    }while(numPlayers<2 || numPlayers>4);
+                        else{
+                            System.out.println("There is no saved game progress, create a new game");
+                        }
+                    }
 
+                    System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
+                    int numPlayers = checkedInputForIntValues(userInput,2,4,"Insert a valid value for the number of players (2, 3, 4)");
 
                     if(serverRMI.createNewGame(playerNickname,numPlayers,myport)){
                         returnCode=0;
@@ -120,8 +123,26 @@ public class ClientRMI implements Runnable{
                 }break;
             }
         }while(returnCode!=0);
-
     }
+
+    private void reconnectToGame(Scanner userInput){
+        System.out.println("Enter the nickname you used last time to join the game");
+        playerNickname = userInput.nextLine();
+        boolean reconnected = false;
+        do{
+            try{
+                reconnected= serverRMI.reconnect(playerNickname, myport);
+            }catch(RemoteException e){
+            }
+
+            if(!reconnected){
+                System.out.println("Cannot reconnect to the game, someone is already connected with this nickname, try with another one");
+                playerNickname = userInput.nextLine();
+            }
+        }while(!reconnected);
+        System.out.println("You reconnected to the game, wait for your turn now");
+    }
+
 
     private int checkedInputForIntValues(Scanner scanner, int min, int max, String ErrorMessage){
         int value=-1;
@@ -199,15 +220,7 @@ public class ClientRMI implements Runnable{
             }
             else{
                 //reconnect to the game
-                nickname = userInput.nextLine();
-                boolean reconnected = false;
-                do{
-                    reconnected= serverRMI.reconnect(nickname, myport);
-                    if(!reconnected){
-                        System.out.println("Cannot reconnect to the game, someone is already connected with this nickname");
-                    }
-                }while(!reconnected);
-                System.out.println("You reconnected to the game, wait for your turn now");
+                reconnectToGame(userInput);
             }
 
             //wait for the game to start
