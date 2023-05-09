@@ -9,8 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Objects;
@@ -18,6 +17,14 @@ import java.util.Objects;
 public class ConnectionTypeController {
     @FXML
     ToggleGroup MatchTypeGroup;
+    @FXML
+    Label ConnectionLabel;
+    @FXML
+    RadioButton ButtonSocket;
+    @FXML
+    RadioButton ButtonRMI;
+    @FXML
+    Button CreateGameButton;
 
     public void switchToLoginScene(ActionEvent event){
         Scene scene;
@@ -25,6 +32,7 @@ public class ConnectionTypeController {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
         ClientSocket clientSocket = null;
         ClientRMI clientRMI = null;
+
 
         try {
             ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
