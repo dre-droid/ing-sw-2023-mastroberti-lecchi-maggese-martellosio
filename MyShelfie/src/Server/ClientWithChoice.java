@@ -25,16 +25,24 @@ public class ClientWithChoice {
 
         if(connectionType==1){
             //RMI CLIENT
-            ClientRMI clientRMI = new ClientRMI();
-            Thread thread = new Thread(clientRMI);
-            thread.start();
+            createNewRMIClient();
         }
         else{
             //SOCKET CLIENT
-            ClientSocket clientSocket = new ClientSocket();
-            clientSocket.runServer();
+            createNewSocketClient();
         }
 
+    }
+
+    public void createNewRMIClient(){
+        ClientRMI clientRMI = new ClientRMI();
+        Thread thread = new Thread(clientRMI);
+        thread.start();
+    }
+
+    public void createNewSocketClient(){
+        ClientSocket clientSocket = new ClientSocket();
+        clientSocket.runServer();
     }
 
     public static void main(String[] args){

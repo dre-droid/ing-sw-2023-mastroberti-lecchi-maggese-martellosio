@@ -85,13 +85,20 @@ public class ServerSock {
         boolean imbecille = false;
         out.println("[REQUEST] Inserisci un nickname:");
         do {
-            if (imbecille)
+            if (imbecille) {
                 out.println("[REQUEST] Nickname is too long! Try a shorter one:");
-            nickname = reader.readLine();
-            imbecille = true;
-        } while (nickname.length() > 15);
+                notifyAll();
+            }
+            try {
+                nickname = reader.readLine();
+                if (nickname.length() > 15) imbecille = true;
+                else break;
+            }
+            catch (Exception e){
+                imbecille = false;
+            }
+        } while (true);
         out.println("Il nickname inserito è: "+ nickname);
-
 
         switch (controller.joinGame(nickname)) {
             //no existing game

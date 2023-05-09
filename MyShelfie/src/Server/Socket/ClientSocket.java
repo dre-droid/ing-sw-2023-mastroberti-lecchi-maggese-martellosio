@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
@@ -26,6 +27,8 @@ public class ClientSocket {
     private static String commonGoalCard;
     private static List<String> leaderboard;
     private static String nickname;
+    public static String stringGUI;
+    public static Socket socket;
 
     //used by ClientWithChoice
     public void runServer(){
@@ -48,7 +51,7 @@ public class ClientSocket {
     public static void main(String[] args) throws IOException {
         try{
             //connect to server
-            Socket socket= new Socket("127.0.0.1", 59010);
+            socket= new Socket("127.0.0.1", 59010);
             socket.setKeepAlive(true);
             //pinger(socket);
 
@@ -67,7 +70,7 @@ public class ClientSocket {
             try {
                 InputStream input = socket.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                String line;
+                String line = null;
                 boolean active = true;
                 clientSpeaker(socket);
 
@@ -129,6 +132,7 @@ public class ClientSocket {
                         System.out.println(line);
                     }
                     }
+                    if (!Objects.isNull(line)) stringGUI = line;
                 }
             catch (SocketException e) {
                 System.out.println("Socket closed.");
@@ -201,6 +205,21 @@ public class ClientSocket {
                     output.println(message);
                 }
 
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        };
+        new Thread(clientSpeaker).start();
+    }
+
+    /**
+     * @param message prints message to the socket's output stream
+     */
+    public static void clientSpeaker(String message){
+        Runnable clientSpeaker = () ->{
+            try{
+                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                output.println(message);
             }catch (Exception e){
                 throw new RuntimeException(e);
             }

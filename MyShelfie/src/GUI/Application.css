@@ -10,3 +10,10 @@
     -fx-background-image: url("../../../MyShelfie/Resources/Publisher_material/Display_2.jpg");
     -fx-background-size:cover ;
 }
+#ConnectionType{
+    -fx-background-image: url("../../../MyShelfie/Resources/Publisher_material/Display_1.jpg");
+    -fx-background-size:cover ;
+}
+.open-sans{
+    -fx-font-family: "Open Sans", sans-serif;
+}
