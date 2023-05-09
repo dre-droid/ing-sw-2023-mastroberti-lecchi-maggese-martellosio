@@ -350,7 +350,7 @@ public class ClientRMI implements Runnable{
 
     private void printShelf(Tile[][] grid){
         System.out.println("1 2 3 4 5");
-        for(int i = 5;i>=0;i--) {
+        for(int i = 5;i>=0;i++) {
             for (int j = 0; j < 5; j++) {
                 if (grid[i][j]==null) System.out.print("x ");
                 else{
@@ -410,7 +410,7 @@ public class ClientRMI implements Runnable{
         Tile[][] pgCard = serverRMI.getMyPersonalGoal(playerNickname);
 
         System.out.println("Your shelf:      Your Personal goal:");
-        for(int row=0;row<6;row++){
+        for(int row=5;row>=0;row--){
             for(int column =0;column<5;column++) {
                 if (shelf[row][column]==null) System.out.print("x ");
                 else{
