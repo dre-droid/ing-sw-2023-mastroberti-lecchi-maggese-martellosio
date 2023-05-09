@@ -18,7 +18,7 @@
    <children>
       <ImageView fx:id="BoardID" fitHeight="472.0" fitWidth="482.0" layoutX="18.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/boards/livingroom.png" />
+            <Image url="../../Resources/boards/livingroom.png" />
          </image>
          <cursor>
             <Cursor fx:constant="DEFAULT" />
@@ -26,32 +26,32 @@
       </ImageView>
       <ImageView fx:id="Opp1Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/boards/bookshelf.png" />
+            <Image url="../../../MyShelfie/Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="Opp2Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="193.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/boards/bookshelf.png" />
+            <Image url="../../../MyShelfie/Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="Opp3Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="365.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/boards/bookshelf.png" />
+            <Image url="../../../MyShelfie/Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
       <ImageView fx:id="CG1" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="311.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/common_goal_cards/1.jpg" />
+            <Image url="../../../MyShelfie/Resources/common_goal_cards/1.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="CG2" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/common_goal_cards/2.jpg" />
+            <Image url="../../../MyShelfie/Resources/common_goal_cards/2.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="MyPGC" fitHeight="179.0" fitWidth="131.0" layoutX="366.0" layoutY="670.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/personal_goal_cards/Personal_Goals12.png" />
+            <Image url="../../../MyShelfie/Resources/personal_goal_cards/Personal_Goals12.png" />
          </image>
       </ImageView>
       <Label layoutX="570.0" layoutY="142.0" text="Player1" textFill="#c0c614">
@@ -364,7 +364,7 @@
       <Text layoutX="879.0" layoutY="520.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC2 description" wrappingWidth="117.95574951171864" />
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="11.0" layoutY="539.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../Resources/boards/bookshelf.png" />
+            <Image url="../../../MyShelfie/Resources/boards/bookshelf.png" />
          </image>
       </ImageView>
    </children>
