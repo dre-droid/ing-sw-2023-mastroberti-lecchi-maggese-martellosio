@@ -180,8 +180,9 @@ public class ClientRMI implements Runnable{
             //System.out.println(text);
              */
             String text = "", receiver = "";
-            int atIndex = userInput.indexOf('@');
-            if(atIndex!=-1) {
+            int atIndex;
+            if(userInput.startsWith("/chat @")) {
+                atIndex = userInput.indexOf('@');
                 receiver = userInput.substring(atIndex + 1);
                 atIndex = receiver.indexOf(' ');
                 text = receiver.substring(atIndex + 1);

@@ -169,8 +169,10 @@ public class ServerSock {
 
                     if (line.startsWith("/chat ")){
                         String text = "", receiver = "";
-                        int atIndex = line.indexOf('@');
-                        if(atIndex!=-1) {
+
+                        int atIndex;
+                        if(line.startsWith("/chat @")) {
+                            atIndex = line.indexOf('@');
                             receiver = line.substring(atIndex + 1);
                             atIndex = receiver.indexOf(' ');
                             text = receiver.substring(atIndex + 1);
