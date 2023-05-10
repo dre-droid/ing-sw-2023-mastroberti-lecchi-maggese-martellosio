@@ -154,7 +154,7 @@ public class Controller {
      * @return true if it's playerNickname turn, false otherwise
      */
     public boolean isMyTurn(String playerNickname){
-        return game.isPlaying.getNickname().equals(playerNickname);
+        return game.getIsPlaying().getNickname().equals(playerNickname);
     }
 
     /**
@@ -163,7 +163,7 @@ public class Controller {
      */
     public String getNameOfPlayerWhoIsCurrentlyPlaying(){
         if(game.hasGameStarted())
-            return game.isPlaying.getNickname();
+            return game.getIsPlaying().getNickname();
         return null;
     }
 
@@ -214,7 +214,7 @@ public class Controller {
      */
     public List<Tile> drawFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction){
         List<Tile> toBeReturned = new ArrayList<>();
-        if(game.isPlaying.getNickname().equals(playerNickname)){
+        if(game.getIsPlaying().getNickname().equals(playerNickname)){
             try{
                 toBeReturned = game.drawsFromBoard(x,y,amount,direction, playerNickname);
             }catch(Exception e){
@@ -234,11 +234,11 @@ public class Controller {
      * is not the one playing the current turn
      */
     public boolean insertTilesInShelf(String playerNickname, List<Tile> tiles, int column){
-        if(playerNickname.equals(game.isPlaying.getNickname())){
+        if(playerNickname.equals(game.getIsPlaying().getNickname())){
             if(column<0 || column>5)
                 return false;
             try{
-                if(game.insertTilesInShelf(tiles,column,game.isPlaying))
+                if(game.insertTilesInShelf(tiles,column,game.getIsPlaying()))
                     return true;
                 else
                     return false;
@@ -256,8 +256,8 @@ public class Controller {
      * not completed the first common goal, true if the player has completed the first common goal
      */
     public boolean checkIfCommonGoalN1IsFulfilled(String playerNickname){
-        if(playerNickname.equals(game.isPlaying.getNickname())){
-            return game.checkIfCommonGoalN1IsFulfilled(game.isPlaying);
+        if(playerNickname.equals(game.getIsPlaying().getNickname())){
+            return game.checkIfCommonGoalN1IsFulfilled(game.getIsPlaying());
         }
         return false;
     }
@@ -269,8 +269,8 @@ public class Controller {
      * not completed the second common goal, true if the player has completed the second common goal
      */
     public boolean checkIfCommonGoalN2IsFulfilled(String playerNickname){
-        if(playerNickname.equals(game.isPlaying.getNickname())){
-            return game.checkIfCommonGoalN2IsFulfilled(game.isPlaying);
+        if(playerNickname.equals(game.getIsPlaying().getNickname())){
+            return game.checkIfCommonGoalN2IsFulfilled(game.getIsPlaying());
         }
         return false;
     }
@@ -281,8 +281,8 @@ public class Controller {
      * @param playerNickname the name of the player who calls this action
      */
     public void endOfTurn(String playerNickname){
-        if(playerNickname.equals(game.isPlaying.getNickname())){
-            game.endOfTurn(game.isPlaying);
+        if(playerNickname.equals(game.getIsPlaying().getNickname())){
+            game.endOfTurn(game.getIsPlaying());
             saveGameProgress();
             server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
         }
@@ -313,7 +313,7 @@ public class Controller {
      */
     public void playTurn() {
         boolean invalidMoveFlag = false;
-        Player thisTurnsPlayer = game.isPlaying;
+        Player thisTurnsPlayer = game.getIsPlaying();
         drawInfo info;
 
         do {

@@ -1,152 +1,99 @@
 package test.java.it.polimi.ingsw.Model;
-
 import main.java.it.polimi.ingsw.Model.*;
-import org.junit.jupiter.api.BeforeEach;
+import main.java.it.polimi.ingsw.Model.Tile;
 import org.junit.jupiter.api.Test;
-import org.testng.Assert;
+import org.junit.jupiter.params.ParameterizedTest;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GameTest{
-    Game g;
-    Player p1, p2, p3, p4;
 
-    @Test
-    void playTurnTest() throws Exception {
-        g = new Game(2);
-        p1 = new Player("p1", false, null);
-        p2 = new Player("p2", false, null);
-        g.addPlayer("p1");
-        g.addPlayer("p2");
+    public Board setCustomBoard(){
+        Board board = new Board(2);
+        board.setTileCAT(1, 3);
+        board.setTileBOOK(1, 4);
 
-        g.getBoard().setTileCAT(1, 3);
-        g.getBoard().setTileBOOK(1, 4);
-        g.getBoard().setTileCAT(2, 3);
-        g.getBoard().setTileBOOK(2, 4);
-        g.getBoard().setTilePLANT(2, 5);
+        board.setTilePLANT(2, 3);
+        board.setTileCAT(2, 4);
+        board.setTileBOOK(2, 5);
 
-                /*
-         ----- Board ------
-        - 0 1 2 3 4 5 6 7 8
-        0 X X X X X X X X X
-        1 X X X C B X X X X
-        2 X X X C B P X X X
-        3 X X F P C G B G X
-        4 X B T G F F F F X
-        5 X T T G G F C X X
-        6 X X X P B G X X X
-        7 X X X X T G X X X
-        8 X X X X X X X X X
+        board.setTilePLANT(3, 2);
+        board.setTilePLANT(3, 3);
+        board.setTileCAT(3, 4);
+        board.setTileCAT(3, 5);
+        board.setTileBOOK(3, 6);
+        board.setTileBOOK(3, 7);
 
-                 */
+        board.setTilePLANT(4, 1);
+        board.setTilePLANT(4, 2);
+        board.setTilePLANT(4, 3);
+        board.setTileCAT(4, 4);
+        board.setTileCAT(4, 5);
+        board.setTileBOOK(4, 6);
+        board.setTileBOOK(4, 7);
 
-        //g.getBoard().printGridMap();
-        //check that drawn tiles are inserted correctly in players' shelves
-        if (g.isPlaying.getNickname().equals("p1")){
-            //g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
-            Tile t1 = p1.getShelf().getGrid()[0][0];
-            Tile t2 = p1.getShelf().getGrid()[0][1];
+        board.setTilePLANT(5, 1);
+        board.setTilePLANT(5, 2);
+        board.setTilePLANT(5, 3);
+        board.setTileCAT(5, 4);
+        board.setTileCAT(5, 5);
+        board.setTileBOOK(5, 6);
 
-            p1.getShelf().getGridForDisplay();
+        board.setTilePLANT(6, 3);
+        board.setTileBOOK(6, 4);
+        board.setTileCAT(6, 5);
 
-            Assert.assertEquals(t1.toString(), "B");
-            Assert.assertEquals(t2.toString(), "C");
+        board.setTileCAT(7, 4);
+        board.setTileBOOK(7, 5);
 
-            //g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
-            t1 = p2.getShelf().getGrid()[0][0];
-            t2 = p2.getShelf().getGrid()[0][1];
-            Tile t3 = p2.getShelf().getGrid()[0][1];
+        //  ----- Board ------
+        //- 0 1 2 3 4 5 6 7 8
+        //0 X X X X X X X X X
+        //1 X X X C B X X X X
+        //2 X X X P C B X X X
+        //3 X X P P C C B B X
+        //4 X P P P C C B B X
+        //5 X P P P C C B X X
+        //6 X X X P B C X X X
+        //7 X X X X C G X X X
+        //8 X X X X X X X X X
 
-            Assert.assertEquals(t1.toString(), "C");
-            Assert.assertEquals(t2.toString(), "P");
-            Assert.assertEquals(t2.toString(), "B");
-        }
-        else {
-            //g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0,21);
-            Tile t1 = p2.getShelf().getGrid()[0][0];
-            Tile t2 = p2.getShelf().getGrid()[0][1];
-
-            Assert.assertEquals(t1.toString(), "B");
-            Assert.assertEquals(t2.toString(), "C");
-
-//            g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0,132);
-            t1 = p1.getShelf().getGrid()[0][0];
-            t2 = p1.getShelf().getGrid()[0][1];
-            Tile t3 = p1.getShelf().getGrid()[0][1];
-
-            Assert.assertEquals(t1.toString(), "C");
-            Assert.assertEquals(t2.toString(), "P");
-            Assert.assertEquals(t2.toString(), "B");
-        }
-
-
-
-    }
-    /*
-    @BeforeEach
-    void setUp(){
-        g = new Game(4);
-        p1 = new Player("p1", false, null);
-        p2 = new Player("p2", false, null);
-        p3 = new Player("p3", false, null);
-        p4 = new Player("p4", false, null);
-        g.addPlayer(p1.getNickname());
-        g.addPlayer(p2.getNickname());
-        g.addPlayer(p3.getNickname());
-        g.addPlayer(p4.getNickname());
+        return board;
     }
 
     @Test
-    void playTurnTest_4P() throws InvalidMoveException, Exception{
-        g.gameStartSetup();
-        Tile[][] test;
-        TilePlacingSpot tile;
+    public void playTurn2P_Test() throws Exception {
+        ArrayList<Player> p = new ArrayList<>();
+        Board board = setCustomBoard();
+        Player p1 = new Player("p1", false, null);
+        Player p2 = new Player("p2", false, null);
+        p.add(p1);
+        p.add(p2);
+        Game g = new Game(2, board, p);
 
-        //test = g.isPlaying.getShelf().getGrid();
-        //test[0][0] = new Tile(Type.CAT);
-        //test[0][1] = new Tile(Type.CAT);
-        //test[0][2] = new Tile(Type.CAT);
+        TilePlacingSpot[][] grid = board.getBoardForDisplay();
+        //check that board has been correctly set for testing
+        assertEquals(grid[1][3].showTileInThisPosition().getType(), Type.CAT);
+        assertEquals(grid[1][4].showTileInThisPosition().getType(), Type.BOOK);
+        assertEquals(grid[3][3].showTileInThisPosition().getType(), Type.PLANT);
+        assertEquals(grid[4][5].showTileInThisPosition().getType(), Type.CAT);
+        assertEquals(grid[5][5].showTileInThisPosition().getType(), Type.CAT);
+        assertEquals(grid[6][5].showTileInThisPosition().getType(), Type.CAT);
 
-
-        g.playTurn(0, 3, 2, Board.Direction.RIGHT, 0, 12);
-        g.playTurn(1, 3, 3, Board.Direction.RIGHT, 0, 123);
-        g.playTurn(2, 2, 3, Board.Direction.RIGHT, 0, 123);
-        g.playTurn(2, 5, 2, Board.Direction.RIGHT, 0, 12);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 2; j < 7; j++) {
-                tile = g.getBoard().getBoardForDisplay()[i][j];
-                if (i == 2 && (j == 2 || j == 6)){
-                    org.junit.Assert.assertEquals(tile.isEmpty(), true);
-                    org.junit.Assert.assertEquals(tile.isAvailable(), true);
-                }
-                if (i != 2 && (j == 2 || j == 6)) {
-                    org.junit.Assert.assertEquals(tile.isEmpty(), false);
-                    org.junit.Assert.assertEquals(tile.isAvailable(), true);
-                }
-                else {
-                    org.junit.Assert.assertEquals(tile.isEmpty(), true);
-                    org.junit.Assert.assertEquals(tile.isAvailable(), true);
-                }
-                Iterator<Player> iterator = g.getPlayerList().iterator();
-                int count = 0;
-                for (Player p: g.getPlayerList()){
-                    if (iterator.next() == g.isPlaying){
-                        do {
-                            while (iterator.hasNext()) {
-                                Assert.assertNotNull(p.getShelf().getGrid()[0][0]);
-                                Assert.assertNotNull(p.getShelf().getGrid()[1][0]);
-                                if (count == 1 || count == 2) Assert.assertNotNull(p.getShelf().getGrid()[0][2]);
-                                count++;
-                            }
-                            iterator = g.getPlayerList().iterator();
-                        }while (count < 4);
-                    }
-                    break;
-                }
-            }
-        }
+        ArrayList<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0, tileList);
+        grid = g.getBoard().getBoardForDisplay();
+        assertEquals(p2.getShelf().getGrid()[0][0].getType(), Type.CAT);
+        assertEquals(p2.getShelf().getGrid()[1][0].getType(), Type.BOOK);
+        assertEquals(grid[1][3].showTileInThisPosition(), null);
+        assertEquals(grid[1][4].showTileInThisPosition(), null);
     }
 
+/*
     @Test
     void setFirstPlayer_Test(){
         int sum = 0;
@@ -155,16 +102,16 @@ public class GameTest{
             bool = p.getFirstPlayerSeat() ? 1 : 0;
             sum += bool;
         }
-        Assert.assertEquals(sum, 1);
+        assertEquals(sum, 1);
 
     }
 
     @Test
     void chooseCommonGoals_Test(){
-        Assert.assertEquals(g.getCommonGoalCards().size(), 2);
+        assertEquals(g.getCommonGoalCards().size(), 2);
     }
-        */
 
+ */
 }
 
 

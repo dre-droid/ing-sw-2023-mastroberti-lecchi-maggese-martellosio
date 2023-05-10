@@ -15,10 +15,10 @@ import java.util.Random;
 import java.util.*;
 
 public class Game {
-    public Player isPlaying;//should be private
+    private Player isPlaying;
     private ArrayList<Player> playersList;
     private int numOfPlayers;
-    private List<Player> leaderBoard;
+    private ArrayList<Player> leaderBoard;
     private Iterator<Player> iterator;
     private List<CommonGoalCard> commonGoalCards;
     private final HashMap<Integer, PersonalGoalCard> validTilesMap = new HashMap<>();
@@ -58,6 +58,33 @@ public class Game {
     }
 
     /**
+     * Used for testing: calls gameStartSetup methods withing the constructor for ease of testing.
+     */
+    public Game(int numOfPlayers, Board board, ArrayList<Player> playerList){
+        this.numOfPlayers = numOfPlayers;
+        this.board = board;
+        this.playersList = playerList;
+        leaderBoard = new ArrayList<>();
+        commonGoalCards = new ArrayList<>();
+        turnCount = 1;
+        lastTurn = false;
+        lastRound = false;
+        gameHasEnded=false;
+        gameHasStarted=false;
+        fillValidTileMap();
+
+        //setfirstplayer
+        playersList.get(1).setFirstPlayerSeat();
+        iterator = playersList.iterator();
+        iterator.next();    //second player to start
+        isPlaying = playersList.get(1);
+
+        chooseCommonGoals();
+        drawPersonalGoalCard();
+        this.gameHasStarted = true;
+    }
+
+    /**
      * @author Andrea Mastroberti
      * after players have been added to the lobby,
      * game starts: Sets first player, Assigns personal goal cards, Fills the board and chooses the common goal cards
@@ -75,6 +102,31 @@ public class Game {
 
     }
 
+    /**
+     * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default.
+     * When all players have joined, starts the game.
+     *
+     * @param nick - nickname
+     */
+    public boolean addPlayer(String nick){
+        if(!hasGameStarted()) {
+            if(playersList.stream().map(Player::getNickname).noneMatch(n->n.equals(nick)) && !nick.isBlank()){
+                Player player = new Player(nick, false, board);
+                playersList.add(player);
+                leaderBoard.add(player);
+                if (playersList.size() == numOfPlayers)
+                    try {
+                        this.gameStartSetup();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //***used by RMI ***
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
             if(!playerNickname.equals(isPlaying.getNickname())) {
@@ -85,7 +137,6 @@ public class Game {
         }
         return null;
     }
-
     public boolean insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
         if(!gameHasEnded){
             if(!player.getNickname().equals(isPlaying.getNickname()))
@@ -95,8 +146,6 @@ public class Game {
         }
         return false;
     }
-
-    //used by RMI
     public void endOfTurn(Player player){
         if(!gameHasEnded){
             if(player.getNickname().equals(isPlaying.getNickname())){
@@ -134,6 +183,8 @@ public class Game {
         }
     }
 
+    //******************
+    //*** used by Socket ***
     /**
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player
@@ -149,6 +200,7 @@ public class Game {
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> drawnTiles = board.drawTiles(x, y, amount, direction);
 
+        //check that drawn tiles match parameter reorderedTiles, else throw exception
         boolean missingTile = true;
         for (Tile t: reorderedTiles) {
             for (Tile j : drawnTiles) {
@@ -160,7 +212,6 @@ public class Game {
         //fix insert tiles ordering
         isPlaying.insertTiles(reorderedTiles, column);
 
-        //isPlaying.printShelf();
         if (isPlaying.hasEndGameToken()) setLastTurnFlag();
 
         //check common goal and eventually give player token
@@ -207,31 +258,6 @@ public class Game {
         printLeaderBoard();
         System.out.println("******************************\n");
     }
-
-    /**
-     * If playersList isn't full, adds a new player to the leaderBoard and to playersList - fristPlayerSeat set to false by default.
-     * When all players have joined, starts the game.
-     *
-     * @param nick - nickname
-     */
-   public boolean addPlayer(String nick){
-       if(!hasGameStarted()) {
-           if(playersList.stream().map(Player::getNickname).noneMatch(n->n.equals(nick)) && !nick.isBlank()){
-               Player player = new Player(nick, false, board);
-               playersList.add(player);
-               leaderBoard.add(player);
-               if (playersList.size() == numOfPlayers)
-                   try {
-                       this.gameStartSetup();
-                   } catch (Exception e) {
-                       e.printStackTrace();
-                   }
-               return true;
-           }
-       }
-       return false;
-    }
-
     /**
      * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
      * Should only be called if game hasn't started.
@@ -242,7 +268,6 @@ public class Game {
            leaderBoard.remove(p);
        }
     }
-
     /**
      * comparator used to keep the leaderboard in descending ordered by score
      */
@@ -251,7 +276,7 @@ public class Game {
             return p2.getScore() - p1.getScore();
         }
     }
-
+    //*********************
 
     //***    setters     ***//
     /**
@@ -310,7 +335,6 @@ public class Game {
      */
     private void setBoard(){
         board = new Board(playersList.size());
-        //for (Player p: playersList) p.setBoard(board); //sets players reference to board
     }
     private void setLastTurnFlag(){
         this.lastTurn = true;
@@ -360,21 +384,7 @@ public class Game {
         return false;
     }
     /**
-     * This method is used to check if this the game is in its last turn
-     * @return true if it's the last turn, false otherwise
-     */
-    public boolean isLastTurn(){
-        return lastTurn;
-    }
-    /**
-     * This method is used to check if the game is in its last round
-     * @return true if it's the last round, false otherwise
-     */
-    public boolean isLastRound(){
-        return lastRound;
-    }
-    /**
-     *this method is used to check if the game has ended
+     *This method is used to check if the game has ended
      * @return true if the game is over, false otherwise
      */
     public boolean hasTheGameEnded(){
