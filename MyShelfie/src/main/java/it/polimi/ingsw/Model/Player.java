@@ -44,10 +44,10 @@ public class Player {
     }*/
 
     /**
-     * @author Andrea Mastroberti
      * wrapper for insertTiles in Shelf
+     * @author Andrea Mastroberti
      * @param currentTiles - list of tiles to be added to shelf, max length 3
-     * @param column - column where tiles will be inserted, column values range [1 ... 5]
+     * @param column - column where tiles will be inserted, column values range [0 ... 4]
      */
     public boolean insertTiles(List<Tile> currentTiles, int column) {
         try {

@@ -18,22 +18,28 @@ public class Shelf {
     }
 
     /**
+     * Inserts all tiles int list t from leftmost to rightmost in the Shelf, inserting from bottom to top.
      * @author Andrea Mastroberti
-     * @param t - list of tiles to be inserted
-     * @param column - column of the shelf where tiles will be added
-     * @throws IndexOutOfBoundsException if the chosen column can't hold all the players tiles
+     * @param t - list of tiles to be inserted, size [1 ... 3]
+     * @param column - column of the shelf where tiles will be added è [0 ... 4]
+     * @throws IndexOutOfBoundsException if the chosen column can't hold all the players tiles or the selected column is out of bounds of the shelf
      */
     public void insertTiles(List<Tile> t, int column) throws IndexOutOfBoundsException{
         int size = t.size();
+        if (size > 3 || size < 1) throw new IndexOutOfBoundsException("Too few or too many tiles");
+
         for (int i = 0; i < ROWS; i++)
             if (grid[i][column] == null){   //first available square
-                if ((ROWS - i) < size) throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles don't fit the column
+                if ((ROWS - i) < size)
+                    throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles don't fit the column
                 else {
-                    for (int j = 0; j < size; j++, i++) grid[i][column] = t.remove(size - j - 1);   //add all tiles from the list
+                    for (int j = 0; j < size; i++, j++)
+                        grid[i][column] = t.remove(0);   //add all tiles from the leftmost to the rightmost in list t
                     break;
                 }
             }
     }
+
     public Tile[][] getGrid(){
         return this.grid;
     }
@@ -232,10 +238,11 @@ public class Shelf {
 
     /**
      * @param amountOfTiles - the amount of tiles you're trying to insert
-     * @param column - in which column to insert
+     * @param column - in which column to insert [0 ... 4]
      * @return - true if the tiles can fit, false otherwise
      */
-    public boolean canItFit(int amountOfTiles, int column) {
+    public boolean canItFit(int amountOfTiles, int column) throws IndexOutOfBoundsException{
+        if (column < 0 || column > 4) throw new IndexOutOfBoundsException();
         for (int i = 0; i < ROWS; i++)
             if (Objects.isNull(this.grid[i][column]))
                 return ROWS - i >= amountOfTiles;
@@ -248,17 +255,31 @@ public class Shelf {
      */
     public Tile[][] getGridForDisplay(){
         Tile[][] displayGrid = new Tile[ROWS][COLUMNS];
-        for(int i=0;i<ROWS;i++)
-            for(int j=0;j<COLUMNS;j++){
-                if(grid[i][j]!=null){
-                    //System.out.print(grid[i][j]+ " ");
+        for(int i=0;i<ROWS;i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                if (grid[i][j] != null) {
+                    //System.out.print(grid[i][j] + " ");
                     displayGrid[i][j] = new Tile(grid[i][j].getType());
-                }
-                else{
+                } else {
                     //System.out.print("x ");
                 }
-                //System.out.println();
             }
+            //System.out.println();
+        }
+        //System.out.println();
         return displayGrid;
+    }
+
+    @Override
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLUMNS; j++) {
+                if (grid[i][j] == null) s += "x ";
+                else s += grid[i][j].toString() + " ";
+            }
+            s += "\n";
+        }
+        return s;
     }
 }

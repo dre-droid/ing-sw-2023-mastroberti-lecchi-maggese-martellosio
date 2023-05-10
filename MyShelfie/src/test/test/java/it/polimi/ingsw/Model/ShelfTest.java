@@ -3,6 +3,10 @@ import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.Tile;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ShelfTest {
@@ -127,4 +131,74 @@ public class ShelfTest {
         assertEquals(10,shelf.getAdjScore());
     }
 
+// insertTiles tests
+    @Test
+    public void insertTiles_Test(){
+        Shelf s = new Shelf();
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+
+        Tile[][] grid = s.getGrid();
+        s.insertTiles(tileList, 0);
+        assertEquals(grid[0][0].getType(), Type.CAT);
+        assertEquals(grid[1][0].getType(), Type.BOOK);
+        assertEquals(grid[2][0].getType(), Type.FRAME);
+    }
+    @Test
+    public void insertTooManyTiles_Test(){
+        Shelf s = new Shelf();
+
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        s.insertTiles(tileList, 0);
+        tileList.clear();
+
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        s.insertTiles(tileList, 0);
+        tileList.clear();
+
+        /*
+        C x x x x
+        B x x x x
+        F x x x x
+        C x x x x
+        B x x x x
+        F x x x x
+                */
+
+        System.out.println(s);
+        tileList.add(new Tile(Type.CAT));
+        try{
+            s.insertTiles(tileList, 0);
+        }
+        catch (IndexOutOfBoundsException e){
+            assertTrue(e.toString().equals("Too many tiles for the selected column!"));
+        }
+    }
+    @Test
+    public void insertTiles_BoundsTest(){
+        Shelf s = new Shelf();
+
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        try{
+            s.insertTiles(tileList, -1);
+        } catch (IndexOutOfBoundsException e){
+            assertTrue(e.getClass().equals(IndexOutOfBoundsException.class));
+        }
+        try{
+            s.insertTiles(tileList, 5);
+        } catch (IndexOutOfBoundsException e){
+            assertTrue(e.getClass().equals(IndexOutOfBoundsException.class));
+        }
+    }
+//************
 }

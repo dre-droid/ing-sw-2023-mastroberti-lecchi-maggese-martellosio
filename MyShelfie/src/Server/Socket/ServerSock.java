@@ -284,7 +284,7 @@ public class ServerSock {
                     }
                     line = string;
                     string = "";
-                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    if (controller.hasTheGameEnded()) return null;
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setX(Integer.parseInt(line));
@@ -302,7 +302,7 @@ public class ServerSock {
                     }
                     line = string;
                     string = "";
-                    if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                    if (controller.hasTheGameEnded()) return null;
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setY(Integer.parseInt(line));
@@ -377,7 +377,10 @@ public class ServerSock {
             boolean tooManyTiles = false;
             do {
                 if (imbecille) {
-                    if (tooManyTiles) out.println("[REQUEST]: The tiles won't fit there! Try again: ");
+                    if (tooManyTiles){
+                        out.println("[REQUEST]: The tiles won't fit there! Try again: ");
+                        tooManyTiles = false;
+                    }
                     else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 }
                 else
@@ -388,7 +391,7 @@ public class ServerSock {
                 }
                 line = string;
                 string = "";
-                if (line.equals("q") || controller.hasTheGameEnded()) return null;
+                if (controller.hasTheGameEnded()) return null;
                 if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
             } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
