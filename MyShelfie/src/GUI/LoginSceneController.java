@@ -1,6 +1,7 @@
 package GUI;
 
 import Server.ClientWithChoice;
+import Server.RMI.ClientNotificationRMI;
 import Server.RMI.ClientRMI;
 import Server.Socket.ClientSocket;
 import javafx.fxml.FXML;
@@ -15,7 +16,11 @@ import javafx.event.ActionEvent;
 import java.awt.*;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Objects;
+import java.util.Random;
 
 public class LoginSceneController {
     @FXML
@@ -35,7 +40,7 @@ public class LoginSceneController {
     private Scene scene;
     private Parent root;
     private ClientSocket clientSocket;
-    private ClientRMI clientRMI;
+    private ClientNotificationRMIGUI clientRMI;
 
     /*
     public void login(ActionEvent event) throws IOException{
@@ -46,6 +51,62 @@ public class LoginSceneController {
 
     public void switchToNextScene(ActionEvent event) {
         try {
+            //connection to rmi server
+            if(clientRMI!=null){
+                System.out.println("rmi active on login scene");
+                clientRMI.setnickname(usernameText.getText());
+                try{
+                    FXMLLoader loader;
+                    String errorMessage="";
+                    clientRMI.startNotificationServer();
+                    int outcome = clientRMI.joinGame();
+                    System.out.println(outcome);
+                    String nextScenPath="";
+                    switch(outcome){
+                        case -1:{
+                            nextScenPath = "MatchType.fxml";
+                            System.out.println("createnewgamecommand");
+                            loader = new FXMLLoader(getClass().getResource(nextScenPath));
+                            Parent root = loader.load();
+                            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                            scene = new Scene(root);
+                            stage.setScene(scene);
+                            MatchTypeController mtt = loader.getController();
+                            mtt.setClientRMI(clientRMI);
+                            stage.show();
+                        }break;
+                        case -2:{
+                            errorMessage = "The game has already started";
+                            loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                        }break;
+                        case -3:{
+                            //error: need to change nickname -> show alert and do nothing
+                            errorMessage = "Nickname already in use";
+                            loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                        }break;
+                        case 0:{
+                            nextScenPath = "GameScene.fxml";
+                            loader = new FXMLLoader(getClass().getResource(nextScenPath));
+                            Parent root = loader.load();
+                            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                            scene = new Scene(root);
+                            stage.setScene(scene);
+                            LoginSceneController lsc = loader.getController();
+                            lsc.setClient(clientRMI);
+                            stage.show();
+                        }break;
+                        default:{
+                            //not yet implemented
+                            loader = new FXMLLoader(getClass().getResource("error.fxml"));
+                        }
+                    }
+                    return;
+                }catch(RemoteException e){
+                    //send to error page
+                    e.printStackTrace();
+                }
+            }
+
             new Thread(() -> {
                 while (true) {
                     if (clientSocket != null)
@@ -56,9 +117,12 @@ public class LoginSceneController {
                             }
                             if (clientSocket.stringGUI.startsWith("[INFO]: Game is starting.")) break;
                         }
-
                 }
             }).start();
+
+
+
+
 
             Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
             stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -76,7 +140,9 @@ public class LoginSceneController {
         client.runServer();
     }
 
-    public void setClient(ClientRMI client){
+    public void setClient(ClientNotificationRMIGUI client){
         this.clientRMI = client;
     }
+
+
 }

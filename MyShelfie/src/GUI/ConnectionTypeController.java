@@ -23,32 +23,36 @@ public class ConnectionTypeController  {
     @FXML
     Button CreateCreateGameButton;
 
+    @FXML
+    private RadioButton rButtonRMI;
+
 
     public void switchToLoginScene(ActionEvent event){
         Scene scene;
         Parent root;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
         ClientSocket clientSocket = null;
-        ClientRMI clientRMI = null;
+        ClientNotificationRMIGUI clientRMI = null;
 
 
         try {
             ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
             if (selectedToggle != null) {
-                String selectedValue = (selectedToggle).getText();
-                if (selectedValue.equals("RMI")) clientRMI = new ClientRMI();
+                if (rButtonRMI.isSelected()) clientRMI = new ClientNotificationRMIGUI();
                 else clientSocket = new ClientSocket();
             }
 
             root = loader.load();
             LoginSceneController loginSceneController = loader.getController();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             if (Objects.isNull(clientSocket)) {
+                stage.setUserData(clientRMI);
                 loginSceneController.setClient(clientRMI);
             } else {
                 loginSceneController.setClient(clientSocket);
             }
 
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
