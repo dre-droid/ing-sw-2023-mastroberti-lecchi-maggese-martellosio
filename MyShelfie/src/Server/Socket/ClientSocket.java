@@ -21,34 +21,17 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 public class ClientSocket {
-    private static Board board;
-    private static Shelf shelf;
-    private static String personalGoalCard;
-    private static String commonGoalCard;
-    private static List<String> leaderboard;
-    private static String nickname;
-    public static String stringGUI;
-    public static Socket socket;
+    private Board board;
+    private Shelf shelf;
+    private String personalGoalCard;
+    private String commonGoalCard;
+    private List<String> leaderboard;
+    private String nickname;
+    public String messageFromServer = "";
+    private Socket socket;
 
     //used by ClientWithChoice
     public void runServer(){
-        try{
-            //connect to server
-            Socket socket= new Socket("127.0.0.1", 59010);
-            socket.setKeepAlive(true);
-            //pinger(socket);
-
-            try{
-                serverListener(socket);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        } catch (IOException e) {throw new RuntimeException(e);}
-    }
-
-    //run directly socket client
-    public static void main(String[] args) throws IOException {
         try{
             //connect to server
             socket= new Socket("127.0.0.1", 59010);
@@ -57,7 +40,6 @@ public class ClientSocket {
 
             try{
                 serverListener(socket);
-
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -65,7 +47,7 @@ public class ClientSocket {
         } catch (IOException e) {throw new RuntimeException(e);}
     }
 
-    private static void serverListener(Socket socket) {
+    private void serverListener(Socket socket) {
         Runnable serverListener = () -> {
             try {
                 InputStream input = socket.getInputStream();
@@ -77,6 +59,7 @@ public class ClientSocket {
                 while(active){
                     Gson gson = new Gson();
                     line = reader.readLine();
+                    if (line != null) messageFromServer = line;
 
                     // ************* DESERIALIZATION ****************
                     if (line.startsWith("[GSONBOARD]")){
@@ -132,7 +115,6 @@ public class ClientSocket {
                         System.out.println(line);
                     }
                     }
-                    if (!Objects.isNull(line)) stringGUI = line;
                 }
             catch (SocketException e) {
                 System.out.println("Socket closed.");
@@ -143,7 +125,7 @@ public class ClientSocket {
         new Thread(serverListener).start();
     }
 
-    private static void printTurn(){
+    private void printTurn(){
         System.out.println();
         System.out.println("*********  " + nickname + ": your turn  *********");
 
@@ -180,7 +162,7 @@ public class ClientSocket {
         System.out.println();
     }
 
-    private static void printShelf(){
+    private void printShelf(){
         System.out.println("*** Shelf ***");
         for (int i = 5; i >= 0; i--) {
             for (int j = 0; j < 5; j++) {
@@ -192,7 +174,7 @@ public class ClientSocket {
         System.out.println("*************");
     }
 
-    private static void clientSpeaker(Socket socket){
+    private void clientSpeaker(Socket socket){
         Runnable clientSpeaker = () ->{
             try{
                 String message;
@@ -215,19 +197,16 @@ public class ClientSocket {
     /**
      * @param message prints message to the socket's output stream
      */
-    public static void clientSpeaker(String message){
-        Runnable clientSpeaker = () ->{
+    public void clientSpeaker(String message){
             try{
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 output.println(message);
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
-        };
-        new Thread(clientSpeaker).start();
     }
     /*
-    private static void pinger(Socket s){
+    private void pinger(Socket s){
         new Thread(() -> {
             try {
                 PrintWriter out = new PrintWriter(s.getOutputStream(), true);

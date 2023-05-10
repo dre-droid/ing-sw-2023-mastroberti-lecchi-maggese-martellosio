@@ -216,4 +216,29 @@ public class ShelfTest {
         assertTrue(flag);
     }
 //************
+
+//canItFit tests
+    @Test
+    public void canItFit_Test(){
+        Shelf s = new Shelf();
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        s.insertTiles(tileList, 4);
+
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        s.insertTiles(tileList, 4);
+
+        assertFalse(s.canItFit(2, 4));
+        assertTrue(s.canItFit(1, 4));
+
+        try{
+            s.canItFit(2, -1);
+        }catch (IndexOutOfBoundsException e){
+            assertTrue(true);
+        }
+    }
+//************
 }

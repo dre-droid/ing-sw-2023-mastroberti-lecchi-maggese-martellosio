@@ -241,6 +241,7 @@ public class Shelf {
      * @param amountOfTiles - the amount of tiles you're trying to insert
      * @param column - in which column to insert [0 ... 4]
      * @return - true if the tiles can fit, false otherwise
+     * @throws IndexOutOfBoundsException if column is out of bounds of shelf
      */
     public boolean canItFit(int amountOfTiles, int column) throws IndexOutOfBoundsException{
         if (column < 0 || column > 4) throw new IndexOutOfBoundsException();
