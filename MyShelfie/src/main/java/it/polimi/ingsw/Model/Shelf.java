@@ -35,9 +35,10 @@ public class Shelf {
                 else {
                     for (int j = 0; j < size; i++, j++)
                         grid[i][column] = t.remove(0);   //add all tiles from the leftmost to the rightmost in list t
-                    break;
+                    return;
                 }
             }
+        throw new IndexOutOfBoundsException();
     }
 
     public Tile[][] getGrid(){

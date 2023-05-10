@@ -172,33 +172,48 @@ public class ShelfTest {
         F x x x x
                 */
 
-        System.out.println(s);
+        //System.out.println(s);
+        boolean flag = false;
         tileList.add(new Tile(Type.CAT));
         try{
             s.insertTiles(tileList, 0);
+        } catch (IndexOutOfBoundsException e){
+            flag = true;
         }
-        catch (IndexOutOfBoundsException e){
-            assertTrue(e.toString().equals("Too many tiles for the selected column!"));
-        }
+        assertTrue(flag);
     }
     @Test
     public void insertTiles_BoundsTest(){
         Shelf s = new Shelf();
-
+        //add 4 tiles
         List<Tile> tileList = new ArrayList<>();
         tileList.add(new Tile(Type.CAT));
         tileList.add(new Tile(Type.BOOK));
         tileList.add(new Tile(Type.FRAME));
+        tileList.add(new Tile(Type.FRAME));
+        boolean flag = false;
+        try{
+            s.insertTiles(tileList, 0);
+        } catch (IndexOutOfBoundsException e){
+            flag = true;
+        }
+        assertTrue(flag);
+
+        flag = false;
         try{
             s.insertTiles(tileList, -1);
         } catch (IndexOutOfBoundsException e){
-            assertTrue(e.getClass().equals(IndexOutOfBoundsException.class));
+            flag = true;
         }
+        assertTrue(flag);
+
+        flag = false;
         try{
             s.insertTiles(tileList, 5);
         } catch (IndexOutOfBoundsException e){
-            assertTrue(e.getClass().equals(IndexOutOfBoundsException.class));
+            flag = true;
         }
+        assertTrue(flag);
     }
 //************
 }
