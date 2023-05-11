@@ -1001,9 +1001,9 @@ public class PersonalGoalCardTest {
 
     @Test
     public void toStringTest(){
-        p1.setPersonalGoalCard(g.getValidTilesMap().get(1));
-
-        System.out.println(p1);
+        p1.setPersonalGoalCard(g.getValidTilesMap().get(2));
+        String pgc2 = "       x x x x x \n       x P x x x \n       C x G x x \n       x x x x B \n       x x x T x \n       x x x x F \n";
+        assertEquals(pgc2, p1.getPersonalGoalCard().toString());
     }
 
 }
