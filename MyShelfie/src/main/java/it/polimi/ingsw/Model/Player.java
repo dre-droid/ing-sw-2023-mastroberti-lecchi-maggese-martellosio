@@ -13,7 +13,6 @@ public class Player {
     private PersonalGoalCard personalGoalCard;
     private boolean endGameToken;
     private boolean firstPlayerSeat;
-    //private Board board;
 
     /**
      * @param firstPlayerSeat - bool, true if player is the first to play
@@ -65,13 +64,7 @@ public class Player {
     public int checkPersonalGoal(){
         return personalGoalCard.getPoints(shelf);
     }
-
-    //setters
-    /*public void setBoard(Board b){
-        this.board = b;
-    }*/
-    public void setCurrentTiles(List<Tile> list){
-        this.currentTiles = list;
+    public void setCurrentTiles(List<Tile> list){ this.currentTiles = list;
     }
     private void setEndGameToken() {this.endGameToken = true;}
     public void setFirstPlayerSeat() {this.firstPlayerSeat = true;}
@@ -121,6 +114,9 @@ public class Player {
         for (ScoringToken t : scoringTokensList) sum += t.points;
         return sum;
     }
+
+    //printShelf is never used
+    /*
     public void printShelf(){
         Tile[][] grid = shelf.getGrid();
         for (int i = 5; i >= 0; i--) {
@@ -132,6 +128,8 @@ public class Player {
         }
         System.out.println();
     }
+
+     */
     public boolean getFirstPlayerSeat(){
         return firstPlayerSeat;
     }
