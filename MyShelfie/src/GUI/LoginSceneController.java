@@ -110,12 +110,12 @@ public class LoginSceneController {
             new Thread(() -> {
                 while (true) {
                     if (clientSocket != null)
-                        if (!Objects.isNull(clientSocket.stringGUI)) {
-                            while (clientSocket.stringGUI.startsWith("[REQUEST]")) {
+                        if (!Objects.isNull(clientSocket.messageFromServer)) {
+                            while (clientSocket.messageFromServer.startsWith("[REQUEST]")) {
                                 clientSocket.clientSpeaker(usernameText.getText());
-                                InfoLabel.setText(clientSocket.stringGUI);
+                                InfoLabel.setText(clientSocket.messageFromServer);
                             }
-                            if (clientSocket.stringGUI.startsWith("[INFO]: Game is starting.")) break;
+                            if (clientSocket.messageFromServer.startsWith("[INFO]: Game is starting.")) break;
                         }
                 }
             }).start();
