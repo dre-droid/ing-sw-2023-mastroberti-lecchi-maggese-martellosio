@@ -99,6 +99,10 @@ public class Player {
     public boolean hasEndGameToken(){
         return endGameToken;
     }
+    public List<ScoringToken> getScoringTokensList(){
+        if (!scoringTokensList.isEmpty()) return new ArrayList<>(scoringTokensList);
+        else return null;
+    }
 
     /**
      * @author Andrea Mastroberti

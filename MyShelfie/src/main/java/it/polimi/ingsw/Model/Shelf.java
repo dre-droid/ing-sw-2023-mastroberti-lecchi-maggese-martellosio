@@ -275,7 +275,7 @@ public class Shelf {
     @Override
     public String toString() {
         String s = "";
-        for (int i = 0; i < ROWS; i++) {
+    for (int i = ROWS - 1; i >= 0; i--) {
             for (int j = 0; j < COLUMNS; j++) {
                 if (grid[i][j] == null) s += "x ";
                 else s += grid[i][j].toString() + " ";

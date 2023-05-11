@@ -16,7 +16,7 @@ public class Bag {
     }
 
     /**
-     * This methods returns all the Tiles present in the bag
+     * This method returns all the Tiles present in the bag
      * @return All the tiles present in the Bag
      */
     public List<Tile> getAllTiles(){

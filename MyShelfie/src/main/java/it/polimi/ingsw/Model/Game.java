@@ -65,6 +65,8 @@ public class Game {
         this.board = board;
         this.playersList = playerList;
         leaderBoard = new ArrayList<>();
+        leaderBoard.add(playerList.get(0));
+        leaderBoard.add(playerList.get(1));
         commonGoalCards = new ArrayList<>();
         turnCount = 1;
         lastTurn = false;
@@ -73,14 +75,21 @@ public class Game {
         gameHasStarted=false;
         fillValidTileMap();
 
-        //setfirstplayer
+        //setfirstplayer  //second player to start
         playersList.get(1).setFirstPlayerSeat();
         iterator = playersList.iterator();
-        iterator.next();    //second player to start
+        iterator.next();
+        iterator.next();
         isPlaying = playersList.get(1);
 
-        chooseCommonGoals();
-        drawPersonalGoalCard();
+        //chooseCommonGoals
+        commonGoalCards.add(new CommonGoalCard(new Diagonal(), this.numOfPlayers));
+        commonGoalCards.add(new CommonGoalCard(new FourCornerOfTheSameType(), this.numOfPlayers));
+
+        //drawPersonalGoalCards
+        playerList.get(0).setPersonalGoalCard(validTilesMap.get(0));
+        playerList.get(1).setPersonalGoalCard(validTilesMap.get(1));
+
         this.gameHasStarted = true;
     }
 
@@ -231,7 +240,6 @@ public class Game {
         //update score and leaderboard
         isPlaying.updateScore();
         Collections.sort(leaderBoard, new scoreComparator());
-
         //next turn and end game logic
         Player nextPlayer;
         if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
