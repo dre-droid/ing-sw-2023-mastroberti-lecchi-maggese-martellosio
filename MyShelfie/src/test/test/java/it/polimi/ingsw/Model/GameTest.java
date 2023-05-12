@@ -20,7 +20,7 @@ public class GameTest{
         p = new ArrayList<>();
         board = setCustomBoard();
         p1 = new Player("p1", false, null);
-        p2 = new Player("p2", false, null);
+        p2 = new Player("p2", true, null);
         p.add(p1);
         p.add(p2);
         g = new Game(2, board, p);
@@ -41,8 +41,8 @@ public class GameTest{
         tileList.add(new Tile(Type.BOOK));
         g.playTurn(1, 3, 2, Board.Direction.RIGHT, 0, tileList);
         TilePlacingSpot[][] grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p2.getShelf().getGrid()[0][0].getType(), Type.CAT);
-        assertEquals(p2.getShelf().getGrid()[1][0].getType(), Type.BOOK);
+        assertEquals(p2.getShelf().getGrid()[5][0].getType(), Type.CAT);
+        assertEquals(p2.getShelf().getGrid()[4][0].getType(), Type.BOOK);
         assertEquals(grid[1][3].showTileInThisPosition(), null);
         assertEquals(grid[1][4].showTileInThisPosition(), null);
 
@@ -52,9 +52,9 @@ public class GameTest{
         tileList.add(new Tile(Type.BOOK));
         g.playTurn(2, 3, 3, Board.Direction.RIGHT, 0, tileList);
         grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p1.getShelf().getGrid()[0][0].getType(), Type.PLANT);
-        assertEquals(p1.getShelf().getGrid()[1][0].getType(), Type.CAT);
-        assertEquals(p1.getShelf().getGrid()[2][0].getType(), Type.BOOK);
+        assertEquals(p1.getShelf().getGrid()[5][0].getType(), Type.PLANT);
+        assertEquals(p1.getShelf().getGrid()[4][0].getType(), Type.CAT);
+        assertEquals(p1.getShelf().getGrid()[3][0].getType(), Type.BOOK);
         assertEquals(grid[2][3].showTileInThisPosition(), null);
         assertEquals(grid[2][4].showTileInThisPosition(), null);
         assertEquals(grid[2][5].showTileInThisPosition(), null);
@@ -65,9 +65,9 @@ public class GameTest{
         tileList.add(new Tile(Type.CAT));
         g.playTurn(3, 2, 3, Board.Direction.RIGHT, 0, tileList);
         grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p2.getShelf().getGrid()[2][0].getType(), Type.PLANT);
         assertEquals(p2.getShelf().getGrid()[3][0].getType(), Type.PLANT);
-        assertEquals(p2.getShelf().getGrid()[4][0].getType(), Type.CAT);
+        assertEquals(p2.getShelf().getGrid()[2][0].getType(), Type.PLANT);
+        assertEquals(p2.getShelf().getGrid()[1][0].getType(), Type.CAT);
         assertEquals(grid[3][2].showTileInThisPosition(), null);
         assertEquals(grid[3][3].showTileInThisPosition(), null);
         assertEquals(grid[3][4].showTileInThisPosition(), null);
@@ -78,9 +78,9 @@ public class GameTest{
         tileList.add(new Tile(Type.BOOK));
         g.playTurn(3, 5, 3, Board.Direction.RIGHT, 0, tileList);
         grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p1.getShelf().getGrid()[3][0].getType(), Type.CAT);
-        assertEquals(p1.getShelf().getGrid()[4][0].getType(), Type.BOOK);
-        assertEquals(p1.getShelf().getGrid()[5][0].getType(), Type.BOOK);
+        assertEquals(p1.getShelf().getGrid()[2][0].getType(), Type.CAT);
+        assertEquals(p1.getShelf().getGrid()[1][0].getType(), Type.BOOK);
+        assertEquals(p1.getShelf().getGrid()[0][0].getType(), Type.BOOK);
         assertEquals(grid[3][5].showTileInThisPosition(), null);
         assertEquals(grid[3][6].showTileInThisPosition(), null);
         assertEquals(grid[3][7].showTileInThisPosition(), null);
@@ -119,7 +119,7 @@ public class GameTest{
         tileList.add(new Tile(Type.CAT));
         g.playTurn(4, 4, 1, Board.Direction.RIGHT, 0, tileList);
         grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p2.getShelf().getGrid()[5][0].getType(), Type.CAT);
+        assertEquals(p2.getShelf().getGrid()[0][0].getType(), Type.CAT);
         assertNull(grid[4][4].showTileInThisPosition());
         assertEquals(p2.getScoringTokensList().size(), 1);
 
@@ -127,7 +127,7 @@ public class GameTest{
         tileList.add(new Tile(Type.PLANT));
         g.playTurn(4, 1, 1, Board.Direction.RIGHT, 1, tileList);
         grid = g.getBoard().getBoardForDisplay();
-        assertEquals(p1.getShelf().getGrid()[3][1].getType(), Type.BOOK);
+        assertEquals(p1.getShelf().getGrid()[2][1].getType(), Type.BOOK);
         assertNull(grid[4][1].showTileInThisPosition());
         assertEquals(p1.getScoringTokensList().size(), 1);
 

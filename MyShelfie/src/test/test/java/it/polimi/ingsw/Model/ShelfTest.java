@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -142,9 +143,9 @@ public class ShelfTest {
 
         Tile[][] grid = s.getGrid();
         s.insertTiles(tileList, 0);
-        assertEquals(grid[0][0].getType(), Type.CAT);
-        assertEquals(grid[1][0].getType(), Type.BOOK);
-        assertEquals(grid[2][0].getType(), Type.FRAME);
+        assertEquals(grid[5][0].getType(), Type.CAT);
+        assertEquals(grid[4][0].getType(), Type.BOOK);
+        assertEquals(grid[3][0].getType(), Type.FRAME);
     }
     @Test
     public void insertTooManyTiles_Test(){
@@ -172,7 +173,7 @@ public class ShelfTest {
         F x x x x
                 */
 
-        //System.out.println(s);
+
         boolean flag = false;
         tileList.add(new Tile(Type.CAT));
         try{
@@ -181,6 +182,26 @@ public class ShelfTest {
             flag = true;
         }
         assertTrue(flag);
+    }
+    @Test
+    public void insertTiles_Too_many_tiles_for_the_selected_column_Test(){
+        Shelf s = new Shelf();
+
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        s.insertTiles(tileList, 0);
+        tileList.clear();
+
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        s.insertTiles(tileList, 0);
+        tileList.clear();
+
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        assertThrows(IndexOutOfBoundsException.class, ()->{s.insertTiles(tileList, 0);});
     }
     @Test
     public void insertTiles_BoundsTest(){
@@ -226,7 +247,7 @@ public class ShelfTest {
         tileList.add(new Tile(Type.BOOK));
         tileList.add(new Tile(Type.FRAME));
         s.insertTiles(tileList, 4);
-
+        tileList = new ArrayList<>();
         tileList.add(new Tile(Type.CAT));
         tileList.add(new Tile(Type.BOOK));
         s.insertTiles(tileList, 4);
@@ -240,5 +261,40 @@ public class ShelfTest {
             assertTrue(true);
         }
     }
-//************
+
+    @Test
+    public void canItFit_returns_false_Test(){
+        Shelf s = new Shelf();
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        s.insertTiles(tileList, 4);
+        tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.BOOK));
+        s.insertTiles(tileList, 4);
+
+        assertFalse(s.canItFit(1, 4));
+
+    }
+
+
+    @Test
+    public void getGridForDisplay_Test(){
+        Shelf shelf = new Shelf();
+        List<Tile> tileList = new ArrayList<>();
+        tileList.add(new Tile(Type.CAT));
+        tileList.add(new Tile(Type.BOOK));
+        tileList.add(new Tile(Type.FRAME));
+        shelf.insertTiles(tileList, 0);
+        for(int i = 0; i < 6; i++)
+            for(int j = 0; j < 5; j++) {
+                if(shelf.getGrid()[i][j] == null)
+                    assertNull(shelf.getGridForDisplay()[i][j]);
+                else
+                    assertEquals(shelf.getGrid()[i][j].getType(), shelf.getGridForDisplay()[i][j].getType());
+            }
+    }
 }
