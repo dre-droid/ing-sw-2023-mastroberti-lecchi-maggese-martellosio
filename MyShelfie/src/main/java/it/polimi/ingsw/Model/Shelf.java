@@ -28,12 +28,12 @@ public class Shelf {
         int size = t.size();
         if (size > 3 || size < 1) throw new IndexOutOfBoundsException("Too few or too many tiles");
 
-        for (int i = 0; i < ROWS; i++)
+        for (int i = ROWS-1; i >= 0; i--)
             if (grid[i][column] == null){   //first available square
-                if ((ROWS - i) < size)
+                if (size > i+1)
                     throw new IndexOutOfBoundsException("Too many tiles for the selected column!"); //exception if tiles don't fit the column
                 else {
-                    for (int j = 0; j < size; i++, j++)
+                    for (int j = 0; j < size; i--, j++)
                         grid[i][column] = t.remove(0);   //add all tiles from the leftmost to the rightmost in list t
                     return;
                 }
@@ -143,14 +143,8 @@ public class Shelf {
                         }
                         adjCounter+=1;
                         alredyChecked.add(c);
-                        /*System.out.println("Tile controllata: ("+c.x+","+c.y+")");
-                        System.out.println("Tile già controllate: ");
-                        for(Coordinate stampa : alredyChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
-                        System.out.println("Tile da controllare: ");
-                        for(Coordinate stampa : toBeChecked){System.out.println("("+stampa.x+","+stampa.y+")");}
-                        System.out.println();*/
                     }while(toBeChecked.size()!=0);
-                    //System.out.println("Tessere adiacenti: "+ adjCounter);
+
                     scoreCounter+=scoreCalc(adjCounter);
                     toBeChecked.clear();
                     adjCounter=0;
@@ -245,9 +239,9 @@ public class Shelf {
      */
     public boolean canItFit(int amountOfTiles, int column) throws IndexOutOfBoundsException{
         if (column < 0 || column > 4) throw new IndexOutOfBoundsException();
-        for (int i = 0; i < ROWS; i++)
+        for (int i = ROWS - 1; i >= 0; i--)
             if (Objects.isNull(this.grid[i][column]))
-                return ROWS - i >= amountOfTiles;
+                return i + 1 >= amountOfTiles;
         return false;
     }
 
@@ -260,22 +254,18 @@ public class Shelf {
         for(int i=0;i<ROWS;i++) {
             for (int j = 0; j < COLUMNS; j++) {
                 if (grid[i][j] != null) {
-                    //System.out.print(grid[i][j] + " ");
+
                     displayGrid[i][j] = new Tile(grid[i][j].getType());
-                } else {
-                    //System.out.print("x ");
                 }
             }
-            //System.out.println();
         }
-        //System.out.println();
         return displayGrid;
     }
 
     @Override
     public String toString() {
         String s = "";
-    for (int i = ROWS - 1; i >= 0; i--) {
+    for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLUMNS; j++) {
                 if (grid[i][j] == null) s += "x ";
                 else s += grid[i][j].toString() + " ";

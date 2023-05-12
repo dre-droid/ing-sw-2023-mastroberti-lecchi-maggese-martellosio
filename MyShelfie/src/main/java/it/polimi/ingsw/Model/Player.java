@@ -32,15 +32,7 @@ public class Player {
 
     }
 
-    /**
-     * encapsulates Board's drawTiles
-     * @return the list of drawn tiles
-     */
-    /*public List<Tile> drawTiles(int x, int y, int amount, Board.Direction direction) throws InvalidMoveException{
-        List<Tile> list = new ArrayList<>();
-        list = board.drawTiles(x, y, amount, direction);
-        return list;
-    }*/
+
 
     /**
      * wrapper for insertTiles in Shelf
@@ -115,21 +107,6 @@ public class Player {
         return sum;
     }
 
-    //printShelf is never used
-    /*
-    public void printShelf(){
-        Tile[][] grid = shelf.getGrid();
-        for (int i = 5; i >= 0; i--) {
-            for (int j = 0; j < 5; j++){
-                if (grid[i][j] == null) System.out.printf("X ");
-                else System.out.printf("%s ", grid[i][j].toString());
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-     */
     public boolean getFirstPlayerSeat(){
         return firstPlayerSeat;
     }

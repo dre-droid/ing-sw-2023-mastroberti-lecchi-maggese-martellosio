@@ -164,7 +164,7 @@ public class ClientSocket {
 
     private void printShelf(){
         System.out.println("*** Shelf ***");
-        for (int i = 5; i >= 0; i--) {
+        for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
                 else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
