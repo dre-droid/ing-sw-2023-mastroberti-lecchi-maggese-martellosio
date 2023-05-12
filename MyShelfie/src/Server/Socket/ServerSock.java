@@ -23,6 +23,7 @@ public class ServerSock {
     private Controller controller;
     private final Server server;
     public String string = "";  //used to communicate with playing player
+    Gson gson = new Gson();
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -162,48 +163,50 @@ public class ServerSock {
                 while (true) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     line = reader.readLine();
+                    synchronized (this) {
+                        if (controller.hasGameStarted())
+                            if (controller.isMyTurn(nickname) && !line.startsWith("/chat "))
+                                string = line;
 
-                    if (controller.hasGameStarted())
-                        if (controller.isMyTurn(nickname) && !line.startsWith("/chat "))
-                            string = line;
+                        if (line.startsWith("/chat ")) {
+                            String text = "", receiver = "";
 
-                    if (line.startsWith("/chat ")){
-                        String text = "", receiver = "";
-
-                        int atIndex;
-                        if(line.startsWith("/chat @")) {
-                            atIndex = line.indexOf('@');
-                            receiver = line.substring(atIndex + 1);
-                            atIndex = receiver.indexOf(' ');
-                            text = receiver.substring(atIndex + 1);
-                            receiver = receiver.substring(0, atIndex);
-                        }
-                        else {
-                            receiver = "all";
-                            atIndex = line.indexOf(' ');
-                            text = line.substring(atIndex + 1);
-                        }
-                        sendChatMessageToClient(nickname, text, receiver);
-                    }
-
-                    if (line.equals("/quit")) {
-                        PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
-                        pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
-                        line = reader.readLine();
-                        if (line.equals("y")) {
-                            if (!controller.hasGameStarted()) {
-                                controller.removePlayer(nickname);
-                                pw.println("[GAMEEND]: You quit.");
+                            int atIndex;
+                            if (line.startsWith("/chat @")) {
+                                atIndex = line.indexOf('@');
+                                receiver = line.substring(atIndex + 1);
+                                atIndex = receiver.indexOf(' ');
+                                text = receiver.substring(atIndex + 1);
+                                receiver = receiver.substring(0, atIndex);
                             } else {
-                                controller.endGame();
-                                for (socketNickStruct c : clients) {
-                                    pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                                    pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
-                                    c.getSocket().close();
-                                }
+                                receiver = "all";
+                                atIndex = line.indexOf(' ');
+                                text = line.substring(atIndex + 1);
                             }
-                            break;  //closes listener on confirmed quit
+                            sendChatMessageToClient(nickname, text, receiver);
                         }
+
+                        if (line.equals("/quit")) {
+                            PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
+                            pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
+                            line = reader.readLine();
+                            if (line.equals("y")) {
+                                if (!controller.hasGameStarted()) {
+                                    controller.removePlayer(nickname);
+                                    pw.println("[GAMEEND]: You quit.");
+                                } else {
+                                    controller.endGame();
+                                    for (socketNickStruct c : clients) {
+                                        pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                                        pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
+                                        c.getSocket().close();
+                                    }
+                                }
+                                break;  //closes listener on confirmed quit
+                            }
+                        }
+
+                        notify();
                     }
                 }
             } catch (SocketException e){
@@ -235,56 +238,29 @@ public class ServerSock {
 
         try {
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
-
-            //*************** SERIALIZATION ***************
-            Gson gson = new Gson();
-
-            out.println("[NICKNAME]" + nickname);
-
-            String jsonBoard = gson.toJson(b);
-            out.println("[GSONBOARD]" + jsonBoard);
-
-            String jsonShelf = gson.toJson(shelf);
-            out.println("[GSONSHELF]" + jsonShelf);
-
-            String jsonPersonalGoal = gson.toJson(pgc.toString());
-            out.println("[GSONPGC]" + jsonPersonalGoal);
-
-            String jsonCommonGoal = cgc.get(0).getDescription() + "\n";
-            jsonCommonGoal += cgc.get(1).getDescription() + "\n";
-            jsonCommonGoal = gson.toJson(jsonCommonGoal);
-            out.println("[GSONCGC]" + jsonCommonGoal);
-
-            ArrayList<String> stringLeaderboard = new ArrayList<String>();
-            for (Player p : leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
-            String jsonLeaderboard = gson.toJson(stringLeaderboard);
-            out.println("[GSONLEAD]" + jsonLeaderboard);
-            //*********************************************
+            sendSerializedObjects(out, nickname, b, shelf, pgc, cgc, leaderboard);
 
             boolean imbecille = false;
-            String line;
             boolean invalidMoveFlag = false;
+            String line;
 
             //do-while block handles correctly drawing tiles from board
             do {
                 //asks for row
                 do {
-                    Thread.sleep(50);
-                    if (!controller.hasTheGameEnded()) {
-                        if (imbecille)
-                            out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
-                        else if (invalidMoveFlag)
-                            out.println("[REQUEST] You cannot draw those tiles. Try again, insert row: ");
-                        else
-                            out.println("[YOUR TURN] Select the row from which to draw from:");
-                    }
-                    while (Objects.equals(string, "")) {
-                        if (controller.hasTheGameEnded()) return null;
-                        Thread.sleep(100);
+                    if (imbecille)
+                        out.println("[REQUEST] Invalid Input! Select the row from which to draw from:");
+                    else if (invalidMoveFlag)
+                        out.println("[REQUEST] You cannot draw those tiles. Try again, insert row: ");
+                    else
+                        out.println("[YOUR TURN] Select the row from which to draw from:");
+                    //waits for input
+                    synchronized (this) {
+                        while (string.equals(""))
+                            wait();
                     }
                     line = string;
                     string = "";
-                    if (controller.hasTheGameEnded()) return null;
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setX(Integer.parseInt(line));
@@ -296,13 +272,13 @@ public class ServerSock {
                         out.println("[REQUEST] Invalid Input! Select the column from which to draw from:");
                     else
                         out.println("[REQUEST] Select the column from which to draw from:");
-                    while (Objects.equals(string, "")) {
-                        if (controller.hasTheGameEnded()) return null;
-                        Thread.sleep(100);
+                    //waits for input
+                    synchronized (this) {
+                        while (string.equals(""))
+                            wait();
                     }
                     line = string;
                     string = "";
-                    if (controller.hasTheGameEnded()) return null;
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setY(Integer.parseInt(line));
@@ -314,9 +290,10 @@ public class ServerSock {
                         out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
                     else
                         out.println("[REQUEST] How many tiles do you want to draw?");
-                    while (Objects.equals(string, "")) {
-                        if (controller.hasTheGameEnded()) return null;
-                        Thread.sleep(100);
+                    //waits for input
+                    synchronized (this) {
+                        while (string.equals(""))
+                            wait();
                     }
                     line = string;
                     string = "";
@@ -332,9 +309,10 @@ public class ServerSock {
                             out.println("[REQUEST] Invalid Input! In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                         else
                             out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                        while (Objects.equals(string, "")) {
-                            if (controller.hasTheGameEnded()) return null;
-                            Thread.sleep(100);
+                        //waits for input
+                        synchronized (this) {
+                            while (string.equals(""))
+                                wait();
                         }
                         line = string;
                         string = "";
@@ -342,25 +320,21 @@ public class ServerSock {
                     } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 0);
                     drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
                     imbecille = false;
-                    try {
-                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
-                        invalidMoveFlag = false;
-                    } catch (InvalidMoveException e) {
-                        invalidMoveFlag = true;
-                    }
                 }
                 else {
                     drawInfo.setDirection(Board.Direction.RIGHT);
-                    try {
-                        drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
-                        invalidMoveFlag = false;
-                    } catch (InvalidMoveException e) {
-                        invalidMoveFlag = true;
-                    }
+                }
+
+                //try to draw selected tiles
+                try {
+                    drawnTiles = b.getTilesForView(drawInfo.getX(), drawInfo.getY(), drawInfo.getAmount(), drawInfo.getDirection());
+                    invalidMoveFlag = false;
+                } catch (InvalidMoveException e) {
+                    invalidMoveFlag = true;
                 }
             }while (invalidMoveFlag);
 
-
+            //show drawn tiles
             String stringa = "[INFO]: Here are your tiles: ";
             int i = 1;
             for (Tile t : drawnTiles) {
@@ -369,8 +343,9 @@ public class ServerSock {
             }
             out.println(stringa);
 
+            //show shelf
             out.println("[SHELF] Here is your Shelf: ");
-            jsonShelf = gson.toJson(shelf);
+            String jsonShelf = gson.toJson(shelf);
             out.println("[GSONSHELF]" + jsonShelf);
 
             //asks shelf column to insert tiles
@@ -385,18 +360,16 @@ public class ServerSock {
                 }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                while (Objects.equals(string, "")) {
-                    if (controller.hasTheGameEnded()) return null;
-                    Thread.sleep(100);
+                synchronized (this) {
+                    while (string.equals(""))
+                        wait();
                 }
                 line = string;
                 string = "";
-                if (controller.hasTheGameEnded()) return null;
                 if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
             } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
-            imbecille = false;
 
             //ask in which order to insert the tiles
             List<Tile> reorderedTiles  = new ArrayList<>();
@@ -410,14 +383,14 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert first: [e.g. 1)C 2)G 3)T -> type 1 to insert C]");
-                            while (Objects.equals(string, "")) {
-                                if (controller.hasTheGameEnded()) return null;
-                                Thread.sleep(100);
+                            synchronized (this) {
+                                while (string.equals(""))
+                                    wait();
                             }
                             line = string;
                             string = "";
                             imbecille = true;
-                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                        } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1);
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
                         insertedValues.add(Integer.parseInt(line));
                     }
@@ -427,14 +400,14 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            while (Objects.equals(string, "")) {
-                                if (controller.hasTheGameEnded()) return null;
-                                Thread.sleep(100);
+                            synchronized (this) {
+                                while (string.equals(""))
+                                    wait();
                             }
                             line = string;
                             string = "";
                             imbecille = true;
-                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
                         insertedValues.add(Integer.parseInt(line));
                     }
@@ -444,15 +417,15 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            while (Objects.equals(string, "")) {
-                                if (controller.hasTheGameEnded()) return null;
-                                Thread.sleep(100);
+                            synchronized (this) {
+                                while (string.equals(""))
+                                    wait();
                             }
                             line = string;
                             string = "";
                             imbecille = true;
-                        } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
-                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
+                        } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line)));
                     }
                 }
             else reorderedTiles = drawnTiles;
@@ -461,6 +434,31 @@ public class ServerSock {
                 e.printStackTrace();
         }
         return drawInfo;
+    }
+
+    private void sendSerializedObjects(PrintWriter out, String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
+        //*************** SERIALIZATION ***************
+        out.println("[NICKNAME]" + nickname);
+
+        String jsonBoard = gson.toJson(b);
+        out.println("[GSONBOARD]" + jsonBoard);
+
+        String jsonShelf = gson.toJson(shelf);
+        out.println("[GSONSHELF]" + jsonShelf);
+
+        String jsonPersonalGoal = gson.toJson(pgc.toString());
+        out.println("[GSONPGC]" + jsonPersonalGoal);
+
+        String jsonCommonGoal = cgc.get(0).getDescription() + "\n";
+        jsonCommonGoal += cgc.get(1).getDescription() + "\n";
+        jsonCommonGoal = gson.toJson(jsonCommonGoal);
+        out.println("[GSONCGC]" + jsonCommonGoal);
+
+        ArrayList<String> stringLeaderboard = new ArrayList<String>();
+        for (Player p : leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
+        String jsonLeaderboard = gson.toJson(stringLeaderboard);
+        out.println("[GSONLEAD]" + jsonLeaderboard);
+        //*********************************************
     }
 
     /**

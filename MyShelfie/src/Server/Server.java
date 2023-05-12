@@ -48,7 +48,7 @@ public class Server {
             //waits that all players connect
             while (!controller.hasGameStarted() && isEveryoneConnected()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -56,7 +56,7 @@ public class Server {
 
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             while (!controller.hasTheGameEnded()) {
-                Thread.sleep(500);
+                Thread.sleep(100);
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
                 }
@@ -67,11 +67,6 @@ public class Server {
             serverSock.flushServer();
             serverRMI.flushServer();    //needs testing
         } while (true);
-    }
-
-    public static void main(String[] args) throws InvalidMoveException, InterruptedException {
-        Server server = new Server();
-        server.run();
     }
 
     public void addPlayerToRecord(String nickname, connectionType conn) {
@@ -127,9 +122,8 @@ public class Server {
         return true;
     }
 
-    private void gameEnd(String nick) throws IOException {
-        //rmi notify
-        serverSock.notifyGameEnd(nick);
+    public static void main(String[] args) throws InvalidMoveException, InterruptedException {
+        Server server = new Server();
+        server.run();
     }
-
 }
