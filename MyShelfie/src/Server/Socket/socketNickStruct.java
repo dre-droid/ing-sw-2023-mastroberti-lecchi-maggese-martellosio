@@ -8,12 +8,12 @@ import java.net.Socket;
 public class socketNickStruct {
     private Socket socket;
     private String name;
-    private boolean alive;
+    private long lastPing;
 
     public socketNickStruct(Socket socket, String name){
         this.name = name;
         this.socket = socket;
-        this.alive = true;
+        this.lastPing = System.currentTimeMillis();
     }
 
     public Socket getSocket() {
@@ -24,6 +24,6 @@ public class socketNickStruct {
         return name;
     }
 
-    public boolean getAlive() { return alive;}
-    public void setAlive(boolean alive) {this.alive = alive;}
+    public long getLastPing() { return lastPing;}
+    public void setLastPing(long lastPing) {this.lastPing = lastPing;}
 }

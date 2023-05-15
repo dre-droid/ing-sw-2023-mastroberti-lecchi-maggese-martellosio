@@ -23,6 +23,7 @@ public class ServerSock {
     private Controller controller;
     private final Server server;
     public String string = "";  //used to communicate with playing player
+    private final long DISCONNECTION_TIME = 10000;
     Gson gson = new Gson();
 
     public ServerSock(Controller controller, Server server){
@@ -40,19 +41,11 @@ public class ServerSock {
                     while (true) {
                         Socket client = serverSocket.accept();
                         acceptClient(client);
+                        checkForDisconnections();
                     }
                 }catch (IOException e) {e.printStackTrace();}
             });
             runServer.start();
-    }
-
-    public void notifyGameEnd(String nick) throws IOException {
-        //find client's socket
-        for (socketNickStruct c: clients){
-            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
-            c.getSocket().close();
-        }
     }
 
     /**
@@ -163,12 +156,27 @@ public class ServerSock {
                 while (true) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     line = reader.readLine();
+                    //if readLine() returns null, the client has disconnected
+                    if (Objects.isNull(line)) {
+                        controller.endGame();
+                        notifyGameEnd(nickname);
+                    }
                     synchronized (this) {
-                        if (controller.hasGameStarted())
-                            if (controller.isMyTurn(nickname) && !line.startsWith("/chat "))
+                        //acknowledges client is still alive
+                        if (line.equals("[PING]")) {
+                            for (socketNickStruct s : clients)
+                                if (s.getName().equals(nickname)){
+                                    s.setLastPing(System.currentTimeMillis());
+                                    System.out.println(nickname + " pinged");
+                                }
+                        }
+                        else if (controller.hasGameStarted())
+                            if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
                                 string = line;
+                                notify();
+                            }
 
-                        if (line.startsWith("/chat ")) {
+                        else if (line.startsWith("/chat ")) {
                             String text = "", receiver = "";
 
                             int atIndex;
@@ -186,7 +194,7 @@ public class ServerSock {
                             sendChatMessageToClient(nickname, text, receiver);
                         }
 
-                        if (line.equals("/quit")) {
+                        else if (line.equals("/quit")) {
                             PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
                             pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
                             line = reader.readLine();
@@ -196,17 +204,12 @@ public class ServerSock {
                                     pw.println("[GAMEEND]: You quit.");
                                 } else {
                                     controller.endGame();
-                                    for (socketNickStruct c : clients) {
-                                        pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                                        pw.println("[GAMEEND]: " + nickname + " has quit the game. Game has ended.");
-                                        c.getSocket().close();
-                                    }
+                                    notifyGameEnd(nickname);
                                 }
                                 break;  //closes listener on confirmed quit
                             }
                         }
 
-                        notify();
                     }
                 }
             } catch (SocketException e){
@@ -216,6 +219,33 @@ public class ServerSock {
             }
         });
         clientListener.start();
+    }
+
+    /**
+     * This thread waits until the game starts, then periodically checks that all clients have sent a [PING] message
+     * within DISCONNECTION_TIME seconds. If they haven't, it is assumed they disconnected and the game ends.
+     * @throws IOException
+     */
+    public void checkForDisconnections() throws IOException {
+        new Thread(() -> {
+            try {
+                while (!controller.hasGameStarted()) Thread.sleep(1000);
+                while (true) {
+                    System.out.println(System.currentTimeMillis());
+                    for (socketNickStruct client : clients) {
+                        System.out.println(client.getName() + ": " + client.getLastPing());
+                        if (System.currentTimeMillis() - client.getLastPing() > DISCONNECTION_TIME) {
+                            notifyGameEnd(client.getName());
+                            controller.endGame();
+                        }
+                    }
+                    System.out.println("has the game ended: " + controller.hasTheGameEnded());
+                    Thread.sleep(5000);
+                }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+        }).start();
     }
 
     /**
@@ -488,6 +518,14 @@ public class ServerSock {
 
     }
 
+    public void notifyGameEnd(String nick) throws IOException {
+        for (socketNickStruct c: clients){
+            PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
+            c.getSocket().close();
+        }
+    }
+
     private static boolean isNumeric(String str) {
         try {
             Integer.parseInt(str);
@@ -529,25 +567,6 @@ public class ServerSock {
                     out.println("[MESSAGE_FROM_"+sender+"]: "+text);
                 }
             }
-    }
-
-    public boolean hasDisconnectionOccurred(){
-        for (socketNickStruct c: clients){
-            if (c.getSocket().isClosed()){
-                controller.endGame();
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return the name of the player that disconnected if present
-     */
-    public String getNameOfDisconnection(){
-        for (socketNickStruct c: clients)
-            if (c.getSocket().isClosed()) return c.getName();
-        return null;
     }
 
     /**

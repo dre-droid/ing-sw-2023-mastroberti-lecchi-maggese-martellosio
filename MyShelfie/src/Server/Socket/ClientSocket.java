@@ -97,6 +97,9 @@ public class ClientSocket {
                     if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]")){
                         System.out.println(line);
                     }
+                    if (line.startsWith("[INFO]: Game is starting.")){
+                        serverPinger();
+                    }
                     if (line.startsWith("[SHELF]")){
                         System.out.println(line);
                         printShelf();
@@ -184,7 +187,9 @@ public class ClientSocket {
                 while(active){
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     message = bufferRead.readLine();
-                    output.println(message);
+                    synchronized (this) {
+                        output.println(message);
+                    }
                 }
 
             }catch (Exception e){
@@ -192,6 +197,27 @@ public class ClientSocket {
             }
         };
         new Thread(clientSpeaker).start();
+    }
+
+    /**
+     * sends a PING to the server every 5 seconds
+     */
+    private void serverPinger(){
+        Runnable serverPinger = () -> {
+            try {
+                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                while (true) {
+                    synchronized (this) {
+                        output.println("[PING]");
+                    }
+                    Thread.sleep(5000);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+        new Thread(serverPinger).start();
     }
 
     /**
@@ -205,21 +231,6 @@ public class ClientSocket {
                 throw new RuntimeException(e);
             }
     }
-    /*
-    private void pinger(Socket s){
-        new Thread(() -> {
-            try {
-                PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-                out.println("[PING]");
-                Thread.sleep(4000);
-
-            } catch (InterruptedException | IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }).start();
-    }
-    */
 }
 
 
