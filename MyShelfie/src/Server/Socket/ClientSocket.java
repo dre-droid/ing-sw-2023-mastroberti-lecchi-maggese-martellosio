@@ -134,7 +134,7 @@ public class ClientSocket {
         Scanner scannercg = new Scanner(commonGoalCard);
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
-        for (int i = 5; i >= 0; i--) {
+        for (int i = 0; i < 6; i++) {
             System.out.print("   ");
             for (int j = 0; j < 5; j++){
                 if (shelf.getGrid()[i][j] == null) System.out.printf("x ");

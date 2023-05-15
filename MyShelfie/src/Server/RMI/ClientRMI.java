@@ -335,7 +335,7 @@ public class ClientRMI implements Runnable{
                                 int finalTileToBeRearranged = tileToBeRearranged;
                                 if(alreadyInsertedTiles.stream().noneMatch((num)->(num== finalTileToBeRearranged))){
                                     alreadyInsertedTiles.add(tileToBeRearranged);
-                                    rearrangedTiles.add(0,drawnTiles.get(tileToBeRearranged-1));
+                                    rearrangedTiles.add(drawnTiles.get(tileToBeRearranged-1));
                                     correctlyRearranged=true;
                                 }else{
                                     System.out.println("You already inserted this tile, try again");
@@ -425,7 +425,7 @@ public class ClientRMI implements Runnable{
         Tile[][] pgCard = serverRMI.getMyPersonalGoal(playerNickname);
 
         System.out.println("Your shelf:      Your Personal goal:");
-        for(int row=5;row>=0;row--){
+        for(int row=0;row<6;row++){
             for(int column =0;column<5;column++) {
                 if (shelf[row][column]==null) System.out.print("x ");
                 else{

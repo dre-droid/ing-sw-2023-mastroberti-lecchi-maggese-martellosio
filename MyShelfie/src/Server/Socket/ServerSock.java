@@ -425,7 +425,7 @@ public class ServerSock {
                             string = "";
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
-                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line)));
+                        reorderedTiles.add(drawnTiles.get(Integer.parseInt(line)-1));
                     }
                 }
             else reorderedTiles = drawnTiles;
