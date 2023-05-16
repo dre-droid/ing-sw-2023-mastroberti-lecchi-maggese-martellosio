@@ -2,7 +2,6 @@
 
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -225,12 +224,7 @@
             <Font size="70.0" />
          </font>
       </Text>
-      <TableView layoutX="925.0" layoutY="85.0" prefHeight="204.0" prefWidth="310.0">
-        <columns>
-          <TableColumn prefWidth="225.5999755859375" text="Player" />
-          <TableColumn minWidth="0.0" prefWidth="84.00006103515625" text="Score" />
-        </columns>
-      </TableView>
+      <TableView fx:id="TableLeaderboard" layoutX="925.0" layoutY="85.0" prefHeight="204.0" prefWidth="310.0" />
       <Text layoutX="801.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="It's Player1 turn">
          <font>
             <Font size="40.0" />

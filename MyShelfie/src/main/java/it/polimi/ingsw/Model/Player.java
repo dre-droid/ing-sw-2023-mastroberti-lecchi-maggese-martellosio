@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Player {
+public class Player implements Serializable{
     private Shelf shelf;
     private int score;
     private List<Tile> currentTiles;

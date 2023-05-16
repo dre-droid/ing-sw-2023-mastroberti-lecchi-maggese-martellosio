@@ -413,5 +413,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return controller.getPGC(playerNickname);
     }
 
+    @Override
+    public List<Player> getLeaderboard() throws RemoteException {
+        return controller.getLeaderboard();
+    }
+
 
 }

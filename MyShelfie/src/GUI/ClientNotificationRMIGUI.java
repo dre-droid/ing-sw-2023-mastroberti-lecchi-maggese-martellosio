@@ -99,9 +99,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             TilePlacingSpot[][] board= serverRMI.getBoard();
             Map<Integer, PersonalGoalCard> pgcMap = serverRMI.getPGCmap();
             PersonalGoalCard pgc = serverRMI.getPGC(nickname);
+
             if(gsc!=null) {
                 gsc.updateBoard(board);
                 gsc.setPersonalGoalCardImage(pgc, pgcMap);
+                gsc.updateLeaderboard(serverRMI.getLeaderboard());
             }
         }catch(RemoteException re){
             System.out.println("Problem in the update of the gui at the beginning of the game");

@@ -2,16 +2,33 @@ package GUI;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GameSceneController extends Application {
+
+    @FXML
+    public TableView TableLeaderboard;
+
+    @FXML
+    public TableColumn Player;
+
+    @FXML TableColumn Score;
 
     @FXML
     public GridPane BoardGrid;
@@ -137,5 +154,24 @@ public class GameSceneController extends Application {
 
     public ClientNotificationRMIGUI getClientRMI(){
         return this.clientRMI;
+    }
+
+    public void updateLeaderboard(List<Player> leaderboard){
+        TableColumn player = new TableColumn("Player");
+        TableColumn score = new TableColumn("Score");
+        TableLeaderboard.getColumns().addAll(player, score);
+        TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        final ObservableList<TableRecord> data = FXCollections.observableArrayList();
+        for(Player p: leaderboard){
+            data.add(new TableRecord(p.getNickname(), ""+p.getScore()));
+        }
+
+        player.setCellValueFactory(new PropertyValueFactory<TableRecord,String>("player"));
+        score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+
+        TableLeaderboard.setItems(data);
+
+
     }
 }

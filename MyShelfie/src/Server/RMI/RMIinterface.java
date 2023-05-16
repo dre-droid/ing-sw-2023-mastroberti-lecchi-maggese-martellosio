@@ -47,4 +47,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public Map<Integer, PersonalGoalCard> getPGCmap() throws RemoteException;
 
     public PersonalGoalCard getPGC(String playerNickname) throws RemoteException;
+
+    public List<Player> getLeaderboard() throws RemoteException;
 }
