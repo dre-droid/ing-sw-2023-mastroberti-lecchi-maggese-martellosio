@@ -90,7 +90,6 @@ public class ServerSock {
         do {
             if (imbecille) {
                 out.println("[REQUEST] Nickname is too long! Try a shorter one:");
-                notifyAll();
             }
             try {
                 nickname = reader.readLine();
@@ -102,7 +101,11 @@ public class ServerSock {
             }
         } while (true);
         out.println("Il nickname inserito è: "+ nickname);
-
+        //server.connectedPlayers.add(nickname);
+        return joinGameSwitch(client, nickname, out, reader);
+    }
+        private synchronized int joinGameSwitch(Socket client, String nickname, PrintWriter out, BufferedReader reader) throws IOException {
+        boolean imbecille;
         switch (controller.joinGame(nickname)) {
             //no existing game
             case -1 -> {
@@ -115,6 +118,11 @@ public class ServerSock {
                         out.println("[REQUEST]: Choose the number of players for the game: ");
                     line = reader.readLine();
                     imbecille = true;
+                    if(controller.hasGameBeenCreated()){
+                        out.println("[INFO]: Somebody has already created a Game!");
+                        return joinGameSwitch(client, nickname, out, reader);
+                    }
+
                 }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
 
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
@@ -122,7 +130,11 @@ public class ServerSock {
                 clients.add(new socketNickStruct(client, nickname));
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                 out.println("[INFO]: In attesa di altri giocatori.");
+                /*synchronized (this){
+                    notifyAll();
+                }
 
+                 */
                 return -1;
             }
             //game has started
@@ -134,6 +146,26 @@ public class ServerSock {
                 out.println("[INFO]: Nickname già in uso, scegline un altro.");
                 return -3;
             }
+            /*case -5 -> {
+                out.println("[INFO]: Waiting for others to setup the game");
+                synchronized (controller.object){
+                    while(!controller.hasGameBeenCreated())
+                        wait();
+                }
+                int outcome;
+                outcome = controller.joinGame(nickname);
+                if(outcome != 0) {
+                    out.println("[INFO]: Nickname invalid");
+                    playerJoin(client);
+                }
+                else {
+                    clients.add(new socketNickStruct(client, nickname));
+                    server.addPlayerToRecord(nickname, Server.connectionType.Socket);
+                }
+                return outcome;
+            }
+
+             */
             //successful
             case 0 -> {
                 clients.add(new socketNickStruct(client, nickname));
@@ -143,7 +175,6 @@ public class ServerSock {
         }
         return -4;  //should never reach!
     }
-
     /**
      * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
      * '/chat ' processes message for chat, otherwise output is ignored.

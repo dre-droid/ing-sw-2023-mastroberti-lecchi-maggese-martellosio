@@ -19,7 +19,6 @@ import java.util.*;
 public class Controller {
     Game game;
     private ServerSock serverSock;
-
     private Server server;
 
     public Controller(){
