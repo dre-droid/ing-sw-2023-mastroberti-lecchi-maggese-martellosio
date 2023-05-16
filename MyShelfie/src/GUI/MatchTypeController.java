@@ -44,10 +44,13 @@ public class MatchTypeController {
                     //alert about a game already being created
                     nextScenePath = "LoginScene.fxml";
                 }
-                Parent root = FXMLLoader.load(getClass().getResource(nextScenePath));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(nextScenePath));
+                Parent root = loader.load();
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 scene = new Scene(root);
                 stage.setScene(scene);
+                GameSceneController gsc = loader.getController();
+                gsc.setClient(clientRMI);
                 stage.show();
                 return;
             }

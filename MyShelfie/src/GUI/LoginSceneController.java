@@ -61,12 +61,12 @@ public class LoginSceneController {
                     clientRMI.startNotificationServer();
                     int outcome = clientRMI.joinGame();
                     System.out.println(outcome);
-                    String nextScenPath="";
+                    String nextScenePath="";
                     switch(outcome){
                         case -1:{
-                            nextScenPath = "MatchType.fxml";
+                            nextScenePath = "MatchType.fxml";
                             System.out.println("createnewgamecommand");
-                            loader = new FXMLLoader(getClass().getResource(nextScenPath));
+                            loader = new FXMLLoader(getClass().getResource(nextScenePath));
                             Parent root = loader.load();
                             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                             scene = new Scene(root);
@@ -85,14 +85,15 @@ public class LoginSceneController {
                             loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
                         }break;
                         case 0:{
-                            nextScenPath = "GameScene.fxml";
-                            loader = new FXMLLoader(getClass().getResource(nextScenPath));
+                            nextScenePath = "GameScene.fxml";
+                            loader = new FXMLLoader(getClass().getResource(nextScenePath));
                             Parent root = loader.load();
                             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                             scene = new Scene(root);
                             stage.setScene(scene);
-                            LoginSceneController lsc = loader.getController();
-                            lsc.setClient(clientRMI);
+                            GameSceneController gsc = loader.getController();
+                            gsc.setClient(clientRMI);
+
                             stage.show();
                         }break;
                         default:{

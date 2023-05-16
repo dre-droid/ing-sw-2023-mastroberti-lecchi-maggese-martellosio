@@ -3,6 +3,7 @@ package GUI;
 import Server.RMI.ClientNotificationInterfaceRMI;
 import Server.RMI.ClientNotificationRMI;
 import Server.RMI.RMIinterface;
+import main.java.it.polimi.ingsw.Model.*;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -14,6 +15,8 @@ import java.util.Random;
 
 public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI {
     private RMIinterface serverRMI;
+
+    GameSceneController gsc;
 
     private int port;
 
@@ -86,7 +89,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {
-
+        GameStartFlag=true;
+        TilePlacingSpot[][] board= serverRMI.getBoard();
+        if(gsc!=null)
+            gsc.updateBoard(board);
     }
 
     @Override
@@ -136,6 +142,19 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void invalidCommandSent() throws RemoteException {
+
+    }
+
+    public void setGameSceneController(GameSceneController controller){
+        gsc = controller;
+    }
+
+    public void updateBoard(){
+        try{
+            gsc.updateBoard(serverRMI.getBoard());
+        }catch(RemoteException re){
+            System.out.println("problame nel reperire la board");
+        }
 
     }
 }
