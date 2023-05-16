@@ -88,7 +88,7 @@ public class ServerSock {
         out.println("[REQUEST] Choose a nickanme:");
         do {
             if (imbecille) {
-                out.println("[REQUEST] Invalid nickname. Try again: ");
+                out.println("[REQUEST] Invalid nickname. Try again.");
             }
             try {
                 nickname = reader.readLine();
@@ -99,7 +99,7 @@ public class ServerSock {
                 imbecille = false;
             }
         } while (true);
-        out.println("[INFO] Chosen nickname: " + nickname);
+        out.println("[INFO]: Chosen nickname: " + nickname);
 
         if (controller.isGameBeingCreated) {
             out.println("[INFO]: Game is being created by another player...");

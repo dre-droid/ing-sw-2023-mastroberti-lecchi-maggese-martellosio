@@ -1,5 +1,6 @@
 package GUI;
 
+import Server.Socket.ClientSocket;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -44,6 +45,7 @@ public class GameSceneController extends Application {
     @FXML
     private ImageView CG2;
     private ClientNotificationRMIGUI clientRMI;
+    private ClientSocket clientSocket;
 
 
     public static void main(String[] args) {
@@ -60,6 +62,10 @@ public class GameSceneController extends Application {
         System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
+    }
+
+    public void setClient(ClientSocket clientSocket){
+        this.clientSocket = clientSocket;
     }
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){

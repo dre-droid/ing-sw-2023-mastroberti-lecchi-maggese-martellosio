@@ -26,6 +26,7 @@ public class ClientSocket {
 
     public String messageFromServer = "";
     public final Object object = new Object();
+    public String nextScene = "";
 
     //used by ClientWithChoice
     public void runServer(){
@@ -89,7 +90,10 @@ public class ClientSocket {
         new Thread(serverListener).start();
     }
 
-    private void handleServerRequest(String line){
+    /**
+     * Handles server's received messages
+     */
+    private synchronized void handleServerRequest(String line){
         if (line.equals("[CONNECTED]"))
             serverPinger();
         if (line.startsWith("[YOUR TURN]")) {
@@ -101,9 +105,6 @@ public class ClientSocket {
         }
         if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE")) {
             System.out.println(line);
-        }
-        if (line.startsWith("[REQUEST]: Choose the number of players for the game:"));
-        if (line.startsWith("[INFO]: Game is starting.")) {
         }
         if (line.startsWith("[SHELF]")) {
             System.out.println(line);
@@ -119,6 +120,24 @@ public class ClientSocket {
             System.out.println(line);
             System.exit(0);
         }
+        //GUI
+        if (line.startsWith("[REQUEST]: Choose the number of players for the game:")){
+            nextScene = "MatchType";
+            notify();
+        }
+        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:")){
+            nextScene = "Unchanged";
+            notify();
+        }
+        if (line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
+            nextScene = "Unchanged";
+            notify();
+        }
+        if (line.startsWith("[INFO]: Game is starting")){
+            nextScene = "GameScene";
+            notify();
+        }
+
     }
 
     /**
