@@ -86,11 +86,11 @@ public class ServerSock {
         out.println("[REQUEST] Choose a nickanme:");
         do {
             if (imbecille) {
-                out.println("[REQUEST] Nickname is too long! Try a shorter one:");
+                out.println("[REQUEST] Invalid nickname. Try again");
             }
             try {
                 nickname = reader.readLine();
-                if (nickname.length() > 15) imbecille = true;
+                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@")) imbecille = true;
                 else break;
             }
             catch (Exception e){
