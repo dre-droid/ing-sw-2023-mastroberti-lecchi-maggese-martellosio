@@ -7,15 +7,11 @@ import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 
 public class ServerSock {
 
@@ -64,8 +60,9 @@ public class ServerSock {
 
                     int resultValue = playerJoin(client);
                     if (resultValue == 0 || resultValue == -1) {    //successfully joined
-                        repeat = false;
                         clientListener(client, getNickFromSocket(client));
+                        repeat = false;
+                        server.addPlayerToConnectedClients(getNickFromSocket(client));
                     }
                 }
             } catch (InterruptedException | IOException e) {
@@ -86,7 +83,7 @@ public class ServerSock {
 
         //asks player nickname
         boolean imbecille = false;
-        out.println("[REQUEST] Inserisci un nickname:");
+        out.println("[REQUEST] Choose a nickanme:");
         do {
             if (imbecille) {
                 out.println("[REQUEST] Nickname is too long! Try a shorter one:");
@@ -100,11 +97,14 @@ public class ServerSock {
                 imbecille = false;
             }
         } while (true);
-        out.println("Il nickname inserito è: "+ nickname);
-        //server.connectedPlayers.add(nickname);
+        out.println("[INFO] Chosen nickname: " + nickname);
+
+        if (controller.isGameBeingCreated)
+            out.println("[INFO]: Game is being created by another player...");
+
         return joinGameSwitch(client, nickname, out, reader);
     }
-        private synchronized int joinGameSwitch(Socket client, String nickname, PrintWriter out, BufferedReader reader) throws IOException {
+    private synchronized int joinGameSwitch(Socket client, String nickname, PrintWriter out, BufferedReader reader) throws IOException {
         boolean imbecille;
         switch (controller.joinGame(nickname)) {
             //no existing game
@@ -130,11 +130,6 @@ public class ServerSock {
                 clients.add(new socketNickStruct(client, nickname));
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                 out.println("[INFO]: In attesa di altri giocatori.");
-                /*synchronized (this){
-                    notifyAll();
-                }
-
-                 */
                 return -1;
             }
             //game has started
@@ -146,26 +141,6 @@ public class ServerSock {
                 out.println("[INFO]: Nickname già in uso, scegline un altro.");
                 return -3;
             }
-            /*case -5 -> {
-                out.println("[INFO]: Waiting for others to setup the game");
-                synchronized (controller.object){
-                    while(!controller.hasGameBeenCreated())
-                        wait();
-                }
-                int outcome;
-                outcome = controller.joinGame(nickname);
-                if(outcome != 0) {
-                    out.println("[INFO]: Nickname invalid");
-                    playerJoin(client);
-                }
-                else {
-                    clients.add(new socketNickStruct(client, nickname));
-                    server.addPlayerToRecord(nickname, Server.connectionType.Socket);
-                }
-                return outcome;
-            }
-
-             */
             //successful
             case 0 -> {
                 clients.add(new socketNickStruct(client, nickname));
@@ -175,6 +150,7 @@ public class ServerSock {
         }
         return -4;  //should never reach!
     }
+
     /**
      * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
      * '/chat ' processes message for chat, otherwise output is ignored.

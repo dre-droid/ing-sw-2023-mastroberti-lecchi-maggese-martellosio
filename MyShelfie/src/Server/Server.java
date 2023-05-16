@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +22,8 @@ public class Server {
     public boolean disconnection;
     public ServerRMI serverRMI;
     public ServerSock serverSock;
-    private Map<String, connectionType> clientsMap;
+    public Map<String, connectionType> clientsMap;
+    public ArrayList<String> connectedClients = new ArrayList<>();      //TODO need to add in RMI
     private Controller controller;
 
     public void run() throws InterruptedException {
@@ -120,6 +122,14 @@ public class Server {
                 return false;
         }
         return true;
+    }
+
+    public void addPlayerToConnectedClients(String nick){
+        connectedClients.add(nick);
+    }
+
+    public String getConnectedPlayer(int index){
+        return connectedClients.get(index);
     }
 
     public static void main(String[] args) throws InvalidMoveException, InterruptedException {

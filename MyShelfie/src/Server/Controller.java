@@ -15,11 +15,13 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Controller {
     Game game;
     private ServerSock serverSock;
     private Server server;
+    public boolean isGameBeingCreated = false;
 
     public Controller(){
     }
@@ -68,24 +70,25 @@ public class Controller {
      *          (0) if the player joined the game correctly
      */
     public synchronized int joinGame(String nickname) {
-        if (game == null) {
-            //System.out.println("There is no game to join, create a new one " + nickname);
-            return -1;
-        }
-        if (game.hasGameStarted()) {
-            //System.out.println("The game has alredy started, " + nickname + " can't join");
-            return -2;
-        }
-        if (game.addPlayer(nickname)) {
-            //System.out.println(nickname + " joined the game");
-            if(game.hasGameStarted()){
-                server.serverRMI.notifyStartOfGame();
+        isGameBeingCreated = true;
+            if (game == null) {
+                //System.out.println("There is no game to join, create a new one " + nickname);
+                return -1;
             }
-            return 0;
-        }else{
-            //System.out.println("Nickname already used");
-            return -3;
-        }
+            if (game.hasGameStarted()) {
+                //System.out.println("The game has alredy started, " + nickname + " can't join");
+                return -2;
+            }
+            if (game.addPlayer(nickname)) {
+                //System.out.println(nickname + " joined the game");
+                if (game.hasGameStarted()) {
+                    server.serverRMI.notifyStartOfGame();
+                }
+                return 0;
+            } else {
+                //System.out.println("Nickname already used");
+                return -3;
+            }
     }
 
     /**

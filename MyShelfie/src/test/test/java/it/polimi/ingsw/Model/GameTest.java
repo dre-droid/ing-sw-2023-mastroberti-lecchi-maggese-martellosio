@@ -35,6 +35,9 @@ public class GameTest{
         System.out.println(g.getCommonGoalCards().get(0).getDescription());
         System.out.println(g.getCommonGoalCards().get(1).getDescription());
 
+        System.out.println(p1.getPersonalGoalCard());
+        System.out.println(p2.getPersonalGoalCard());
+
         //first turn - p2
         ArrayList<Tile> tileList = new ArrayList<>();
         tileList.add(new Tile(Type.CAT));

@@ -87,8 +87,8 @@ public class Game {
         commonGoalCards.add(new CommonGoalCard(new FourCornerOfTheSameType(), this.numOfPlayers));
 
         //drawPersonalGoalCards
-        playerList.get(0).setPersonalGoalCard(validTilesMap.get(0));
-        playerList.get(1).setPersonalGoalCard(validTilesMap.get(1));
+        playerList.get(0).setPersonalGoalCard(validTilesMap.get(1));
+        playerList.get(1).setPersonalGoalCard(validTilesMap.get(2));
 
         this.gameHasStarted = true;
     }
