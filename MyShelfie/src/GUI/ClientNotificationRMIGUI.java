@@ -149,11 +149,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         gsc = controller;
     }
 
-    public void updateBoard(){
-        try{
-            gsc.updateBoard(serverRMI.getBoard());
-        }catch(RemoteException re){
-            System.out.println("problame nel reperire la board");
+    public TilePlacingSpot[][] getBoard(){
+        try {
+            return serverRMI.getBoard();
+        } catch (RemoteException e) {
+            System.out.println("problem in getting the board");
+            return null;
         }
 
     }

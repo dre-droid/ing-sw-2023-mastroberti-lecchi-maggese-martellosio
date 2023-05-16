@@ -27,7 +27,7 @@ public class GameSceneController extends Application {
     public void setClient(ClientNotificationRMIGUI client){
         this.clientRMI = client;
         System.out.println(this.toString());
-        System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
+        //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
     }
 
@@ -37,31 +37,6 @@ public class GameSceneController extends Application {
             public void run() {
                 Image image;
                 ImageView imv;
-
-                /*System.out.println("  0 1 2 3 4 5 6 7 8");
-                for(int i = 0;i<9;i++) {
-                    System.out.print(i+" ");
-                    for (int j = 0; j < 9; j++) {
-                        if (!grid[i][j].isAvailable()) System.out.print("x ");
-                        else{
-                            if(grid[i][j].isEmpty()) System.out.print("e ");
-                            else{
-                                Tile t = grid[i][j].showTileInThisPosition();
-                                switch(t.getType()){
-                                    case CAT: System.out.print("C ");break;
-                                    case BOOK:System.out.print("B ");break;
-                                    case GAME:System.out.print("G ");break;
-                                    case FRAME:System.out.print("F ");break;
-                                    case PLANT:System.out.print("P ");break;
-                                    case TROPHY:System.out.print("T ");break;
-                                }
-                            }
-
-                        }
-                    }
-                    System.out.println("");
-                }*/
-
                 for(int i=0;i<9;i++){
                     for(int j=0;j<9;j++){
                         if (grid[i][j].isAvailable()) {
@@ -70,22 +45,22 @@ public class GameSceneController extends Application {
                                 Tile t = grid[i][j].showTileInThisPosition();
                                 switch(t.getType()){
                                     case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
-                                                System.out.print("C ");
+                                                //System.out.print("C ");
                                     }break;
                                     case BOOK:{image = new Image("item_tiles/Libri1.1.png",45,45,true,true);
-                                        System.out.print("B ");
+                                        //System.out.print("B ");
                                     }break;
                                     case GAME:{image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);
-                                        System.out.print("G ");
+                                        //System.out.print("G ");
                                     }break;
                                     case FRAME:{image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);
-                                        System.out.print("F ");
+                                        //System.out.print("F ");
                                     }break;
                                     case PLANT:{image = new Image("item_tiles/Piante1.1.png",45,45,true,true);
-                                        System.out.print("P ");
+                                        //System.out.print("P ");
                                     }break;
                                     case TROPHY:{image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);
-                                        System.out.print("T ");
+                                        //System.out.print("T ");
                                     }break;
                                     default:image = null;
                                 }
@@ -94,13 +69,13 @@ public class GameSceneController extends Application {
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
                             else{
-                                System.out.print("- ");
+                                //System.out.print("- ");
                             }
                         }else{
-                            System.out.print("- ");
+                            //System.out.print("- ");
                         }
                     }
-                    System.out.println();
+                    //System.out.println();
                 }
             }
         });

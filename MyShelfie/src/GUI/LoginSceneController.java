@@ -93,6 +93,7 @@ public class LoginSceneController {
                             stage.setScene(scene);
                             GameSceneController gsc = loader.getController();
                             gsc.setClient(clientRMI);
+                            gsc.updateBoard(clientRMI.getBoard());
 
                             stage.show();
                         }break;
