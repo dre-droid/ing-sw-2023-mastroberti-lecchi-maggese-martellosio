@@ -1,17 +1,11 @@
 package Server.Socket;
 
-import java.lang.reflect.Type;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.Board;
-import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
-import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
-import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
 
 import java.io.BufferedReader;
@@ -27,8 +21,11 @@ public class ClientSocket {
     private String commonGoalCard;
     private List<String> leaderboard;
     private String nickname;
-    public String messageFromServer = "";
     private Socket socket;
+    private final Gson gson = new Gson();
+
+    public String messageFromServer = "";
+    public final Object object = new Object();
 
     //used by ClientWithChoice
     public void runServer(){
@@ -36,10 +33,9 @@ public class ClientSocket {
             //connect to server
             socket= new Socket("127.0.0.1", 59010);
             socket.setKeepAlive(true);
-            //pinger(socket);
 
             try{
-                serverListener(socket);
+                serverListener();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -47,75 +43,40 @@ public class ClientSocket {
         } catch (IOException e) {throw new RuntimeException(e);}
     }
 
-    private void serverListener(Socket socket) {
+    /**
+     * Creates a thread that sends a PING to the server every 5 seconds
+     */
+    private void serverPinger(){
+        Runnable serverPinger = () -> {
+            try {
+                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
+                while (!socket.isClosed()) {
+                    synchronized (this) {   //writing to output is synchronized with other writing methods
+                        output.println("[PING]");
+                    }
+                    Thread.sleep(5000);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        };
+
+        new Thread(serverPinger).start();
+    }
+
+    private void serverListener() {
         Runnable serverListener = () -> {
             try {
                 InputStream input = socket.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                String line = null;
-                boolean active = true;
-                clientSpeaker(socket);
+                clientSpeaker();
 
-                while(active){
-                    Gson gson = new Gson();
-                    line = reader.readLine();
-                    if (line != null) messageFromServer = line;
-
-                    // ************* DESERIALIZATION ****************
-                    if (line.startsWith("[GSONBOARD]")){
-                        String gsonString = line.replace("[GSONBOARD]", "");
-                        board = gson.fromJson(gsonString, Board.class);
-                    }
-                    if (line.startsWith("[GSONSHELF]")){
-                        String gsonString = line.replace("[GSONSHELF]", "");
-                        shelf = gson.fromJson(gsonString, Shelf.class);
-                    }
-                    if (line.startsWith("[GSONLEAD]")){
-                        String gsonString = line.replace("[GSONLEAD]", "");
-                        leaderboard = gson.fromJson(gsonString, List.class);
-                    }
-                    if (line.startsWith("[GSONPGC]")){
-                        String gsonString = line.replace("[GSONPGC]", "");
-                        personalGoalCard = gson.fromJson(gsonString, String.class);
-                    }
-                    if (line.startsWith("[GSONCGC]")){
-                        String gsonString = line.replace("[GSONCGC]", "");
-                        commonGoalCard = gson.fromJson(gsonString, String.class);
-                    }
-                    if (line.startsWith("[NICKNAME]")){
-                        String gsonString = line.replace("[NICKNAME]", "");
-                        nickname = gsonString;
-                    }
-                    // ********************************************
-                    if (line.startsWith("[YOUR TURN]")){
-                        printTurn();
-                        System.out.println(line);
-                    }
-                    if(line.startsWith("[INVALID MOVE]")){
-                        System.out.println("Non puoi selezionare queste tessere. Riprova.\n");
-                    }
-                    if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]")){
-                        System.out.println(line);
-                    }
-                    if (line.startsWith("[INFO]: Game is starting.")){
-                        serverPinger();
-                    }
-                    if (line.startsWith("[SHELF]")){
-                        System.out.println(line);
-                        printShelf();
-                    }
-                    if (line.startsWith("[TURNEND]")){
-                        printShelf();
-                        System.out.println();
-                        System.out.println(line);
-                        System.out.println("******************************");
-                    }
-                    if (line.startsWith("[GAMEEND]")){
-                        System.out.println(line);
-                        System.exit(0);
-                    }
-                    if(line.startsWith("[MESSAGE")){
-                        System.out.println(line);
+                while(!socket.isClosed()) {
+                    String line = reader.readLine();
+                    synchronized (object) {
+                        messageFromServer = line;
+                        deserializeObjects(line);
+                        handleServerRequest(line);
                     }
                     }
                 }
@@ -128,6 +89,71 @@ public class ClientSocket {
         new Thread(serverListener).start();
     }
 
+    private void handleServerRequest(String line){
+        if (line.equals("[CONNECTED]"))
+            serverPinger();
+        if (line.startsWith("[YOUR TURN]")) {
+            printTurn();
+            System.out.println(line);
+        }
+        if (line.startsWith("[INVALID MOVE]")) {
+            System.out.println("You cannot select those tiles. Try again.\n");
+        }
+        if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE")) {
+            System.out.println(line);
+        }
+        if (line.startsWith("[REQUEST]: Choose the number of players for the game:"));
+        if (line.startsWith("[INFO]: Game is starting.")) {
+        }
+        if (line.startsWith("[SHELF]")) {
+            System.out.println(line);
+            printShelf();
+        }
+        if (line.startsWith("[TURNEND]")) {
+            printShelf();
+            System.out.println();
+            System.out.println(line);
+            System.out.println("******************************");
+        }
+        if (line.startsWith("[GAMEEND]")) {
+            System.out.println(line);
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Handles deserializing objects sent from serverSocket
+     * @param line: the serialized object sent from the server
+     */
+    private void deserializeObjects(String line){
+        if (line.startsWith("[GSONBOARD]")) {
+            String gsonString = line.replace("[GSONBOARD]", "");
+            board = gson.fromJson(gsonString, Board.class);
+        }
+        if (line.startsWith("[GSONSHELF]")) {
+            String gsonString = line.replace("[GSONSHELF]", "");
+            shelf = gson.fromJson(gsonString, Shelf.class);
+        }
+        if (line.startsWith("[GSONLEAD]")) {
+            String gsonString = line.replace("[GSONLEAD]", "");
+            leaderboard = gson.fromJson(gsonString, List.class);
+        }
+        if (line.startsWith("[GSONPGC]")) {
+            String gsonString = line.replace("[GSONPGC]", "");
+            personalGoalCard = gson.fromJson(gsonString, String.class);
+        }
+        if (line.startsWith("[GSONCGC]")) {
+            String gsonString = line.replace("[GSONCGC]", "");
+            commonGoalCard = gson.fromJson(gsonString, String.class);
+        }
+        if (line.startsWith("[NICKNAME]")) {
+            nickname = line.replace("[NICKNAME]", "");
+        }
+    }
+
+    /**
+     * Prints a command line view of the player's turn
+     */
     private void printTurn(){
         System.out.println();
         System.out.println("*********  " + nickname + ": your turn  *********");
@@ -140,7 +166,7 @@ public class ClientSocket {
         for (int i = 0; i < 6; i++) {
             System.out.print("   ");
             for (int j = 0; j < 5; j++){
-                if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
+                if (shelf.getGrid()[i][j] == null) System.out.print("x ");
                 else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
             }
             System.out.print("   ");
@@ -169,7 +195,7 @@ public class ClientSocket {
         System.out.println("*** Shelf ***");
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
-                if (shelf.getGrid()[i][j] == null) System.out.printf("x ");
+                if (shelf.getGrid()[i][j] == null) System.out.print("x ");
                 else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
             }
             System.out.println();
@@ -177,17 +203,19 @@ public class ClientSocket {
         System.out.println("*************");
     }
 
-    private void clientSpeaker(Socket socket){
+    /**
+     * Creates a thread that reads the terminal and sends each line to the serverSocket
+     */
+    private void clientSpeaker(){
         Runnable clientSpeaker = () ->{
             try{
                 String message;
 
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                boolean active = true;
-                while(active){
+                while(!socket.isClosed()){
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     message = bufferRead.readLine();
-                    synchronized (this) {
+                    synchronized (this) {   //writing to output is synchronized with other writing methods
                         output.println(message);
                     }
                 }
@@ -200,33 +228,14 @@ public class ClientSocket {
     }
 
     /**
-     * sends a PING to the server every 5 seconds
-     */
-    private void serverPinger(){
-        Runnable serverPinger = () -> {
-            try {
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                while (true) {
-                    synchronized (this) {
-                        output.println("[PING]");
-                    }
-                    Thread.sleep(5000);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        };
-
-        new Thread(serverPinger).start();
-    }
-
-    /**
-     * @param message prints message to the socket's output stream
+     * Prints the message string to the server's InputStream
      */
     public void clientSpeaker(String message){
             try{
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                output.println(message);
+                synchronized (this){     //writing to output is synchronized with other writing methods
+                    output.println(message);
+                }
             }catch (Exception e){
                 throw new RuntimeException(e);
             }

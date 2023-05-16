@@ -3,7 +3,8 @@ package Server.Socket;
 import java.net.Socket;
 
 /**
- * this class is used as a C-style struct to store clients' socket/nickname pairs in a single list
+ * This class is used as a C-style struct to store clients' socket/nickname pairs and their
+ * last ping in a single list
  */
 public class socketNickStruct {
     private Socket socket;
