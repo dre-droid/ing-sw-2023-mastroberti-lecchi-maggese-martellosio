@@ -1,5 +1,6 @@
 package main.java.it.polimi.ingsw.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.*;
@@ -8,7 +9,7 @@ import java.util.*;
  * @author Saverio Maggese, Diego Lecchi
  */
 
-public class PersonalGoalCard{
+public class PersonalGoalCard implements Serializable {
     /**
      * @param valildTiles is a shelf that contains only the tiles that the player has to match in order to obtain points
      *

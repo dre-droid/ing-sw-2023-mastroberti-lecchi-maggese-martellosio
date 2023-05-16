@@ -9,10 +9,15 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.util.Map;
+
 public class GameSceneController extends Application {
 
     @FXML
     public GridPane BoardGrid;
+
+    @FXML
+    public ImageView MyPGC;
     private ClientNotificationRMIGUI clientRMI;
 
     public static void main(String[] args) {
@@ -29,6 +34,54 @@ public class GameSceneController extends Application {
         System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
+    }
+
+    public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
+        int id=-1;
+        Image image=null;
+        boolean flag;
+        for(Map.Entry<Integer, PersonalGoalCard> pgcKey: pgcMap.entrySet()){
+            /*System.out.println(pgcKey.getValue().toString());
+            System.out.println("/////////////////////////////");
+            System.out.println(pgc.toString());*/
+            Tile[][] tps = pgcKey.getValue().getValidTiles().getGridForDisplay();
+            Tile[][] tpsPlayer = pgc.getValidTiles().getGridForDisplay();
+            flag =true;
+            for(int i=0;i<6;i++){
+                for(int j=0;j<5;j++){
+                    if(tps[i][j]!=null && tpsPlayer[i][j]!=null){
+                        if(tps[i][j].getType() != tpsPlayer[i][j].getType())
+                            flag = false;
+                    }else{
+                        if(!(tps[i][j]==null && tpsPlayer[i][j]==null))
+                            flag = false;
+                    }
+                }
+            }
+            if(flag){
+                id= pgcKey.getKey();
+                System.out.println("---"+id);
+            }
+            flag = true;
+
+            //System.out.println("-------------------------------");
+        }
+        switch (id){
+            case 1:image = new Image("personal_goal_cards/Personal_Goals.png") ;break;
+            case 2:image = new Image("personal_goal_cards/Personal_Goals2.png") ;break;
+            case 3:image = new Image("personal_goal_cards/Personal_Goals3.png") ;break;
+            case 4:image = new Image("personal_goal_cards/Personal_Goals4.png") ;break;
+            case 5:image = new Image("personal_goal_cards/Personal_Goals5.png") ;break;
+            case 6:image = new Image("personal_goal_cards/Personal_Goals6.png") ;break;
+            case 7:image = new Image("personal_goal_cards/Personal_Goals7.png") ;break;
+            case 8:image = new Image("personal_goal_cards/Personal_Goals8.png") ;break;
+            case 9:image = new Image("personal_goal_cards/Personal_Goals9.png") ;break;
+            case 10:image = new Image("personal_goal_cards/Personal_Goals10.png") ;break;
+            case 11:image = new Image("personal_goal_cards/Personal_Goals11.png") ;break;
+            case 12:image = new Image("personal_goal_cards/Personal_Goals12.png") ;break;
+            default:System.out.println("MANNAGGIAAA");
+        }
+        MyPGC.setImage(image);
     }
 
     public void updateBoard(TilePlacingSpot[][] grid){
@@ -80,5 +133,9 @@ public class GameSceneController extends Application {
             }
         });
 
+    }
+
+    public ClientNotificationRMIGUI getClientRMI(){
+        return this.clientRMI;
     }
 }

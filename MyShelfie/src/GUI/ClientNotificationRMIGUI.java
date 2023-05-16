@@ -11,6 +11,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI {
@@ -90,10 +91,26 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {
         GameStartFlag=true;
-        TilePlacingSpot[][] board= serverRMI.getBoard();
-        if(gsc!=null)
-            gsc.updateBoard(board);
+        updateGUIAtBeginningOfGame();
     }
+
+    public void updateGUIAtBeginningOfGame(){
+        try{
+            TilePlacingSpot[][] board= serverRMI.getBoard();
+            Map<Integer, PersonalGoalCard> pgcMap = serverRMI.getPGCmap();
+            PersonalGoalCard pgc = serverRMI.getPGC(nickname);
+            if(gsc!=null) {
+                gsc.updateBoard(board);
+                gsc.setPersonalGoalCardImage(pgc, pgcMap);
+            }
+        }catch(RemoteException re){
+            System.out.println("Problem in the update of the gui at the beginning of the game");
+            re.printStackTrace();
+        }
+    }
+
+
+
 
     @Override
     public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException {

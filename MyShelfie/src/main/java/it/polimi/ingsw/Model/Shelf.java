@@ -1,5 +1,6 @@
 package main.java.it.polimi.ingsw.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,7 +9,7 @@ import java.util.Objects;
  * @author Diego Lecchi
  * class Shelf represents the shelf of a player as a matrix of Tiles
  */
-public class Shelf {
+public class Shelf implements Serializable {
     public final int ROWS = 6;
     public final int COLUMNS = 5;
     private Tile grid[][];

@@ -326,6 +326,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
     @Override
+    public Map<Integer, PersonalGoalCard> getPGCmap() throws RemoteException {
+        return controller.getPGCmap();
+    }
+
+    @Override
     public Tile[][] getMyPersonalGoal(String playerNickname) throws RemoteException {
         return controller.getMyPersonalCard(playerNickname);
     }
@@ -402,6 +407,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     public void addClient(String playerName){
         clients.put(playerName, null);
+    }
+
+    public PersonalGoalCard getPGC(String playerNickname) throws RemoteException{
+        return controller.getPGC(playerNickname);
     }
 
 

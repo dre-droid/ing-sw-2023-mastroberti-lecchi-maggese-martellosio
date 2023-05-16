@@ -5,6 +5,7 @@ import main.java.it.polimi.ingsw.Model.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 public interface RMIinterface extends java.rmi.Remote{
 
@@ -42,4 +43,8 @@ public interface RMIinterface extends java.rmi.Remote{
     public void chatMessage(String senderName, String text, String receiverName) throws RemoteException;
 
     public boolean loadGameProgressFromFile() throws RemoteException;
+
+    public Map<Integer, PersonalGoalCard> getPGCmap() throws RemoteException;
+
+    public PersonalGoalCard getPGC(String playerNickname) throws RemoteException;
 }

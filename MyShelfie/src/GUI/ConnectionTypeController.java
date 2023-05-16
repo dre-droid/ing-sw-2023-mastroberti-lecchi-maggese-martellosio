@@ -46,7 +46,7 @@ public class ConnectionTypeController  {
             LoginSceneController loginSceneController = loader.getController();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             if (Objects.isNull(clientSocket)) {
-                stage.setUserData(clientRMI);
+                //stage.setUserData(clientRMI);
                 loginSceneController.setClient(clientRMI);
             } else {
                 loginSceneController.setClient(clientSocket);

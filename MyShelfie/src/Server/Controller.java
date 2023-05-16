@@ -13,10 +13,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Timer;
+import java.util.*;
 
 public class Controller {
     Game game;
@@ -379,6 +376,14 @@ public class Controller {
         if(toBeChecked.exists())
             return true;
         else return false;
+    }
+
+    public Map<Integer, PersonalGoalCard> getPGCmap(){
+        return game.getValidTilesMap();
+    }
+
+    public PersonalGoalCard getPGC(String playerNickname) {
+        return game.getPlayerList().stream().filter(p->p.getNickname().equals(playerNickname)).toList().get(0).getPersonalGoalCard();
     }
 
 }
