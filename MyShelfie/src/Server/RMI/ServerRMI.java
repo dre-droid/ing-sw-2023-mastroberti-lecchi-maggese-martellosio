@@ -4,6 +4,7 @@ import Server.Controller;
 import Server.Server;
 import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -415,7 +416,19 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     @Override
     public List<Player> getLeaderboard() throws RemoteException {
-        return controller.getLeaderboard();
+        if(controller.hasGameStarted())
+            return controller.getLeaderboard();
+        else
+            return null;
+    }
+
+    @Override
+    public List<CommonGoalCard> getCommonGoalCards() throws RemoteException {
+        if(controller.hasGameStarted()){
+            return controller.getCommonGoalCards();
+        }
+        else
+            return null;
     }
 
 

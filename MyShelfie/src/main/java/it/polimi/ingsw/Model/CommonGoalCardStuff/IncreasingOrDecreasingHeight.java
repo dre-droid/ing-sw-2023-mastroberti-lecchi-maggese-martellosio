@@ -4,7 +4,9 @@ import main.java.it.polimi.ingsw.Model.Shelf;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.*;
 
-public class IncreasingOrDecreasingHeight implements StrategyCommonGoal{
+import java.io.Serializable;
+
+public class IncreasingOrDecreasingHeight implements StrategyCommonGoal, Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] grid = shelf.getGrid();

@@ -1,11 +1,13 @@
 package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.Serializable;
+
 /**
  * @author Saverio Maggese
  * checks if there are two rows containing tiles of all different types
  */
-public class TwoLinesOfDifferentTypes implements StrategyCommonGoal{
+public class TwoLinesOfDifferentTypes implements StrategyCommonGoal, Serializable {
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();
         boolean repeated=false;

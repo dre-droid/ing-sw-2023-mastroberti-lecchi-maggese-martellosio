@@ -4,6 +4,7 @@ import Server.RMI.ClientNotificationInterfaceRMI;
 import Server.RMI.ClientNotificationRMI;
 import Server.RMI.RMIinterface;
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -99,11 +100,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             TilePlacingSpot[][] board= serverRMI.getBoard();
             Map<Integer, PersonalGoalCard> pgcMap = serverRMI.getPGCmap();
             PersonalGoalCard pgc = serverRMI.getPGC(nickname);
+            List<CommonGoalCard> cgcs = serverRMI.getCommonGoalCards();
 
             if(gsc!=null) {
                 gsc.updateBoard(board);
                 gsc.setPersonalGoalCardImage(pgc, pgcMap);
-                gsc.updateLeaderboard(serverRMI.getLeaderboard());
+                gsc.createLeaderboard(serverRMI.getLeaderboard());
+                gsc.setCommonGoalCardImage(cgcs.get(0),1);
+                gsc.setCommonGoalCardImage(cgcs.get(1),2);
             }
         }catch(RemoteException re){
             System.out.println("Problem in the update of the gui at the beginning of the game");

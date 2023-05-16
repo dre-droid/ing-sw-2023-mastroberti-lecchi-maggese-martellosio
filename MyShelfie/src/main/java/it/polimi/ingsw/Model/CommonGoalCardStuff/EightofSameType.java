@@ -2,12 +2,15 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 
 
 import main.java.it.polimi.ingsw.Model.*;
+
+import java.io.Serializable;
+
 /**
  * @author Saverio Maggese
  * checks if there are at least 8 tiles of the same type
  */
 
-public class EightofSameType implements StrategyCommonGoal{
+public class EightofSameType implements StrategyCommonGoal, Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();

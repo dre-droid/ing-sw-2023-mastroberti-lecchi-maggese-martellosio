@@ -3,10 +3,11 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FourGroupsOfAtLeastFourSameTypeTiles implements StrategyCommonGoal{
+public class FourGroupsOfAtLeastFourSameTypeTiles implements StrategyCommonGoal, Serializable {
 
     class Coordinate{
         public int x;

@@ -3,7 +3,9 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 import main.java.it.polimi.ingsw.Model.Shelf;
 import main.java.it.polimi.ingsw.Model.Tile;
 
-public class FourRowsOfMaxThreeDifferentTypes implements StrategyCommonGoal {
+import java.io.Serializable;
+
+public class FourRowsOfMaxThreeDifferentTypes implements StrategyCommonGoal , Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();

@@ -2,7 +2,9 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 
 import main.java.it.polimi.ingsw.Model.*;
 
-public class FourCornerOfTheSameType implements StrategyCommonGoal{
+import java.io.Serializable;
+
+public class FourCornerOfTheSameType implements StrategyCommonGoal, Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();

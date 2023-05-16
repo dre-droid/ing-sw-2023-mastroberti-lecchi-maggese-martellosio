@@ -3,7 +3,9 @@ import main.java.it.polimi.ingsw.Model.Shelf;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.*;
 
-public class SquaredShapedGroups implements StrategyCommonGoal {
+import java.io.Serializable;
+
+public class SquaredShapedGroups implements StrategyCommonGoal, Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();

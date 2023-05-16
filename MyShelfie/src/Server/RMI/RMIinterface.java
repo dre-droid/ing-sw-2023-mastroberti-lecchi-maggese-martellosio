@@ -1,6 +1,7 @@
 package Server.RMI;
 
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -49,4 +50,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public PersonalGoalCard getPGC(String playerNickname) throws RemoteException;
 
     public List<Player> getLeaderboard() throws RemoteException;
+
+    public List<CommonGoalCard> getCommonGoalCards() throws RemoteException;
 }

@@ -15,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,20 +23,28 @@ import java.util.Map;
 
 public class GameSceneController extends Application {
 
+    private boolean leaderboardCheck = false;
     @FXML
-    public TableView TableLeaderboard;
+    private TableView TableLeaderboard;
 
     @FXML
-    public TableColumn Player;
+    private TableColumn Player;
 
-    @FXML TableColumn Score;
-
-    @FXML
-    public GridPane BoardGrid;
+    @FXML private TableColumn Score;
 
     @FXML
-    public ImageView MyPGC;
+    private GridPane BoardGrid;
+
+    @FXML
+    private ImageView MyPGC;
+
+    @FXML
+    private ImageView CG1;
+
+    @FXML
+    private ImageView CG2;
     private ClientNotificationRMIGUI clientRMI;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -156,22 +165,51 @@ public class GameSceneController extends Application {
         return this.clientRMI;
     }
 
-    public void updateLeaderboard(List<Player> leaderboard){
-        TableColumn player = new TableColumn("Player");
-        TableColumn score = new TableColumn("Score");
-        TableLeaderboard.getColumns().addAll(player, score);
-        TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    public void createLeaderboard(List<Player> leaderboard){
+        if(!leaderboardCheck){
+            leaderboardCheck=true;
+            TableColumn player = new TableColumn("Player");
+            TableColumn score = new TableColumn("Score");
+            TableLeaderboard.getColumns().addAll(player, score);
+            TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        final ObservableList<TableRecord> data = FXCollections.observableArrayList();
-        for(Player p: leaderboard){
-            data.add(new TableRecord(p.getNickname(), ""+p.getScore()));
+            final ObservableList<TableRecord> data = FXCollections.observableArrayList();
+            for(Player p: leaderboard){
+                data.add(new TableRecord(p.getNickname(), ""+p.getScore()));
+            }
+
+            player.setCellValueFactory(new PropertyValueFactory<TableRecord,String>("player"));
+            score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+
+            TableLeaderboard.setItems(data);
         }
 
-        player.setCellValueFactory(new PropertyValueFactory<TableRecord,String>("player"));
-        score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+    }
 
-        TableLeaderboard.setItems(data);
-
+    public void setCommonGoalCardImage(CommonGoalCard cgc,int n){
+        int id = cgc.getStrategyID();
+        Image image = null;
+        switch(id){
+            case 1:image = new Image("common_goal_cards/11.jpg");break;
+            case 2:image = new Image("common_goal_cards/9.jpg");break;
+            case 3:image = new Image("common_goal_cards/8.jpg");break;
+            case 4:image = new Image("common_goal_cards/3.jpg");break;
+            case 5:image = new Image("common_goal_cards/7.jpg");break;
+            case 6:image = new Image("common_goal_cards/12.jpg");break;
+            case 7:image = new Image("common_goal_cards/4.jpg");break;
+            case 8:image = new Image("common_goal_cards/1.jpg");break;
+            case 9:image = new Image("common_goal_cards/5.jpg");break;
+            case 10:image = new Image("common_goal_cards/2.jpg");break;
+            case 11:image = new Image("common_goal_cards/6.jpg");break;
+            case 12:image = new Image("common_goal_cards/10.jpg");break;
+        }
+        if(n==1){
+            CG1.setImage(image);
+        }
+        if(n==2){
+            CG2.setImage(image);
+        }
 
     }
+
 }

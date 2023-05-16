@@ -1,6 +1,8 @@
 package main.java.it.polimi.ingsw.Model;
 
-public class ScoringToken {
+import java.io.Serializable;
+
+public class ScoringToken implements Serializable {
 
     int points;
     public ScoringToken(int points){

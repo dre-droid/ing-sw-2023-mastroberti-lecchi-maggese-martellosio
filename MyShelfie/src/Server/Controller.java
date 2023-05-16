@@ -5,6 +5,7 @@ import Server.Socket.drawInfo;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import javax.naming.ldap.Control;
 import java.io.*;
@@ -384,6 +385,10 @@ public class Controller {
 
     public PersonalGoalCard getPGC(String playerNickname) {
         return game.getPlayerList().stream().filter(p->p.getNickname().equals(playerNickname)).toList().get(0).getPersonalGoalCard();
+    }
+
+    public List<CommonGoalCard> getCommonGoalCards(){
+        return game.getCommonGoalCards();
     }
 
 }

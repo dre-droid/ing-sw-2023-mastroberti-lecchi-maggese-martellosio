@@ -3,6 +3,7 @@ package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  * @author Francesco Martellosio
  * This class represent the common goals that the player must fulfill in order to gain points
  */
-public class CommonGoalCard {
+public class CommonGoalCard implements Serializable {
     private StrategyCommonGoal strategy;
     private List<ScoringToken> tokens;
     private List<String> playersWhoCompleted;

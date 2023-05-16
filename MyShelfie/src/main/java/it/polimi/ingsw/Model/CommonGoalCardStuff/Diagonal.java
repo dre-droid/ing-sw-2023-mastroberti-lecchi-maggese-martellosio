@@ -1,12 +1,14 @@
 package main.java.it.polimi.ingsw.Model.CommonGoalCardStuff;
 import main.java.it.polimi.ingsw.Model.*;
 
+import java.io.Serializable;
+
 /**
  * @author Saverio Maggese
  * checks if the diagonal common goal is metched
  */
 
-public class Diagonal implements StrategyCommonGoal {
+public class Diagonal implements StrategyCommonGoal, Serializable {
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();
