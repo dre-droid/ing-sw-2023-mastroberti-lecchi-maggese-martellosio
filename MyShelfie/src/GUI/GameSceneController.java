@@ -38,10 +38,14 @@ public class GameSceneController extends Application {
                 Image image;
                 ImageView imv;
 
+                /*System.out.println("  0 1 2 3 4 5 6 7 8");
                 for(int i = 0;i<9;i++) {
+                    System.out.print(i+" ");
                     for (int j = 0; j < 9; j++) {
-                        if (grid[i][j].isAvailable()){
-                            if(!grid[i][j].isEmpty()){
+                        if (!grid[i][j].isAvailable()) System.out.print("x ");
+                        else{
+                            if(grid[i][j].isEmpty()) System.out.print("e ");
+                            else{
                                 Tile t = grid[i][j].showTileInThisPosition();
                                 switch(t.getType()){
                                     case CAT: System.out.print("C ");break;
@@ -52,10 +56,11 @@ public class GameSceneController extends Application {
                                     case TROPHY:System.out.print("T ");break;
                                 }
                             }
+
                         }
                     }
                     System.out.println("");
-                }
+                }*/
 
                 for(int i=0;i<9;i++){
                     for(int j=0;j<9;j++){
@@ -64,20 +69,38 @@ public class GameSceneController extends Application {
                                 imv = new ImageView();
                                 Tile t = grid[i][j].showTileInThisPosition();
                                 switch(t.getType()){
-                                    case CAT: image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);break;
-                                    case BOOK:image = new Image("item_tiles/Libri1.1.png",45,45,true,true);break;
-                                    case GAME:image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);break;
-                                    case FRAME:image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);;break;
-                                    case PLANT:image = new Image("item_tiles/Piante1.1.png",45,45,true,true);break;
-                                    case TROPHY:image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);;break;
+                                    case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
+                                                System.out.print("C ");
+                                    }break;
+                                    case BOOK:{image = new Image("item_tiles/Libri1.1.png",45,45,true,true);
+                                        System.out.print("B ");
+                                    }break;
+                                    case GAME:{image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);
+                                        System.out.print("G ");
+                                    }break;
+                                    case FRAME:{image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);
+                                        System.out.print("F ");
+                                    }break;
+                                    case PLANT:{image = new Image("item_tiles/Piante1.1.png",45,45,true,true);
+                                        System.out.print("P ");
+                                    }break;
+                                    case TROPHY:{image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);
+                                        System.out.print("T ");
+                                    }break;
                                     default:image = null;
                                 }
                                 imv.setImage(image);
-                                BoardGrid.add(imv,i,j);
+                                BoardGrid.add(imv,j,i);
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
+                            else{
+                                System.out.print("- ");
+                            }
+                        }else{
+                            System.out.print("- ");
                         }
                     }
+                    System.out.println();
                 }
             }
         });
