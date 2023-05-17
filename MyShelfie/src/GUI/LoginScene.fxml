@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.TextArea?>
 <AnchorPane fx:id="LoginAnchorPane" prefHeight="400.0" prefWidth="600.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
    <children>
       <Label id="TopLabel" layoutX="109.0" layoutY="14.0" styleClass="open-sans" text="Insert your username" textFill="#f2eded">
@@ -19,10 +20,6 @@
          </font>
       </Button>
       <TextField fx:id="usernameText" layoutX="215.0" layoutY="187.0" promptText="username" style="-fx-background-color: white;" styleClass="open-sans" />
-      <Label fx:id="InfoLabel" layoutX="109.0" layoutY="236.0" prefHeight="28.0" prefWidth="361.0" style="-fx-background-color: white;" styleClass="open-sans" text="a" textAlignment="CENTER" textFill="BLACK">
-         <font>
-            <Font size="22.0" />
-         </font>
-      </Label>
+      <TextArea fx:id="messageTextArea" wrapText="true" editable="false" layoutX="111.0" layoutY="236.0" prefHeight="28.0" prefWidth="361.0"/>
    </children>
 </AnchorPane>

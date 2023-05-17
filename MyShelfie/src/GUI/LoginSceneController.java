@@ -27,6 +27,7 @@ import java.util.Random;
 
 public class LoginSceneController {
     @FXML
+    private javafx.scene.control.TextArea messageTextArea;
     public javafx.scene.control.Label InfoLabel;
     @FXML
     Label TopLabel;
@@ -54,7 +55,7 @@ public class LoginSceneController {
         try {
             if (Objects.isNull(clientSocket)) handleRMI(event);
             else {
-                if (!alive)
+                if (!alive) //handles spamming button
                     new Thread(() -> handleSocket(event)).start();
             }
         } catch (IOException e) {
@@ -133,8 +134,8 @@ public class LoginSceneController {
             clientSocket.clientSpeaker(usernameText.getText());
             //wait for server response being handled by clientSocket
             synchronized (clientSocket) {
-                System.out.println("client socket nextscene: " + clientSocket.nextScene);
-                if (clientSocket.nextScene.equals("")) clientSocket.wait();
+                //System.out.println("client socket nextscene: " + clientSocket.nextScene);
+                while (clientSocket.nextScene.equals("")) clientSocket.wait();
             }
             if (clientSocket.nextScene.equals("MatchType")) {
                 //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
@@ -167,6 +168,7 @@ public class LoginSceneController {
                     GameSceneController gameSceneController = loader.getController();
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     gameSceneController.setClient(clientSocket);
+                    new Thread(gameSceneController::fillGameScene).start();     // new thread to handle displaying GameScene objects
 
                     scene = new Scene(root);
                     stage.setScene(scene);
@@ -175,7 +177,7 @@ public class LoginSceneController {
             }
             if (clientSocket.nextScene.equals("Unchanged")){
                 Platform.runLater(() -> {
-                    InfoLabel.setText("Invalid nickname. Try again!");
+                    messageTextArea.setText("Invalid nickname. Try again!");
                 });
             }
         }catch(InterruptedException | RuntimeException e){

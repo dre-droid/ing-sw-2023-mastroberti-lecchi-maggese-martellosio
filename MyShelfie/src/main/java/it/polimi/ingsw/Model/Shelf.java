@@ -18,6 +18,10 @@ public class Shelf implements Serializable {
         this.grid = new Tile[ROWS][COLUMNS];
     }
 
+    public Shelf(Tile[][] grid){
+        this.grid = grid;
+    }
+
     /**
      * Inserts all tiles int list t from leftmost to rightmost in the Shelf, inserting from bottom to top.
      * @author Andrea Mastroberti

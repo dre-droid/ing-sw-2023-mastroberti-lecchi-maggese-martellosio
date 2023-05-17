@@ -1,6 +1,7 @@
 package GUI;
 
 import Server.Socket.ClientSocket;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -73,6 +74,7 @@ public class MatchTypeController {
                 GameSceneController gameSceneController = loader.getController();
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 gameSceneController.setClient(clientSocket);
+                new Thread(gameSceneController::fillGameScene).start();
 
                 scene = new Scene(root);
                 stage.setScene(scene);

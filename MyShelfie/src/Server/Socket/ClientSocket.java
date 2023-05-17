@@ -1,11 +1,20 @@
 package Server.Socket;
 
+import java.lang.reflect.Field;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.StrategyCommonGoal;
+import main.java.it.polimi.ingsw.Model.PersonalGoalCard;
+import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
 
 import java.io.BufferedReader;
@@ -15,14 +24,17 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 public class ClientSocket {
-    private Board board;
-    private Shelf shelf;
-    private String personalGoalCard;
-    private String commonGoalCard;
-    private List<String> leaderboard;
-    private String nickname;
-    private Socket socket;
-    private final Gson gson = new Gson();
+
+
+    private Board board = null;
+    private Shelf shelf = null;
+    private PersonalGoalCard personalGoalCard = null;
+    private List<CommonGoalCard> commonGoalCard = null;
+    private List<Player> leaderboard = null;
+    private String nickname = null;
+    private Socket socket = null;
+    Map<Integer, PersonalGoalCard> pgcMap = null;
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
 
     public String messageFromServer = "";
     public final Object object = new Object();
@@ -94,8 +106,9 @@ public class ClientSocket {
      * Handles server's received messages
      */
     private synchronized void handleServerRequest(String line){
-        if (line.equals("[CONNECTED]"))
+        if (line.equals("[CONNECTED]")) {
             serverPinger();
+        }
         if (line.startsWith("[YOUR TURN]")) {
             printTurn();
             System.out.println(line);
@@ -120,17 +133,18 @@ public class ClientSocket {
             System.out.println(line);
             System.exit(0);
         }
+
         //GUI
-        if (line.startsWith("[REQUEST]: Choose the number of players for the game:")){
+        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
+            nextScene = "Unchanged";
+            notify();
+        }
+        else if (line.startsWith("[REQUEST]: Choose the number of players for the game:")){
             nextScene = "MatchType";
             notify();
         }
-        if (line.startsWith("[INFO]: Game is starting")){
+        else if (line.startsWith("[INFO]: Game is being created by another player") || line.startsWith("[INFO]: Waiting for all players to connect...")) {
             nextScene = "GameScene";
-            notify();
-        }
-        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
-            nextScene = "Unchanged";
             notify();
         }
 
@@ -140,7 +154,7 @@ public class ClientSocket {
      * Handles deserializing objects sent from serverSocket
      * @param line: the serialized object sent from the server
      */
-    private void deserializeObjects(String line){
+    private synchronized void deserializeObjects(String line){
         if (line.startsWith("[GSONBOARD]")) {
             String gsonString = line.replace("[GSONBOARD]", "");
             board = gson.fromJson(gsonString, Board.class);
@@ -150,20 +164,29 @@ public class ClientSocket {
             shelf = gson.fromJson(gsonString, Shelf.class);
         }
         if (line.startsWith("[GSONLEAD]")) {
+            TypeToken<List<Player>> typeToken = new TypeToken<>() {};
             String gsonString = line.replace("[GSONLEAD]", "");
-            leaderboard = gson.fromJson(gsonString, List.class);
+            leaderboard = gson.fromJson(gsonString, typeToken.getType());
         }
         if (line.startsWith("[GSONPGC]")) {
+            TypeToken<PersonalGoalCard> typeToken = new TypeToken<>() {};
             String gsonString = line.replace("[GSONPGC]", "");
-            personalGoalCard = gson.fromJson(gsonString, String.class);
+            personalGoalCard = gson.fromJson(gsonString, typeToken.getType());
         }
         if (line.startsWith("[GSONCGC]")) {
-            String gsonString = line.replace("[GSONCGC]", "");
-            commonGoalCard = gson.fromJson(gsonString, String.class);
+            line = line.replace("[GSONCGC]", "");
+            TypeToken<List<CommonGoalCard>> typeToken = new TypeToken<>() {};
+            commonGoalCard = gson.fromJson(line, typeToken.getType());
         }
         if (line.startsWith("[NICKNAME]")) {
             nickname = line.replace("[NICKNAME]", "");
         }
+        if (line.startsWith("[GSONPGMAP]")){
+            line = line.replace("[GSONPGMAP]", "");
+            TypeToken<Map<Integer, PersonalGoalCard>> typeToken = new TypeToken<>() {};
+            pgcMap = gson.fromJson(line, typeToken.getType());
+        }
+        notify();
     }
 
     /**
@@ -174,8 +197,8 @@ public class ClientSocket {
         System.out.println("*********  " + nickname + ": your turn  *********");
 
         //shelf & personalGoal print
-        Scanner scannerpg = new Scanner(personalGoalCard);
-        Scanner scannercg = new Scanner(commonGoalCard);
+        Scanner scannerpg = new Scanner(personalGoalCard.toString());
+        Scanner scannercg = new Scanner(commonGoalCard.get(0).getDescription() + "\n" + commonGoalCard.get(1).getDescription());
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {
@@ -199,8 +222,9 @@ public class ClientSocket {
         //leaderboard print
         System.out.println("Leaderboard");
         int i = 0;
-        for (String s: leaderboard) {
-            System.out.println(i + 1 + ". " + s);
+        for (Player p: leaderboard) {
+            System.out.print(i + 1 + ". " + p.getNickname() + ": ");
+            System.out.println(p.getScore());
             i++;
         }
         System.out.println();
@@ -254,6 +278,46 @@ public class ClientSocket {
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
+    }
+
+    public boolean areAllObjectsReceived(){
+        Field[] fields = getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                if (field.get(this) == null) {
+                    return false;
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+    //getters
+    public Board getBoard() {
+        return board;
+    }
+    public Shelf getShelf() {
+        return shelf;
+    }
+    public PersonalGoalCard getPersonalGoalCard() {
+        return personalGoalCard;
+    }
+    public List<CommonGoalCard> getCommonGoalCard() {
+        return commonGoalCard;
+    }
+    public List<Player> getLeaderboard() {
+        return leaderboard;
+    }
+    public String getNickname() {
+        return nickname;
+    }
+    public Socket getSocket() {
+        return socket;
+    }
+    public Map<Integer, PersonalGoalCard> getPgcMap() {
+        return pgcMap;
     }
 }
 

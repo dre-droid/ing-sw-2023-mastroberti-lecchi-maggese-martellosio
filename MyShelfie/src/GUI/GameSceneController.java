@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -57,16 +58,19 @@ public class GameSceneController extends Application {
 
     }
 
-    public void setClient(ClientNotificationRMIGUI client){
+    public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
     }
-
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
     }
+    public ClientNotificationRMIGUI getClientRMI(){
+        return this.clientRMI;
+    }
+
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
         int id=-1;
@@ -167,10 +171,6 @@ public class GameSceneController extends Application {
 
     }
 
-    public ClientNotificationRMIGUI getClientRMI(){
-        return this.clientRMI;
-    }
-
     public void createLeaderboard(List<Player> leaderboard){
         if(!leaderboardCheck){
             leaderboardCheck=true;
@@ -216,6 +216,29 @@ public class GameSceneController extends Application {
             CG2.setImage(image);
         }
 
+    }
+
+    /**
+     * Fills GUI with game objects once game has started.
+     * @throws InterruptedException
+     */
+    public void fillGameScene(){
+        try {
+            synchronized (clientSocket) {
+                while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
+            }
+            System.out.println("Are all obects received? " + clientSocket.areAllObjectsReceived());
+            System.out.println(clientSocket.getBoard());
+            Platform.runLater(() -> {
+                setPersonalGoalCardImage(clientSocket.getPersonalGoalCard(), clientSocket.getPgcMap());
+                updateBoard(clientSocket.getBoard().getBoardForDisplay());
+                createLeaderboard(clientSocket.getLeaderboard());
+                setCommonGoalCardImage(clientSocket.getCommonGoalCard().get(0), 1);
+                setCommonGoalCardImage(clientSocket.getCommonGoalCard().get(1), 2);
+            });
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
     }
 
 }

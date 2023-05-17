@@ -65,6 +65,14 @@ public class Board {
     }
 
     /**
+     * Creates a board object given a TilePlacingSpot[][] - it does not check for the validity of the grid
+     */
+    public Board(TilePlacingSpot[][] grid){
+        bag = new Bag();
+        this.grid = grid;
+    }
+
+    /**
      * This method is used to draw tiles from the board
      *
      * @param x         x coordinate of the starting position on the board [0 ... 8]

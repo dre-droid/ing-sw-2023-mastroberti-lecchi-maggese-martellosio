@@ -4,8 +4,11 @@ package Server.Socket;
 import Server.Controller;
 import Server.Server;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.StrategyCommonGoal;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -19,7 +22,7 @@ public class ServerSock {
     private Controller controller;
     private final Server server;
     private final long DISCONNECTION_TIME = 30000;  //disconnection threshold: 30s
-    private Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public String string = "";  //used to communicate with playing player
 
     public ServerSock(Controller controller, Server server){
@@ -60,6 +63,9 @@ public class ServerSock {
                 while (repeat) {
                     int resultValue = playerJoin(client);
                     if (resultValue == 0 || resultValue == -1) {    //successfully joined
+                        if (controller.isGameBeingCreated) {
+                            out.println("[INFO]: Game is being created by another player...");
+                        }
                         clientListener(client, getNickFromSocket(client));
                         repeat = false;
                         server.addPlayerToConnectedClients(getNickFromSocket(client));
@@ -101,11 +107,6 @@ public class ServerSock {
         } while (true);
         out.println("[INFO]: Chosen nickname: " + nickname);
 
-        if (controller.isGameBeingCreated) {
-            out.println("[INFO]: Game is being created by another player...");
-            //gui passa a gamescene
-        }
-
         return joinGameSwitch(client, nickname, out, reader);
     }
 
@@ -135,10 +136,10 @@ public class ServerSock {
                 }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
 
                 controller.createNewGame(nickname, Integer.parseInt(line)); //create new game
-                out.println("[INFO]: Il numero di giocatori inserito è:  " + line);
+                out.println("[INFO]: Selected number of players for the game: " + line);
                 clients.add(new socketNickStruct(client, nickname));
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);
-                out.println("[INFO]: In attesa di altri giocatori.");
+                out.println("[INFO]: Waiting for all players to connect...");
                 return -1;
             }
             //game has started
@@ -500,18 +501,17 @@ public class ServerSock {
         String jsonShelf = gson.toJson(shelf);
         out.println("[GSONSHELF]" + jsonShelf);
 
-        String jsonPersonalGoal = gson.toJson(pgc.toString());
+        String jsonPersonalGoal = gson.toJson(pgc);
         out.println("[GSONPGC]" + jsonPersonalGoal);
 
-        String jsonCommonGoal = cgc.get(0).getDescription() + "\n";
-        jsonCommonGoal += cgc.get(1).getDescription() + "\n";
-        jsonCommonGoal = gson.toJson(jsonCommonGoal);
+        String jsonCommonGoal = gson.toJson(cgc);
         out.println("[GSONCGC]" + jsonCommonGoal);
 
-        ArrayList<String> stringLeaderboard = new ArrayList<String>();
-        for (Player p : leaderboard) stringLeaderboard.add(p.getNickname() + ": " + p.getScore());
-        String jsonLeaderboard = gson.toJson(stringLeaderboard);
+        String jsonLeaderboard = gson.toJson(leaderboard);
         out.println("[GSONLEAD]" + jsonLeaderboard);
+
+        String jsonPGMap = gson.toJson(controller.getPGCmap());
+        out.println("[GSONPGMAP]" + jsonPGMap);
         //*********************************************
     }
 
@@ -585,6 +585,7 @@ public class ServerSock {
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
+                sendSerializedObjects(pw, c.getName(), new Board(controller.getBoard()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getLeaderboard());
                 pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
             }
         }catch (Exception e){
@@ -651,3 +652,4 @@ public class ServerSock {
             }
     }
 }
+//TODO server cant handle when first player to connect and choose num of player disconnects
