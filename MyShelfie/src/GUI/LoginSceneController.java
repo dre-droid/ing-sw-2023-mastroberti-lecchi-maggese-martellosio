@@ -45,7 +45,7 @@ public class LoginSceneController {
     private FXMLLoader loader;
     private ClientSocket clientSocket;
     private ClientNotificationRMIGUI clientRMI;
-    private boolean repeat = false;
+    private boolean alive = false;
 
     /**
      * Method is called when button is pressed in ConnectionType scene
@@ -53,8 +53,10 @@ public class LoginSceneController {
     public void switchToNextScene(ActionEvent event) {
         try {
             if (Objects.isNull(clientSocket)) handleRMI(event);
-            else new Thread(() -> handleSocket(event)).start();
-            //TODO what if someone spams the button?
+            else {
+                if (!alive)
+                    new Thread(() -> handleSocket(event)).start();
+            }
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -127,12 +129,13 @@ public class LoginSceneController {
 
     private void handleSocket(ActionEvent event){
         try {
-            clientSocket.clientSpeaker(usernameText.getText());     //send username
+            alive = true;
+            clientSocket.clientSpeaker(usernameText.getText());
             //wait for server response being handled by clientSocket
             synchronized (clientSocket) {
-                while (!clientSocket.nextScene.equals("Unchanged") && !clientSocket.nextScene.equals("MatchType") && !clientSocket.nextScene.equals("GameScene")) clientSocket.wait();
+                System.out.println("client socket nextscene: " + clientSocket.nextScene);
+                if (clientSocket.nextScene.equals("")) clientSocket.wait();
             }
-            //TODO why does it get stuck in wait() (i think) after inserting wrong nickname? (have to press twice but it sort of works)
             if (clientSocket.nextScene.equals("MatchType")) {
                 //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
                 Platform.runLater(() -> {
@@ -177,6 +180,11 @@ public class LoginSceneController {
             }
         }catch(InterruptedException | RuntimeException e){
             e.printStackTrace();
+        }
+        finally {
+            //set thread to dead, and reset nextScene variable
+            alive = false;
+            clientSocket.nextScene = "";
         }
     }
 

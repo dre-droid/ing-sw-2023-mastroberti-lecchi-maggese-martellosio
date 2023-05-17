@@ -125,16 +125,12 @@ public class ClientSocket {
             nextScene = "MatchType";
             notify();
         }
-        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:")){
-            nextScene = "Unchanged";
-            notify();
-        }
-        if (line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
-            nextScene = "Unchanged";
-            notify();
-        }
         if (line.startsWith("[INFO]: Game is starting")){
             nextScene = "GameScene";
+            notify();
+        }
+        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
+            nextScene = "Unchanged";
             notify();
         }
 
