@@ -39,6 +39,7 @@ public class ClientSocket {
     public String messageFromServer = "";
     public final Object object = new Object();
     public String nextScene = "";
+    public String turnOfPlayer = "";
 
     //used by ClientWithChoice
     public void runServer(){
@@ -145,6 +146,11 @@ public class ClientSocket {
         }
         else if (line.startsWith("[INFO]: Game is being created by another player") || line.startsWith("[INFO]: Waiting for all players to connect...")) {
             nextScene = "GameScene";
+            notify();
+        }
+        if (line.startsWith("[INFO]: Game is starting.")){
+            nextScene = "GameStart";
+            turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
             notify();
         }
 

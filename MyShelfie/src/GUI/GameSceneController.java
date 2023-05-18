@@ -15,6 +15,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
@@ -24,7 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GameSceneController extends Application {
-
+    @FXML
+    public Text TopLabel;
     private boolean leaderboardCheck = false;
     @FXML
     private TableView TableLeaderboard;
@@ -96,7 +98,6 @@ public class GameSceneController extends Application {
             }
             if(flag){
                 id= pgcKey.getKey();
-                System.out.println("---"+id);
             }
             flag = true;
 
@@ -227,8 +228,6 @@ public class GameSceneController extends Application {
             synchronized (clientSocket) {
                 while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
             }
-            System.out.println("Are all obects received? " + clientSocket.areAllObjectsReceived());
-            System.out.println(clientSocket.getBoard());
             Platform.runLater(() -> {
                 setPersonalGoalCardImage(clientSocket.getPersonalGoalCard(), clientSocket.getPgcMap());
                 updateBoard(clientSocket.getBoard().getBoardForDisplay());
@@ -238,6 +237,21 @@ public class GameSceneController extends Application {
             });
         }catch (InterruptedException e){
             e.printStackTrace();
+        }
+    }
+
+    public void refresh(){
+        //runs for the whole duration of the game
+        while (!clientSocket.getSocket().isClosed()){
+            try {
+                synchronized (clientSocket) {
+                    while (!clientSocket.nextScene.equals("GameStart")) clientSocket.wait();
+                }
+                TopLabel.setText(clientSocket.turnOfPlayer);
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

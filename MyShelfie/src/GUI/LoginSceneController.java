@@ -169,6 +169,7 @@ public class LoginSceneController {
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     gameSceneController.setClient(clientSocket);
                     new Thread(gameSceneController::fillGameScene).start();     // new thread to handle displaying GameScene objects
+                    new Thread(gameSceneController::refresh).start();               // new thread for handling gamescene refreshing
 
                     scene = new Scene(root);
                     stage.setScene(scene);

@@ -75,6 +75,7 @@ public class MatchTypeController {
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 gameSceneController.setClient(clientSocket);
                 new Thread(gameSceneController::fillGameScene).start();
+                new Thread(gameSceneController::refresh).start();
 
                 scene = new Scene(root);
                 stage.setScene(scene);
