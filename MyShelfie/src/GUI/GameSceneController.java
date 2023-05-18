@@ -6,27 +6,53 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
-import javafx.scene.control.Tab;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
-import java.util.HashMap;
+import javafx.scene.input.MouseEvent;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class GameSceneController extends Application {
     @FXML
     public Text TopLabel;
+
+    private int drawnTilesCounter;
+
+    private List<Position> alreadyDrawnPositions;
+    class Position{
+        private int x;
+        private int y;
+         public Position(int x,int y){
+             this.x = x;
+             this.y = y;
+         }
+
+         public int getX(){
+             return x;
+         }
+
+        public int getY(){
+            return y;
+        }
+    }
     private boolean leaderboardCheck = false;
     @FXML
     private TableView TableLeaderboard;
@@ -41,6 +67,9 @@ public class GameSceneController extends Application {
 
     @FXML
     private ImageView MyPGC;
+
+    @FXML
+    private GridPane TileToBeInserted;
 
     @FXML
     private ImageView CG1;
@@ -65,6 +94,8 @@ public class GameSceneController extends Application {
         System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
+        alreadyDrawnPositions = new ArrayList<>();
+        drawnTilesCounter = 0;
     }
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
@@ -98,6 +129,7 @@ public class GameSceneController extends Application {
             }
             if(flag){
                 id= pgcKey.getKey();
+                System.out.println("---"+id);
             }
             flag = true;
 
@@ -125,6 +157,14 @@ public class GameSceneController extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+
+                EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent e) {
+                        boardTileClicked(e);
+                    }
+                };
+
                 Image image;
                 ImageView imv;
                 for(int i=0;i<9;i++){
@@ -155,6 +195,7 @@ public class GameSceneController extends Application {
                                     default:image = null;
                                 }
                                 imv.setImage(image);
+                                imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
                                 BoardGrid.add(imv,j,i);
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
@@ -173,26 +214,108 @@ public class GameSceneController extends Application {
     }
 
     public void createLeaderboard(List<Player> leaderboard){
-        if(!leaderboardCheck){
-            leaderboardCheck=true;
-            TableColumn player = new TableColumn("Player");
-            TableColumn score = new TableColumn("Score");
-            TableLeaderboard.getColumns().addAll(player, score);
-            TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (!leaderboardCheck) {
+                    leaderboardCheck = true;
+                    TableColumn player = new TableColumn("Player");
+                    TableColumn score = new TableColumn("Score");
+                    TableLeaderboard.getColumns().addAll(player, score);
+                    TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-            final ObservableList<TableRecord> data = FXCollections.observableArrayList();
-            for(Player p: leaderboard){
-                data.add(new TableRecord(p.getNickname(), ""+p.getScore()));
+                    final ObservableList<TableRecord> data = FXCollections.observableArrayList();
+                    for (Player p : leaderboard) {
+                        data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
+                    }
+
+                    player.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("player"));
+                    score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+
+                    TableLeaderboard.setItems(data);
+                }
             }
+        });
+    }
 
-            player.setCellValueFactory(new PropertyValueFactory<TableRecord,String>("player"));
-            score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+    private void removeTileFromDrawnTiles(Event event){
+        System.out.println("remove tile is called ");
+        ImageView imv = (ImageView) event.getSource();
+        StackPane stackPane = (StackPane) imv.getParent();
+        if(TileToBeInserted.getChildren().remove(stackPane)){
+            drawnTilesCounter--;
+            Position p = (Position) stackPane.getUserData();
+            alreadyDrawnPositions.remove(
+                    alreadyDrawnPositions.stream().filter(
+                            position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                    ).toList().get(0)
+            );
 
-            TableLeaderboard.setItems(data);
         }
 
     }
 
+
+    public void boardTileClicked(Event event){
+        if(drawnTilesCounter<3){
+            //System.out.println(event.getSource().toString());
+            ImageView sender = (ImageView) event.getSource();
+            int row = transformIntegerToInt(GridPane.getRowIndex(sender));
+            int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
+            if(alreadyDrawnPositions.stream().noneMatch(position -> (position.getX()==row && position.getY()==column))){
+                alreadyDrawnPositions.add(new Position(row, column));
+                ImageView tileSelected = new ImageView(sender.getImage());
+                ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
+                redx.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent e) {
+                        removeTileFromDrawnTiles(e);
+                    }
+                });
+                StackPane stackPane = new StackPane();
+                stackPane.getChildren().add(tileSelected);
+                stackPane.getChildren().add(redx);
+                stackPane.setAlignment(redx, Pos.TOP_RIGHT);
+
+                TileToBeInserted.add(stackPane,getFirstEmptySpot(TileToBeInserted) ,0);
+                stackPane.setUserData(new Position(row, column));
+                drawnTilesCounter++;
+                if(drawnTilesCounter==1){
+                    ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
+                    Button button = new Button();
+                    button.setGraphic(checkImg);
+                    TileToBeInserted.add(button,3,0);
+                }
+            }
+
+        }
+    }
+
+    private int getFirstEmptySpot(GridPane gridPane){
+        for(int column =0; column<3; column++){
+            if(getNodeAt(0,column,gridPane)==null)
+                return column;
+        }
+        return -1;
+    }
+
+    private Node getNodeAt(int row, int column, GridPane gridPane){
+        Node result = null;
+        ObservableList<Node> childrens = TileToBeInserted.getChildren();
+        for (Node node : childrens) {
+            if(GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == column) {
+                result = node;
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * This method is used to set the image of a common goal card
+     * @param cgc the commongoal card
+     * @param n the number of the common goal card (1,2)
+     */
     public void setCommonGoalCardImage(CommonGoalCard cgc,int n){
         int id = cgc.getStrategyID();
         Image image = null;
@@ -254,5 +377,13 @@ public class GameSceneController extends Application {
             }
         }
     }
+
+    private int transformIntegerToInt(Integer i){
+        if(i==null)
+            return 0;
+        else
+            return i;
+    }
+
 
 }
