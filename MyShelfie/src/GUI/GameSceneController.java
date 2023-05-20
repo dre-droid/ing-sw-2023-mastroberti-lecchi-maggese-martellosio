@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -84,6 +85,14 @@ public class GameSceneController {
 
     @FXML
     private Text CG2_id;
+
+    @FXML
+    private Label p1Label;
+    @FXML
+    private Label p2Label;
+    @FXML
+    private Label p3Label;
+
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
@@ -108,6 +117,7 @@ public class GameSceneController {
            createLeaderboard(leaderboard);
            setCommonGoalCardImage(cgcs.get(0),1);
            setCommonGoalCardImage(cgcs.get(1),2);
+           setPlayerLabels();
         });
     }
 
@@ -393,6 +403,19 @@ public class GameSceneController {
             }
         }
     }
+    public void setPlayerLabels(){
+        int count = 0;
+        Label[] labels = new Label[]{p1Label, p2Label, p3Label};
+        int n = clientSocket.getLeaderboard().size();
+        for(int i=0;i<n;i++){
+            if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
+                labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
+                count++;
+            }
+        }
+
+    }
+}
+
 
     //****** end socket specific ********//
-}
