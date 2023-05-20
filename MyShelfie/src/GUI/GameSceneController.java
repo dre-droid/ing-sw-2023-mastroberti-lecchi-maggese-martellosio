@@ -85,6 +85,15 @@ public class GameSceneController {
 
     @FXML
     private Text CG2_id;
+
+    @FXML
+    private Label p1Label;
+    @FXML
+    private Label p2Label;
+    @FXML
+    private Label p3Label;
+
+
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
