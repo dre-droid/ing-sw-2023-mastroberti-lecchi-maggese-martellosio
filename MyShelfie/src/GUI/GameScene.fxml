@@ -351,8 +351,8 @@
 
          </children>
       </GridPane>
-      <Text layoutX="879.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC1 description" wrappingWidth="117.95574951171864" />
-      <Text layoutX="879.0" layoutY="520.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC2 description" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG1_id" layoutX="879.0" layoutY="382.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC1 description" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG2_id" layoutX="879.0" layoutY="520.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC2 description" wrappingWidth="117.95574951171864" />
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="11.0" layoutY="539.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />
