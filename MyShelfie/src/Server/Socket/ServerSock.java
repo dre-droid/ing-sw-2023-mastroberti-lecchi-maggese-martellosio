@@ -536,7 +536,7 @@ public class ServerSock {
      * Prints message to all clients in socketNickStruct clients
      * @param message
      */
-    private void broadcastMessage(String message){
+    public synchronized void broadcastMessage(String message){
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
@@ -581,11 +581,12 @@ public class ServerSock {
     }
 
 
-    public void notifyGameStart(String nickname) {
+    public synchronized void notifyGameStart(String nickname) {
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
                 sendSerializedObjects(pw, c.getName(), new Board(controller.getBoard()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getLeaderboard());
+                pw.println("[CURRENTPLAYER]" + nickname);
                 pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
             }
         }catch (Exception e){
