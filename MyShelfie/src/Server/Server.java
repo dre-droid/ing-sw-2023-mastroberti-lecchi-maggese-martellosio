@@ -56,11 +56,13 @@ public class Server {
                 }
             }
 
+            // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             while (!controller.hasTheGameEnded()) {
                 Thread.sleep(100);
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
+                    notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                 }
             }
 
@@ -114,6 +116,13 @@ public class Server {
                 }
             }
         }
+    }
+
+    /**
+     * sends Socket client the name of the current player
+     */
+    public void notifySocketOfTurnEnd(String isPlaying){
+        serverSock.broadcastMessage("[CURRENTPLAYER]" + isPlaying);
     }
 
     public boolean isEveryoneConnected(){

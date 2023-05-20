@@ -36,6 +36,7 @@ public class ClientSocket {
     Map<Integer, PersonalGoalCard> pgcMap = null;
     private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
 
+    public String isPlaying = "";
     public String messageFromServer = "";
     public final Object object = new Object();
     public String nextScene = "";
@@ -191,6 +192,10 @@ public class ClientSocket {
             line = line.replace("[GSONPGMAP]", "");
             TypeToken<Map<Integer, PersonalGoalCard>> typeToken = new TypeToken<>() {};
             pgcMap = gson.fromJson(line, typeToken.getType());
+        }
+        if (line.startsWith("[CURRENTPLAYER]")){
+            line = line.replace("[CURRENTPLAYER]", "");
+            isPlaying = line;
         }
         notify();
     }

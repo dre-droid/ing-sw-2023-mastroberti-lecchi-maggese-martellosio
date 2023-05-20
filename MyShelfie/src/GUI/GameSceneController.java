@@ -12,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -85,14 +84,6 @@ public class GameSceneController {
 
     @FXML
     private Text CG2_id;
-
-    @FXML
-    private Label p1Label;
-    @FXML
-    private Label p2Label;
-    @FXML
-    private Label p3Label;
-
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
@@ -118,6 +109,7 @@ public class GameSceneController {
            setCommonGoalCardImage(cgcs.get(0),1);
            setCommonGoalCardImage(cgcs.get(1),2);
            setPlayerLabels();
+           updateTurnLabel(isPlaying);
         });
     }
 
@@ -419,3 +411,7 @@ public class GameSceneController {
 
 
     //****** end socket specific ********//
+}
+//TODO make application not resizable
+//TODO visualize common goal in gui
+//TODO update turn GUI

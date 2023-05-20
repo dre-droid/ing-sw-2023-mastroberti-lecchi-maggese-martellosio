@@ -39,6 +39,7 @@ public class MatchTypeController {
             if(rButton4p.isSelected())
                 numOfPlayers = 4;
 
+            // client RMI
             if(clientRMI!=null){
                 System.out.println("Rmi active in match type scene");
                 String nextScenePath;
@@ -71,11 +72,10 @@ public class MatchTypeController {
                 //change scene to GameScene
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
                 root = loader.load();
-                GameSceneController gameSceneController = loader.getController();
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                GameSceneController gameSceneController = loader.getController();
                 gameSceneController.setClient(clientSocket);
-                new Thread(gameSceneController::updateGUIifGameHasStarted).start();
-                new Thread(gameSceneController::refresh).start();
+                gameSceneController.runGameSceneThreads();
 
                 scene = new Scene(root);
                 stage.setScene(scene);

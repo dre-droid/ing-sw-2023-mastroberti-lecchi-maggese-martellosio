@@ -2,11 +2,9 @@ package Server.RMI;
 
 import Server.Controller;
 import Server.Server;
-import com.google.gson.Gson;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
-import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -234,6 +232,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
+    /**
+     * Method is called after RMI client's turn is over. All other RMI clients are notified, and controller.endOfTurn() is invoked.
+     * @param playerNickname the player whose turn is ending
+     * @throws RemoteException
+     */
     public void endOfTurn(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
@@ -245,6 +248,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             //ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             /*if(clientToBeNotified!=null)
                 clientToBeNotified.startTurn();*/
+            server.notifySocketOfTurnEnd(playerNickname);
             controller.endOfTurn(playerNickname);
 
             if(controller.hasTheGameEnded()){
@@ -389,6 +393,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     public void setController(Controller controller){
         this.controller = controller;
+    }
+
+    public String getIsPlaying(){
+        return controller.getNameOfPlayerWhoIsCurrentlyPlaying();
     }
 
     public void quitGame(String playerNickname) throws RemoteException{

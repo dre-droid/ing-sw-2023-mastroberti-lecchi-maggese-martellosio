@@ -180,8 +180,7 @@ public class LoginSceneController {
             GameSceneController gameSceneController = loader.getController();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             gameSceneController.setClient(clientSocket);
-            new Thread(gameSceneController::updateGUIifGameHasStarted).start();     // new thread to handle displaying GameScene objects
-            new Thread(gameSceneController::refresh).start();               // new thread for handling gamescene refreshing
+            gameSceneController.runGameSceneThreads();
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -198,10 +197,11 @@ public class LoginSceneController {
             MatchTypeController matchTypeController = loader.getController();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             matchTypeController.setClient(clientSocket);
-
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         });
     }
+
+
 }
