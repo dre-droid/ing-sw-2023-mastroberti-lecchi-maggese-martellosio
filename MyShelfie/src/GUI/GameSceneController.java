@@ -79,6 +79,11 @@ public class GameSceneController {
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
 
+    @FXML
+    private Text CG1_id;
+
+    @FXML
+    private Text CG2_id;
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
@@ -244,9 +249,11 @@ public class GameSceneController {
         }
         if(n==1){
             CG1.setImage(image);
+            CG1_id.setText(cgc.getDescription());
         }
         if(n==2){
             CG2.setImage(image);
+            CG2_id.setText(cgc.getDescription());
         }
 
     }
@@ -386,5 +393,6 @@ public class GameSceneController {
             }
         }
     }
+
     //****** end socket specific ********//
 }
