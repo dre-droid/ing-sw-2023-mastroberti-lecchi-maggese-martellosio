@@ -45,7 +45,7 @@ public class ClientSocket {
     public void runServer(){
         try{
             //connect to server
-            socket= new Socket("127.0.0.1", 59010);
+            socket= new Socket("127.0.0.1",59010);
             socket.setKeepAlive(true);
 
             try{
@@ -122,10 +122,10 @@ public class ClientSocket {
         }
         if (line.startsWith("[SHELF]")) {
             System.out.println(line);
-            printShelf();
+            printShelf(getShelf());
         }
         if (line.startsWith("[TURNEND]")) {
-            printShelf();
+            printShelf(getShelf());
             System.out.println();
             System.out.println(line);
             System.out.println("******************************");
@@ -234,9 +234,18 @@ public class ClientSocket {
             i++;
         }
         System.out.println();
+
+        //print other player shelfs
+        for(Player p: leaderboard){
+            if(!p.getNickname().equals(getNickname())){
+                System.out.println(p.getNickname()+"'s Shelf");
+                printShelf(p.getShelf());
+
+            }
+        }
     }
 
-    private void printShelf(){
+    private void printShelf(Shelf shelf){
         System.out.println("*** Shelf ***");
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
