@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -101,7 +102,7 @@ public class GameSceneController {
     /**
      * Updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
      */
-    public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard){
+    public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
            updateBoard(board);
            setPersonalGoalCardImage(pgc, pgcMap);
@@ -285,7 +286,21 @@ public class GameSceneController {
         });
     }
 
-    public void boardTileClicked(Event event){
+    /**
+     * This method should be called at the end of a client's turn. It updates the board after
+     * changes made by the client.
+     */
+    //TODO this needs to be called at the end of the turn in RMI
+    public void updateGameScene(String nextPlayer, TilePlacingSpot[][] board, List<Player> leaderboard){
+        Platform.runLater(() -> {
+           updateTurnLabel(nextPlayer);
+           updateBoard(board);
+           createLeaderboard(leaderboard);
+        });
+    }
+
+
+    private void boardTileClicked(Event event){
         if(drawnTilesCounter<3){
             //System.out.println(event.getSource().toString());
             ImageView sender = (ImageView) event.getSource();
@@ -320,6 +335,12 @@ public class GameSceneController {
         }
     }
 
+    /**
+     * Changes the top label to display the new currently playing client
+     */
+    private void updateTurnLabel(String player){
+        TopLabel.setText(player + "'s turn.");
+    }
 
     private int getFirstEmptySpot(GridPane gridPane){
         for(int column =0; column<3; column++){
@@ -367,34 +388,47 @@ public class GameSceneController {
 
     //****** socket specific ********//
     /**
+     * Creates threads to run updateGUIIfGameHasStarted and socketUpdateGUI
+     */
+    public void runGameSceneThreads(){
+        socketInitializeGameScene();
+        socketUpdateGameScene();
+    }
+    /**
      * Used by socket to wait for server notification that game has started. When it has, updateGUIAtBeginningOfGame is called.
      * @throws InterruptedException
      */
-    public void updateGUIifGameHasStarted(){
-        try {
-            synchronized (clientSocket) {
-                while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
-            }
-            updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard());
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }
-    }
-
-    public void refresh(){
-        //runs for the whole duration of the game
-        while (!clientSocket.getSocket().isClosed()){
+    public void socketInitializeGameScene(){
+        new Thread(() -> {
             try {
                 synchronized (clientSocket) {
-                    while (!clientSocket.nextScene.equals("GameStart")) clientSocket.wait();
+                    while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
                 }
-                TopLabel.setText(clientSocket.turnOfPlayer);
-            }
-            catch (Exception e){
+                updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
+            }catch (InterruptedException e){
                 e.printStackTrace();
             }
-        }
+        }).start();
     }
+
+    public void socketUpdateGameScene(){
+        new Thread(() -> {
+            // runs for the whole duration of the game
+            while (!clientSocket.getSocket().isClosed()){
+                try {
+                    synchronized (clientSocket) {
+                        while (clientSocket.isPlaying.equals("")) clientSocket.wait();
+                    }
+                    updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard());
+                    clientSocket.isPlaying = "";
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
     public void setPlayerLabels(){
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
@@ -407,11 +441,9 @@ public class GameSceneController {
         }
 
     }
-}
-
 
     //****** end socket specific ********//
 }
 //TODO make application not resizable
-//TODO visualize common goal in gui
+//TODO visualize common goal tokens in gui
 //TODO update turn GUI
