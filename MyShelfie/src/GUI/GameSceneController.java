@@ -92,6 +92,12 @@ public class GameSceneController {
     private Label p2Label;
     @FXML
     private Label p3Label;
+    @FXML
+    private ImageView Opp1Shelf_ID;
+    @FXML
+    private ImageView Opp2Shelf_ID;
+    @FXML
+    private ImageView Opp3Shelf_ID;
 
 
     public void setClient(ClientNotificationRMIGUI client) {
@@ -441,10 +447,12 @@ public class GameSceneController {
     public void setPlayerLabels(){
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
+        ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
         int n = clientSocket.getLeaderboard().size();
         for(int i=0;i<n;i++){
             if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
                 labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
+                shelfs[count].setImage(new Image("boards/bookshelf.png"));
                 count++;
             }
         }

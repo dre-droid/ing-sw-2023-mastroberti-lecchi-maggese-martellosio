@@ -180,21 +180,9 @@
 
          </children>
       </GridPane>
-      <ImageView fx:id="Opp1Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />
-         </image>
-      </ImageView>
-      <ImageView fx:id="Opp2Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="193.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />
-         </image>
-      </ImageView>
-      <ImageView fx:id="Opp3Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="365.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />
-         </image>
-      </ImageView>
+      <ImageView fx:id="Opp1Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="Opp2Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="193.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="Opp3Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="365.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="CG1" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="311.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../MyShelfie/Resources/common_goal_cards/1.jpg" />
@@ -210,17 +198,17 @@
             <Image url="@../../../MyShelfie/Resources/personal_goal_cards/front_EMPTY.jpg" />
          </image>
       </ImageView>
-      <Label fx:id="p1Label" layoutX="570.0" layoutY="142.0" text="Player1" textFill="#c0c614">
+      <Label fx:id="p1Label" layoutX="570.0" layoutY="142.0" textFill="#c0c614">
          <font>
             <Font size="20.0" />
          </font>
       </Label>
-      <Label fx:id="p2Label" layoutX="570.0" layoutY="318.0" text="Player2" textFill="#c0c614">
+      <Label fx:id="p2Label" layoutX="570.0" layoutY="318.0" textFill="#c0c614">
          <font>
             <Font size="20.0" />
          </font>
       </Label>
-      <Label fx:id="p3Label" layoutX="570.0" layoutY="488.0" text="Player3" textFill="#c0c614">
+      <Label fx:id="p3Label" layoutX="570.0" layoutY="488.0" textFill="#c0c614">
          <font>
             <Font size="20.0" />
          </font>
