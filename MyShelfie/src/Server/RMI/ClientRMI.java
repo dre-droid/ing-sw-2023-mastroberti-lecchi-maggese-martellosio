@@ -2,6 +2,7 @@ package Server.RMI;
 
 import Server.ClientWithChoice;
 import main.java.it.polimi.ingsw.Model.Board;
+import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.TilePlacingSpot;
 import org.junit.jupiter.api.MethodOrderer;
@@ -459,7 +460,13 @@ public class ClientRMI implements Runnable{
         System.out.println("Here are the common goals: ");
         System.out.println(serverRMI.getCommonGoalCardDescription());
 
-
+        //Printing other players Shelfs
+        for(Player p: serverRMI.getLeaderboard()){
+            if(!p.getNickname().equals(playerNickname)){
+                System.out.println(p.getNickname()+"'s Shelf");
+                printShelf(serverRMI.getMyShelf(p.getNickname()));
+            }
+        }
     }
 
 }
