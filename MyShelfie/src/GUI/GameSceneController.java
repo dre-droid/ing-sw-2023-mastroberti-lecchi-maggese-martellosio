@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class GameSceneController extends Application {
+public class GameSceneController {
     @FXML
     public Text TopLabel;
 
@@ -79,23 +79,11 @@ public class GameSceneController extends Application {
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
 
-
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
-
-    }
-
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
-        alreadyDrawnPositions = new ArrayList<>();
-        drawnTilesCounter = 0;
     }
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
@@ -104,6 +92,85 @@ public class GameSceneController extends Application {
         return this.clientRMI;
     }
 
+
+    /**
+     * Updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
+     */
+    public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard){
+        Platform.runLater(() -> {
+           updateBoard(board);
+           setPersonalGoalCardImage(pgc, pgcMap);
+           createLeaderboard(leaderboard);
+           setCommonGoalCardImage(cgcs.get(0),1);
+           setCommonGoalCardImage(cgcs.get(1),2);
+        });
+    }
+
+    /**
+     * Handles tile selection: mouse click on a board tile causes tile selection
+     * @param grid - game board
+     */
+    public void updateBoard(TilePlacingSpot[][] grid){
+        alreadyDrawnPositions = new ArrayList<>();
+        drawnTilesCounter = 0;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+                EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent e) {
+                        boardTileClicked(e);
+                    }
+                };
+
+                Image image;
+                ImageView imv;
+                for(int i=0;i<9;i++){
+                    for(int j=0;j<9;j++){
+                        if (grid[i][j].isAvailable()) {
+                            if(!grid[i][j].isEmpty()) {
+                                imv = new ImageView();
+                                Tile t = grid[i][j].showTileInThisPosition();
+                                switch(t.getType()){
+                                    case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
+                                        //System.out.print("C ");
+                                    }break;
+                                    case BOOK:{image = new Image("item_tiles/Libri1.1.png",45,45,true,true);
+                                        //System.out.print("B ");
+                                    }break;
+                                    case GAME:{image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);
+                                        //System.out.print("G ");
+                                    }break;
+                                    case FRAME:{image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);
+                                        //System.out.print("F ");
+                                    }break;
+                                    case PLANT:{image = new Image("item_tiles/Piante1.1.png",45,45,true,true);
+                                        //System.out.print("P ");
+                                    }break;
+                                    case TROPHY:{image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);
+                                        //System.out.print("T ");
+                                    }break;
+                                    default:image = null;
+                                }
+                                imv.setImage(image);
+                                imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                                BoardGrid.add(imv,j,i);
+                                //imv.resize(imv.getFitHeight(), imv.getFitHeight());
+                            }
+                            else{
+                                //System.out.print("- ");
+                            }
+                        }else{
+                            //System.out.print("- ");
+                        }
+                    }
+                    //System.out.println();
+                }
+            }
+        });
+
+    }
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
         int id=-1;
@@ -153,63 +220,34 @@ public class GameSceneController extends Application {
         MyPGC.setImage(image);
     }
 
-    public void updateBoard(TilePlacingSpot[][] grid){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-
-                EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent e) {
-                        boardTileClicked(e);
-                    }
-                };
-
-                Image image;
-                ImageView imv;
-                for(int i=0;i<9;i++){
-                    for(int j=0;j<9;j++){
-                        if (grid[i][j].isAvailable()) {
-                            if(!grid[i][j].isEmpty()) {
-                                imv = new ImageView();
-                                Tile t = grid[i][j].showTileInThisPosition();
-                                switch(t.getType()){
-                                    case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
-                                                //System.out.print("C ");
-                                    }break;
-                                    case BOOK:{image = new Image("item_tiles/Libri1.1.png",45,45,true,true);
-                                        //System.out.print("B ");
-                                    }break;
-                                    case GAME:{image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);
-                                        //System.out.print("G ");
-                                    }break;
-                                    case FRAME:{image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);
-                                        //System.out.print("F ");
-                                    }break;
-                                    case PLANT:{image = new Image("item_tiles/Piante1.1.png",45,45,true,true);
-                                        //System.out.print("P ");
-                                    }break;
-                                    case TROPHY:{image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);
-                                        //System.out.print("T ");
-                                    }break;
-                                    default:image = null;
-                                }
-                                imv.setImage(image);
-                                imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                                BoardGrid.add(imv,j,i);
-                                //imv.resize(imv.getFitHeight(), imv.getFitHeight());
-                            }
-                            else{
-                                //System.out.print("- ");
-                            }
-                        }else{
-                            //System.out.print("- ");
-                        }
-                    }
-                    //System.out.println();
-                }
-            }
-        });
+    /**
+     * This method is used to set the image of a common goal card
+     * @param cgc the commongoal card
+     * @param n the number of the common goal card (1,2)
+     */
+    public void setCommonGoalCardImage(CommonGoalCard cgc,int n){
+        int id = cgc.getStrategyID();
+        Image image = null;
+        switch(id){
+            case 1:image = new Image("common_goal_cards/11.jpg");break;
+            case 2:image = new Image("common_goal_cards/9.jpg");break;
+            case 3:image = new Image("common_goal_cards/8.jpg");break;
+            case 4:image = new Image("common_goal_cards/3.jpg");break;
+            case 5:image = new Image("common_goal_cards/7.jpg");break;
+            case 6:image = new Image("common_goal_cards/12.jpg");break;
+            case 7:image = new Image("common_goal_cards/4.jpg");break;
+            case 8:image = new Image("common_goal_cards/1.jpg");break;
+            case 9:image = new Image("common_goal_cards/5.jpg");break;
+            case 10:image = new Image("common_goal_cards/2.jpg");break;
+            case 11:image = new Image("common_goal_cards/6.jpg");break;
+            case 12:image = new Image("common_goal_cards/10.jpg");break;
+        }
+        if(n==1){
+            CG1.setImage(image);
+        }
+        if(n==2){
+            CG2.setImage(image);
+        }
 
     }
 
@@ -237,24 +275,6 @@ public class GameSceneController extends Application {
             }
         });
     }
-
-    private void removeTileFromDrawnTiles(Event event){
-        System.out.println("remove tile is called ");
-        ImageView imv = (ImageView) event.getSource();
-        StackPane stackPane = (StackPane) imv.getParent();
-        if(TileToBeInserted.getChildren().remove(stackPane)){
-            drawnTilesCounter--;
-            Position p = (Position) stackPane.getUserData();
-            alreadyDrawnPositions.remove(
-                    alreadyDrawnPositions.stream().filter(
-                            position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                    ).toList().get(0)
-            );
-
-        }
-
-    }
-
 
     public void boardTileClicked(Event event){
         if(drawnTilesCounter<3){
@@ -291,12 +311,30 @@ public class GameSceneController extends Application {
         }
     }
 
+
     private int getFirstEmptySpot(GridPane gridPane){
         for(int column =0; column<3; column++){
             if(getNodeAt(0,column,gridPane)==null)
                 return column;
         }
         return -1;
+    }
+
+    private void removeTileFromDrawnTiles(Event event){
+        System.out.println("remove tile is called ");
+        ImageView imv = (ImageView) event.getSource();
+        StackPane stackPane = (StackPane) imv.getParent();
+        if(TileToBeInserted.getChildren().remove(stackPane)){
+            drawnTilesCounter--;
+            Position p = (Position) stackPane.getUserData();
+            alreadyDrawnPositions.remove(
+                    alreadyDrawnPositions.stream().filter(
+                            position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                    ).toList().get(0)
+            );
+
+        }
+
     }
 
     private Node getNodeAt(int row, int column, GridPane gridPane){
@@ -311,53 +349,24 @@ public class GameSceneController extends Application {
         return result;
     }
 
-    /**
-     * This method is used to set the image of a common goal card
-     * @param cgc the commongoal card
-     * @param n the number of the common goal card (1,2)
-     */
-    public void setCommonGoalCardImage(CommonGoalCard cgc,int n){
-        int id = cgc.getStrategyID();
-        Image image = null;
-        switch(id){
-            case 1:image = new Image("common_goal_cards/11.jpg");break;
-            case 2:image = new Image("common_goal_cards/9.jpg");break;
-            case 3:image = new Image("common_goal_cards/8.jpg");break;
-            case 4:image = new Image("common_goal_cards/3.jpg");break;
-            case 5:image = new Image("common_goal_cards/7.jpg");break;
-            case 6:image = new Image("common_goal_cards/12.jpg");break;
-            case 7:image = new Image("common_goal_cards/4.jpg");break;
-            case 8:image = new Image("common_goal_cards/1.jpg");break;
-            case 9:image = new Image("common_goal_cards/5.jpg");break;
-            case 10:image = new Image("common_goal_cards/2.jpg");break;
-            case 11:image = new Image("common_goal_cards/6.jpg");break;
-            case 12:image = new Image("common_goal_cards/10.jpg");break;
-        }
-        if(n==1){
-            CG1.setImage(image);
-        }
-        if(n==2){
-            CG2.setImage(image);
-        }
-
+    private int transformIntegerToInt(Integer i){
+        if(i==null)
+            return 0;
+        else
+            return i;
     }
 
+    //****** socket specific ********//
     /**
-     * Fills GUI with game objects once game has started.
+     * Used by socket to wait for server notification that game has started. When it has, updateGUIAtBeginningOfGame is called.
      * @throws InterruptedException
      */
-    public void fillGameScene(){
+    public void updateGUIifGameHasStarted(){
         try {
             synchronized (clientSocket) {
                 while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
             }
-            Platform.runLater(() -> {
-                setPersonalGoalCardImage(clientSocket.getPersonalGoalCard(), clientSocket.getPgcMap());
-                updateBoard(clientSocket.getBoard().getBoardForDisplay());
-                createLeaderboard(clientSocket.getLeaderboard());
-                setCommonGoalCardImage(clientSocket.getCommonGoalCard().get(0), 1);
-                setCommonGoalCardImage(clientSocket.getCommonGoalCard().get(1), 2);
-            });
+            updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard());
         }catch (InterruptedException e){
             e.printStackTrace();
         }
@@ -377,13 +386,5 @@ public class GameSceneController extends Application {
             }
         }
     }
-
-    private int transformIntegerToInt(Integer i){
-        if(i==null)
-            return 0;
-        else
-            return i;
-    }
-
-
+    //****** end socket specific ********//
 }

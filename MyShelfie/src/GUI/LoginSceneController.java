@@ -48,6 +48,14 @@ public class LoginSceneController {
     private ClientNotificationRMIGUI clientRMI;
     private boolean alive = false;
 
+    public void setClient(ClientSocket client){
+        this.clientSocket = client;
+        client.runServer();
+    }
+    public void setClient(ClientNotificationRMIGUI client){
+        this.clientRMI = client;
+    }
+
     /**
      * Method is called when button is pressed in ConnectionType scene
      */
@@ -132,54 +140,24 @@ public class LoginSceneController {
         try {
             alive = true;
             clientSocket.clientSpeaker(usernameText.getText());
-            //wait for server response being handled by clientSocket
+            // wait for server response being handled by clientSocket
             synchronized (clientSocket) {
-                //System.out.println("client socket nextscene: " + clientSocket.nextScene);
                 while (clientSocket.nextScene.equals("")) clientSocket.wait();
             }
+
             if (clientSocket.nextScene.equals("MatchType")) {
                 //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
-                Platform.runLater(() -> {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("MatchType.fxml"));
-                    try {
-                        root = loader.load();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    MatchTypeController matchTypeController = loader.getController();
-                    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    matchTypeController.setClient(clientSocket);
-
-                    scene = new Scene(root);
-                    stage.setScene(scene);
-                    stage.show();
-                });
-
+                switchToMatchTypeScene(event);
             }
             if (clientSocket.nextScene.equals("GameScene")) {
                 //change scene to GameScene
-                Platform.runLater(() -> {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
-                    try {
-                        root = loader.load();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    GameSceneController gameSceneController = loader.getController();
-                    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    gameSceneController.setClient(clientSocket);
-                    new Thread(gameSceneController::fillGameScene).start();     // new thread to handle displaying GameScene objects
-                    new Thread(gameSceneController::refresh).start();               // new thread for handling gamescene refreshing
+                switchToGameScene(event);
 
-                    scene = new Scene(root);
-                    stage.setScene(scene);
-                    stage.show();
-                });
-            }
-            if (clientSocket.nextScene.equals("Unchanged")){
+            if (clientSocket.nextScene.equals("Unchanged")) {
                 Platform.runLater(() -> {
                     messageTextArea.setText("Invalid nickname. Try again!");
                 });
+            }
             }
         }catch(InterruptedException | RuntimeException e){
             e.printStackTrace();
@@ -191,14 +169,39 @@ public class LoginSceneController {
         }
     }
 
-    public void setClient(ClientSocket client){
-        this.clientSocket = client;
-        client.runServer();
+    private void switchToGameScene(ActionEvent event){
+        Platform.runLater(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            GameSceneController gameSceneController = loader.getController();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            gameSceneController.setClient(clientSocket);
+            new Thread(gameSceneController::updateGUIifGameHasStarted).start();     // new thread to handle displaying GameScene objects
+            new Thread(gameSceneController::refresh).start();               // new thread for handling gamescene refreshing
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        });
     }
+    private void switchToMatchTypeScene(ActionEvent event){
+        Platform.runLater(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("MatchType.fxml"));
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            MatchTypeController matchTypeController = loader.getController();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            matchTypeController.setClient(clientSocket);
 
-    public void setClient(ClientNotificationRMIGUI client){
-        this.clientRMI = client;
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        });
     }
-
-
 }

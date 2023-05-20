@@ -310,7 +310,7 @@ public class ClientSocket {
     public PersonalGoalCard getPersonalGoalCard() {
         return personalGoalCard;
     }
-    public List<CommonGoalCard> getCommonGoalCard() {
+    public List<CommonGoalCard> getCommonGoalCards() {
         return commonGoalCard;
     }
     public List<Player> getLeaderboard() {
