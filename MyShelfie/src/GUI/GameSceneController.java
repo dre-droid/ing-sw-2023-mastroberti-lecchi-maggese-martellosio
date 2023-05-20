@@ -6,15 +6,13 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -30,6 +28,7 @@ import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class GameSceneController {
     @FXML
@@ -98,7 +97,12 @@ public class GameSceneController {
     private ImageView Opp2Shelf_ID;
     @FXML
     private ImageView Opp3Shelf_ID;
-
+    @FXML
+    private Button chatButton;
+    @FXML
+    private TextArea messageTextArea2;
+    @FXML
+    private TextField chatTextField;
 
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
@@ -457,6 +461,45 @@ public class GameSceneController {
             }
         }
 
+    }
+
+    public void messageTextArea() {
+        String message;
+        messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
+        messageTextArea2.appendText("\n");
+        try {
+            synchronized (clientSocket) {
+                while (true) {
+                    message = clientSocket.chatMessage;
+                    if(!Objects.equals(message, "") && !Objects.equals(message, null)) {
+                        String finalMessage = message;
+                        Platform.runLater(() -> {
+                            messageTextArea2.appendText(finalMessage);
+                            messageTextArea2.appendText("\n");
+                        });
+                    }
+                    clientSocket.wait();
+                }
+            }
+        }catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
+    public void chatButtonPressed(ActionEvent e){
+        String message=chatTextField.getText();
+        if(!Objects.equals(message, "")) {
+            clientSocket.clientSpeaker("/chat " + message);
+            chatTextField.clear();
+
+            String finalMessage = message;
+            Platform.runLater(() -> {
+                messageTextArea2.appendText("YOU: " + finalMessage);
+                messageTextArea2.appendText("\n");
+            });
+        }
     }
 
     //****** end socket specific ********//

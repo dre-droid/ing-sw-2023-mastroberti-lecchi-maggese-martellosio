@@ -76,6 +76,7 @@ public class MatchTypeController {
                 GameSceneController gameSceneController = loader.getController();
                 gameSceneController.setClient(clientSocket);
                 gameSceneController.runGameSceneThreads();
+                new Thread(gameSceneController::messageTextArea).start();
 
                 scene = new Scene(root);
                 stage.setScene(scene);

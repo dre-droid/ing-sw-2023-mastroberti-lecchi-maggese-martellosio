@@ -181,6 +181,8 @@ public class LoginSceneController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             gameSceneController.setClient(clientSocket);
             gameSceneController.runGameSceneThreads();
+            new Thread(gameSceneController::messageTextArea).start();
+
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();

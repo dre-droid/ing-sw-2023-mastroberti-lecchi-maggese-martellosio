@@ -40,6 +40,7 @@ public class ClientSocket {
     public String messageFromServer = "";
     public final Object object = new Object();
     public String nextScene = "";
+    public String chatMessage = "";
     public String turnOfPlayer = "";
 
     //used by ClientWithChoice
@@ -93,8 +94,8 @@ public class ClientSocket {
                         deserializeObjects(line);
                         handleServerRequest(line);
                     }
-                    }
                 }
+            }
             catch (SocketException e) {
                 System.out.println("Socket closed.");
             }
@@ -149,6 +150,14 @@ public class ClientSocket {
             nextScene = "GameScene";
             notify();
         }
+        else if (line.startsWith("[MESSAGE_FROM")){
+            chatMessage = line;
+            notify();
+        }
+        //if(line.contains("Invalid input") && !line.startsWith("[MESSAGE_FROM")){
+        //    chatMessage = line;
+        //    notify();
+        //}
         if (line.startsWith("[INFO]: Game is starting.")){
             nextScene = "GameStart";
             turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
