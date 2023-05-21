@@ -53,6 +53,9 @@ public class Controller {
             }*/
             game = new Game(numOfPlayers);
             game.addPlayer(nickname);
+            synchronized (this){
+                notifyAll();
+            }
             System.out.println("Created new game by "+nickname);
             return true;
         }
