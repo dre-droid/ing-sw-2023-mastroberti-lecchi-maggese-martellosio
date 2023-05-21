@@ -49,6 +49,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     public void startingTheGame(String startingPlayer) throws RemoteException {
         System.out.println("The game has started, "+startingPlayer+" will be the first to play!!");
         clientRMI.setGameStartFlag(true);
+        synchronized (this){
+            notify();
+        }
     }
 
     @Override

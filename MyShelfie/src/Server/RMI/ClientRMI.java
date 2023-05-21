@@ -231,6 +231,11 @@ public class ClientRMI implements Runnable{
             }
 
             //wait for the game to start
+            synchronized (notifications){
+                while(!GameStartFlag)
+                    notifications.wait();
+            }
+            /* Trying to limit the use of thread sleep
             while(!GameStartFlag){
                 try{
                     Thread.sleep(500);
@@ -238,6 +243,8 @@ public class ClientRMI implements Runnable{
                     e.printStackTrace();
                 }
             }
+
+             */
             //the game starts!
             System.out.println("the game actually started");
             //we continue to play until the game is over
