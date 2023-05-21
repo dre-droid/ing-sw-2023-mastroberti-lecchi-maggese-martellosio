@@ -1,5 +1,7 @@
 package GUI;
 
+import GUI.PositionStuff.Position;
+import GUI.PositionStuff.PositionRowComparator;
 import Server.Socket.ClientSocket;
 import com.google.gson.reflect.TypeToken;
 import javafx.application.Application;
@@ -36,31 +38,15 @@ import javafx.scene.input.MouseEvent;
 import java.util.*;
 
 public class GameSceneController {
-    class Position{
+    @FXML
+    public Text TopLabel;
 
-        private int x;
-        private int y;
-        public Position(int x,int y){
-            this.x = x;
-            this.y = y;
-        }
-        public int getX(){
-            return x;
-        }
-
-        public int getY(){
-            return y;
-        }
-
-
-    }
     private int drawnTilesCounter;
+
     private List<Position> alreadyDrawnPositions;
     private boolean leaderboardCheck = false;
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
-    @FXML
-    public Text TopLabel;
     @FXML
     private TableView TableLeaderboard;
 
@@ -125,6 +111,7 @@ public class GameSceneController {
     public ClientNotificationRMIGUI getClientRMI(){
         return this.clientRMI;
     }
+
 
     /**
      * Updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
@@ -339,15 +326,15 @@ public class GameSceneController {
 
 
 
-    private void boardTileClicked(Event event){
-        if(drawnTilesCounter<3){
+    private void boardTileClicked(Event event) {
+        if (drawnTilesCounter < 3) {
             //System.out.println(event.getSource().toString());
             Rectangle sender = (Rectangle) event.getSource();
             int row = transformIntegerToInt(GridPane.getRowIndex(sender));
             int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
             //System.out.println("("+row+","+column+")");
-            if(checkIfTileCanBeDrawn(new Position(row,column))){
-                if(alreadyDrawnPositions.stream().noneMatch(position -> (position.getX()==row && position.getY()==column))){
+            if (checkIfTileCanBeDrawn(new Position(row, column))) {
+                if (alreadyDrawnPositions.stream().noneMatch(position -> (position.getX() == row && position.getY() == column))) {
                     sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
                     sender.setUserData(1);
                     alreadyDrawnPositions.add(new Position(row, column));
@@ -359,23 +346,20 @@ public class GameSceneController {
                     stackPane.getChildren().add(redx);
                     stackPane.setAlignment(redx, Pos.TOP_RIGHT);
 
-                    TileToBeInserted.add(stackPane,getFirstEmptySpot(TileToBeInserted) ,0);
+                    TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);
                     stackPane.setUserData(new Position(row, column));
                     drawnTilesCounter++;
-                    if(drawnTilesCounter==1){
+                    if (drawnTilesCounter == 1) {
                         ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
                         Button checkmarkButton = new Button();
                         checkmarkButton.setGraphic(checkImg);
                         checkmarkButton.setOnAction(this::handleCheckmarkButton);
-                        TileToBeInserted.add(checkmarkButton,3,0);
+                        TileToBeInserted.add(checkmarkButton, 3, 0);
                     }
                 }
             }
-
-
         }
     }
-
     //TODO RMIHandleCheckmarkButton()
 
     /**
@@ -400,6 +384,35 @@ public class GameSceneController {
 
     private void handleShelfButton(){
 
+    }
+
+    /**
+     * this method is used to send the tile to draw to the server, is called when the green check button is pressed
+     */
+    public void drawTilesFromServer(){
+        //first we get all the parameters we need from the gui
+        int x, y, amount, direction;
+        //we now have to check if the tiles are all on the same column or on the same row
+        boolean onSameRow = true;
+        x = alreadyDrawnPositions.get(0).getX();
+        for(Position p: alreadyDrawnPositions){
+            if(p.getX()!=x){
+                onSameRow = false;
+            }
+        }//if onSameRow is true that means that the tiles are on the same row, if it is false then they are on the same column
+        //we sort the list of position now
+        if(onSameRow){
+            Collections.sort(alreadyDrawnPositions, new PositionRowComparator());
+            for(int i=0;i<alreadyDrawnPositions.size();i++){
+                System.out.println("("+alreadyDrawnPositions.get(i).getX()+","+alreadyDrawnPositions.get(i).getY()+")");
+            }
+        }
+
+
+        //rmi
+
+
+        //socket still to be implemented
     }
 
     private boolean checkIfTileCanBeDrawn(Position p){
@@ -497,7 +510,7 @@ public class GameSceneController {
         try{
             ImageView sender = (ImageView) event.getSource();
             StackPane stackPane = (StackPane) sender.getParent();
-            //System.out.println("tile counter: "+drawnTilesCounter);
+            System.out.println("tile counter: "+drawnTilesCounter);
             if(drawnTilesCounter==3){
                 //if the tile that is being removed has two tiles selecte around it cannot be removed
                 Position maybeMiddle = (Position) stackPane.getUserData();
@@ -506,6 +519,9 @@ public class GameSceneController {
                     if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
                         otherPositions.add(p);
                     }
+                }
+                for(Position p: otherPositions){
+                    System.out.println("("+p.getX()+","+p.getY()+")");
                 }
                 boolean allWithSameXs= true;
                 int x=-1;
@@ -757,6 +773,8 @@ public class GameSceneController {
             throw new RuntimeException(e);
         }
     }
+
+
 
     public void chatButtonPressed(ActionEvent e){
         String message=chatTextField.getText();
