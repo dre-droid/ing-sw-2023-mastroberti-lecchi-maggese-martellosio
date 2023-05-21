@@ -29,13 +29,13 @@ public class ClientSocket {
     private Board board = null;
     private Shelf shelf = null;
     private PersonalGoalCard personalGoalCard = null;
-    private List<CommonGoalCard> commonGoalCard = null;
+    private List<CommonGoalCard> commonGoalCards = null;
     private List<Player> leaderboard = null;
     private String nickname = null;
     private Socket socket = null;
-    Map<Integer, PersonalGoalCard> pgcMap = null;
-    private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
+    private Map<Integer, PersonalGoalCard> pgcMap = null;
 
+    public final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public String isPlaying = "";
     public String messageFromServer = "";
     public final Object object = new Object();
@@ -192,7 +192,7 @@ public class ClientSocket {
         if (line.startsWith("[GSONCGC]")) {
             line = line.replace("[GSONCGC]", "");
             TypeToken<List<CommonGoalCard>> typeToken = new TypeToken<>() {};
-            commonGoalCard = gson.fromJson(line, typeToken.getType());
+            commonGoalCards = gson.fromJson(line, typeToken.getType());
         }
         if (line.startsWith("[NICKNAME]")) {
             nickname = line.replace("[NICKNAME]", "");
@@ -218,7 +218,7 @@ public class ClientSocket {
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
-        Scanner scannercg = new Scanner(commonGoalCard.get(0).getDescription() + "\n" + commonGoalCard.get(1).getDescription());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() + "\n" + commonGoalCards.get(1).getDescription());
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {
@@ -300,9 +300,10 @@ public class ClientSocket {
      */
     public void clientSpeaker(String message){
             try{
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                synchronized (this){     //writing to output is synchronized with other writing methods
+                PrintWriter output = new PrintWriter(socket.getOutputStream(), false);
+                synchronized (this){     // writing to output is synchronized with other writing methods
                     output.println(message);
+                    output.flush();
                 }
             }catch (Exception e){
                 throw new RuntimeException(e);
@@ -334,7 +335,7 @@ public class ClientSocket {
         return personalGoalCard;
     }
     public List<CommonGoalCard> getCommonGoalCards() {
-        return commonGoalCard;
+        return commonGoalCards;
     }
     public List<Player> getLeaderboard() {
         return leaderboard;

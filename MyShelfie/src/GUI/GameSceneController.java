@@ -1,6 +1,7 @@
 package GUI;
 
 import Server.Socket.ClientSocket;
+import com.google.gson.reflect.TypeToken;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -35,29 +36,31 @@ import javafx.scene.input.MouseEvent;
 import java.util.*;
 
 public class GameSceneController {
-    @FXML
-    public Text TopLabel;
-
-    private int drawnTilesCounter;
-
-    private List<Position> alreadyDrawnPositions;
     class Position{
+
         private int x;
         private int y;
-         public Position(int x,int y){
-             this.x = x;
-             this.y = y;
-         }
-
-         public int getX(){
-             return x;
-         }
+        public Position(int x,int y){
+            this.x = x;
+            this.y = y;
+        }
+        public int getX(){
+            return x;
+        }
 
         public int getY(){
             return y;
         }
+
+
     }
+    private int drawnTilesCounter;
+    private List<Position> alreadyDrawnPositions;
     private boolean leaderboardCheck = false;
+    private ClientNotificationRMIGUI clientRMI;
+    private ClientSocket clientSocket;
+    @FXML
+    public Text TopLabel;
     @FXML
     private TableView TableLeaderboard;
 
@@ -80,8 +83,6 @@ public class GameSceneController {
 
     @FXML
     private ImageView CG2;
-    private ClientNotificationRMIGUI clientRMI;
-    private ClientSocket clientSocket;
 
     @FXML
     private Text CG1_id;
@@ -107,6 +108,9 @@ public class GameSceneController {
     private TextArea messageTextArea2;
     @FXML
     private TextField chatTextField;
+    @FXML
+    public GridPane shelfButtonsPane;
+
 
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
@@ -117,10 +121,10 @@ public class GameSceneController {
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
     }
+
     public ClientNotificationRMIGUI getClientRMI(){
         return this.clientRMI;
     }
-
 
     /**
      * Updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
@@ -333,6 +337,8 @@ public class GameSceneController {
     }
 
 
+
+
     private void boardTileClicked(Event event){
         if(drawnTilesCounter<3){
             //System.out.println(event.getSource().toString());
@@ -358,15 +364,42 @@ public class GameSceneController {
                     drawnTilesCounter++;
                     if(drawnTilesCounter==1){
                         ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
-                        Button button = new Button();
-                        button.setGraphic(checkImg);
-                        TileToBeInserted.add(button,3,0);
+                        Button checkmarkButton = new Button();
+                        checkmarkButton.setGraphic(checkImg);
+                        checkmarkButton.setOnAction(this::handleCheckmarkButton);
+                        TileToBeInserted.add(checkmarkButton,3,0);
                     }
                 }
             }
 
 
         }
+    }
+
+    //TODO RMIHandleCheckmarkButton()
+
+    /**
+     * Sends the server a request to draw the selected tiles from the board.
+     */
+    private void handleCheckmarkButton(ActionEvent event) {
+        if (alreadyDrawnPositions.size() > 0) {
+            if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton();
+            else {
+            }
+
+
+            for (int i = 0; i < 5; i++) {
+                Button shelfButton = new Button();
+                shelfButton.setOnAction(this::handleCheckmarkButton);
+                ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
+                img.setImage(new Image("misc/sort-down.png"));
+            }
+            handleShelfButton();
+        }
+    }
+
+    private void handleShelfButton(){
+
     }
 
     private boolean checkIfTileCanBeDrawn(Position p){
@@ -464,7 +497,7 @@ public class GameSceneController {
         try{
             ImageView sender = (ImageView) event.getSource();
             StackPane stackPane = (StackPane) sender.getParent();
-            System.out.println("tile counter: "+drawnTilesCounter);
+            //System.out.println("tile counter: "+drawnTilesCounter);
             if(drawnTilesCounter==3){
                 //if the tile that is being removed has two tiles selecte around it cannot be removed
                 Position maybeMiddle = (Position) stackPane.getUserData();
@@ -473,9 +506,6 @@ public class GameSceneController {
                     if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
                         otherPositions.add(p);
                     }
-                }
-                for(Position p: otherPositions){
-                    System.out.println("("+p.getX()+","+p.getY()+")");
                 }
                 boolean allWithSameXs= true;
                 int x=-1;
@@ -488,14 +518,14 @@ public class GameSceneController {
                     }
                 }
                 if(allWithSameXs){
-                    System.out.println("x uguali");
+                    //System.out.println("x uguali");
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
                         return;
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
                         return;
                 }
                 else{
-                    System.out.println("Y uguali");
+                    //System.out.println("Y uguali");
                     if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
                         return;
                     if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
@@ -728,8 +758,6 @@ public class GameSceneController {
         }
     }
 
-
-
     public void chatButtonPressed(ActionEvent e){
         String message=chatTextField.getText();
         if(!Objects.equals(message, "")) {
@@ -742,6 +770,33 @@ public class GameSceneController {
                 messageTextArea2.appendText("\n");
             });
         }
+    }
+
+    /**
+     * Sends socket server a request to draw the selected tiles. It mimics input from CLI.
+     */
+    private void socketHandleCheckmarkButton(){
+        boolean horizontal = true;
+        Position min;
+        int size = alreadyDrawnPositions.size();
+
+        // check if drawn tiles are horizontal or vertical
+        for (int i = 0; i < alreadyDrawnPositions.size(); i++){
+            if (alreadyDrawnPositions.get(i).getX() != alreadyDrawnPositions.get(0).getX()) horizontal = false;
+        }
+
+        // find leftmost/topmost tile in alreadyDrawnPositions array, send socket its position
+        min = alreadyDrawnPositions.get(0);
+        if (horizontal){
+            for (Position p : alreadyDrawnPositions)
+                if (p.getX() < min.getX()) min = p;
+        } else {
+            for (Position p : alreadyDrawnPositions)
+                if (p.getY() < min.getY()) min = p;
+        }
+        clientSocket.clientSpeaker(Integer.toString(min.getX()));
+        clientSocket.clientSpeaker(Integer.toString(min.getY()));
+        clientSocket.clientSpeaker(Integer.toString(size));
     }
 
     //****** end socket specific ********//

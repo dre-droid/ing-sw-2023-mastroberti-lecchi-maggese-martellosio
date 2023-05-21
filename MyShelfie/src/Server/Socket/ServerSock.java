@@ -9,6 +9,7 @@ import com.google.gson.InstanceCreator;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.StrategyCommonGoal;
+import org.testng.internal.protocols.Input;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -23,7 +24,7 @@ public class ServerSock {
     private final Server server;
     private final long DISCONNECTION_TIME = 30000;  //disconnection threshold: 30s
     private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
-    public String string = "";  //used to communicate with playing player
+    public List<String> messageBuffer = new ArrayList<>();
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -179,8 +180,8 @@ public class ServerSock {
     }
 
     /**
-     * Creates a thread to listen to the clients' messages. If client's turn, writes client's messages to global variable string. If message starts with
-     * '/chat ' processes message for chat, otherwise output is ignored.
+     * Creates a thread to listen and process clients' messages. All received strings are either processed or appended to a List<String> messageBuffer. In
+     * the latter case notify() is called to wake up drawInquiry waiting on input from client.
      */
     public void clientListener(Socket client, String nickname){
         Thread clientListener = new Thread(() -> {
@@ -189,65 +190,65 @@ public class ServerSock {
                 InputStream input = client.getInputStream();
                 while (true) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    line = reader.readLine();
-                    //if readLine() returns null, the client has disconnected
-                    if (Objects.isNull(line)) {
-                        controller.endGame();
-                        notifyGameEnd(nickname);
-                    }
-                    synchronized (this) {
-                        //acknowledges client is still alive
-                        if (line.equals("[PING]")) {
-                            for (socketNickStruct s : clients)
-                                if (s.getName().equals(nickname)){
-                                    s.setLastPing(System.currentTimeMillis());
-                                    System.out.println(nickname + " pinged");
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println("LINE READ: " + line);
+                        // if readLine() returns null, the client has disconnected
+                        if (Objects.isNull(line)) {
+                            controller.endGame();
+                            notifyGameEnd(nickname);
+                        }
+                        synchronized (this) {
+                            // processes PING message
+                            if (line.equals("[PING]")) {
+                                for (socketNickStruct s : clients)
+                                    if (s.getName().equals(nickname)) {
+                                        s.setLastPing(System.currentTimeMillis());
+                                        //System.out.println(nickname + " pinged");
+                                    }
+                                // processes user's input
+                            } else if (controller.hasGameStarted())
+                                if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
+                                    messageBuffer.add(line);
+                                    notify();
+                                }
+                                // processes chat message
+                                else if (line.startsWith("/chat ")) {
+                                    String text = "", receiver = "";
+
+                                    int atIndex;
+
+                                    if (line.startsWith("/chat @")) {
+                                        atIndex = line.indexOf('@');
+                                        receiver = line.substring(atIndex + 1);
+                                        atIndex = receiver.indexOf(' ');
+                                        text = receiver.substring(atIndex + 1);
+                                        receiver = receiver.substring(0, atIndex);
+                                        if (!Objects.equals(receiver, nickname))
+                                            sendChatMessageToClient(nickname, text, receiver, true);
+                                    } else {
+                                        receiver = "all";
+                                        atIndex = line.indexOf(' ');
+                                        text = line.substring(atIndex + 1);
+                                        sendChatMessageToClient(nickname, text, receiver, false);
+                                    }
+                                }
+                                // processes /quit
+                                else if (line.equals("/quit")) {
+                                    PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
+                                    pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
+                                    line = reader.readLine();
+                                    if (line.equals("y")) {
+                                        if (!controller.hasGameStarted()) {
+                                            controller.removePlayer(nickname);
+                                            pw.println("[GAMEEND]: You quit.");
+                                        } else {
+                                            controller.endGame();
+                                            notifyGameEnd(nickname);
+                                        }
+                                        break;  //closes listener on confirmed quit
+                                    }
                                 }
                         }
-                        else if (controller.hasGameStarted())
-                            if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
-                                string = line;
-                                notify();
-                            }
-
-                        else if (line.startsWith("/chat ")) {
-                            String text = "", receiver = "";
-
-                            int atIndex;
-
-                            if (line.startsWith("/chat @")) {
-                                atIndex = line.indexOf('@');
-                                receiver = line.substring(atIndex + 1);
-                                atIndex = receiver.indexOf(' ');
-                                text = receiver.substring(atIndex + 1);
-                                receiver = receiver.substring(0, atIndex);
-                                if(!Objects.equals(receiver, nickname))
-                                    sendChatMessageToClient(nickname, text, receiver, true);
-                            } else {
-                                receiver = "all";
-                                atIndex = line.indexOf(' ');
-                                text = line.substring(atIndex + 1);
-                                sendChatMessageToClient(nickname, text, receiver, false);
-                            }
-
-                        }
-
-                        else if (line.equals("/quit")) {
-                            PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
-                            pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
-                            line = reader.readLine();
-                            if (line.equals("y")) {
-                                if (!controller.hasGameStarted()) {
-                                    controller.removePlayer(nickname);
-                                    pw.println("[GAMEEND]: You quit.");
-                                } else {
-                                    controller.endGame();
-                                    notifyGameEnd(nickname);
-                                }
-                                break;  //closes listener on confirmed quit
-                            }
-                        }
-
                     }
                 }
             } catch (SocketException e){
@@ -324,12 +325,12 @@ public class ServerSock {
                     else
                         out.println("[YOUR TURN] Select the row from which to draw from:");
                     //waits for input
-                    synchronized (this) {
-                        while (string.equals(""))
+                    while(messageBuffer.isEmpty())
+                        synchronized (this) {
                             wait();
-                    }
-                    line = string;
-                    string = "";
+                        }
+
+                    line = messageBuffer.remove(0);
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setX(Integer.parseInt(line));
@@ -342,12 +343,11 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Select the column from which to draw from:");
                     //waits for input
-                    synchronized (this) {
-                        while (string.equals(""))
+                    while(messageBuffer.isEmpty())
+                        synchronized (this) {
                             wait();
-                    }
-                    line = string;
-                    string = "";
+                        }
+                    line = messageBuffer.remove(0);
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
                 drawInfo.setY(Integer.parseInt(line));
@@ -360,12 +360,11 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] How many tiles do you want to draw?");
                     //waits for input
-                    synchronized (this) {
-                        while (string.equals(""))
+                    while(messageBuffer.isEmpty())
+                        synchronized (this) {
                             wait();
-                    }
-                    line = string;
-                    string = "";
+                        }
+                    line = messageBuffer.remove(0);
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
                 drawInfo.setAmount(Integer.parseInt(line));
@@ -379,12 +378,11 @@ public class ServerSock {
                         else
                             out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                         //waits for input
-                        synchronized (this) {
-                            while (string.equals(""))
+                        while(messageBuffer.isEmpty())
+                            synchronized (this) {
                                 wait();
-                        }
-                        line = string;
-                        string = "";
+                            }
+                        line = messageBuffer.remove(0);
                         imbecille = true;
                     } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 0);
                     drawInfo.setDirection(Board.Direction.values()[Integer.parseInt(line)]);
@@ -429,12 +427,11 @@ public class ServerSock {
                 }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                synchronized (this) {
-                    while (string.equals(""))
+                while(messageBuffer.isEmpty())
+                    synchronized (this) {
                         wait();
-                }
-                line = string;
-                string = "";
+                    }
+                line = messageBuffer.remove(0);
                 if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
             } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
@@ -452,12 +449,11 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert first: [e.g. 1)C 2)G 3)T -> type 1 to insert C]");
-                            synchronized (this) {
-                                while (string.equals(""))
+                            while(messageBuffer.isEmpty())
+                                synchronized (this) {
                                     wait();
-                            }
-                            line = string;
-                            string = "";
+                                }
+                            line = messageBuffer.remove(0);
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1);
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
@@ -469,12 +465,11 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            synchronized (this) {
-                                while (string.equals(""))
+                            while(messageBuffer.isEmpty())
+                                synchronized (this) {
                                     wait();
-                            }
-                            line = string;
-                            string = "";
+                                }
+                            line = messageBuffer.remove(0);
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
@@ -486,12 +481,11 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            synchronized (this) {
-                                while (string.equals(""))
+                            while(messageBuffer.isEmpty())
+                                synchronized (this) {
                                     wait();
-                            }
-                            line = string;
-                            string = "";
+                                }
+                            line = messageBuffer.remove(0);
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line)-1));
