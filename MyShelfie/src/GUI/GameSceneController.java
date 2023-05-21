@@ -3,21 +3,28 @@ package GUI;
 import Server.Socket.ClientSocket;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
@@ -25,10 +32,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import javafx.scene.input.MouseEvent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class GameSceneController {
     @FXML
@@ -106,7 +110,7 @@ public class GameSceneController {
 
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
-        System.out.println(this.toString());
+        //System.out.println(this.toString());
         //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
     }
@@ -147,17 +151,20 @@ public class GameSceneController {
                 EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent e) {
-                        boardTileClicked(e);
+                        Rectangle sender = (Rectangle) e.getSource();
+                        if((Integer)sender.getUserData()==1){
+                            removeTileFromDrawnTiles(e);
+                        }else {
+                            boardTileClicked(e);
+                        }
                     }
                 };
 
                 Image image;
-                ImageView imv;
                 for(int i=0;i<9;i++){
                     for(int j=0;j<9;j++){
                         if (grid[i][j].isAvailable()) {
                             if(!grid[i][j].isEmpty()) {
-                                imv = new ImageView();
                                 Tile t = grid[i][j].showTileInThisPosition();
                                 switch(t.getType()){
                                     case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
@@ -180,9 +187,16 @@ public class GameSceneController {
                                     }break;
                                     default:image = null;
                                 }
-                                imv.setImage(image);
-                                imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                                BoardGrid.add(imv,j,i);
+                                ImagePattern imp = new ImagePattern(image);
+                                Rectangle rect = new Rectangle();
+                                rect.setUserData(0);
+                                rect.setFill(imp);
+                                rect.setHeight(42);
+                                rect.setWidth(42);
+                                //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
+                                rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                                //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                                BoardGrid.add(rect,j,i);
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
                             else{
@@ -223,7 +237,7 @@ public class GameSceneController {
             }
             if(flag){
                 id= pgcKey.getKey();
-                System.out.println("---"+id);
+                //System.out.println("---"+id);
             }
             flag = true;
 
@@ -242,7 +256,7 @@ public class GameSceneController {
             case 10:image = new Image("personal_goal_cards/Personal_Goals10.png") ;break;
             case 11:image = new Image("personal_goal_cards/Personal_Goals11.png") ;break;
             case 12:image = new Image("personal_goal_cards/Personal_Goals12.png") ;break;
-            default:System.out.println("MANNAGGIAAA");
+            default://.out.println("MANNAGGIAAA");
         }
         MyPGC.setImage(image);
     }
@@ -322,36 +336,110 @@ public class GameSceneController {
     private void boardTileClicked(Event event){
         if(drawnTilesCounter<3){
             //System.out.println(event.getSource().toString());
-            ImageView sender = (ImageView) event.getSource();
+            Rectangle sender = (Rectangle) event.getSource();
             int row = transformIntegerToInt(GridPane.getRowIndex(sender));
             int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
-            if(alreadyDrawnPositions.stream().noneMatch(position -> (position.getX()==row && position.getY()==column))){
-                alreadyDrawnPositions.add(new Position(row, column));
-                ImageView tileSelected = new ImageView(sender.getImage());
-                ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
-                redx.onMouseClickedProperty().set(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent e) {
-                        removeTileFromDrawnTiles(e);
-                    }
-                });
-                StackPane stackPane = new StackPane();
-                stackPane.getChildren().add(tileSelected);
-                stackPane.getChildren().add(redx);
-                stackPane.setAlignment(redx, Pos.TOP_RIGHT);
+            //System.out.println("("+row+","+column+")");
+            if(drawnTilesCounter==0 ||  checkIfTileCanBeDrawn(new Position(row,column))){
+                if(alreadyDrawnPositions.stream().noneMatch(position -> (position.getX()==row && position.getY()==column))){
+                    sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
+                    sender.setUserData(1);
+                    alreadyDrawnPositions.add(new Position(row, column));
+                    ImagePattern p = (ImagePattern) sender.getFill();
+                    ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
+                    redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
+                    StackPane stackPane = new StackPane();
+                    stackPane.getChildren().add(new ImageView(p.getImage()));
+                    stackPane.getChildren().add(redx);
+                    stackPane.setAlignment(redx, Pos.TOP_RIGHT);
 
-                TileToBeInserted.add(stackPane,getFirstEmptySpot(TileToBeInserted) ,0);
-                stackPane.setUserData(new Position(row, column));
-                drawnTilesCounter++;
-                if(drawnTilesCounter==1){
-                    ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
-                    Button button = new Button();
-                    button.setGraphic(checkImg);
-                    TileToBeInserted.add(button,3,0);
+                    TileToBeInserted.add(stackPane,getFirstEmptySpot(TileToBeInserted) ,0);
+                    stackPane.setUserData(new Position(row, column));
+                    drawnTilesCounter++;
+                    if(drawnTilesCounter==1){
+                        ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
+                        Button button = new Button();
+                        button.setGraphic(checkImg);
+                        TileToBeInserted.add(button,3,0);
+                    }
                 }
             }
 
+
         }
+    }
+
+    private boolean checkIfTileCanBeDrawn(Position p){
+        //sulla stessa riga delle altre tiles
+        boolean returnValue= false;
+        if(drawnTilesCounter==0)
+            return true;
+        if(drawnTilesCounter==1){
+            //adiacent to the already selected tile
+            Position p1 = alreadyDrawnPositions.get(0);
+            if(p1.getX()== p.getX()) {
+                if(p.getY() == p1.getY() + 1 || p.getY() == p1.getY() - 1)
+                    returnValue = true;
+            }
+            else if(p1.getY() == p.getY()){
+                if(p.getX() == p1.getX() + 1 || p.getX() == p1.getX() - 1)
+                    returnValue = true;
+            }
+            return returnValue;
+        }
+        if(drawnTilesCounter==2){
+
+            Position p1 = alreadyDrawnPositions.get(0);
+            Position p2 = alreadyDrawnPositions.get(1);
+            //adiacent to the first tile
+            if(p1.getX()== p.getX()) {
+                if(p.getY() == p1.getY() + 1 || p.getY() == p1.getY() - 1)
+                    returnValue = true;
+            }
+            else if(p1.getY() == p.getY()){
+                if(p.getX() == p1.getX() + 1 || p.getX() == p1.getX() - 1)
+                    returnValue = true;
+            }
+            //adiacent to the second tile
+            if(p2.getX()==p1.getX()){
+                if(p.getX()!=p2.getX())
+                    return false;
+            }
+            if(p1.getY()==p2.getY()){
+                if(p.getY()!=p2.getY())
+                    return false;
+            }
+            if(p2.getX()== p.getX()) {
+                if(p.getY() == p2.getY() + 1 || p.getY() == p2.getY() - 1)
+                    returnValue = true;
+            }
+            else if(p2.getY() == p.getY()){
+                if(p.getX() == p2.getX() + 1 || p.getX() == p2.getX() - 1)
+                    returnValue = true;
+            }
+            if(p1.getX()==p2.getX()+2){
+                if(p.getX()!=p2.getX()+1){
+                    return false;
+                }
+            }
+            if(p1.getX()==p2.getX()-2){
+                if(p.getX()!=p1.getX()+1){
+                    return false;
+                }
+            }
+            if(p1.getY()==p2.getY()+2){
+                if(p.getY()!=p2.getY()+1){
+                    return false;
+                }
+            }
+            if(p1.getY()==p2.getY()-2){
+                if(p.getY()!=p1.getY()+1){
+                    return false;
+                }
+            }
+            return returnValue;
+        }
+        return false;
     }
 
     /**
@@ -370,27 +458,144 @@ public class GameSceneController {
     }
 
     private void removeTileFromDrawnTiles(Event event){
-        System.out.println("remove tile is called ");
-        ImageView imv = (ImageView) event.getSource();
-        StackPane stackPane = (StackPane) imv.getParent();
-        if(TileToBeInserted.getChildren().remove(stackPane)){
-            drawnTilesCounter--;
-            Position p = (Position) stackPane.getUserData();
-            alreadyDrawnPositions.remove(
-                    alreadyDrawnPositions.stream().filter(
-                            position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                    ).toList().get(0)
-            );
+        //System.out.println("remove tile is called ");
+        try{
+            ImageView sender = (ImageView) event.getSource();
+            StackPane stackPane = (StackPane) sender.getParent();
+            System.out.println("tile counter: "+drawnTilesCounter);
+            if(drawnTilesCounter==3){
+                //if the tile that is being removed has two tiles selecte around it cannot be removed
+                Position maybeMiddle = (Position) stackPane.getUserData();
+                List<Position> otherPositions = new ArrayList<>();
+                for(Position p: alreadyDrawnPositions){
+                    if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
+                        otherPositions.add(p);
+                    }
+                }
+                for(Position p: otherPositions){
+                    System.out.println("("+p.getX()+","+p.getY()+")");
+                }
+                boolean allWithSameXs= true;
+                int x=-1;
+                for(Position p: alreadyDrawnPositions){
+                    if(x==-1){
+                        x=p.getX();
+                    }else{
+                        if(x!=p.getX())
+                            allWithSameXs = false;
+                    }
+                }
+                if(allWithSameXs){
+                    System.out.println("x uguali");
+                    if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
+                        return;
+                    if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
+                        return;
+                }
+                else{
+                    System.out.println("Y uguali");
+                    if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
+                        return;
+                    if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
+                        return;
+                }
+            }
+            if(TileToBeInserted.getChildren().remove(stackPane)){
+                drawnTilesCounter--;
+                Position p = (Position) stackPane.getUserData();
+                Rectangle rec = (Rectangle) getNodeAt(p.getX(), p.getY(), BoardGrid);
+                rec.setUserData(0);
+                rec.setStyle("-fx-stroke-width: 0;");
+                alreadyDrawnPositions.remove(
+                        alreadyDrawnPositions.stream().filter(
+                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                        ).toList().get(0)
+                );
 
+            }
+        }catch(ClassCastException e){
+            //e.printStackTrace();
+            Rectangle sender = (Rectangle) event.getSource();
+            int row = transformIntegerToInt(GridPane.getRowIndex(sender));
+            int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
+            if(drawnTilesCounter==3){
+                //if the tile that is being removed has two tiles selecte around it cannot be removed
+                Position maybeMiddle = new Position(row,column);
+                List<Position> otherPositions = new ArrayList<>();
+                for(Position p: alreadyDrawnPositions){
+                    if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
+                        otherPositions.add(p);
+                    }
+                }
+                for(Position p: otherPositions){
+                    System.out.println("("+p.getX()+","+p.getY()+")");
+                }
+                boolean allWithSameXs= true;
+                int x=-1;
+                for(Position p: alreadyDrawnPositions){
+                    if(x==-1){
+                        x=p.getX();
+                    }else{
+                        if(x!=p.getX())
+                            allWithSameXs = false;
+                    }
+                }
+                if(allWithSameXs){
+                    System.out.println("x uguali");
+                    if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
+                        return;
+                    if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
+                        return;
+                }
+                else{
+                    System.out.println("Y uguali");
+                    if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
+                        return;
+                    if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
+                        return;
+                }
+            }
+
+            sender.setUserData(0);
+            sender.setStyle("-fx-stroke-width: 0;");
+            System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
+            StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
+            System.out.println(stackPane.toString());
+            if(TileToBeInserted.getChildren().remove(stackPane)){
+                System.out.println("ok sono stato cancellato");
+                drawnTilesCounter--;
+                Position p = (Position) stackPane.getUserData();
+                alreadyDrawnPositions.remove(
+                        alreadyDrawnPositions.stream().filter(
+                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                        ).toList().get(0)
+                );
+
+            }
         }
+    }
 
+    private int getColumnToRemoveTileFrom(Position p){
+        ObservableList<Node> childrens = TileToBeInserted.getChildren();
+        for(Node n: childrens){
+            if(n.getUserData()!=null){
+                Position np = (Position) n.getUserData();
+                if(np.getX()==p.getX() && np.getY()==p.getY()){
+                    System.out.println("yeeeeeee");
+                    return transformIntegerToInt(GridPane.getColumnIndex(n));
+                }
+            }
+        }
+        return -1;
     }
 
     private Node getNodeAt(int row, int column, GridPane gridPane){
         Node result = null;
-        ObservableList<Node> childrens = TileToBeInserted.getChildren();
+        ObservableList<Node> childrens = gridPane.getChildren();
+        //.out.println(gridPane.toString());
         for (Node node : childrens) {
-            if(GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == column) {
+            //System.out.println(node.toString());
+            if(transformIntegerToInt(GridPane.getRowIndex(node)) == row && transformIntegerToInt(GridPane.getColumnIndex(node)) == column) {
                 result = node;
                 break;
             }
@@ -452,14 +657,14 @@ public class GameSceneController {
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
-        int n = clientSocket.getLeaderboard().size();
+        /*int n = clientSocket.getLeaderboard().size();
         for(int i=0;i<n;i++){
             if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
                 labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
                 shelfs[count].setImage(new Image("boards/bookshelf.png"));
                 count++;
             }
-        }
+        }*/
 
     }
 
