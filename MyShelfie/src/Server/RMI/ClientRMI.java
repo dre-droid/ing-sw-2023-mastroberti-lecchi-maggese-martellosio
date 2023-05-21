@@ -11,10 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class ClientRMI implements Runnable{
 
@@ -170,16 +167,7 @@ public class ClientRMI implements Runnable{
             serverRMI.quitGame(playerNickname);
             return true;
         }else if(userInput.startsWith("/chat ")){
-            System.out.println("Chat message sent");
-            /*String sender, text, receiver;
-            int atIndex = userInput.indexOf('@');
-            receiver = userInput.substring(atIndex+1);
-            atIndex = receiver.indexOf(' ');
-            text = receiver.substring(atIndex+1);
-            receiver = receiver.substring(0, atIndex);
-            //System.out.println(receiver);
-            //System.out.println(text);
-             */
+
             String text = "", receiver = "";
             int atIndex;
             if(userInput.startsWith("/chat @")) {
@@ -188,13 +176,16 @@ public class ClientRMI implements Runnable{
                 atIndex = receiver.indexOf(' ');
                 text = receiver.substring(atIndex + 1);
                 receiver = receiver.substring(0, atIndex);
+                if(!Objects.equals(receiver, playerNickname))
+                    serverRMI.chatMessage(playerNickname, text, receiver, true);
             }
             else {
                 receiver = "all";
                 atIndex = userInput.indexOf(' ');
                 text = userInput.substring(atIndex + 1);
+                serverRMI.chatMessage(playerNickname, text, receiver, false);
             }
-            serverRMI.chatMessage(playerNickname, text, receiver);
+
             return true;
         }else{
             return false;

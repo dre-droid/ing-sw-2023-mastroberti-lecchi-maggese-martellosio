@@ -77,20 +77,20 @@ public class Server {
         clientsMap.put(nickname, conn);
     }
 
-    public void chatMessage(String sender, String text, String receiver){
+    public void chatMessage(String sender, String text, String receiver, Boolean pm){
         //broadcast message
         if(receiver.equals("all")){
             for(Map.Entry<String, connectionType> client: clientsMap.entrySet()){
                 if(!client.getKey().equals(sender))
                     if(client.getValue()==connectionType.RMI){
                         try{
-                            serverRMI.chatMessage(sender, text, client.getKey());
+                            serverRMI.chatMessage(sender, text, client.getKey(), pm);
                         } catch (RemoteException e) {
                             System.out.println("Cannot send message to "+receiver);
                         }
                     }else{
                         try {
-                            serverSock.sendChatMessageToClient(sender, text, client.getKey());
+                            serverSock.sendChatMessageToClient(sender, text, client.getKey(), pm);
                         } catch (IOException e) {
                             System.out.println("Cannot send message to"+receiver);
                         }
@@ -102,7 +102,7 @@ public class Server {
             //send message to rmi player
             if(clientsMap.get(receiver)==connectionType.RMI){
                 try{
-                    serverRMI.chatMessage(sender, text, receiver);
+                    serverRMI.chatMessage(sender, text, receiver, pm);
                 } catch (RemoteException e) {
                     System.out.println("Cannot send message to "+receiver);
                 }
@@ -110,7 +110,7 @@ public class Server {
             //send message to socket client
             else{
                 try {
-                    serverSock.sendChatMessageToClient(sender, text, receiver);
+                    serverSock.sendChatMessageToClient(sender, text, receiver, pm);
                 } catch (IOException e) {
                     System.out.println("Cannot send message to"+receiver);
                 }

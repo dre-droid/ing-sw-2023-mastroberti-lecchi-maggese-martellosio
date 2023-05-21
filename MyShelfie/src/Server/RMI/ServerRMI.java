@@ -405,12 +405,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
     @Override
-    public void chatMessage(String senderName, String text, String receiverName) throws RemoteException {
-        if(clients.get(receiverName)==null){
-            server.chatMessage(senderName, text, receiverName);
+    public void chatMessage(String senderName, String text, String receiverName, Boolean pm) throws RemoteException {
+        if(clients.get(receiverName)==null){            //receiverName not in RMI clients map?
+            server.chatMessage(senderName, text, receiverName, pm);
         }
         else{
-            clients.get(receiverName).receiveMessage(text, senderName);
+            clients.get(receiverName).receiveMessage(text, senderName, pm);
         }
     }
 

@@ -150,7 +150,7 @@ public class ClientSocket {
             nextScene = "GameScene";
             notify();
         }
-        else if (line.startsWith("[MESSAGE_FROM")){
+        else if (line.startsWith("[MESSAGE FROM")){
             chatMessage = line;
             notify();
         }

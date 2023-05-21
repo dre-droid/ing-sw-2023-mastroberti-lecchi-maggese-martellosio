@@ -97,12 +97,15 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     @Override
     public void startTurn() throws RemoteException {
         clientRMI.setMyTurnFlag(true);
-        System.out.println("your turn has started, press enter to play your turn");
+        System.out.println("Your turn has started, press enter to play your turn");
     }
 
     @Override
-    public void receiveMessage(String text, String sender) throws RemoteException {
-        System.out.println("*"+sender+"*: "+text);
+    public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException {
+        if(pm)
+            System.out.println("[MESSAGE FROM "+sender+" TO YOU]: "+text);
+        else
+            System.out.println("[MESSAGE FROM "+sender+"]: "+text);
     }
 
     @Override

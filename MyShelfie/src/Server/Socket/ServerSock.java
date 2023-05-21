@@ -64,7 +64,7 @@ public class ServerSock {
                     int resultValue = playerJoin(client);
                     if (resultValue == 0 || resultValue == -1) {    //successfully joined
                         if (controller.isGameBeingCreated) {
-                            out.println("[INFO]: Game is being created by another player...");
+                            out.println("[INFO]: Game is being created by another player...");  //TODO this appears to player who creates the game, wrong!
                         }
                         clientListener(client, getNickFromSocket(client));
                         repeat = false;
@@ -200,18 +200,22 @@ public class ServerSock {
                             String text = "", receiver = "";
 
                             int atIndex;
+
                             if (line.startsWith("/chat @")) {
                                 atIndex = line.indexOf('@');
                                 receiver = line.substring(atIndex + 1);
                                 atIndex = receiver.indexOf(' ');
                                 text = receiver.substring(atIndex + 1);
                                 receiver = receiver.substring(0, atIndex);
+                                if(!Objects.equals(receiver, nickname))
+                                    sendChatMessageToClient(nickname, text, receiver, true);
                             } else {
                                 receiver = "all";
                                 atIndex = line.indexOf(' ');
                                 text = line.substring(atIndex + 1);
+                                sendChatMessageToClient(nickname, text, receiver, false);
                             }
-                            sendChatMessageToClient(nickname, text, receiver);
+
                         }
 
                         else if (line.equals("/quit")) {
@@ -638,17 +642,17 @@ public class ServerSock {
 
     public void setController(Controller c){ this.controller = c;}
 
-    public void sendChatMessageToClient(String sender, String text, String receiver) throws IOException {
+    public void sendChatMessageToClient(String sender, String text, String receiver, Boolean pm) throws IOException {
         if(clients.stream().noneMatch(client->client.getName().equals(receiver)))
-            server.chatMessage(sender, text, receiver);
+            server.chatMessage(sender, text, receiver, pm);
         else
             for (socketNickStruct c: clients){
                 if(c.getName().equals(receiver)){
-                    /*System.out.println(sender);
-                    System.out.println(text);
-                    System.out.println(receiver);*/
                     PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-                    out.println("[MESSAGE_FROM_"+sender+"]: "+text);
+                    if(pm)
+                        out.println("[MESSAGE FROM "+sender+" TO YOU]: "+text);
+                    else
+                        out.println("[MESSAGE FROM "+sender+"]: "+text);
                 }
             }
     }

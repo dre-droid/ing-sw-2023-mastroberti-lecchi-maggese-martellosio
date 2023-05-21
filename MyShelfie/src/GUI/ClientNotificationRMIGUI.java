@@ -157,7 +157,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     }
 
     @Override
-    public void receiveMessage(String text, String sender) throws RemoteException {
+    public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException {
 
     }
 
