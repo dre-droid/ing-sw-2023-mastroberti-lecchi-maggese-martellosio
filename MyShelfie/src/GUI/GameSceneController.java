@@ -340,7 +340,7 @@ public class GameSceneController {
             int row = transformIntegerToInt(GridPane.getRowIndex(sender));
             int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
             //System.out.println("("+row+","+column+")");
-            if(drawnTilesCounter==0 ||  checkIfTileCanBeDrawn(new Position(row,column))){
+            if(checkIfTileCanBeDrawn(new Position(row,column))){
                 if(alreadyDrawnPositions.stream().noneMatch(position -> (position.getX()==row && position.getY()==column))){
                     sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
                     sender.setUserData(1);
@@ -372,6 +372,8 @@ public class GameSceneController {
     private boolean checkIfTileCanBeDrawn(Position p){
         //sulla stessa riga delle altre tiles
         boolean returnValue= false;
+        if(!checkIfTileIsDrawable(p))
+            return false;
         if(drawnTilesCounter==0)
             return true;
         if(drawnTilesCounter==1){
@@ -575,6 +577,40 @@ public class GameSceneController {
         }
     }
 
+    private boolean checkIfTileIsDrawable(Position p){
+        boolean oneSideFree = false;
+        int row, column;
+        //check up
+        System.out.println("UP:");
+        row = p.getX();
+        column = p.getY()-1;
+        if(getNodeAt(row, column, BoardGrid)==null){
+            oneSideFree = true;
+        }
+        //check down
+        System.out.println("DOWN:");
+        row = p.getX();
+        column = p.getY()+1;
+        if(getNodeAt(row, column, BoardGrid)==null){
+            oneSideFree = true;
+        }
+        //check left
+        System.out.println("LEFT:");
+        row = p.getX()-1;
+        column = p.getY();
+        if(getNodeAt(row, column, BoardGrid)==null){
+            oneSideFree = true;
+        }
+        //check right
+        System.out.println("RIGHT:");
+        row = p.getX()+1;
+        column = p.getY();
+        if(getNodeAt(row, column, BoardGrid)==null){
+            oneSideFree = true;
+        }
+        return oneSideFree;
+    }
+
     private int getColumnToRemoveTileFrom(Position p){
         ObservableList<Node> childrens = TileToBeInserted.getChildren();
         for(Node n: childrens){
@@ -597,6 +633,7 @@ public class GameSceneController {
             //System.out.println(node.toString());
             if(transformIntegerToInt(GridPane.getRowIndex(node)) == row && transformIntegerToInt(GridPane.getColumnIndex(node)) == column) {
                 result = node;
+                System.out.println(result.toString());
                 break;
             }
         }
