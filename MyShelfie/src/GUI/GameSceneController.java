@@ -360,6 +360,10 @@ public class GameSceneController {
      * @param event event triggering the call of this method
      */
     private void boardTileClicked(Event event) {
+        if(clientRMI!=null){
+            if(!clientRMI.isMyTurn())
+                return;
+        }
         if(!drawIsOver){
             if (drawnTilesCounter < 3) {
                 //System.out.println(event.getSource().toString());
@@ -407,6 +411,10 @@ public class GameSceneController {
         if (alreadyDrawnPositions.size() > 0) {
             if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton(event);
             else {
+                if(clientRMI!=null){
+                    if(!clientRMI.isMyTurn())
+                        return;
+                }
                 drawTilesFromRMIServer();
             }
             drawIsOver = true;
@@ -420,7 +428,15 @@ public class GameSceneController {
     private void handleShelfButton(ActionEvent e){
         if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
         else{
+            if(clientRMI!=null){
+                if(!clientRMI.isMyTurn())
+                    return;
+            }
             rmiHandleShelfButton(e);
+            //clean TileToBeInserted
+            for(int column = 0;column<3;column++){
+                TileToBeInserted.getChildren().remove(getNodeAt(0,column,TileToBeInserted));
+            }
         }
 
         // hide shelf buttons and tile deck
@@ -601,7 +617,7 @@ public class GameSceneController {
     /**
      * Changes the top label to display the new currently playing client
      */
-    private void updateTurnLabel(String player){
+    public void updateTurnLabel(String player){
         TopLabel.setText(player + "'s turn.");
     }
 

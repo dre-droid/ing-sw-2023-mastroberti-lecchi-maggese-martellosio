@@ -131,6 +131,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             boolean returnValue = serverRMI.insertTilesInShelf(nickname,drawnTiles,column);
             if(returnValue){
                 drawnTiles = null;
+                MyTurnFlag = false;
             }
             return returnValue;
 
@@ -158,7 +159,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void aTurnHasEnded(String currentPlayerNickname, String nextPlayerNickname) throws RemoteException {
-
+        gsc.updateTurnLabel(nextPlayerNickname);
     }
 
     @Override
@@ -188,7 +189,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void startTurn() throws RemoteException {
-
+        MyTurnFlag = true;
     }
 
     @Override
@@ -219,5 +220,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return null;
         }
 
+    }
+
+    public boolean isMyTurn(){
+        return MyTurnFlag;
     }
 }

@@ -288,16 +288,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
 
-            for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            }
+
 
             //ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             /*if(clientToBeNotified!=null)
                 clientToBeNotified.startTurn();*/
             server.notifySocketOfTurnEnd(playerNickname);
             controller.endOfTurn(playerNickname);
-
+            for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            }
             if(controller.hasTheGameEnded()){
                 notifyEndOfGame();
             }
