@@ -30,62 +30,74 @@ public class MatchTypeController {
     private ClientSocket clientSocket;
 
     public void switchtoGameScene(ActionEvent event){
-        try {
-            int numOfPlayers=-1;
-            if(rButton2p.isSelected())
-                numOfPlayers = 2;
-            if(rButton3p.isSelected())
-                numOfPlayers = 3;
-            if(rButton4p.isSelected())
-                numOfPlayers = 4;
+        if (rButton2p.isSelected() || rButton3p.isSelected() || rButton4p.isSelected()) {
+            try {
+                int numOfPlayers = -1;
+                if (rButton2p.isSelected())
+                    numOfPlayers = 2;
+                if (rButton3p.isSelected())
+                    numOfPlayers = 3;
+                if (rButton4p.isSelected())
+                    numOfPlayers = 4;
 
-            // client RMI
-            if(clientRMI!=null){
-                System.out.println("Rmi active in match type scene");
-                String nextScenePath;
-                if(clientRMI.createNewGame(numOfPlayers)){
-                    nextScenePath = "GameScene.fxml";
-                }else{
-                    //alert about a game already being created
-                    nextScenePath = "LoginScene.fxml";
+                // client RMI
+                if (clientRMI != null) {
+                    System.out.println("Rmi active in match type scene");
+                    String nextScenePath;
+                    if (clientRMI.createNewGame(numOfPlayers)) {
+                        nextScenePath = "GameScene.fxml";
+                    } else {
+                        //alert about a game already being created
+                        nextScenePath = "LoginScene.fxml";
+                    }
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource(nextScenePath));
+                    Parent root = loader.load();
+                    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    scene = new Scene(root);
+                    stage.setScene(scene);
+                    GameSceneController gsc = loader.getController();
+                    gsc.setClient(clientRMI);
+                    gsc.setPlayerName(clientRMI.getNickname());
+                    stage.show();
+                } else {
+                    clientSocket.clientSpeaker(Integer.toString(numOfPlayers));
+                    //TODO check that RMI hasnt created a game in the mean time
+                    //e.g.
+                    //[INFO]: Chosen nickname: dre
+                    //[INFO]: Game is being created by another player...
+                    //[REQUEST]: Choose the number of players for the game:
+                    //2
+                    //[INFO]: Somebody has already created a Game!
+                    //[INFO]: Game is starting. der's turn.
+                    //change scene to GameScene
+                    socketSwitchToGameScene(event);
                 }
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(nextScenePath));
-                Parent root = loader.load();
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                scene = new Scene(root);
-                stage.setScene(scene);
-                GameSceneController gsc = loader.getController();
-                gsc.setClient(clientRMI);
-                stage.show();
-                return;
-            }
-            else{
-                clientSocket.clientSpeaker(Integer.toString(numOfPlayers));
-                //TODO check that RMI hasnt created a game in the mean time
-                //e.g.
-                //[INFO]: Chosen nickname: dre
-                //[INFO]: Game is being created by another player...
-                //[REQUEST]: Choose the number of players for the game:
-                //2
-                //[INFO]: Somebody has already created a Game!
-                //[INFO]: Game is starting. der's turn.
-                //change scene to GameScene
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
-                root = loader.load();
-                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                GameSceneController gameSceneController = loader.getController();
-                gameSceneController.setClient(clientSocket);
-                gameSceneController.runGameSceneThreads();
-                new Thread(gameSceneController::messageTextArea).start();
 
-                scene = new Scene(root);
-                stage.setScene(scene);
-                stage.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    private void socketSwitchToGameScene(ActionEvent event){
+        Platform.runLater(() -> {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            GameSceneController gameSceneController = loader.getController();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            gameSceneController.setClient(clientSocket);
+            gameSceneController.runGameSceneThreads();
+            new Thread(gameSceneController::messageTextArea).start();
+            gameSceneController.setPlayerName(clientSocket.getNickname());
+
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        });
     }
 
     public void setClient(ClientNotificationRMIGUI clientRMI){

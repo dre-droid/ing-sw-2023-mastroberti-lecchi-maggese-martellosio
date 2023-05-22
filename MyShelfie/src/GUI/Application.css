@@ -10,15 +10,28 @@
     -fx-background-image: url("../../../MyShelfie/Resources/Publisher_material/Display_2.jpg");
     -fx-background-size:cover ;
 }
-#ConnectionType{
-    -fx-background-image: url("../../../MyShelfie/Resources/Publisher_material/Display_1.jpg");
-    -fx-background-size:cover ;
-}
-.open-sans{
-
-}
 #EndSceneAnchor{
     -fx-background-image: url("../../../MyShelfie/Resources/Publisher_material/Display_5.jpg");
     -fx-background-size: cover;
 
+}
+.rounded-field {
+    -fx-background-radius: 17;
+}
+.rounded-textfield {
+    -fx-background-radius: 13;
+    -fx-background-color: ffe09e;
+
+}
+.Montserrat-text {
+    -fx-font-family: 'Montserrat';
+    -fx-text-fill: white;
+}
+.rounded-rectangle {
+  -fx-border-color: black;
+   fx-border-width: 1px;
+  -fx-border-radius: 5px;
+}
+.curlz {
+    -fx-font-family: 'Jokerman';
 }

@@ -119,8 +119,11 @@ public class ClientSocket {
         if (line.startsWith("[INVALID MOVE]")) {
             System.out.println("You cannot select those tiles. Try again.\n");
         }
-        if (line.startsWith("[INFO]") || line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE")) {
+        if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE")) {
             System.out.println(line);
+        }
+        if (line.startsWith("[INFO]: Chosen nickname:")){
+            nickname = line.replace("[INFO]: Chosen nickname: ", "");
         }
         if (line.startsWith("[SHELF]")) {
             System.out.println(line);

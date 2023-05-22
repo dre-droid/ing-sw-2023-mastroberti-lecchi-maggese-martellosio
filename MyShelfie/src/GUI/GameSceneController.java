@@ -31,6 +31,7 @@ public class GameSceneController {
     @FXML
     public Text TopLabel;
     public GridPane PlayerShelfGrid;
+    public Label PlayerName;
 
     private int drawnTilesCounter;
 
@@ -97,6 +98,9 @@ public class GameSceneController {
     }
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
+    }
+    public void setPlayerName(String name){
+        Platform.runLater(() -> PlayerName.setText(name));
     }
 
     public ClientNotificationRMIGUI getClientRMI(){
@@ -294,7 +298,7 @@ public class GameSceneController {
                         if(boardView[i][j].isEmpty()){
                             Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
                             if(tileAtThisPosition!=null){
-                                System.out.println("("+i+","+j+") dovrebbe essere eliminato");
+                                //System.out.println("("+i+","+j+") dovrebbe essere eliminato");
                                 BoardGrid.getChildren().remove(tileAtThisPosition);
                             }
                         }
@@ -405,7 +409,11 @@ public class GameSceneController {
         if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
         else{//TODO RMI
         }
+
+        // hide shelf buttons and tile deck
         shelfButtonsPane.setVisible(false);
+        ((Button) TileToBeInserted.getChildren()).setVisible(false);
+
     }
 
     private void createShelfButtons(){

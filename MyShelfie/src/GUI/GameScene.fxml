@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
@@ -180,12 +181,12 @@
       <ImageView fx:id="Opp3Shelf_ID" fitHeight="150.0" fitWidth="200.0" layoutX="529.0" layoutY="365.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="CG1" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="311.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../MyShelfie/Resources/common_goal_cards/1.jpg" />
+            <Image url="@../../../MyShelfie/Resources/common_goal_cards/EmptyCommonGoal.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="CG2" fitHeight="150.0" fitWidth="200.0" layoutX="1034.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../MyShelfie/Resources/common_goal_cards/2.jpg" />
+            <Image url="@../../../MyShelfie/Resources/common_goal_cards/EmptyCommonGoal.jpg" />
          </image>
       </ImageView>
       <ImageView fx:id="MyPGC" fitHeight="179.0" fitWidth="131.0" layoutX="366.0" layoutY="670.0" pickOnBounds="true" preserveRatio="true">
@@ -209,11 +210,6 @@
          </font>
       </Label>
       <TableView fx:id="TableLeaderboard" layoutX="925.0" layoutY="85.0" prefHeight="204.0" prefWidth="310.0" />
-      <Text fx:id="TopLabel" layoutX="763.0" layoutY="63.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Waiting for game to start...">
-         <font>
-            <Font size="40.0" />
-         </font>
-      </Text>
       <GridPane fx:id="BoardGrid" hgap="4.0" layoutX="38.0" layoutY="33.0" prefHeight="427.0" prefWidth="427.0" vgap="3.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -288,8 +284,8 @@
 
          </children>
       </GridPane>
-      <Text fx:id="CG1_id" layoutX="846.0" layoutY="364.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC1 description" wrappingWidth="117.95574951171864" />
-      <Text fx:id="CG2_id" layoutX="846.0" layoutY="521.0" strokeType="OUTSIDE" strokeWidth="0.0" text="CGC2 description" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG1_id" layoutX="846.0" layoutY="364.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG2_id" layoutX="846.0" layoutY="521.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="117.95574951171864" />
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="11.0" layoutY="539.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />
@@ -364,5 +360,27 @@
             </ImageView>
          </children>
       </GridPane>
+      <Pane layoutX="1083.0" layoutY="11.0" prefHeight="63.0" prefWidth="200.0" styleClass="rounded-rectangle">
+         <children>
+            <ImageView fitHeight="48.0" fitWidth="48.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../MyShelfie/Resources/misc/person.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="PlayerName" layoutX="48.0" layoutY="19.0" prefHeight="26.0" prefWidth="130.0" text="Player name">
+               <font>
+                  <Font size="20.0" />
+               </font></Label>
+         </children>
+      </Pane>
+      <Pane layoutX="529.0" layoutY="11.0" prefHeight="63.0" prefWidth="341.0" styleClass="rounded-rectangle">
+         <children>
+            <Text fx:id="TopLabel" layoutX="29.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Waiting for game to start..." textAlignment="CENTER">
+               <font>
+                  <Font size="26.0" />
+               </font>
+            </Text>
+         </children>
+      </Pane>
    </children>
 </AnchorPane>

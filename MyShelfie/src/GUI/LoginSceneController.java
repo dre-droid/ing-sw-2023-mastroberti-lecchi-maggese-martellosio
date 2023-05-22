@@ -115,6 +115,7 @@ public class LoginSceneController {
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
                         gsc.getClientRMI().updateGUIAtBeginningOfGame();
+                        gsc.setPlayerName(clientRMI.getNickname());
 
                         stage.show();
                     }break;
@@ -147,11 +148,11 @@ public class LoginSceneController {
 
             if (clientSocket.nextScene.equals("MatchType")) {
                 //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
-                switchToMatchTypeScene(event);
+                socketSwitchToMatchTypeScene(event);
             }
             if (clientSocket.nextScene.equals("GameScene")) {
                 //change scene to GameScene
-                switchToGameScene(event);
+                socketSwitchToMatchTypeScene(event);
 
             if (clientSocket.nextScene.equals("Unchanged")) {
                 Platform.runLater(() -> {
@@ -169,7 +170,7 @@ public class LoginSceneController {
         }
     }
 
-    private void switchToGameScene(ActionEvent event){
+    private void socketSwitchToGameScene(ActionEvent event){
         Platform.runLater(() -> {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("GameScene.fxml"));
             try {
@@ -182,13 +183,14 @@ public class LoginSceneController {
             gameSceneController.setClient(clientSocket);
             gameSceneController.runGameSceneThreads();
             new Thread(gameSceneController::messageTextArea).start();
+            gameSceneController.setPlayerName(clientSocket.getNickname());
 
             scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         });
     }
-    private void switchToMatchTypeScene(ActionEvent event){
+    private void socketSwitchToMatchTypeScene(ActionEvent event){
         Platform.runLater(() -> {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("MatchType.fxml"));
             try {
