@@ -27,6 +27,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     private boolean EndGameFlag;
     private boolean GameStartFlag;
 
+    private List<Tile> drawnTiles;
+
     public ClientNotificationRMIGUI() throws RemoteException{
         try{
             Registry registryServer = LocateRegistry.getRegistry();
@@ -117,7 +119,29 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public boolean drawTilesFromBoard(int x, int y, int amount, Board.Direction direction){
         try {
-            return serverRMI.drawTilesFromBoard(nickname, x, y, amount, direction) != null;
+            drawnTiles = serverRMI.drawTilesFromBoard(nickname, x, y, amount, direction);
+            return  drawnTiles!=null;
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean insertTilesInShelf(int column ) {
+        try {
+            boolean returnValue = serverRMI.insertTilesInShelf(nickname,drawnTiles,column);
+            if(returnValue){
+                drawnTiles = null;
+            }
+            return returnValue;
+
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Tile[][] getMyShelf(){
+        try {
+            return serverRMI.getMyShelf(nickname);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

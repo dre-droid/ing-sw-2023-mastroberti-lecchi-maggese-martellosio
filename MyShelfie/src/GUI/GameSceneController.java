@@ -30,6 +30,9 @@ import java.util.*;
 public class GameSceneController {
     @FXML
     public Text TopLabel;
+
+    public boolean drawIsOver;
+
     public GridPane PlayerShelfGrid;
     public Label PlayerName;
 
@@ -121,6 +124,7 @@ public class GameSceneController {
            setPlayerLabels();
            updateTurnLabel(isPlaying);
            createShelfButtons();
+           drawIsOver = false;
         });
     }
 
@@ -298,7 +302,7 @@ public class GameSceneController {
                         if(boardView[i][j].isEmpty()){
                             Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
                             if(tileAtThisPosition!=null){
-                                //System.out.println("("+i+","+j+") dovrebbe essere eliminato");
+                                System.out.println("("+i+","+j+") dovrebbe essere eliminato");
                                 BoardGrid.getChildren().remove(tileAtThisPosition);
                             }
                         }
@@ -344,6 +348,8 @@ public class GameSceneController {
            updateBoard(board);
            updateShelf(shelf);
            createLeaderboard(leaderboard);
+           if(clientSocket.getNickname()==clientSocket.isPlaying)
+               drawIsOver = false;
         });
     }
 
@@ -354,37 +360,43 @@ public class GameSceneController {
      * @param event event triggering the call of this method
      */
     private void boardTileClicked(Event event) {
-        if (drawnTilesCounter < 3) {
-            //System.out.println(event.getSource().toString());
-            Rectangle sender = (Rectangle) event.getSource();
-            int row = transformIntegerToInt(GridPane.getRowIndex(sender));
-            int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
-            //System.out.println("("+row+","+column+")");
-            if (checkIfTileCanBeDrawn(new Position(row, column))) {
-                if (alreadyDrawnPositions.stream().noneMatch(position -> (position.getX() == row && position.getY() == column))) {
-                    sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
-                    sender.setUserData(1);
-                    alreadyDrawnPositions.add(new Position(row, column));
-                    ImagePattern p = (ImagePattern) sender.getFill();
-                    ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
-                    redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
-                    StackPane stackPane = new StackPane();
-                    stackPane.getChildren().add(new ImageView(p.getImage()));
-                    stackPane.getChildren().add(redx);
-                    stackPane.setAlignment(redx, Pos.TOP_RIGHT);
-                    TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);
-                    stackPane.setUserData(new Position(row, column));
-                    drawnTilesCounter++;
-                    if (drawnTilesCounter == 1) {
-                        ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
-                        Button checkmarkButton = new Button();
-                        checkmarkButton.setGraphic(checkImg);
-                        checkmarkButton.setOnAction(this::handleCheckmarkButton);
-                        TileToBeInserted.add(checkmarkButton, 3, 0);
+        if(!drawIsOver){
+            if (drawnTilesCounter < 3) {
+                //System.out.println(event.getSource().toString());
+                Rectangle sender = (Rectangle) event.getSource();
+                int row = transformIntegerToInt(GridPane.getRowIndex(sender));
+                int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
+                //System.out.println("("+row+","+column+")");
+                if (checkIfTileCanBeDrawn(new Position(row, column))) {
+                    if (alreadyDrawnPositions.stream().noneMatch(position -> (position.getX() == row && position.getY() == column))) {
+                        sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
+                        sender.setUserData(1);
+                        alreadyDrawnPositions.add(new Position(row, column));
+                        ImagePattern p = (ImagePattern) sender.getFill();
+                        ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
+                        redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
+                        StackPane stackPane = new StackPane();
+                        stackPane.getChildren().add(new ImageView(p.getImage()));
+                        stackPane.getChildren().add(redx);
+                        stackPane.setAlignment(redx, Pos.TOP_RIGHT);
+                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);
+                        stackPane.setUserData(new Position(row, column));
+                        drawnTilesCounter++;
+                        if (drawnTilesCounter == 1) {
+                            ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
+                            Button checkmarkButton = new Button();
+                            checkmarkButton.setGraphic(checkImg);
+                            checkmarkButton.setOnAction(this::handleCheckmarkButton);
+                            TileToBeInserted.add(checkmarkButton, 3, 0);
+                        }
                     }
                 }
             }
         }
+
+
+
+
     }
 
     /**
@@ -397,7 +409,7 @@ public class GameSceneController {
             else {
                 drawTilesFromRMIServer();
             }
-
+            drawIsOver = true;
         }
     }
 
@@ -407,13 +419,38 @@ public class GameSceneController {
      */
     private void handleShelfButton(ActionEvent e){
         if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
-        else{//TODO RMI
+        else{
+            rmiHandleShelfButton(e);
         }
 
         // hide shelf buttons and tile deck
         shelfButtonsPane.setVisible(false);
-        ((Button) TileToBeInserted.getChildren()).setVisible(false);
+        //((Button) TileToBeInserted.getChildren()).setVisible(false);
 
+        drawIsOver = false;
+    }
+
+    public void rmiUpdateShelf(Tile[][] shelf){
+        for (int rows = 0; rows < 6; rows++)
+            for (int columns = 0; columns < 5; columns++){
+                Tile t = shelf[rows][columns];
+                if (t != null){
+                    System.out.println(t.getImgPath());
+                    ImageView img = (ImageView) getNodeAt(rows, columns, PlayerShelfGrid);
+                    img.setImage(new Image(t.getImgPath(),45,45,true,true));
+                }
+            }
+    }
+
+    private void rmiHandleShelfButton(Event e){
+        Button button = (Button) e.getSource();
+        System.out.println("Button getid: " + button.getId());
+        int column = Integer.parseInt(button.getId());
+        if(clientRMI.insertTilesInShelf(column))
+            System.out.println("Insert in shelf rmi successful");
+        else
+            System.out.println("Problem in insert in shelf");
+        rmiUpdateShelf(clientRMI.getMyShelf());
     }
 
     private void createShelfButtons(){
@@ -461,6 +498,8 @@ public class GameSceneController {
         //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
             System.out.println("RMI draw operation was a success");
+
+        shelfButtonsPane.setVisible(true);
     }
 
     /**
@@ -953,3 +992,5 @@ public class GameSceneController {
 //TODO make application not resizable
 //TODO visualize common goal tokens in gui
 //TODO update turn GUI
+//TODO remove the drawn tiles from TileToBeInserted after they are inserted in the shelf
+//TODO after the green check mark is pressed the tiles in the board cannot be selected anymore
