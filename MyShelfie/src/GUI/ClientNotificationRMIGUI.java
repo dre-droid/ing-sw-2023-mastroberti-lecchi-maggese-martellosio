@@ -88,6 +88,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void someoneJoinedTheGame(String nickname) throws RemoteException {
 
     }
+    public void gameHasBeenCreated() throws RemoteException{
+
+    }
 
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {

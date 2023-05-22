@@ -40,12 +40,13 @@ public class Controller {
 
     /**
      * This method is used to create a new instance of game (if there isn't one already running) with numOfPlayers players and then
-     * add to the game the player who created the game (nickname)
+     * add to the game the player who created the game (nickname). Calls serverRMI method gameIsCreated to notify every waiting ClientRMI
+     * that a game has been created
      * @param nickname name of the player who is creating the game
      * @param numOfPlayers number of players that can join the game
      * @return true if the game is created correctly, false if there is already a game running
      */
-    public boolean createNewGame(String nickname, int numOfPlayers){
+    public boolean createNewGame(String nickname, int numOfPlayers) throws RemoteException{
         if(game==null){
             /*if(loadGameProgress()){
                 System.out.println("Loaded game from file!");
@@ -57,6 +58,7 @@ public class Controller {
                 notifyAll();
             }
             System.out.println("Created new game by "+nickname);
+            server.serverRMI.gameIsCreated();
             return true;
         }
         System.out.println("There is already a game to join");

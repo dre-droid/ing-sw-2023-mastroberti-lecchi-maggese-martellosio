@@ -3,16 +3,19 @@ package Server.RMI;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 
 public interface RMIinterface extends java.rmi.Remote{
-
+    public int joinLobby(String nickname, int port) throws RemoteException;
     public int joinGame(String nickname,int port) throws java.rmi.RemoteException;
 
     public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException;
     public List<Tile> drawTilesFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction) throws java.rmi.RemoteException;
+    public boolean isGameBeingCreated() throws RemoteException;
+    public void gameIsCreated() throws RemoteException;
 
     public boolean hasGameStarted() throws RemoteException;
 

@@ -35,6 +35,20 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println("Game created successfully");
     }
 
+    /**
+     * this method sets the boolean value gameHasBeenCreated in ClientRMI to true and notifies it. Called by ServerRMI method
+     * gameIsCreated which in turn is called by Controller when a new game is created
+     * @author Diego Lecchi
+     * @throws RemoteException
+     */
+    public void gameHasBeenCreated() throws RemoteException{
+        clientRMI.setGameHasBeenCreated(true);
+        synchronized (this){
+            notifyAll();
+        }
+    }
+
+
     @Override
     public void cannotCreateNewGame(String problem) throws RemoteException {
         System.out.println("Cannot create a new game because: "+problem);

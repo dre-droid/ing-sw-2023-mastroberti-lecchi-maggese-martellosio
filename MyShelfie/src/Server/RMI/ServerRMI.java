@@ -24,11 +24,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     //private List<ClientNotificationRecord> clients;
 
     private Map<String, ClientNotificationInterfaceRMI> clients;
+    private Map<ClientNotificationInterfaceRMI, String> clientsLobby;
 
 
 
     public ServerRMI(Controller controller, Server server) throws RemoteException {super();
         clients = new HashMap();
+        clientsLobby = new HashMap<>();
         //timerDraw = new Timer();
         //timerInsert = new Timer();
         this.controller = controller;
@@ -37,8 +39,28 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
     /**
+     *This method is called by ClientRMI to join a map Lobby, used to alert every ClientRMI waiting for a game to be created
+     * @author Diego Lecchi
+     * @param nickname name of the player that wants to join the lobby
+     * @param port used to connect to the rmi client
+     * @return 0 if the player has been added to the map
+     * @throws RemoteException
+     */
+    public int joinLobby(String nickname, int port) throws RemoteException{
+        ClientNotificationInterfaceRMI clientToBeNotified;
+        try{
+            Registry registry = LocateRegistry.getRegistry(port);
+            clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
+        } catch (NotBoundException e) {
+            throw new RuntimeException(e);
+        }
+        clientsLobby.put(clientToBeNotified, nickname);
+        return 0;
+    }
+    //TODO gestire se più giocatori joinano rispetto a numero partita
+    /**
      * This method is called to join the game, if the controller added the player correctly it alerts the client and add it to the
-     * clients list, if the controller cannot add the player to the game (oucome=-1,-2,-3) it sends a message to the client with the
+     * clients list, if the controller cannot add the player to the game (outcome=-1,-2,-3) it sends a message to the client with the
      * corresponding error
      * @param nickname name of the player that wants to join the game
      * @param port used to connect to the rmi client
@@ -88,7 +110,28 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
         return outcome;
     }
+    public boolean isGameBeingCreated() throws RemoteException{
+        return controller.isGameBeingCreated;
+    }
 
+    /**
+     * this method is called by Controller in createNewGame method when a new game is created. Calls method gameHasBeenCreated
+     * for every RMI client in clientsLobby Map
+     * @author Diego Lecchi
+     * @throws RemoteException
+     */
+    public void gameIsCreated() throws RemoteException{
+        try{
+            if(clientsLobby.size()>0){
+                Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
+                for(ClientNotificationInterfaceRMI c : set){
+                    c.gameHasBeenCreated();
+                }
+            }
+        } catch (RemoteException e) {
+            System.out.println("Cannot notify client");
+        }
+    }
 
     /**
      * This method is called to create a new game that can host a number of player equals to numOfPlayers
