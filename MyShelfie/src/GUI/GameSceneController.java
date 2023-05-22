@@ -30,6 +30,7 @@ import java.util.*;
 public class GameSceneController {
     @FXML
     public Text TopLabel;
+    public GridPane PlayerShelfGrid;
 
     private int drawnTilesCounter;
 
@@ -329,10 +330,11 @@ public class GameSceneController {
      * changes made by the client.
      */
     //TODO this needs to be called at the end of the turn in RMI
-    public void updateGameScene(String nextPlayer, TilePlacingSpot[][] board, List<Player> leaderboard){
+    public void updateGameScene(String nextPlayer, TilePlacingSpot[][] board, List<Player> leaderboard, Shelf shelf){
         Platform.runLater(() -> {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
+           updateShelf(shelf);
            createLeaderboard(leaderboard);
         });
     }
@@ -376,27 +378,26 @@ public class GameSceneController {
 
     /**
      * Sends the server a request to draw the selected tiles from the board.
+     * Updates client's board.
      */
     private void handleCheckmarkButton(ActionEvent event) {
         if (alreadyDrawnPositions.size() > 0) {
             if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton(event);
             else {
-                //TODO RMIHandleCheckmarkButton()
-                //System.out.println("drawTilesFromRMIServer");
                 drawTilesFromRMIServer();
             }
+
         }
     }
 
     /**
-     * Sends the server a request to insert the tiles in the selected column of the shelf
+     * Sends the server a request to insert the tiles in the selected column of the shelf.
+     * Calls updateGameScene().
      */
     private void handleShelfButton(ActionEvent e){
         if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
         else{//TODO RMI
         }
-
-
         shelfButtonsPane.setVisible(false);
     }
 
@@ -445,11 +446,6 @@ public class GameSceneController {
         //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
             System.out.println("RMI draw operation was a success");
-
-        //rmi
-
-
-        //socket still to be implemented
     }
 
     private boolean checkIfTileCanBeDrawn(Position p){
@@ -525,6 +521,21 @@ public class GameSceneController {
             return returnValue;
         }
         return false;
+    }
+
+    /**
+     * Displays the argument shelf to the scene
+     */
+    private void updateShelf(Shelf shelf){
+        for (int rows = 0; rows < 6; rows++)
+            for (int columns = 0; columns < 5; columns++){
+                Tile t = shelf.getGrid()[rows][columns];
+                if (t != null){
+                    System.out.println(t.getImgPath());
+                    ImageView img = (ImageView) getNodeAt(rows, columns, PlayerShelfGrid);
+                    img.setImage(new Image(t.getImgPath(),45,45,true,true));
+                }
+            }
     }
 
     /**
@@ -763,7 +774,7 @@ public class GameSceneController {
                     synchronized (clientSocket) {
                         while (clientSocket.isPlaying.equals("")) clientSocket.wait();
                     }
-                    updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard());
+                    updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
                     clientSocket.isPlaying = "";
                 }
                 catch (Exception e){
@@ -839,7 +850,7 @@ public class GameSceneController {
             if (alreadyDrawnPositions.get(i).getX() != alreadyDrawnPositions.get(0).getX()) horizontal = false;
         }
 
-        // find leftmost/topmost tile in alreadyDrawnPositions array, send socket its position
+        // Find leftmost/topmost tile in alreadyDrawnPositions array, send socket its position. Update client's board.
         min = alreadyDrawnPositions.get(0);
         if (horizontal){
             for (Position p : alreadyDrawnPositions)
@@ -855,14 +866,19 @@ public class GameSceneController {
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
         clientSocket.clientSpeaker(Integer.toString(size));
-        if (horizontal) {
-           clientSocket.clientSpeaker("2");
+        try {
+            if (horizontal) {
+                clientSocket.clientSpeaker("2");
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.RIGHT);
+            } else {
+                clientSocket.clientSpeaker("1");
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.RIGHT);
+            }
+        }catch (InvalidMoveException error){
+            error.printStackTrace();
         }
-        else {
-           clientSocket.clientSpeaker("1");
-        }
-        //System.out.println(min.getX() + ", " + min.getY() + ", " + size);
-        //TODO draw tiles from board
+
+        updateBoard(clientSocket.getBoard().getBoardForDisplay());
         shelfButtonsPane.setVisible(true);
     }
 
@@ -887,6 +903,17 @@ public class GameSceneController {
             System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
             clientSocket.clientSpeaker("[GUI]" + clientSocket.gson.toJson(positionList));
         }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            throw new RuntimeException(ex);
+        }
+        // wait to receive next turn info
+        synchronized (clientSocket){
+
+        }
+
+        updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
     }
 
     //****** end socket specific ********//
