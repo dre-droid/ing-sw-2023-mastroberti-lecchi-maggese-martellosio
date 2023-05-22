@@ -21,7 +21,7 @@ public class MainGUI extends Application {
     public void start(Stage stage) throws Exception {
 
         try{
-        Font.loadFont(getClass().getResource("JokermanRegular.ttf").toExternalForm(), 10);
+        //Font.loadFont(getClass().getResource("JokermanRegular.ttf").toExternalForm(), 10);
         Parent root = FXMLLoader.load(getClass().getResource("ConnectionType.fxml"));
         Scene scene1 = new Scene(root);
         stage.setScene(scene1);
