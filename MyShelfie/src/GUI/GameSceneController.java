@@ -115,6 +115,7 @@ public class GameSceneController {
            setCommonGoalCardImage(cgcs.get(1),2);
            setPlayerLabels();
            updateTurnLabel(isPlaying);
+           createShelfButtons();
         });
     }
 
@@ -358,7 +359,6 @@ public class GameSceneController {
                     stackPane.getChildren().add(new ImageView(p.getImage()));
                     stackPane.getChildren().add(redx);
                     stackPane.setAlignment(redx, Pos.TOP_RIGHT);
-
                     TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);
                     stackPane.setUserData(new Position(row, column));
                     drawnTilesCounter++;
@@ -373,32 +373,43 @@ public class GameSceneController {
             }
         }
     }
-    //TODO RMIHandleCheckmarkButton()
 
     /**
      * Sends the server a request to draw the selected tiles from the board.
      */
     private void handleCheckmarkButton(ActionEvent event) {
         if (alreadyDrawnPositions.size() > 0) {
-            if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton();
+            if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton(event);
             else {
+                //TODO RMIHandleCheckmarkButton()
                 //System.out.println("drawTilesFromRMIServer");
                 drawTilesFromRMIServer();
             }
-
-
-            /*for (int i = 0; i < 5; i++) {
-                Button shelfButton = new Button();
-                shelfButton.setOnAction(this::handleCheckmarkButton);
-                ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
-                img.setImage(new Image("misc/sort-down.png"));
-            }
-            handleShelfButton();*/
         }
     }
 
-    private void handleShelfButton(){
+    /**
+     * Sends the server a request to insert the tiles in the selected column of the shelf
+     */
+    private void handleShelfButton(ActionEvent e){
+        if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
+        else{//TODO RMI
+        }
 
+
+        shelfButtonsPane.setVisible(false);
+    }
+
+    private void createShelfButtons(){
+        for (int i = 0; i < 5; i++) {
+            Button shelfButton = new Button();
+            shelfButton.setId(Integer.toString(i));
+            shelfButton.setPrefSize(47, 47);
+            shelfButton.setOpacity(0);
+            shelfButton.setVisible(true);
+            shelfButton.setOnAction(this::handleShelfButton);
+            shelfButtonsPane.add(shelfButton, i, 0);
+        }
     }
 
     /**
@@ -435,6 +446,10 @@ public class GameSceneController {
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
             System.out.println("RMI draw operation was a success");
 
+        //rmi
+
+
+        //socket still to be implemented
     }
 
     private boolean checkIfTileCanBeDrawn(Position p){
@@ -611,7 +626,7 @@ public class GameSceneController {
                     }
                 }
                 if(allWithSameXs){
-                    //System.out.println("x uguali");
+                    //("x uguali");
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
                         return;
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
@@ -649,7 +664,7 @@ public class GameSceneController {
         boolean oneSideFree = false;
         int row, column;
         //check up
-        //System.out.println("UP:");
+       // System.out.println("UP:");
         row = p.getX();
         column = p.getY()-1;
         if(getNodeAt(row, column, BoardGrid)==null){
@@ -680,8 +695,8 @@ public class GameSceneController {
     }
 
     private int getColumnToRemoveTileFrom(Position p){
-        ObservableList<Node> childrens = TileToBeInserted.getChildren();
-        for(Node n: childrens){
+        ObservableList<Node> children = TileToBeInserted.getChildren();
+        for(Node n: children){
             if(n.getUserData()!=null){
                 Position np = (Position) n.getUserData();
                 if(np.getX()==p.getX() && np.getY()==p.getY()){
@@ -796,8 +811,6 @@ public class GameSceneController {
         }
     }
 
-
-
     public void chatButtonPressed(ActionEvent e){
         String message=chatTextField.getText();
         if(!Objects.equals(message, "")) {
@@ -814,8 +827,9 @@ public class GameSceneController {
 
     /**
      * Sends socket server a request to draw the selected tiles. It mimics input from CLI.
+     * Sets shelfButtonsPane to visible, draws tiles from board.
      */
-    private void socketHandleCheckmarkButton(){
+    private void socketHandleCheckmarkButton(ActionEvent e){
         boolean horizontal = true;
         Position min;
         int size = alreadyDrawnPositions.size();
@@ -829,14 +843,50 @@ public class GameSceneController {
         min = alreadyDrawnPositions.get(0);
         if (horizontal){
             for (Position p : alreadyDrawnPositions)
-                if (p.getX() < min.getX()) min = p;
+                if (p.getY() < min.getY()){
+                    min = p;
+                }
         } else {
             for (Position p : alreadyDrawnPositions)
-                if (p.getY() < min.getY()) min = p;
+                if (p.getX() < min.getX()){
+                    min = p;
+                }
         }
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
         clientSocket.clientSpeaker(Integer.toString(size));
+        if (horizontal) {
+           clientSocket.clientSpeaker("2");
+        }
+        else {
+           clientSocket.clientSpeaker("1");
+        }
+        //System.out.println(min.getX() + ", " + min.getY() + ", " + size);
+        //TODO draw tiles from board
+        shelfButtonsPane.setVisible(true);
+    }
+
+    /**
+     * Sends server selected column and GUI message with serialized List<Position>
+     */
+    private void socketHandleShelfButton(ActionEvent e){
+        // sends selected column
+        Button button = (Button) e.getSource();
+        System.out.println("Button getid: " + button.getId());
+        if (!Objects.isNull(clientSocket)) {
+            clientSocket.clientSpeaker(button.getId());
+        }
+
+        // Sends List<Position>, the positions of the selected tiles, to the server
+        if (TileToBeInserted.getChildren().size() > 1) {
+            List<Position> positionList = new ArrayList<>();
+            for (Node n : TileToBeInserted.getChildren()) {
+                Position p = (Position) n.getUserData();
+                if (p != null) positionList.add(p);
+            }
+            System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
+            clientSocket.clientSpeaker("[GUI]" + clientSocket.gson.toJson(positionList));
+        }
     }
 
     //****** end socket specific ********//

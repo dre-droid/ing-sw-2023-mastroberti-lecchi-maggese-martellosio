@@ -47,12 +47,10 @@ public class Server {
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
 
-            //waits that all players connect
-            while (!controller.hasGameStarted() && isEveryoneConnected()) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+            // waits that all players connect and game starts
+            synchronized (controller) {
+                while (!controller.hasGameStarted() && isEveryoneConnected()) {
+                    controller.wait();
                 }
             }
 

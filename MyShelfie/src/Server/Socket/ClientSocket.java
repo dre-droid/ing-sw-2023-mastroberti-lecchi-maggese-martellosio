@@ -284,7 +284,7 @@ public class ClientSocket {
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     message = bufferRead.readLine();
                     synchronized (this) {   //writing to output is synchronized with other writing methods
-                        output.println(message);
+                        if (!message.startsWith("[GUI])")) output.println(message);
                     }
                 }
 

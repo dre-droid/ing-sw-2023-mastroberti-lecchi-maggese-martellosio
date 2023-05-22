@@ -86,6 +86,7 @@ public class Controller {
                 //System.out.println(nickname + " joined the game");
                 if (game.hasGameStarted()) {
                     server.serverRMI.notifyStartOfGame();
+                    notifyAll();
                 }
                 return 0;
             } else {
