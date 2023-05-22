@@ -15,6 +15,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void cannotCreateNewGame(String problem) throws RemoteException;
 
     public void someoneJoinedTheGame(String nickname) throws RemoteException;
+    public void gameHasBeenCreated() throws RemoteException;
 
     public void startingTheGame(String startingPlayer) throws RemoteException;
 

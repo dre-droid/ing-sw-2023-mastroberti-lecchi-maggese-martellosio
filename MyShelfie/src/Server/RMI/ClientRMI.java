@@ -22,6 +22,7 @@ public class ClientRMI implements Runnable{
     private boolean MyTurnFlag;
     private boolean EndGameFlag;
     private boolean GameStartFlag;
+    private boolean gameHasBeenCreated;
     int myport;
 
     public ClientRMI(){
@@ -29,10 +30,15 @@ public class ClientRMI implements Runnable{
         MyTurnFlag = false;
         EndGameFlag = false;
         GameStartFlag = false;
+        gameHasBeenCreated = false;
     }
 
     public void setMyTurnFlag(boolean value){
         MyTurnFlag = value;
+    }
+
+    public void setGameHasBeenCreated(boolean value) {
+        this.gameHasBeenCreated = value;
     }
 
     public boolean getMyTurnFlag(){
@@ -82,10 +88,30 @@ public class ClientRMI implements Runnable{
         }while(!outcome);
     }
 
-    private void joinGame(Scanner userInput) throws RemoteException {
+    private void joinGame(Scanner userInput) throws RemoteException, InterruptedException {
         int returnCode;
         do{
             playerNickname = userInput.nextLine();
+            while(serverRMI.joinLobby(playerNickname, myport) != 0)
+                playerNickname = userInput.nextLine();
+            if(serverRMI.isGameBeingCreated()){
+                System.out.println("Game is being created by another player...");
+                /*while (!gameHasBeenCreated){
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                 */
+                synchronized (notifications){
+                    while(!gameHasBeenCreated){
+                        notifications.wait();
+                    }
+                }
+
+            }
             returnCode = serverRMI.joinGame(playerNickname,myport);
             switch(returnCode){
                 case -1: {
