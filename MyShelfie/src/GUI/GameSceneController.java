@@ -280,6 +280,10 @@ public class GameSceneController {
 
     }
 
+    /**
+     * this method is used to remove the image of the tiles that has been drawn by a player from the board gui
+     * @param boardView a matrix representing the current state of the board
+     */
     public void removeDrawnTilesFromBoard(TilePlacingSpot[][] boardView){
         Platform.runLater(new Runnable() {
             @Override
@@ -338,8 +342,11 @@ public class GameSceneController {
     }
 
 
-
-
+    /**
+     * this method is used to handle the event on click of the tiles in the board, if the tile is not already been drawn then it's drawn
+     * and placed in the TileToBeInserted grid pane, then the border of the drawn tile in the board turns to yellow
+     * @param event event triggering the call of this method
+     */
     private void boardTileClicked(Event event) {
         if (drawnTilesCounter < 3) {
             //System.out.println(event.getSource().toString());
@@ -452,6 +459,12 @@ public class GameSceneController {
         //socket still to be implemented
     }
 
+    /**
+     * this method is used to check wether a tile can be drawn from the board (is on the same row/column of the other drawn tiles,
+     * is drawable according to game rules)
+     * @param p it's the position of the tile in the board that we want to draw
+     * @return true if the tile is drawable, false otherwise
+     */
     private boolean checkIfTileCanBeDrawn(Position p){
         //sulla stessa riga delle altre tiles
         boolean returnValue= false;
@@ -534,6 +547,11 @@ public class GameSceneController {
         TopLabel.setText(player + "'s turn.");
     }
 
+    /**
+     * This method is used to find the first empty spot on the first row in a gridpane
+     * @param gridPane the gridPane where we want to find the first empty spot
+     * @return the column of the first row that is empty
+     */
     private int getFirstEmptySpot(GridPane gridPane){
         for(int column =0; column<3; column++){
             if(getNodeAt(0,column,gridPane)==null)
@@ -542,6 +560,12 @@ public class GameSceneController {
         return -1;
     }
 
+    /**
+     * This method is used to remove a tile form the TileToBeInserted gridpane, this method is called by pressing on a tile in the board
+     * that has the yellow border or on the red x on the tiles in the TileToBeInserted gridpane
+     * it is not possible to remove the tile that is in the middle of other two
+     * @param event
+     */
     private void removeTileFromDrawnTiles(Event event){
         //System.out.println("remove tile is called ");
         try{
