@@ -176,6 +176,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException {
+        System.out.println(nickname+" has updated the board");
         gsc.updateBoard(boardView);
     }
 

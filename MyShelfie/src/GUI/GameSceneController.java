@@ -178,7 +178,8 @@ public class GameSceneController {
                                 //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
                                 rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
                                 //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                                BoardGrid.add(rect,j,i);
+                                if(getNodeAt(i,j,BoardGrid)==null)
+                                    BoardGrid.add(rect,j,i);
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
                             else{
@@ -287,6 +288,7 @@ public class GameSceneController {
                         if(boardView[i][j].isEmpty()){
                             Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
                             if(tileAtThisPosition!=null){
+                                System.out.println("("+i+","+j+") dovrebbe essere eliminato");
                                 BoardGrid.getChildren().remove(tileAtThisPosition);
                             }
                         }
@@ -380,7 +382,7 @@ public class GameSceneController {
         if (alreadyDrawnPositions.size() > 0) {
             if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton();
             else {
-                System.out.println("drawTilesFromRMIServer");
+                //System.out.println("drawTilesFromRMIServer");
                 drawTilesFromRMIServer();
             }
 
@@ -417,9 +419,9 @@ public class GameSceneController {
         //we sort the list of position now
         if(onSameRow){
             alreadyDrawnPositions = alreadyDrawnPositions.stream().sorted(Comparator.comparingInt(Position::getY)).toList();
-            for(int i=0;i<alreadyDrawnPositions.size();i++){
+            /*for(int i=0;i<alreadyDrawnPositions.size();i++){
                 System.out.println("("+alreadyDrawnPositions.get(i).getX()+","+alreadyDrawnPositions.get(i).getY()+")");
-            }
+            }*/
             direction = Board.Direction.RIGHT;
         }
         else{
@@ -429,7 +431,7 @@ public class GameSceneController {
         x = alreadyDrawnPositions.get(0).getX();
         y = alreadyDrawnPositions.get(0).getY();
         amount = drawnTilesCounter;
-        System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
+        //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
             System.out.println("RMI draw operation was a success");
 
@@ -530,7 +532,7 @@ public class GameSceneController {
         try{
             ImageView sender = (ImageView) event.getSource();
             StackPane stackPane = (StackPane) sender.getParent();
-            System.out.println("tile counter: "+drawnTilesCounter);
+            //System.out.println("tile counter: "+drawnTilesCounter);
             if(drawnTilesCounter==3){
                 //if the tile that is being removed has two tiles selecte around it cannot be removed
                 Position maybeMiddle = (Position) stackPane.getUserData();
@@ -541,7 +543,7 @@ public class GameSceneController {
                     }
                 }
                 for(Position p: otherPositions){
-                    System.out.println("("+p.getX()+","+p.getY()+")");
+                    //System.out.println("("+p.getX()+","+p.getY()+")");
                 }
                 boolean allWithSameXs= true;
                 int x=-1;
@@ -595,9 +597,9 @@ public class GameSceneController {
                         otherPositions.add(p);
                     }
                 }
-                for(Position p: otherPositions){
+                /*for(Position p: otherPositions){
                     System.out.println("("+p.getX()+","+p.getY()+")");
-                }
+                }*/
                 boolean allWithSameXs= true;
                 int x=-1;
                 for(Position p: alreadyDrawnPositions){
@@ -609,14 +611,14 @@ public class GameSceneController {
                     }
                 }
                 if(allWithSameXs){
-                    System.out.println("x uguali");
+                    //System.out.println("x uguali");
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
                         return;
                     if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
                         return;
                 }
                 else{
-                    System.out.println("Y uguali");
+                    //System.out.println("Y uguali");
                     if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
                         return;
                     if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
@@ -626,11 +628,11 @@ public class GameSceneController {
 
             sender.setUserData(0);
             sender.setStyle("-fx-stroke-width: 0;");
-            System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
+            //System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
             StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
-            System.out.println(stackPane.toString());
+            //System.out.println(stackPane.toString());
             if(TileToBeInserted.getChildren().remove(stackPane)){
-                System.out.println("ok sono stato cancellato");
+                //System.out.println("ok sono stato cancellato");
                 drawnTilesCounter--;
                 Position p = (Position) stackPane.getUserData();
                 alreadyDrawnPositions.remove(
@@ -647,28 +649,28 @@ public class GameSceneController {
         boolean oneSideFree = false;
         int row, column;
         //check up
-        System.out.println("UP:");
+        //System.out.println("UP:");
         row = p.getX();
         column = p.getY()-1;
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check down
-        System.out.println("DOWN:");
+        //System.out.println("DOWN:");
         row = p.getX();
         column = p.getY()+1;
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check left
-        System.out.println("LEFT:");
+        //System.out.println("LEFT:");
         row = p.getX()-1;
         column = p.getY();
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check right
-        System.out.println("RIGHT:");
+        //System.out.println("RIGHT:");
         row = p.getX()+1;
         column = p.getY();
         if(getNodeAt(row, column, BoardGrid)==null){
@@ -683,7 +685,7 @@ public class GameSceneController {
             if(n.getUserData()!=null){
                 Position np = (Position) n.getUserData();
                 if(np.getX()==p.getX() && np.getY()==p.getY()){
-                    System.out.println("yeeeeeee");
+                    //System.out.println("yeeeeeee");
                     return transformIntegerToInt(GridPane.getColumnIndex(n));
                 }
             }
@@ -699,7 +701,7 @@ public class GameSceneController {
             //System.out.println(node.toString());
             if(transformIntegerToInt(GridPane.getRowIndex(node)) == row && transformIntegerToInt(GridPane.getColumnIndex(node)) == column) {
                 result = node;
-                System.out.println(result.toString());
+                //System.out.println(result.toString());
                 break;
             }
         }
