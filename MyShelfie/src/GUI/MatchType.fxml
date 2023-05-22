@@ -15,10 +15,10 @@
             <Font size="38.0" />
          </font>
       </Label>
-      <Button fx:id="CreateGameButton" layoutX="603.0" layoutY="480.0" mnemonicParsing="false" onAction="#switchtoGameScene" text="Create GAME" />
+      <Button fx:id="CreateGameButton" layoutX="603.0" layoutY="483.0" mnemonicParsing="false" onAction="#switchtoGameScene" text="Create GAME" />
       <Pane layoutX="470.0" layoutY="407.0" prefHeight="52.0" prefWidth="359.0">
          <children>
-            <RadioButton fx:id="rButton3p" mnemonicParsing="false" text="3p" textFill="#fffdfd">
+            <RadioButton fx:id="rButton3p" layoutX="150.0" mnemonicParsing="false" text="3p" textFill="#fffdfd">
                <font>
                   <Font size="20.0" />
                </font>
@@ -26,14 +26,14 @@
                   <ToggleGroup fx:id="MatchTypeGroup" />
                </toggleGroup>
             </RadioButton>
-            <RadioButton fx:id="rButton2p" layoutX="150.0" layoutY="1.0" mnemonicParsing="false" text="2p" textFill="#fcfcfc" toggleGroup="$MatchTypeGroup">
-               <font>
-                  <Font size="20.0" />
-               </font>
-            </RadioButton>
-            <RadioButton fx:id="rButton4p" layoutX="279.0" layoutY="-1.0" mnemonicParsing="false" text="4p" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
+            <RadioButton fx:id="rButton4p" layoutX="293.0" layoutY="-1.0" mnemonicParsing="false" text="4p" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
                <font>
                   <Font size="22.0" />
+               </font>
+            </RadioButton>
+            <RadioButton fx:id="rButton2p" mnemonicParsing="false" text="2p" textFill="#fcfcfc" toggleGroup="$MatchTypeGroup">
+               <font>
+                  <Font size="20.0" />
                </font>
             </RadioButton>
          </children>
