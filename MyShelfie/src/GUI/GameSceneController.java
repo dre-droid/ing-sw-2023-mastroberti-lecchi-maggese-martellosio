@@ -337,6 +337,10 @@ public class GameSceneController {
         });
     }
 
+    /**
+     * This method is used to update the leaderboard in the gui
+     * @param leaderboard the List of players containing the leaderboard data
+     */
     public void updateLeaderboard(List<Player> leaderboard){
         Platform.runLater(new Runnable() {
             @Override
@@ -459,6 +463,10 @@ public class GameSceneController {
         drawIsOver = false;
     }
 
+    /**
+     * This method is used to update the shelf when playing with the rmi connection
+     * @param shelf a matrix of tile representing the state of the shelf
+     */
     public void rmiUpdateShelf(Tile[][] shelf){
         for (int rows = 0; rows < 6; rows++)
             for (int columns = 0; columns < 5; columns++){
@@ -471,6 +479,10 @@ public class GameSceneController {
             }
     }
 
+    /**
+     * This method is called to insert the tile picked with the gui in the shelf on the rmi server
+     * @param e
+     */
     private void rmiHandleShelfButton(Event e){
         Button button = (Button) e.getSource();
         System.out.println("Button getid: " + button.getId());
@@ -771,6 +783,11 @@ public class GameSceneController {
         }
     }
 
+    /**
+     * This method is used to check if the tile in position p on the board is drawable according to the game rules (it must have at least one side free)
+     * @param p position of the tile on which we are doing the control
+     * @return true if the tile is drawable, false otherwise
+     */
     private boolean checkIfTileIsDrawable(Position p){
         boolean oneSideFree = false;
         int row, column;
@@ -805,6 +822,11 @@ public class GameSceneController {
         return oneSideFree;
     }
 
+    /**
+     * This method is used to find the column of the tile to be removed from TileToBeInserted when we press a tile with yellow border on the board
+     * @param p position of the tile on the board
+     * @return the column in which the pressed tile is in the TileToBeInserted gridpane
+     */
     private int getColumnToRemoveTileFrom(Position p){
         ObservableList<Node> children = TileToBeInserted.getChildren();
         for(Node n: children){
@@ -819,6 +841,13 @@ public class GameSceneController {
         return -1;
     }
 
+    /**
+     * This method is used to get the Node in position (x, y) in the gridpane
+     * @param row row of the element
+     * @param column column of the element
+     * @param gridPane gridpane in which we look for the node
+     * @return null if the position (x,y) is empty in gridPane, otherwise it returns the node in that position
+     */
     private Node getNodeAt(int row, int column, GridPane gridPane){
         Node result = null;
         ObservableList<Node> childrens = gridPane.getChildren();
@@ -834,6 +863,11 @@ public class GameSceneController {
         return result;
     }
 
+    /**
+     * this method is used to transform an integer into an int
+     * @param i integer
+     * @return the int value of the integer if the integer is not null, 0 otherwise
+     */
     private int transformIntegerToInt(Integer i){
         if(i==null)
             return 0;
@@ -1020,6 +1054,5 @@ public class GameSceneController {
 }
 //TODO make application not resizable
 //TODO visualize common goal tokens in gui
-//TODO update turn GUI
-//TODO remove the drawn tiles from TileToBeInserted after they are inserted in the shelf
-//TODO after the green check mark is pressed the tiles in the board cannot be selected anymore
+
+
