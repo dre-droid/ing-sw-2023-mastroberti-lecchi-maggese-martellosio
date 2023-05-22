@@ -337,6 +337,19 @@ public class GameSceneController {
         });
     }
 
+    public void updateLeaderboard(List<Player> leaderboard){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                final ObservableList<TableRecord> data = FXCollections.observableArrayList();
+                for (Player p : leaderboard) {
+                    data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
+                }
+                TableLeaderboard.setItems(data);
+            }
+        });
+    }
+
     /**
      * This method should be called at the end of a client's turn. It updates the board after
      * changes made by the client.
