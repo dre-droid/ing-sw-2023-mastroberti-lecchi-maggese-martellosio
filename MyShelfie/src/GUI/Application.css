@@ -33,5 +33,7 @@
   -fx-border-radius: 5px;
 }
 .curlz {
-    -fx-font-family: 'Jokerman';
-}
+ -fx-font-family: Jokerman;
+ -fx-font-size: 25;
+ -fx-font-color: white;
+ }

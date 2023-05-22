@@ -24,41 +24,40 @@ public class ConnectionTypeController  {
     Button CreateCreateGameButton;
 
     @FXML
+    private RadioButton ButtonSocket;
+    @FXML
     private RadioButton rButtonRMI;
 
 
     public void switchToLoginScene(ActionEvent event){
-        Scene scene;
-        Parent root;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
-        ClientSocket clientSocket = null;
-        ClientNotificationRMIGUI clientRMI = null;
+        ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
+        if (selectedToggle.isSelected()) {
+            Scene scene;
+            Parent root;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+            ClientSocket clientSocket = null;
+            ClientNotificationRMIGUI clientRMI = null;
 
-
-        try {
-            ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
-            if (selectedToggle != null) {
+            try {
                 if (rButtonRMI.isSelected()) clientRMI = new ClientNotificationRMIGUI();
                 else clientSocket = new ClientSocket();
+
+                root = loader.load();
+                LoginSceneController loginSceneController = loader.getController();
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                if (Objects.isNull(clientSocket)) {
+                    //stage.setUserData(clientRMI);
+                    loginSceneController.setClient(clientRMI);
+                } else {
+                    loginSceneController.setClient(clientSocket);
+                }
+                scene = new Scene(root);
+                stage.setScene(scene);
+                stage.show();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-
-            root = loader.load();
-            LoginSceneController loginSceneController = loader.getController();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            if (Objects.isNull(clientSocket)) {
-                //stage.setUserData(clientRMI);
-                loginSceneController.setClient(clientRMI);
-            } else {
-                loginSceneController.setClient(clientSocket);
-            }
-
-
-            scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }

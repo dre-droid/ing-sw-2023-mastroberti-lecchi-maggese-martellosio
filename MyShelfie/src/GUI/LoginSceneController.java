@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
@@ -27,12 +28,7 @@ import java.util.Random;
 
 public class LoginSceneController {
     @FXML
-    private javafx.scene.control.TextArea messageTextArea;
-    public javafx.scene.control.Label InfoLabel;
-    @FXML
-    Label TopLabel;
-    @FXML
-    Button LoginButton;
+    public Label messageTextArea;
     @FXML
     javafx.scene.control.TextField usernameText;
     @FXML
@@ -152,7 +148,7 @@ public class LoginSceneController {
             }
             if (clientSocket.nextScene.equals("GameScene")) {
                 //change scene to GameScene
-                socketSwitchToMatchTypeScene(event);
+                socketSwitchToGameScene(event);
 
             if (clientSocket.nextScene.equals("Unchanged")) {
                 Platform.runLater(() -> {

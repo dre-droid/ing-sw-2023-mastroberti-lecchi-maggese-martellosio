@@ -4,27 +4,48 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="ConnectionType" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="366.0" prefWidth="568.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.ConnectionTypeController">
-   <children>
-      <Label fx:id="ConnectionLabel" layoutX="24.0" layoutY="26.0" styleClass="open-sans" text="Choose the connection:" textFill="#fffafa">
-         <font>
-            <Font size="50.0" />
-         </font>
-      </Label>
-      <RadioButton fx:id="ButtonSocket" layoutX="88.0" layoutY="210.0" mnemonicParsing="false" styleClass="open-sans" text="Socket" textFill="#fffdfd">
-         <font>
-            <Font size="22.0" />
-         </font>
-         <toggleGroup>
-            <ToggleGroup fx:id="MatchTypeGroup" />
-         </toggleGroup></RadioButton>
-      <RadioButton fx:id="rButtonRMI" layoutX="385.0" layoutY="209.0" mnemonicParsing="false" text="RMI" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
-         <font>
-            <Font size="22.0" />
-         </font></RadioButton>
-      <Button fx:id="CreateGameButton" layoutX="230.0" layoutY="294.0" mnemonicParsing="false" onAction="#switchToLoginScene" text="Next" />
-   </children>
+<AnchorPane fx:id="ConnectionType" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.ConnectionTypeController">
+   <Pane layoutX="452.0" prefHeight="871.0" prefWidth="849.0">
+      <children>
+            <ImageView fitHeight="865.0" fitWidth="1298.0" pickOnBounds="true" preserveRatio="true" translateX="-250.0">
+                  <Image url="@../../../MyShelfie/Resources/Publisher_material/Display_1.jpg" />
+            </ImageView>
+         <Pane layoutX="248.0" layoutY="319.0" prefHeight="375.0" prefWidth="354.0">
+            <children>
+                  <Label fx:id="ConnectionLabel" layoutX="-87.0" prefHeight="63.0" prefWidth="572.0" styleClass="open-sans" text="Choose the connection:" textFill="#fffafa">
+                     <font>
+                        <Font size="50.0" />
+                     </font>
+                  </Label>
+                  <RadioButton fx:id="ButtonSocket" layoutX="14.0" layoutY="173.0" mnemonicParsing="false" styleClass="open-sans" text="Socket" textFill="#fffdfd">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="MatchTypeGroup" />
+                     </toggleGroup>
+               </RadioButton>
+                  <RadioButton fx:id="rButtonRMI" layoutX="246.0" layoutY="173.0" mnemonicParsing="false" text="RMI" textFill="#fffdfd" toggleGroup="$MatchTypeGroup">
+                     <font>
+                        <Font size="22.0" />
+                     </font>
+               </RadioButton>
+                  <Button layoutX="155.0" layoutY="270.0" mnemonicParsing="false" onAction="#switchToLoginScene" text="Next" />
+            </children>
+         </Pane>
+      </children>
+   </Pane>
+      <Pane prefHeight="865.0" prefWidth="452.0" style="-fx-background-color: #614124;">
+            <ImageView fitHeight="865.0" fitWidth="452.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+                <Image url="@../../../MyShelfie/Resources/Publisher_material/MyShelfie.png" />
+            </ImageView>
+            <Label layoutX="40.0" layoutY="210.0" prefHeight="576.0" prefWidth="372.0" styleClass="curlz" text="Welcome to My Shelfie!            In this board game, players collect tiles from the Living Room board and place them in their libraries to earn points. The goal is to fill your library by strategically choosing 1, 2, or 3 adjacent tiles that form a straight line with at least one free side. Points are earned based grouping tiles in the library. The game ends when a player fills their library!" textFill="WHITE" wrapText="true">
+            </Label>
+      </Pane>
 </AnchorPane>
