@@ -141,12 +141,16 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         List<Tile> drawnTiles = controller.drawFromBoard(playerNickname, x, y, amount, direction);
         if(drawnTiles==null){
             //clients.stream().filter(client->client.nickname.equals(playerNickname)).toList().get(0).client.moveIsNotValid();
+            System.out.println("move is not valid");
             clients.get(playerNickname).moveIsNotValid();
             return null;
         }
         /*timerDraw.cancel();
         timerInsert = new Timer();
         startTimer(timerInsert,insertDelay);*/
+        for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+            client.getValue().updateBoard(controller.getBoard());
+        }
         return drawnTiles;
     }
 

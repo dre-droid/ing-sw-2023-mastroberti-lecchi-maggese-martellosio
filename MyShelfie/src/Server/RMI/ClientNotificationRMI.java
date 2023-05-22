@@ -116,5 +116,10 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         System.out.println("The command you sent has invalid parameters");
     }
 
+    @Override
+    public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException {
+
+    }
+
 
 }

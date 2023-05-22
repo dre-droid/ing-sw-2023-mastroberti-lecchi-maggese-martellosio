@@ -1,35 +1,25 @@
 package GUI;
 
 import GUI.PositionStuff.Position;
-import GUI.PositionStuff.PositionRowComparator;
 import Server.Socket.ClientSocket;
-import com.google.gson.reflect.TypeToken;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
@@ -135,6 +125,7 @@ public class GameSceneController {
     public void updateBoard(TilePlacingSpot[][] grid){
         alreadyDrawnPositions = new ArrayList<>();
         drawnTilesCounter = 0;
+        removeDrawnTilesFromBoard(grid);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -191,6 +182,8 @@ public class GameSceneController {
                                 //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                             }
                             else{
+                                Rectangle rect = (Rectangle) getNodeAt(i,j,BoardGrid);
+
                                 //System.out.print("- ");
                             }
                         }else{
@@ -285,6 +278,24 @@ public class GameSceneController {
 
     }
 
+    public void removeDrawnTilesFromBoard(TilePlacingSpot[][] boardView){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0;i<9;i++){
+                    for(int j=0;j<9;j++){
+                        if(boardView[i][j].isEmpty()){
+                            Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
+                            if(tileAtThisPosition!=null){
+                                BoardGrid.getChildren().remove(tileAtThisPosition);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     public void createLeaderboard(List<Player> leaderboard){
         Platform.runLater(new Runnable() {
             @Override
@@ -369,16 +380,18 @@ public class GameSceneController {
         if (alreadyDrawnPositions.size() > 0) {
             if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton();
             else {
+                System.out.println("drawTilesFromRMIServer");
+                drawTilesFromRMIServer();
             }
 
 
-            for (int i = 0; i < 5; i++) {
+            /*for (int i = 0; i < 5; i++) {
                 Button shelfButton = new Button();
                 shelfButton.setOnAction(this::handleCheckmarkButton);
                 ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
                 img.setImage(new Image("misc/sort-down.png"));
             }
-            handleShelfButton();
+            handleShelfButton();*/
         }
     }
 
@@ -389,9 +402,10 @@ public class GameSceneController {
     /**
      * this method is used to send the tile to draw to the server, is called when the green check button is pressed
      */
-    public void drawTilesFromServer(){
+    public void drawTilesFromRMIServer(){
         //first we get all the parameters we need from the gui
-        int x, y, amount, direction;
+        int x, y, amount;
+        Board.Direction direction;
         //we now have to check if the tiles are all on the same column or on the same row
         boolean onSameRow = true;
         x = alreadyDrawnPositions.get(0).getX();
@@ -402,17 +416,23 @@ public class GameSceneController {
         }//if onSameRow is true that means that the tiles are on the same row, if it is false then they are on the same column
         //we sort the list of position now
         if(onSameRow){
-            Collections.sort(alreadyDrawnPositions, new PositionRowComparator());
+            alreadyDrawnPositions = alreadyDrawnPositions.stream().sorted(Comparator.comparingInt(Position::getY)).toList();
             for(int i=0;i<alreadyDrawnPositions.size();i++){
                 System.out.println("("+alreadyDrawnPositions.get(i).getX()+","+alreadyDrawnPositions.get(i).getY()+")");
             }
+            direction = Board.Direction.RIGHT;
         }
+        else{
+            alreadyDrawnPositions = alreadyDrawnPositions.stream().sorted(Comparator.comparingInt(Position::getX)).toList();
+            direction = Board.Direction.DOWN;
+        }
+        x = alreadyDrawnPositions.get(0).getX();
+        y = alreadyDrawnPositions.get(0).getY();
+        amount = drawnTilesCounter;
+        System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
+        if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
+            System.out.println("RMI draw operation was a success");
 
-
-        //rmi
-
-
-        //socket still to be implemented
     }
 
     private boolean checkIfTileCanBeDrawn(Position p){

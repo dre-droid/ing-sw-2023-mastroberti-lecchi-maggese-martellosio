@@ -103,7 +103,6 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             List<CommonGoalCard> cgcs = serverRMI.getCommonGoalCards();
             List<Player> leaderboard = serverRMI.getLeaderboard();
             String isPlaying = serverRMI.getIsPlaying();
-
             if(gsc!=null) {
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, cgcs, leaderboard, isPlaying);
             }
@@ -112,6 +111,15 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             re.printStackTrace();
         }
     }
+
+    public boolean drawTilesFromBoard(int x, int y, int amount, Board.Direction direction){
+        try {
+            return serverRMI.drawTilesFromBoard(nickname, x, y, amount, direction) != null;
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 
 
@@ -164,6 +172,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void invalidCommandSent() throws RemoteException {
 
+    }
+
+    @Override
+    public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException {
+        gsc.updateBoard(boardView);
     }
 
     public void setGameSceneController(GameSceneController controller){
