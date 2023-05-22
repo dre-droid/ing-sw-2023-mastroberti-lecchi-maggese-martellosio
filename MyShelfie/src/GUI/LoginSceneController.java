@@ -113,6 +113,7 @@ public class LoginSceneController {
                         gsc.getClientRMI().updateGUIAtBeginningOfGame();
                         gsc.setPlayerName(clientRMI.getNickname());
 
+                        stage.setResizable(false);
                         stage.show();
                     }break;
                     default:{
@@ -130,6 +131,7 @@ public class LoginSceneController {
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
     }
 
@@ -183,6 +185,7 @@ public class LoginSceneController {
 
             scene = new Scene(root);
             stage.setScene(scene);
+            stage.setResizable(false);
             stage.show();
         });
     }
@@ -199,6 +202,7 @@ public class LoginSceneController {
             matchTypeController.setClient(clientSocket);
             scene = new Scene(root);
             stage.setScene(scene);
+            stage.setResizable(false);
             stage.show();
         });
     }

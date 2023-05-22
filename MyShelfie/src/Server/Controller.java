@@ -2,20 +2,12 @@ package Server;
 
 import Server.Socket.ServerSock;
 import Server.Socket.drawInfo;
-import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
-import javax.naming.ldap.Control;
 import java.io.*;
-import java.lang.reflect.Type;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Controller {
     Game game;
@@ -147,11 +139,18 @@ public class Controller {
      * @return null if the game hasn't started yet, a matrix o TilePlacingSpot representing the current state of the board if the
      * game has started
      */
-    public TilePlacingSpot[][] getBoard(){
+    public TilePlacingSpot[][] getTilePlacingSpot(){
         if(game.hasGameStarted()){
             return game.getBoard().getBoardForDisplay();
         }
         return null;
+    }
+
+    /**
+     * This method is used to get a copy of the board
+     */
+    public Board getBoard(){
+        return new Board(game.getBoard());
     }
 
     /**
@@ -330,6 +329,7 @@ public class Controller {
                     saveGameProgress();
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
+                    serverSock.updateGameObjectsAfterTurn();
                     invalidMoveFlag = false;
                 } else
                     endGame();
@@ -398,5 +398,4 @@ public class Controller {
     public List<CommonGoalCard> getCommonGoalCards(){
         return game.getCommonGoalCards();
     }
-
 }

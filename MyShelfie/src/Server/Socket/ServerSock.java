@@ -505,7 +505,7 @@ public class ServerSock {
                 List<Tile> tileList = new ArrayList<>();
 
                 for (Position p: positionList){
-                    tileList.add(controller.getBoard()[p.getX()][p.getY()].drawTileFromSpot());
+                    tileList.add(controller.getTilePlacingSpot()[p.getX()][p.getY()].drawTileFromSpot());
                 }
                 reorderedTiles = tileList;
             }
@@ -614,7 +614,7 @@ public class ServerSock {
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                sendSerializedObjects(pw, c.getName(), new Board(controller.getBoard()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getLeaderboard());
+                sendSerializedObjects(pw, c.getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getLeaderboard());
                 pw.println("[CURRENTPLAYER]" + nickname);
                 pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
             }
@@ -658,6 +658,23 @@ public class ServerSock {
 
     }
 
+    public void updateGameObjectsAfterTurn(){
+        try {
+            for (socketNickStruct s : clients) {
+                PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
+                String jsonBoard = gson.toJson(controller.getBoard());
+                pw.println("[GSONBOARD]" + jsonBoard);
+
+                String jsonShelf = gson.toJson(controller.getMyShelf(s.getName()));
+                pw.println("[GSONSHELF]" + jsonShelf);
+
+                String jsonLeaderboard = gson.toJson(controller.getLeaderboard());
+                pw.println("[GSONLEAD]" + jsonLeaderboard);
+                }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
      *  Creates new instance of clients array
      */

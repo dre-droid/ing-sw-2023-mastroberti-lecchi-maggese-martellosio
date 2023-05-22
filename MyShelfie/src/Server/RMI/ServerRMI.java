@@ -192,7 +192,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         timerInsert = new Timer();
         startTimer(timerInsert,insertDelay);*/
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-            client.getValue().updateBoard(controller.getBoard());
+            client.getValue().updateBoard(controller.getTilePlacingSpot());
         }
         return drawnTiles;
     }
@@ -232,7 +232,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     @Override
     public TilePlacingSpot[][] getBoard() throws RemoteException {
-        return controller.getBoard();
+        return controller.getTilePlacingSpot();
     }
 
     @Override

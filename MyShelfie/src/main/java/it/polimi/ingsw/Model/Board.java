@@ -64,6 +64,7 @@ public class Board {
         this.refill();
     }
 
+
     /**
      * Creates a board object given a TilePlacingSpot[][] - it does not check for the validity of the grid
      */
@@ -72,6 +73,14 @@ public class Board {
         this.grid = grid;
     }
 
+    /**
+     * Creates a copy of the passed board
+     */
+
+    public Board(Board b){
+        grid = b.grid;
+        bag = b.bag;
+    }
     /**
      * This method is used to draw tiles from the board
      *
