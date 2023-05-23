@@ -102,6 +102,16 @@ public class GameSceneController {
     private TextField chatTextField;
     @FXML
     public GridPane shelfButtonsPane;
+    @FXML
+    public ImageView MyToken1;
+    @FXML
+    public ImageView MyToken2;
+    @FXML
+    public ImageView EndGameToken1;
+    @FXML
+    public ImageView EndGameToken2;
+    @FXML
+    public ImageView EndGameToken3;
 
 
     public void setClient(ClientNotificationRMIGUI client) {
@@ -965,6 +975,7 @@ public class GameSceneController {
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
+        ImageView[] endgametokens = new ImageView[]{EndGameToken1,EndGameToken2,EndGameToken3};
         int n;
         if(clientSocket!=null){
              n = clientSocket.getLeaderboard().size();
@@ -972,8 +983,14 @@ public class GameSceneController {
                 if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
                     labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
                     shelfs[count].setImage(new Image("boards/bookshelf.png"));
+                    if(clientSocket.getLeaderboard().get(i).hasEndGameToken())
+                        endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
                     count++;
                 }
+                if(clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname()) && clientSocket.getLeaderboard().get(i).hasEndGameToken()){
+                    MyToken1.setImage(new Image("scoring_tokens/endgame.jpg"));
+                }
+
             }
         }else{
             List<Player> players = clientRMI.getLeaderboard();
@@ -996,7 +1013,12 @@ public class GameSceneController {
                             rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
                         }break;
                     }
+                    if(clientRMI.getLeaderboard().get(i).hasEndGameToken())
+                        endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
                     count++;
+                }
+                if(players.get(i).getNickname().equals(clientRMI.getNickname()) && players.get(i).hasEndGameToken()){
+                    MyToken1.setImage(new Image("scoring_tokens/endgame.jpg"));
                 }
             }
         }
@@ -1149,6 +1171,8 @@ public class GameSceneController {
 
         updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
     }
+
+
 
     //****** end socket specific ********//
 }
