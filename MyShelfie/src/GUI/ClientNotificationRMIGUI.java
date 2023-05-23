@@ -2,6 +2,7 @@ package GUI;
 
 import Server.RMI.ClientNotificationInterfaceRMI;
 import Server.RMI.ClientNotificationRMI;
+import Server.RMI.ClientRMI;
 import Server.RMI.RMIinterface;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
@@ -159,9 +160,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
-
-
-
+    public Tile[][] getShelfOfPlayer(String player){
+        try {
+            return serverRMI.getMyShelf(player);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException {
@@ -242,6 +247,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         gsc.updateBoard(boardView);
     }
 
+    @Override
+    public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
+        gsc.rmiUpdateOppShelf(nickname,grid);
+    }
+
     public void setGameSceneController(GameSceneController controller){
         gsc = controller;
     }
@@ -254,6 +264,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return null;
         }
 
+    }
+
+    public boolean hasGameStarted(){
+        try {
+            return serverRMI.hasGameStarted();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean isMyTurn(){

@@ -33,6 +33,15 @@ public class GameSceneController {
     @FXML
     public Text TopLabel;
 
+    @FXML
+    public GridPane Opp1ShelfGrid;
+
+    @FXML
+    public GridPane Opp2ShelfGrid;
+
+    @FXML
+    public GridPane Opp3ShelfGrid;
+
     public boolean drawIsOver;
 
     public GridPane PlayerShelfGrid;
@@ -377,6 +386,21 @@ public class GameSceneController {
         });
     }
 
+    public void rmiUpdateOppShelf(String nickname, Tile[][] grid){
+        if(Opp1ShelfGrid.getUserData()!=null)
+            if(((String)Opp1ShelfGrid.getUserData()).equals(nickname)){
+            rmiUpdateShelf(grid,Opp1ShelfGrid);
+            }
+        if(Opp2ShelfGrid.getUserData()!=null)
+            if(((String)Opp2ShelfGrid.getUserData()).equals(nickname)){
+                rmiUpdateShelf(grid,Opp2ShelfGrid);
+            }
+        if(Opp3ShelfGrid.getUserData()!=null)
+            if(((String)Opp3ShelfGrid.getUserData()).equals(nickname)){
+                rmiUpdateShelf(grid,Opp3ShelfGrid);
+            }
+    }
+
 
     /**
      * this method is used to handle the event on click of the tiles in the board, if the tile is not already been drawn then it's drawn
@@ -474,16 +498,22 @@ public class GameSceneController {
      * This method is used to update the shelf when playing with the rmi connection
      * @param shelf a matrix of tile representing the state of the shelf
      */
-    public void rmiUpdateShelf(Tile[][] shelf){
-        for (int rows = 0; rows < 6; rows++)
-            for (int columns = 0; columns < 5; columns++){
-                Tile t = shelf[rows][columns];
-                if (t != null){
-                    System.out.println(t.getImgPath());
-                    ImageView img = (ImageView) getNodeAt(rows, columns, PlayerShelfGrid);
-                    img.setImage(new Image(t.getImgPath(),45,45,true,true));
-                }
+    public void rmiUpdateShelf(Tile[][] shelf, GridPane gridpane){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                for (int rows = 0; rows < 6; rows++)
+                    for (int columns = 0; columns < 5; columns++){
+                        Tile t = shelf[rows][columns];
+                        if (t != null){
+                            //System.out.println(t.getImgPath());
+                            ImageView img = (ImageView) getNodeAt(rows, columns, gridpane);
+                            img.setImage(new Image(t.getImgPath(),45,45,true,true));
+                        }
+                    }
             }
+        });
+
     }
 
     /**
@@ -498,7 +528,7 @@ public class GameSceneController {
             System.out.println("Insert in shelf rmi successful");
         else
             System.out.println("Problem in insert in shelf");
-        rmiUpdateShelf(clientRMI.getMyShelf());
+        rmiUpdateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
     private void createShelfButtons(){
@@ -946,6 +976,20 @@ public class GameSceneController {
                 if(!players.get(i).getNickname().equals(clientRMI.getNickname())){
                     labels[count].setText(players.get(i).getNickname());
                     shelfs[count].setImage(new Image("boards/bookshelf.png"));
+                    switch(count){
+                        case 0:{
+                            Opp1ShelfGrid.setUserData(players.get(i).getNickname());
+                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                        }break;
+                        case 1:{
+                            Opp2ShelfGrid.setUserData(players.get(i).getNickname());
+                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                        }break;
+                        case 2:{
+                            Opp3ShelfGrid.setUserData(players.get(i).getNickname());
+                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                        }break;
+                    }
                     count++;
                 }
             }

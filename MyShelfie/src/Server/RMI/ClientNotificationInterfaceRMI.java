@@ -1,6 +1,7 @@
 package Server.RMI;
 
 import main.java.it.polimi.ingsw.Model.Player;
+import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.TilePlacingSpot;
 
 import java.rmi.RemoteException;
@@ -45,6 +46,8 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void invalidCommandSent() throws RemoteException;
 
     public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException;
+
+    public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException;
 
 
 

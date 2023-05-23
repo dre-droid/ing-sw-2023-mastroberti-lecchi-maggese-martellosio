@@ -138,5 +138,10 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
     }
 
+    @Override
+    public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
+
+    }
+
 
 }

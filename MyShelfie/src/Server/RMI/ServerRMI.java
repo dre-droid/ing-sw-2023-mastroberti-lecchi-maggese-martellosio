@@ -240,6 +240,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         if(controller.insertTilesInShelf(playernickName, tiles, column)){
             //timerInsert.cancel();
             System.out.println("ServerRMI-->tiles correctly inserted");
+            for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                if(!client.getKey().equals(playernickName)){
+                    client.getValue().updateOppShelf(playernickName, controller.getMyShelf(playernickName));
+                }
+            }
             endOfTurn(playernickName);
             return true;
         }

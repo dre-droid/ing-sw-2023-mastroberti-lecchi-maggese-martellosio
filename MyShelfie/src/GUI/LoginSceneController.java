@@ -100,7 +100,8 @@ public class LoginSceneController {
                         stage.setScene(scene);
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
-                        gsc.getClientRMI().updateGUIAtBeginningOfGame();
+                        if(gsc.getClientRMI().hasGameStarted())
+                            gsc.getClientRMI().updateGUIAtBeginningOfGame();
                         gsc.setPlayerName(clientRMI.getNickname());
 
                         stage.setResizable(false);
