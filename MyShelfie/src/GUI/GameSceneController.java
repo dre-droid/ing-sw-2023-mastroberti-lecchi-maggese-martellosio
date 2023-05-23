@@ -574,8 +574,11 @@ public class GameSceneController {
         y = alreadyDrawnPositions.get(0).getY();
         amount = drawnTilesCounter;
         //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
-        if(clientRMI.drawTilesFromBoard(x,y,amount,direction))
+        if(clientRMI.drawTilesFromBoard(x,y,amount,direction)){
             System.out.println("RMI draw operation was a success");
+
+        }
+
 
         shelfButtonsPane.setVisible(true);
     }
@@ -704,120 +707,123 @@ public class GameSceneController {
      */
     private void removeTileFromDrawnTiles(Event event){
         //System.out.println("remove tile is called ");
-        try{
-            ImageView sender = (ImageView) event.getSource();
-            StackPane stackPane = (StackPane) sender.getParent();
-            //System.out.println("tile counter: "+drawnTilesCounter);
-            if(drawnTilesCounter==3){
-                //if the tile that is being removed has two tiles selecte around it cannot be removed
-                Position maybeMiddle = (Position) stackPane.getUserData();
-                List<Position> otherPositions = new ArrayList<>();
-                for(Position p: alreadyDrawnPositions){
-                    if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
-                        otherPositions.add(p);
+        if(!drawIsOver){
+            try{
+                ImageView sender = (ImageView) event.getSource();
+                StackPane stackPane = (StackPane) sender.getParent();
+                //System.out.println("tile counter: "+drawnTilesCounter);
+                if(drawnTilesCounter==3){
+                    //if the tile that is being removed has two tiles selecte around it cannot be removed
+                    Position maybeMiddle = (Position) stackPane.getUserData();
+                    List<Position> otherPositions = new ArrayList<>();
+                    for(Position p: alreadyDrawnPositions){
+                        if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
+                            otherPositions.add(p);
+                        }
+                    }
+                    for(Position p: otherPositions){
+                        //System.out.println("("+p.getX()+","+p.getY()+")");
+                    }
+                    boolean allWithSameXs= true;
+                    int x=-1;
+                    for(Position p: alreadyDrawnPositions){
+                        if(x==-1){
+                            x=p.getX();
+                        }else{
+                            if(x!=p.getX())
+                                allWithSameXs = false;
+                        }
+                    }
+                    if(allWithSameXs){
+                        //System.out.println("x uguali");
+                        if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
+                            return;
+                        if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
+                            return;
+                    }
+                    else{
+                        //System.out.println("Y uguali");
+                        if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
+                            return;
+                        if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
+                            return;
                     }
                 }
-                for(Position p: otherPositions){
-                    //System.out.println("("+p.getX()+","+p.getY()+")");
-                }
-                boolean allWithSameXs= true;
-                int x=-1;
-                for(Position p: alreadyDrawnPositions){
-                    if(x==-1){
-                        x=p.getX();
-                    }else{
-                        if(x!=p.getX())
-                            allWithSameXs = false;
-                    }
-                }
-                if(allWithSameXs){
-                    //System.out.println("x uguali");
-                    if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
-                        return;
-                    if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
-                        return;
-                }
-                else{
-                    //System.out.println("Y uguali");
-                    if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
-                        return;
-                    if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
-                        return;
-                }
-            }
-            if(TileToBeInserted.getChildren().remove(stackPane)){
-                drawnTilesCounter--;
-                Position p = (Position) stackPane.getUserData();
-                Rectangle rec = (Rectangle) getNodeAt(p.getX(), p.getY(), BoardGrid);
-                rec.setUserData(0);
-                rec.setStyle("-fx-stroke-width: 0;");
-                alreadyDrawnPositions.remove(
-                        alreadyDrawnPositions.stream().filter(
-                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                        ).toList().get(0)
-                );
+                if(TileToBeInserted.getChildren().remove(stackPane)){
+                    drawnTilesCounter--;
+                    Position p = (Position) stackPane.getUserData();
+                    Rectangle rec = (Rectangle) getNodeAt(p.getX(), p.getY(), BoardGrid);
+                    rec.setUserData(0);
+                    rec.setStyle("-fx-stroke-width: 0;");
+                    alreadyDrawnPositions.remove(
+                            alreadyDrawnPositions.stream().filter(
+                                    position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                            ).toList().get(0)
+                    );
 
-            }
-        }catch(ClassCastException e){
-            //e.printStackTrace();
-            Rectangle sender = (Rectangle) event.getSource();
-            int row = transformIntegerToInt(GridPane.getRowIndex(sender));
-            int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
-            if(drawnTilesCounter==3){
-                //if the tile that is being removed has two tiles selecte around it cannot be removed
-                Position maybeMiddle = new Position(row,column);
-                List<Position> otherPositions = new ArrayList<>();
-                for(Position p: alreadyDrawnPositions){
-                    if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
-                        otherPositions.add(p);
-                    }
                 }
+            }catch(ClassCastException e){
+                //e.printStackTrace();
+                Rectangle sender = (Rectangle) event.getSource();
+                int row = transformIntegerToInt(GridPane.getRowIndex(sender));
+                int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
+                if(drawnTilesCounter==3){
+                    //if the tile that is being removed has two tiles selecte around it cannot be removed
+                    Position maybeMiddle = new Position(row,column);
+                    List<Position> otherPositions = new ArrayList<>();
+                    for(Position p: alreadyDrawnPositions){
+                        if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
+                            otherPositions.add(p);
+                        }
+                    }
                 /*for(Position p: otherPositions){
                     System.out.println("("+p.getX()+","+p.getY()+")");
                 }*/
-                boolean allWithSameXs= true;
-                int x=-1;
-                for(Position p: alreadyDrawnPositions){
-                    if(x==-1){
-                        x=p.getX();
-                    }else{
-                        if(x!=p.getX())
-                            allWithSameXs = false;
+                    boolean allWithSameXs= true;
+                    int x=-1;
+                    for(Position p: alreadyDrawnPositions){
+                        if(x==-1){
+                            x=p.getX();
+                        }else{
+                            if(x!=p.getX())
+                                allWithSameXs = false;
+                        }
+                    }
+                    if(allWithSameXs){
+                        //("x uguali");
+                        if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
+                            return;
+                        if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
+                            return;
+                    }
+                    else{
+                        //System.out.println("Y uguali");
+                        if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
+                            return;
+                        if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
+                            return;
                     }
                 }
-                if(allWithSameXs){
-                    //("x uguali");
-                    if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
-                        return;
-                    if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
-                        return;
-                }
-                else{
-                    //System.out.println("Y uguali");
-                    if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
-                        return;
-                    if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
-                        return;
-                }
-            }
 
-            sender.setUserData(0);
-            sender.setStyle("-fx-stroke-width: 0;");
-            //System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
-            StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
-            //System.out.println(stackPane.toString());
-            if(TileToBeInserted.getChildren().remove(stackPane)){
-                //System.out.println("ok sono stato cancellato");
-                drawnTilesCounter--;
-                Position p = (Position) stackPane.getUserData();
-                alreadyDrawnPositions.remove(
-                        alreadyDrawnPositions.stream().filter(
-                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                        ).toList().get(0)
-                );
+                sender.setUserData(0);
+                sender.setStyle("-fx-stroke-width: 0;");
+                //System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
+                StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
+                //System.out.println(stackPane.toString());
+                if(TileToBeInserted.getChildren().remove(stackPane)){
+                    //System.out.println("ok sono stato cancellato");
+                    drawnTilesCounter--;
+                    Position p = (Position) stackPane.getUserData();
+                    alreadyDrawnPositions.remove(
+                            alreadyDrawnPositions.stream().filter(
+                                    position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                            ).toList().get(0)
+                    );
 
+                }
             }
         }
+
     }
 
     /**
@@ -1147,5 +1153,6 @@ public class GameSceneController {
     //****** end socket specific ********//
 }
 //TODO visualize common goal tokens in gui
-
+//TODO fix wrong order insertion of the tile in shelf on the gui
+//TODO add button to rearrange the drawnTiles
 
