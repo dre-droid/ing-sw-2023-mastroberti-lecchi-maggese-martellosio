@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -16,7 +22,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="GameAnchor" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.GameSceneController">
+<AnchorPane fx:id="GameAnchor" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.GameSceneController">
    <children>
       <ImageView fx:id="BoardID" fitHeight="472.0" fitWidth="482.0" layoutX="18.0" layoutY="11.0" pickOnBounds="true" preserveRatio="true">
          <image>
@@ -284,7 +290,7 @@
 
          </children>
       </GridPane>
-      <Text fx:id="CG1_id" layoutX="846.0" layoutY="364.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG1_id" layoutX="805.0" layoutY="332.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="158.95574951171864" />
       <Text fx:id="CG2_id" layoutX="846.0" layoutY="521.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="117.95574951171864" />
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="11.0" layoutY="539.0" pickOnBounds="true" preserveRatio="true">
          <image>
@@ -373,14 +379,13 @@
                </font></Label>
          </children>
       </Pane>
-      <Pane layoutX="529.0" layoutY="11.0" prefHeight="63.0" prefWidth="341.0" styleClass="rounded-rectangle">
-         <children>
-            <Text fx:id="TopLabel" layoutX="29.0" layoutY="41.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Waiting for game to start..." textAlignment="CENTER">
-               <font>
-                  <Font size="26.0" />
-               </font>
-            </Text>
-         </children>
-      </Pane>
+      <Pane layoutX="729.0" layoutY="11.0" prefHeight="63.0" prefWidth="341.0" styleClass="rounded-rectangle" />
+      <Text fx:id="TopLabel" layoutX="751.0" layoutY="53.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Waiting for game to start..." textAlignment="CENTER">
+         <font>
+            <Font size="26.0" />
+         </font>
+      </Text>
+      <ImageView fx:id="myToken1" fitHeight="44.0" fitWidth="65.0" layoutX="362.0" layoutY="615.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="MyToken2" fitHeight="44.0" fitWidth="65.0" layoutX="465.0" layoutY="615.0" pickOnBounds="true" preserveRatio="true" />
    </children>
 </AnchorPane>
