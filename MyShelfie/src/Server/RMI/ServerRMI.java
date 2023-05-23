@@ -493,3 +493,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
 
 }
+
+
+//TODO aggiungere la possibilità di connettersi da due computer con rmi

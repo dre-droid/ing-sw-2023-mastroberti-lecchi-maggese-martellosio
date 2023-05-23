@@ -182,7 +182,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void gameIsOver(List<String> leaderboard) throws RemoteException {
-
+        //popup
+        gsc.endGamePopup();
     }
 
     @Override
@@ -233,6 +234,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             receiver = "all";
             serverRMI.chatMessage(nickname, message, receiver, false);
 
+        }
+    }
+
+    public void quitGame(){
+        try {
+            serverRMI.quitGame(nickname);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 

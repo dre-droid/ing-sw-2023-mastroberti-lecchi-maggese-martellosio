@@ -4,13 +4,18 @@ import Server.Socket.ClientSocket;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -98,6 +103,27 @@ public class LoginSceneController {
                         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                         scene = new Scene(root);
                         stage.setScene(scene);
+                        stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
+                            e.consume();
+                            Popup popup = new Popup();
+                            HBox buttons = new HBox(30);
+                            Button quit = new Button("Quit game");
+                            Button cancel = new Button("Cancel");
+                            buttons.getChildren().addAll(quit, cancel);
+                            buttons.setPadding(new Insets(5,5,5,5));
+                            buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
+                            popup.getContent().add(buttons);
+                            popup.show(stage);
+                            quit.setOnAction(eq->{
+                                if(clientRMI!=null){
+                                    clientRMI.quitGame();
+                                }
+                                Platform.exit();
+                            });
+                            cancel.setOnAction(ec->{
+                                popup.hide();
+                            });
+                        });
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
                         if(gsc.getClientRMI().hasGameStarted())
@@ -200,3 +226,4 @@ public class LoginSceneController {
 
 
 }
+//TODO add popup to quit game on closing window also on socket

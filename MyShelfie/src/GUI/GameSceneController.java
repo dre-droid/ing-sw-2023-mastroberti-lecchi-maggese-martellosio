@@ -16,11 +16,15 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
@@ -35,6 +39,9 @@ public class GameSceneController {
 
     @FXML
     public GridPane Opp1ShelfGrid;
+
+    @FXML
+    private AnchorPane GameAnchor;
 
     @FXML
     public GridPane Opp2ShelfGrid;
@@ -873,6 +880,28 @@ public class GameSceneController {
             oneSideFree = true;
         }
         return oneSideFree;
+    }
+
+    public void endGamePopup(){
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Popup popup = new Popup();
+                HBox buttons = new HBox(30);
+                Button okButton = new Button("Ok");
+                buttons.getChildren().add(okButton);
+                Label message = new Label("Someone quit, so the game has ended");
+                buttons.getChildren().add(message);
+                buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
+                popup.getContent().add(buttons);
+                //Stage stage = (Stage) GameAnchor.getScene().getWindow();
+                popup.show(GameAnchor.getScene().getWindow());
+                okButton.setOnAction(endgameEvent->{
+                    Platform.exit();
+                });
+
+            }
+        });
     }
 
     /**
