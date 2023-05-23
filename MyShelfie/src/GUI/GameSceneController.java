@@ -1,6 +1,7 @@
 package GUI;
 
 import GUI.PositionStuff.Position;
+import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -25,6 +26,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import javafx.scene.input.MouseEvent;
 
+import java.rmi.RemoteException;
 import java.util.*;
 
 public class GameSceneController {
@@ -932,8 +934,12 @@ public class GameSceneController {
         }*/
 
     }
-
-    public void messageTextArea() {
+    /**
+     * This method is called in MatchTypeController and in LoginSceneController when the switch to GameScene is called to show incoming
+     * messages to the player in messageTextArea
+     * @author Diego Lecchi
+     */
+    public void socketMessageTextArea() {
         String message;
         messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
         messageTextArea2.appendText("\n");
@@ -956,15 +962,41 @@ public class GameSceneController {
         }
     }
 
-    public void chatButtonPressed(ActionEvent e){
+    /**
+     * This method is called by ClientNotificationRMIGUI receiveMessage to show incoming messages to the player in messageTextArea
+     * @author Diego Lecchi
+     * @param message is the message received by the client from the server
+     */
+    public void rmiMessageTextArea(String message){
+        if(!Objects.equals(message, "") && !Objects.equals(message, null)){
+            Platform.runLater(() -> {
+                messageTextArea2.appendText(message);
+                messageTextArea2.appendText("\n");
+            });
+
+        }
+
+    }
+
+    /**
+     * this method is called once chat button is pressed, if clientSocket != null it sends the chat message through method clientSpeaker
+     * otherwise it means the player is using RMI so the message is sent through method sendChatMessage
+     * @author Diego Lecchi
+     * @param e
+     * @throws RemoteException
+     */
+    public void chatButtonPressed(ActionEvent e) throws RemoteException {
+
         String message=chatTextField.getText();
         if(!Objects.equals(message, "")) {
-            clientSocket.clientSpeaker("/chat " + message);
+            if(clientSocket != null)
+                clientSocket.clientSpeaker("/chat " + message);
+            else
+                clientRMI.sendChatMessage(message);
             chatTextField.clear();
 
-            String finalMessage = message;
             Platform.runLater(() -> {
-                messageTextArea2.appendText("YOU: " + finalMessage);
+                messageTextArea2.appendText("YOU: " + message);
                 messageTextArea2.appendText("\n");
             });
         }

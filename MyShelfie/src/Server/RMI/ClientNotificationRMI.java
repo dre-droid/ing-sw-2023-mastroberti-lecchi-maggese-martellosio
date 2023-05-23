@@ -124,6 +124,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         else
             System.out.println("[MESSAGE FROM "+sender+"]: "+text);
     }
+    public void sendChatMessage(String message)throws RemoteException{
+
+    }
 
     @Override
     public void invalidCommandSent() throws RemoteException {

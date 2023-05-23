@@ -96,15 +96,7 @@ public class ClientRMI implements Runnable{
                 playerNickname = userInput.nextLine();
             if(serverRMI.isGameBeingCreated()){
                 System.out.println("Game is being created by another player...");
-                /*while (!gameHasBeenCreated){
-                    try {
-                        Thread.sleep(250);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
 
-                 */
                 synchronized (notifications){
                     while(!gameHasBeenCreated){
                         notifications.wait();
@@ -261,16 +253,7 @@ public class ClientRMI implements Runnable{
                 while(!GameStartFlag)
                     notifications.wait();
             }
-            /* Trying to limit the use of thread sleep
-            while(!GameStartFlag){
-                try{
-                    Thread.sleep(500);
-                }catch(InterruptedException e){
-                    e.printStackTrace();
-                }
-            }
 
-             */
             //the game starts!
             System.out.println("the game actually started");
             //we continue to play until the game is over

@@ -40,6 +40,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void startTurn() throws RemoteException;
 
     public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException;
+    public void sendChatMessage(String message) throws RemoteException;
 
     public void invalidCommandSent() throws RemoteException;
 

@@ -91,7 +91,7 @@ public class MatchTypeController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             gameSceneController.setClient(clientSocket);
             gameSceneController.runGameSceneThreads();
-            new Thread(gameSceneController::messageTextArea).start();
+            new Thread(gameSceneController::socketMessageTextArea).start();
             gameSceneController.setPlayerName(clientSocket.getNickname());
 
             scene = new Scene(root);

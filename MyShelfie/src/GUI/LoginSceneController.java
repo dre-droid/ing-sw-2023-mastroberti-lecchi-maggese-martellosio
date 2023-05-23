@@ -1,8 +1,5 @@
 package GUI;
 
-import Server.ClientWithChoice;
-import Server.RMI.ClientNotificationRMI;
-import Server.RMI.ClientRMI;
 import Server.Socket.ClientSocket;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -14,17 +11,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
-import main.java.it.polimi.ingsw.Model.Game;
-
-import javax.swing.*;
-import java.awt.*;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 import java.util.Objects;
-import java.util.Random;
 
 public class LoginSceneController {
     @FXML
@@ -180,7 +170,7 @@ public class LoginSceneController {
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             gameSceneController.setClient(clientSocket);
             gameSceneController.runGameSceneThreads();
-            new Thread(gameSceneController::messageTextArea).start();
+            new Thread(gameSceneController::socketMessageTextArea).start();
             gameSceneController.setPlayerName(clientSocket.getNickname());
 
             scene = new Scene(root);

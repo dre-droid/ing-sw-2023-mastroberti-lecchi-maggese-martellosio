@@ -13,6 +13,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI {
@@ -195,7 +196,28 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException {
+        if(pm)
+            gsc.rmiMessageTextArea("[MESSAGE FROM " + sender + " TO YOU]: " + text);
+        else
+            gsc.rmiMessageTextArea("[MESSAGE FROM "+sender+"]: "+text);
+    }
 
+    public void sendChatMessage(String message) throws RemoteException{
+        String text = "", receiver = "";
+        int atIndex;
+        if(message.startsWith("@")){
+            receiver = message.substring( 1);
+            atIndex = receiver.indexOf(' ');
+            text = receiver.substring(atIndex + 1);
+            receiver = receiver.substring(0, atIndex);
+            if(!Objects.equals(receiver, nickname))
+                serverRMI.chatMessage(nickname, text, receiver, true);
+        }
+        else {
+            receiver = "all";
+            serverRMI.chatMessage(nickname, message, receiver, false);
+
+        }
     }
 
     @Override
