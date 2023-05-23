@@ -654,8 +654,6 @@ public class ServerSock {
         catch (Exception e){
             e.printStackTrace();
         }
-
-
     }
 
     public void updateGameObjectsAfterTurn(){
@@ -664,9 +662,6 @@ public class ServerSock {
                 PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
                 String jsonBoard = gson.toJson(controller.getBoard());
                 pw.println("[GSONBOARD]" + jsonBoard);
-
-                String jsonShelf = gson.toJson(controller.getMyShelf(s.getName()));
-                pw.println("[GSONSHELF]" + jsonShelf);
 
                 String jsonLeaderboard = gson.toJson(controller.getLeaderboard());
                 pw.println("[GSONLEAD]" + jsonLeaderboard);

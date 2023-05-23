@@ -89,11 +89,11 @@ public class ClientSocket {
 
                 while(!socket.isClosed()) {
                     String line = reader.readLine();
-                    synchronized (object) {
+//                    synchronized (object) {
                         messageFromServer = line;
                         deserializeObjects(line);
                         handleServerRequest(line);
-                    }
+//                    }
                 }
             }
             catch (SocketException e) {
@@ -119,7 +119,7 @@ public class ClientSocket {
         if (line.startsWith("[INVALID MOVE]")) {
             System.out.println("You cannot select those tiles. Try again.\n");
         }
-        if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE")) {
+        if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
             System.out.println(line);
         }
         if (line.startsWith("[INFO]: Chosen nickname:")){
