@@ -103,7 +103,7 @@ public class GameSceneController {
     @FXML
     public GridPane shelfButtonsPane;
     @FXML
-    public ImageView MyToken1;
+    public ImageView MyEndGameToken;
     @FXML
     public ImageView MyToken2;
     @FXML
@@ -988,7 +988,7 @@ public class GameSceneController {
                     count++;
                 }
                 if(clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname()) && clientSocket.getLeaderboard().get(i).hasEndGameToken()){
-                    MyToken1.setImage(new Image("scoring_tokens/endgame.jpg"));
+                    MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));
                 }
 
             }
@@ -1018,7 +1018,7 @@ public class GameSceneController {
                     count++;
                 }
                 if(players.get(i).getNickname().equals(clientRMI.getNickname()) && players.get(i).hasEndGameToken()){
-                    MyToken1.setImage(new Image("scoring_tokens/endgame.jpg"));
+                    MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));
                 }
             }
         }
