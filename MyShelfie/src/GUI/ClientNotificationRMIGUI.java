@@ -42,6 +42,16 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         GameStartFlag = false;
     }
 
+
+    public List<Player> getLeaderboard(){
+        try{
+            return serverRMI.getLeaderboard();
+        }catch(RemoteException remoteException){
+            throw new RuntimeException(remoteException);
+        }
+
+    }
+
     public void startNotificationServer() throws RemoteException{
         Random random = new Random();
         port = random.nextInt(3000,6000);
@@ -162,6 +172,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void aTurnHasEnded(String currentPlayerNickname, String nextPlayerNickname) throws RemoteException {
         gsc.updateTurnLabel(nextPlayerNickname);
         gsc.updateLeaderboard(serverRMI.getLeaderboard());
+        gsc.updateBoard(serverRMI.getBoard());
     }
 
     @Override

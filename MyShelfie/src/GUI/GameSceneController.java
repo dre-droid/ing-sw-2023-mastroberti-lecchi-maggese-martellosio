@@ -929,14 +929,29 @@ public class GameSceneController {
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
-        /*int n = clientSocket.getLeaderboard().size();
-        for(int i=0;i<n;i++){
-            if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
-                labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
-                shelfs[count].setImage(new Image("boards/bookshelf.png"));
-                count++;
+        int n;
+        if(clientSocket!=null){
+             n = clientSocket.getLeaderboard().size();
+            for(int i=0;i<n;i++){
+                if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
+                    labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
+                    shelfs[count].setImage(new Image("boards/bookshelf.png"));
+                    count++;
+                }
             }
-        }*/
+        }else{
+            List<Player> players = clientRMI.getLeaderboard();
+            n = clientRMI.getLeaderboard().size();
+            for(int i=0;i<n;i++){
+                if(!players.get(i).getNickname().equals(clientRMI.getNickname())){
+                    labels[count].setText(players.get(i).getNickname());
+                    shelfs[count].setImage(new Image("boards/bookshelf.png"));
+                    count++;
+                }
+            }
+        }
+
+
 
     }
     /**
