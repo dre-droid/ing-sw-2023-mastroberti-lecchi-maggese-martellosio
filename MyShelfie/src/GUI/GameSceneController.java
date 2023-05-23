@@ -118,6 +118,11 @@ public class GameSceneController {
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
+            messageTextArea2.setVisible(true);
+            messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
+            messageTextArea2.appendText("\n");
+            chatButton.setVisible(true);
+            chatTextField.setVisible(true);
            updateBoard(board);
            setPersonalGoalCardImage(pgc, pgcMap);
            createLeaderboard(leaderboard);
@@ -941,8 +946,6 @@ public class GameSceneController {
      */
     public void socketMessageTextArea() {
         String message;
-        messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
-        messageTextArea2.appendText("\n");
         try {
             synchronized (clientSocket) {
                 while (true) {
@@ -1084,7 +1087,6 @@ public class GameSceneController {
 
     //****** end socket specific ********//
 }
-//TODO make application not resizable
 //TODO visualize common goal tokens in gui
 
 
