@@ -46,11 +46,8 @@ public class Controller {
             }*/
             game = new Game(numOfPlayers);
             game.addPlayer(nickname);
-            synchronized (this){
-                notifyAll();
-            }
+            server.notifyGameHasBeenCreated();      //server function that notifies socket and rmi that game has been created
             System.out.println("Created new game by "+nickname);
-            server.serverRMI.gameIsCreated();
             return true;
         }
         System.out.println("There is already a game to join");

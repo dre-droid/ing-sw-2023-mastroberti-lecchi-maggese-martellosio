@@ -49,6 +49,6 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException;
 
-
-
+    public void nickNameAlreadyInUse() throws RemoteException;
+    public void notifyOfDisconnection() throws RemoteException;
 }

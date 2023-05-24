@@ -2,9 +2,11 @@ package Server.RMI;
 
 import Server.Controller;
 import Server.Server;
+import Server.Socket.socketNickStruct;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
+import java.net.Socket;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -18,13 +20,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     Server server;
     Controller controller;
-
+    private final long DISCONNECTION_TIME = 7000;  //disconnection threshold: 5s
     private final int drawDelay= 60000;
     private final int insertDelay = 70000;
     //private List<ClientNotificationRecord> clients;
 
     private Map<String, ClientNotificationInterfaceRMI> clients;
-    private Map<ClientNotificationInterfaceRMI, String> clientsLobby;
+    private Map<ClientNotificationInterfaceRMI, RmiNickStruct> clientsLobby;
 
 
 
@@ -35,6 +37,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         //timerInsert = new Timer();
         this.controller = controller;
         this.server = server;
+        checkForDisconnections();
 
     }
 
@@ -54,7 +57,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
         }
-        clientsLobby.put(clientToBeNotified, nickname);
+        for(int i = 0; i < server.clientsInLobby.size(); i++)
+            if(nickname.equals(server.clientsInLobby.get(i))){
+                clientToBeNotified.nickNameAlreadyInUse();
+                return -1;
+            }
+        server.clientsInLobby.add(nickname);
+        clientsLobby.put(clientToBeNotified, new RmiNickStruct(nickname));
+        clientsLobby.get(clientToBeNotified).setLastPing(System.currentTimeMillis());
         return 0;
     }
     //TODO gestire se più giocatori joinano rispetto a numero partita
@@ -491,8 +501,66 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             return null;
     }
 
+    /**
+     * This method is used to check if rmi clients are still connected, if not it removes the one that disconnected from both clientsInLobby
+     * list in server and from clientsLobby map and alerts the server of the disconnection by calling server.notifyLobbyDisconnection()
+     * @author Diego Lecchi
+     */
+    private void checkForDisconnections(){
+        new Thread(() -> {
+            try {
+                while(Objects.isNull(controller)) Thread.sleep(1000);
+                //while (!controller.hasGameStarted()) Thread.sleep(3000);
+                while (true) {
 
+                    for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()) {
+
+                        if (System.currentTimeMillis() - client.getValue().getLastPing() > DISCONNECTION_TIME) {
+                            String nickOfDisconnectedPlayer = client.getValue().getNickname();
+
+                            server.clientsInLobby.remove(nickOfDisconnectedPlayer);
+                            System.out.println(nickOfDisconnectedPlayer +" disconnected");
+                            clientsLobby.remove(client.getKey());
+                            server.notifyLobbyDisconnection();
+                        }
+                    }
+
+                    Thread.sleep(2000);
+                }
+                //System.out.println("has the game ended: " + controller.hasTheGameEnded());
+
+
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    /**
+     * this method is called by clientRMI's function heartbeat() and it's used to set the last ping of the client that called it in
+     * clientsLobby map
+     * @param nickname is the nickname of the clients that needs his lastPing updated
+     */
+    public synchronized void setLastPing(String nickname){
+        for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
+            if(nickname.equals(client.getValue().getNickname()))
+                client.getValue().setLastPing(System.currentTimeMillis());
+        }
+    }
+
+    /**
+     * Notifies every rmi client that a disconnection has occurred
+     * @throws RemoteException
+     */
+    public void notifyLobbyDisconnectionRMI() throws RemoteException{
+        for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
+            client.getKey().notifyOfDisconnection();
+        }
+    }
+    public String getFirstClientInLobby() throws RemoteException{
+        return server.clientsInLobby.get(0);
+    }
 }
 
-
+//TODO unire client e clientsLobby
 //TODO aggiungere la possibilità di connettersi da due computer con rmi

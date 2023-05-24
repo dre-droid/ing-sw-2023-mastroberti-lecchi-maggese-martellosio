@@ -286,4 +286,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public boolean isMyTurn(){
         return MyTurnFlag;
     }
+    public void nickNameAlreadyInUse() throws RemoteException{
+
+    }
+    public void notifyOfDisconnection() throws RemoteException{
+
+    }
+
 }

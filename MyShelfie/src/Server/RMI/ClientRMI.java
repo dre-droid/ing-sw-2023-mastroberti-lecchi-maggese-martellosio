@@ -92,13 +92,15 @@ public class ClientRMI implements Runnable{
         int returnCode;
         do{
             playerNickname = userInput.nextLine();
+
             while(serverRMI.joinLobby(playerNickname, myport) != 0)
                 playerNickname = userInput.nextLine();
+            heartbeat();
             if(serverRMI.isGameBeingCreated()){
                 System.out.println("Game is being created by another player...");
 
                 synchronized (notifications){
-                    while(!gameHasBeenCreated){
+                    while(!gameHasBeenCreated && !playerNickname.equals(serverRMI.getFirstClientInLobby()) ){
                         notifications.wait();
                     }
                 }
@@ -134,7 +136,7 @@ public class ClientRMI implements Runnable{
                 case -2:{
                     System.out.println("Try again later");
                 }break;
-                case -3:{
+                case -3:{ //should never reach
                     System.out.println("Try a different nickname");
                 }break;
             }
@@ -474,6 +476,27 @@ public class ClientRMI implements Runnable{
                 printShelf(serverRMI.getMyShelf(p.getNickname()));
             }
         }
+    }
+
+    /**
+     * this method is used to ping serverRMI
+     * @author Diego Lecchi
+     */
+    public void heartbeat() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    serverRMI.setLastPing(playerNickname);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
 }

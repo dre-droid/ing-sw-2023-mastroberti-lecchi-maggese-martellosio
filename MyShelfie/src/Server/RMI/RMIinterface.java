@@ -56,4 +56,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public List<CommonGoalCard> getCommonGoalCards() throws RemoteException;
 
     public String getIsPlaying() throws RemoteException;
+    public void setLastPing(String nickname)throws RemoteException;
+    public String getFirstClientInLobby() throws RemoteException;
 }

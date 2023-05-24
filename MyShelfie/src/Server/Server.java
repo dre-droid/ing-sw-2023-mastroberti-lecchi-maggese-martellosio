@@ -25,6 +25,7 @@ public class Server {
     public Map<String, connectionType> clientsMap;
     public ArrayList<String> connectedClients = new ArrayList<>();      //TODO need to add in RMI
     private Controller controller;
+    public ArrayList<String> clientsInLobby = new ArrayList<>();
 
     public void run() throws InterruptedException {
         //run Socket and RMI servers
@@ -130,6 +131,15 @@ public class Server {
         }
         return true;
     }
+    public void notifyLobbyDisconnection() throws RemoteException{
+        serverRMI.notifyLobbyDisconnectionRMI();
+        serverSock.notifyLobbyDisconnectionSocket();
+        System.out.println("a player disconnected from the lobby");
+    }
+    public void notifyGameHasBeenCreated() throws RemoteException{
+        serverRMI.gameIsCreated();
+        serverSock.notifyGameHasBeenCreatedSocket();
+    }
 
     public void addPlayerToConnectedClients(String nick){
         connectedClients.add(nick);
@@ -143,4 +153,5 @@ public class Server {
         Server server = new Server();
         server.run();
     }
+
 }

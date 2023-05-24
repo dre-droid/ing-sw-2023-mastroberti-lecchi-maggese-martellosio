@@ -48,7 +48,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         }
     }
 
-
+    public void nickNameAlreadyInUse() throws RemoteException{
+        System.out.println("This nickname is already in use, try another one");
+    }
     @Override
     public void cannotCreateNewGame(String problem) throws RemoteException {
         System.out.println("Cannot create a new game because: "+problem);
@@ -142,6 +144,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
 
     }
-
-
+    public void notifyOfDisconnection() throws RemoteException{
+        synchronized (this){
+            notifyAll();
+        }
+    }
 }
