@@ -26,7 +26,7 @@ public class ServerSock {
     private ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
     private final Server server;
-    private final long DISCONNECTION_TIME = 7000;  //disconnection threshold: 7s
+    private final long DISCONNECTION_TIME = 5000;  //disconnection threshold: 5s
     private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public List<String> messageBuffer = new ArrayList<>();
 
@@ -76,6 +76,7 @@ public class ServerSock {
                     if(resultValue == -4){
                         //here if the player disconnected before the game is created
                         repeat = false;
+                        return;
                     }
                 }
             } catch (InterruptedException | IOException e) {
@@ -129,8 +130,17 @@ public class ServerSock {
         if (controller.isGameBeingCreated) {
             out.println("[INFO]: Game is being created by another player...");
             synchronized (this){
-                while(!controller.hasGameBeenCreated() && !nickname.equals(server.clientsInLobby.get(0)))
+                while(!controller.hasGameBeenCreated() && !nickname.equals(server.clientsInLobby.get(0))) {
                     wait();
+                    boolean disconnected = true;
+                    for (int i = 0; i < clients.size(); i++) {
+                        if(clients.get(i).getName().equals(nickname)){
+                            disconnected = false;
+                        }
+                    }
+                    if(disconnected)
+                        return -4;
+                }
             }
         }
 
@@ -327,13 +337,14 @@ public class ServerSock {
                                 //System.out.println(nickOfDisconnectedPlayer +" disconnected");
                                 clients.remove(client);
                                 server.notifyLobbyDisconnection();
+                                //TODO chek more often for disconnection
                                 i--;
 
                             }
                         }
                     }
                     //System.out.println("has the game ended: " + controller.hasTheGameEnded());
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 }
                 }catch(Exception e){
                     e.printStackTrace();
