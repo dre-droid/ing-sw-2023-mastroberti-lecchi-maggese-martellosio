@@ -55,7 +55,7 @@ public class ServerSock {
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
      * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
-     * When clients successfully joins, thread terminates.
+     * When clients successfully joins, thread terminates. If game has started, ignores the player.
      * @param client - the client's socket
      */
     private void acceptClient(Socket client) {
@@ -63,23 +63,26 @@ public class ServerSock {
             try {
                 boolean repeat = true;
                 PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-                out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
+                if (!controller.hasGameStarted()) {
+                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
 
-                while (repeat) {
-                    int resultValue = playerJoin(client);
-                    if (resultValue == 0 || resultValue == -1) {    //successfully joined
-                        //clientListener(client, getNickFromSocket(client));
-                        repeat = false;
-                        server.addPlayerToConnectedClients(getNickFromSocket(client));
-                       // sendMessage("[CONNECTED]", client);
+                    while (repeat) {
+                        int resultValue = playerJoin(client);
+                        if (resultValue == 0 || resultValue == -1) {    //successfully joined
+                            //clientListener(client, getNickFromSocket(client));
+                            repeat = false;
+                            server.addPlayerToConnectedClients(getNickFromSocket(client));
+                            // sendMessage("[CONNECTED]", client);
+                        }
+                        if (resultValue == -4) {
+                            //here if the player disconnected before the game is created
+                            repeat = false;
+                            return;
+                        }
                     }
-                    if(resultValue == -4){
-                        //here if the player disconnected before the game is created
-                        repeat = false;
-                        return;
-                    }
-                }
-            } catch (InterruptedException | IOException e) {
+                } else
+                    out.println("[GAMEEND]: Game has already started! Try to join again later.");
+            }catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         });
