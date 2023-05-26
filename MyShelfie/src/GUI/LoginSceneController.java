@@ -233,7 +233,7 @@ public class LoginSceneController {
     private void updateLabelText(Label label, String string) {
         // if message is unchanged, animate a yellow blink to give feedback
         if (messageTextArea.getText().equals(string)) {
-            Duration ANIMATION_DURATION = Duration.seconds(0.5);
+            Duration ANIMATION_DURATION = Duration.seconds(0.3);
 
             Timeline timeline = new Timeline();
 

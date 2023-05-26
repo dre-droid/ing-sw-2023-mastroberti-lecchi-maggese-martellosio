@@ -63,7 +63,7 @@ public class ServerSock {
             try {
                 PrintWriter out = new PrintWriter(client.getOutputStream(), true);
                 if (!controller.hasGameStarted()) {
-                    out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
+                    out.println("[INFO] Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
 
                     while (true) {
                         int resultValue = playerJoin(client);
@@ -77,7 +77,7 @@ public class ServerSock {
                         }
                     }
                 }else
-                    out.println("[GAMEEND]: Game has already started! Try to join again later.");
+                    out.println("[GAMEEND] Game has already started! Try to join again later.");
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
@@ -101,13 +101,14 @@ public class ServerSock {
         out.println("[REQUEST] Choose a nickname:");
         do {
             try {
-            if (imbecille) {
-                if (nicknameAlreadyInUse)
-                    out.println("[REQUEST]: Nickame already in use. Try again:");
-                else
-                    out.println("[REQUEST] Invalid nickname. Try again:");
-            }
+                if (imbecille) {
+                    if (nicknameAlreadyInUse)
+                        out.println("[REQUEST] Nickame already in use. Try again:");
+                    else
+                        out.println("[REQUEST] Invalid nickname. Try again:");
+                }
                 nickname = reader.readLine();
+                if (nickname.equals("[PING]")) break;
                 nicknameAlreadyInUse = false;
 
                 for (int i = 0; i < server.clientsInLobby.size(); i++) {
@@ -129,9 +130,9 @@ public class ServerSock {
         clientListener(client, nickname);
         sendMessage("[CONNECTED]", client);
 
-        out.println("[INFO]: Chosen nickname: " + nickname);
+        out.println("[INFO] Chosen nickname: " + nickname);
         if (controller.isGameBeingCreated) {
-            out.println("[INFO]: Game is being created by another player...");
+            out.println("[INFO] Game is being created by another player...");
             synchronized (this){
                 while(!controller.hasGameBeenCreated() && !nickname.equals(server.clientsInLobby.get(0))) {
                     wait();
@@ -163,9 +164,9 @@ public class ServerSock {
                 imbecille = false;
                 do {
                     if (imbecille)
-                        out.println("[REQUEST]: Invalid input, you can choose between 2 and 4 players: ");
+                        out.println("[REQUEST] Invalid input, you can choose between 2 and 4 players: ");
                     else
-                        out.println("[REQUEST]: Choose the number of players for the game: ");
+                        out.println("[REQUEST] Choose the number of players for the game: ");
                     while(messageBuffer.isEmpty())
                         synchronized (this) {
                             wait();
@@ -177,24 +178,24 @@ public class ServerSock {
 
                     imbecille = true;
                     if(controller.hasGameBeenCreated()){
-                        out.println("[INFO]: Somebody has already created a Game!");
+                        out.println("[INFO] Somebody has already created a Game!");
                         return joinGameSwitch(client, nickname, out, reader);
                     }
 
                 }while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
 
                 if(controller.createNewGame(nickname, Integer.parseInt(line))){ //create new game
-                    out.println("[INFO]: Selected number of players for the game: " + line);
+                    out.println("[INFO] Selected number of players for the game: " + line);
                     //clients.add(new socketNickStruct(client, nickname));
                     server.addPlayerToRecord(nickname, Server.connectionType.Socket);
-                    out.println("[INFO]: Waiting for all players to connect...");
+                    out.println("[INFO] Waiting for all players to connect...");
                     return -1;
                 }
                 else{
-                    out.println("[INFO]: Somebody has already created a Game!");
+                    out.println("[INFO] Somebody has already created a Game!");
                     //clients.add(new socketNickStruct(client, nickname));
                     server.addPlayerToRecord(nickname, Server.connectionType.Socket);
-                    out.println("[INFO]: Waiting for all players to connect...");
+                    out.println("[INFO] Waiting for all players to connect...");
                     return 0;
                 }
 
@@ -207,7 +208,7 @@ public class ServerSock {
             //name in use
             case -3 -> {        //should never reach thanks to the list in server "clientsInLobby"
                 //gui remains in loginScene
-                out.println("[INFO]: Nickname in use, try another one:");
+                out.println("[INFO] Nickname in use, try another one:");
                 return -3;
             }
             //successful
@@ -316,8 +317,7 @@ public class ServerSock {
     public void checkForDisconnections() throws IOException {
         new Thread(() -> {
             try {
-                while(Objects.isNull(controller)) Thread.sleep(1000);
-                //while (!controller.hasGameStarted()) Thread.sleep(3000);
+                while (Objects.isNull(controller)) Thread.sleep(500);
                 while (true) {
                     if(controller.hasGameStarted()) {
                         //System.out.println(System.currentTimeMillis());

@@ -1215,22 +1215,13 @@ public class GameSceneController {
         try {
             Thread.sleep(500);
         } catch (InterruptedException ex) {
-            throw new RuntimeException(ex);
+           ex.printStackTrace();
         }
-        // wait to receive next turn info
-        synchronized (clientSocket){
-
-        }
-
-        //updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
     }
-
-
 
     //****** end socket specific ********//
 }
+//TODO RMI currently can send but not recieve messages to/from socket
 //TODO visualize common goal tokens in gui
-//TODO fix wrong order insertion of the tile in shelf on the gui
-//TODO add button to rearrange the drawnTiles
 //TODO socket should display error message when quitting
 

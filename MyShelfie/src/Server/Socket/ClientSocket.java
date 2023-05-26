@@ -121,8 +121,8 @@ public class ClientSocket {
         if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
             System.out.println(line);
         }
-        if (line.startsWith("[INFO]: Chosen nickname:")){
-            nickname = line.replace("[INFO]: Chosen nickname: ", "");
+        if (line.startsWith("[INFO] Chosen nickname:")){
+            nickname = line.replace("[INFO] Chosen nickname: ", "");
         }
         if (line.startsWith("[SHELF]")) {
             System.out.println(line);
@@ -140,18 +140,17 @@ public class ClientSocket {
         }
 
         //GUI
-        if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST]: Nickame already in use") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
-            line = line.replace("[REQUEST]", "");
-            line = line.replace("[INFO]", "");
-            nextScene = line.replace(":", "");
+        if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST] Nickame already in use")){
+            line = line.replace("[REQUEST] ", "");
+            nextScene = line.replace("[INFO] ", "");
             System.out.println("client socket " + nextScene);
             notify();
         }
-        else if (line.startsWith("[REQUEST]: Choose the number of players for the game:")){
+        else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
             nextScene = "MatchType";
             notify();
         }
-        else if (line.startsWith("[INFO]: Game is being created by another player") || line.startsWith("[INFO]: Waiting for all players to connect...")) {
+        else if (line.startsWith("[INFO] Game is being created by another player") || line.startsWith("[INFO] Waiting for all players to connect...")) {
             nextScene = "GameScene";
             notify();
         }
@@ -163,7 +162,7 @@ public class ClientSocket {
         //    chatMessage = line;
         //    notify();
         //}
-        if (line.startsWith("[INFO]: Game is starting.")){
+        if (line.startsWith("[INFO] Game is starting.")){
             nextScene = "GameStart";
             turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
             notify();
