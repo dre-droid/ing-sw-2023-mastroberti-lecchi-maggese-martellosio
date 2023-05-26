@@ -131,17 +131,53 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @throws RemoteException
      */
     public void gameIsCreated() throws RemoteException{
-        try{
-            if(clientsLobby.size()>0){
-                Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
-                for(ClientNotificationInterfaceRMI c : set){
-                    c.gameHasBeenCreated();
+
+        new Thread(() -> {
+            while(!controller.hasGameStarted()) {
+                try {
+                    if (clientsLobby.size() > 0) {
+                        Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
+                        for (ClientNotificationInterfaceRMI c : set) {
+                            c.gameHasBeenCreated();
+
+                        }
+                    }
+                } catch (RemoteException e) {
+                    System.out.println("Cannot notify client");
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
-        } catch (RemoteException e) {
-            System.out.println("Cannot notify client");
+        }).start();
+
+    //TODO a client throws exception nullpointerexception after waiting for the other client to choose the number of player for the match
+
+        /*
+        if(controller.hasGameBeenCreated()) {
+            try {
+                if (clientsLobby.size() > 0) {
+                    Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
+                    for (ClientNotificationInterfaceRMI c : set) {      //notifies other player rmi in wait()
+                        c.gameHasBeenCreated();
+                    }
+                }
+            } catch (RemoteException e) {
+                System.out.println("Cannot notify client");
+            }
+            return true;
         }
+        else
+            return false;
+
+         */
+
+
     }
+
+
 
     /**
      * This method is called to create a new game that can host a number of player equals to numOfPlayers
