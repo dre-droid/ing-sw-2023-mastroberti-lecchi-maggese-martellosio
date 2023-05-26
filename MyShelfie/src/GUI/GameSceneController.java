@@ -144,6 +144,7 @@ public class GameSceneController {
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
+            //TODO refactor code below (chat setting) to a private method
             messageTextArea2.setVisible(true);
             messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
             messageTextArea2.appendText("\n");
@@ -162,83 +163,79 @@ public class GameSceneController {
     }
 
     /**
-     * Handles tile selection: mouse click on a board tile causes tile selection
+     * Replaces the scene's board tiles with grid[][] tiles. Each tile has a EventHandler<MouseEvent> to handle tile selection.
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
         alreadyDrawnPositions = new ArrayList<>();
         drawnTilesCounter = 0;
         removeDrawnTilesFromBoard(grid);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        EventHandler<MouseEvent> eventHandler = e -> {
+            Rectangle sender = (Rectangle) e.getSource();
+            if((Integer)sender.getUserData()==1){
+                removeTileFromDrawnTiles(e);
+            }else {
+                boardTileClicked(e);
+            }
+        };
 
-                EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent e) {
-                        Rectangle sender = (Rectangle) e.getSource();
-                        if((Integer)sender.getUserData()==1){
-                            removeTileFromDrawnTiles(e);
-                        }else {
-                            boardTileClicked(e);
-                        }
-                    }
-                };
-
-                Image image;
-                for(int i=0;i<9;i++){
-                    for(int j=0;j<9;j++){
-                        if (grid[i][j].isAvailable()) {
-                            if(!grid[i][j].isEmpty()) {
-                                Tile t = grid[i][j].showTileInThisPosition();
-                                switch(t.getType()){
-                                    case CAT:{ image = new Image("item_tiles/Gatti1.1.png",45,45,true,true);
-                                        //System.out.print("C ");
-                                    }break;
-                                    case BOOK:{image = new Image("item_tiles/Libri1.1.png",45,45,true,true);
-                                        //System.out.print("B ");
-                                    }break;
-                                    case GAME:{image = new Image("item_tiles/Giochi1.1.png",45,45,true,true);
-                                        //System.out.print("G ");
-                                    }break;
-                                    case FRAME:{image = new Image("item_tiles/Cornici1.1.png",45,45,true,true);
-                                        //System.out.print("F ");
-                                    }break;
-                                    case PLANT:{image = new Image("item_tiles/Piante1.1.png",45,45,true,true);
-                                        //System.out.print("P ");
-                                    }break;
-                                    case TROPHY:{image = new Image("item_tiles/Trofei1.1.png",45,45,true,true);
-                                        //System.out.print("T ");
-                                    }break;
-                                    default:image = null;
-                                }
-                                ImagePattern imp = new ImagePattern(image);
-                                Rectangle rect = new Rectangle();
-                                rect.setUserData(0);
-                                rect.setFill(imp);
-                                rect.setHeight(42);
-                                rect.setWidth(42);
-                                //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
-                                rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                                //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                                if(getNodeAt(i,j,BoardGrid)==null)
-                                    BoardGrid.add(rect,j,i);
-                                //imv.resize(imv.getFitHeight(), imv.getFitHeight());
+        Image image;
+        for(int i=0;i<9;i++){
+            for(int j=0;j<9;j++){
+                if (grid[i][j].isAvailable()) {
+                    if(!grid[i][j].isEmpty()) {
+                        Tile t = grid[i][j].showTileInThisPosition();
+                        switch (t.getType()) {
+                            case CAT -> {
+                                image = new Image("item_tiles/Gatti1.1.png", 45, 45, true, true);
+                                //System.out.print("C ");
                             }
-                            else{
-                                Rectangle rect = (Rectangle) getNodeAt(i,j,BoardGrid);
-
-                                //System.out.print("- ");
+                            case BOOK -> {
+                                image = new Image("item_tiles/Libri1.1.png", 45, 45, true, true);
+                                //System.out.print("B ");
                             }
-                        }else{
-                            //System.out.print("- ");
+                            case GAME -> {
+                                image = new Image("item_tiles/Giochi1.1.png", 45, 45, true, true);
+                                //System.out.print("G ");
+                            }
+                            case FRAME -> {
+                                image = new Image("item_tiles/Cornici1.1.png", 45, 45, true, true);
+                                //System.out.print("F ");
+                            }
+                            case PLANT -> {
+                                image = new Image("item_tiles/Piante1.1.png", 45, 45, true, true);
+                                //System.out.print("P ");
+                            }
+                            case TROPHY -> {
+                                image = new Image("item_tiles/Trofei1.1.png", 45, 45, true, true);
+                                //System.out.print("T ");
+                            }
+                            default -> image = null;
                         }
+                        ImagePattern imp = new ImagePattern(image);
+                        Rectangle rect = new Rectangle();
+                        rect.setUserData(0);
+                        rect.setFill(imp);
+                        rect.setHeight(42);
+                        rect.setWidth(42);
+                        //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
+                        rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                        //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                        if(getNodeAt(i,j,BoardGrid)==null)
+                            BoardGrid.add(rect,j,i);
+                        //imv.resize(imv.getFitHeight(), imv.getFitHeight());
                     }
-                    //System.out.println();
+                    else{
+                        Rectangle rect = (Rectangle) getNodeAt(i,j,BoardGrid);
+
+                        //System.out.print("- ");
+                    }
+                }else{
+                    //System.out.print("- ");
                 }
             }
-        });
-
+            //System.out.println();
+        }
     }
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
@@ -327,17 +324,14 @@ public class GameSceneController {
      * @param boardView a matrix representing the current state of the board
      */
     public void removeDrawnTilesFromBoard(TilePlacingSpot[][] boardView){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for(int i = 0;i<9;i++){
-                    for(int j=0;j<9;j++){
-                        if(boardView[i][j].isEmpty()){
-                            Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
-                            if(tileAtThisPosition!=null){
-                                System.out.println("("+i+","+j+") dovrebbe essere eliminato");
-                                BoardGrid.getChildren().remove(tileAtThisPosition);
-                            }
+        Platform.runLater(() -> {
+            for(int i = 0;i<9;i++){
+                for(int j=0;j<9;j++){
+                    if(boardView[i][j].isEmpty()){
+                        Node tileAtThisPosition = getNodeAt(i,j,BoardGrid);
+                        if(tileAtThisPosition!=null){
+                            //System.out.println("("+i+","+j+") dovrebbe essere eliminato");
+                            BoardGrid.getChildren().remove(tileAtThisPosition);
                         }
                     }
                 }
@@ -346,26 +340,23 @@ public class GameSceneController {
     }
 
     public void createLeaderboard(List<Player> leaderboard){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                if (!leaderboardCheck) {
-                    leaderboardCheck = true;
-                    TableColumn player = new TableColumn("Player");
-                    TableColumn score = new TableColumn("Score");
-                    TableLeaderboard.getColumns().addAll(player, score);
-                    TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        Platform.runLater(() -> {
+            if (!leaderboardCheck) {
+                leaderboardCheck = true;
+                TableColumn player = new TableColumn("Player");
+                TableColumn score = new TableColumn("Score");
+                TableLeaderboard.getColumns().addAll(player, score);
+                TableLeaderboard.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-                    final ObservableList<TableRecord> data = FXCollections.observableArrayList();
-                    for (Player p : leaderboard) {
-                        data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
-                    }
-
-                    player.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("player"));
-                    score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
-
-                    TableLeaderboard.setItems(data);
+                final ObservableList<TableRecord> data = FXCollections.observableArrayList();
+                for (Player p : leaderboard) {
+                    data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
                 }
+
+                player.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("player"));
+                score.setCellValueFactory(new PropertyValueFactory<TableRecord, String>("score"));
+
+                TableLeaderboard.setItems(data);
             }
         });
     }
@@ -391,30 +382,49 @@ public class GameSceneController {
      * This method should be called at the end of a client's turn. It updates the board after
      * changes made by the client.
      */
-    //TODO this needs to be called at the end of the turn in RMI
     public void updateGameScene(String nextPlayer, TilePlacingSpot[][] board, List<Player> leaderboard, Shelf shelf){
         Platform.runLater(() -> {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
            updateShelf(shelf);
            createLeaderboard(leaderboard);
-           if(clientSocket.getNickname()==clientSocket.isPlaying)
+           if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
                drawIsOver = false;
         });
     }
 
-    public void rmiUpdateOppShelf(String nickname, Tile[][] grid){
+    /**
+     * Updates opponents' shelves
+     * @param nickname the
+     * @param grid
+     */
+    public void updateOppShelf(String nickname, Tile[][] grid){
         if(Opp1ShelfGrid.getUserData()!=null)
             if(((String)Opp1ShelfGrid.getUserData()).equals(nickname)){
-            rmiUpdateShelf(grid,Opp1ShelfGrid);
+            updateShelf(grid,Opp1ShelfGrid);
             }
         if(Opp2ShelfGrid.getUserData()!=null)
             if(((String)Opp2ShelfGrid.getUserData()).equals(nickname)){
-                rmiUpdateShelf(grid,Opp2ShelfGrid);
+                updateShelf(grid,Opp2ShelfGrid);
             }
         if(Opp3ShelfGrid.getUserData()!=null)
             if(((String)Opp3ShelfGrid.getUserData()).equals(nickname)){
-                rmiUpdateShelf(grid,Opp3ShelfGrid);
+                updateShelf(grid,Opp3ShelfGrid);
+            }
+    }
+
+    public void updateOppShelf(String nickname, Shelf shelf){
+        if(Opp1ShelfGrid.getUserData()!=null)
+            if(((String)Opp1ShelfGrid.getUserData()).equals(nickname)){
+                updateShelf(shelf.getGrid(),Opp1ShelfGrid);
+            }
+        if(Opp2ShelfGrid.getUserData()!=null)
+            if(((String)Opp2ShelfGrid.getUserData()).equals(nickname)){
+                updateShelf(shelf.getGrid(),Opp2ShelfGrid);
+            }
+        if(Opp3ShelfGrid.getUserData()!=null)
+            if(((String)Opp3ShelfGrid.getUserData()).equals(nickname)){
+                updateShelf(shelf.getGrid(),Opp3ShelfGrid);
             }
     }
 
@@ -425,8 +435,11 @@ public class GameSceneController {
      * @param event event triggering the call of this method
      */
     private void boardTileClicked(Event event) {
-        if(clientRMI!=null){
+        if(!Objects.isNull(clientRMI)){
             if(!clientRMI.isMyTurn())
+                return;
+        }else{
+            if (!clientSocket.isMyTurn())
                 return;
         }
         if(!drawIsOver){
@@ -448,7 +461,7 @@ public class GameSceneController {
                         stackPane.getChildren().add(new ImageView(p.getImage()));
                         stackPane.getChildren().add(redx);
                         stackPane.setAlignment(redx, Pos.TOP_RIGHT);
-                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);
+                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
                         stackPane.setUserData(new Position(row, column));
                         drawnTilesCounter++;
                         if (drawnTilesCounter == 1) {
@@ -474,12 +487,13 @@ public class GameSceneController {
      */
     private void handleCheckmarkButton(ActionEvent event) {
         if (alreadyDrawnPositions.size() > 0) {
-            if (!Objects.isNull(clientSocket)) socketHandleCheckmarkButton(event);
+            // socket
+            if (!Objects.isNull(clientSocket))
+                socketHandleCheckmarkButton(event);
+                // rmi
             else {
-                if(clientRMI!=null){
-                    if(!clientRMI.isMyTurn())
-                        return;
-                }
+                if (!clientRMI.isMyTurn())
+                    return;
                 drawTilesFromRMIServer();
             }
             drawIsOver = true;
@@ -491,46 +505,31 @@ public class GameSceneController {
      * Calls updateGameScene().
      */
     private void handleShelfButton(ActionEvent e){
-        if (!Objects.isNull(clientSocket)) socketHandleShelfButton(e);
-        else{
-            if(clientRMI!=null){
-                if(!clientRMI.isMyTurn())
-                    return;
+        // socket
+        if (!Objects.isNull(clientSocket)) {
+            if (!clientSocket.isMyTurn()){
+                System.out.println("truee");
+                return;
             }
-            rmiHandleShelfButton(e);
-            //clean TileToBeInserted
-            for(int column = 0;column<3;column++){
-                TileToBeInserted.getChildren().remove(getNodeAt(0,column,TileToBeInserted));
-            }
+            socketHandleShelfButton(e);
         }
+        // rmi
+        else{
+            if(!clientRMI.isMyTurn())
+                return;
+            rmiHandleShelfButton(e);
+            }
+
+        //clean TileToBeInserted
+        for(int column = 0;column<3;column++){
+            TileToBeInserted.getChildren().remove(getNodeAt(0,column,TileToBeInserted));
+    }
 
         // hide shelf buttons and tile deck
         shelfButtonsPane.setVisible(false);
         //((Button) TileToBeInserted.getChildren()).setVisible(false);
 
         drawIsOver = false;
-    }
-
-    /**
-     * This method is used to update the shelf when playing with the rmi connection
-     * @param shelf a matrix of tile representing the state of the shelf
-     */
-    public void rmiUpdateShelf(Tile[][] shelf, GridPane gridpane){
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                for (int rows = 0; rows < 6; rows++)
-                    for (int columns = 0; columns < 5; columns++){
-                        Tile t = shelf[rows][columns];
-                        if (t != null){
-                            //System.out.println(t.getImgPath());
-                            ImageView img = (ImageView) getNodeAt(rows, columns, gridpane);
-                            img.setImage(new Image(t.getImgPath(),45,45,true,true));
-                        }
-                    }
-            }
-        });
-
     }
 
     /**
@@ -545,7 +544,7 @@ public class GameSceneController {
             System.out.println("Insert in shelf rmi successful");
         else
             System.out.println("Problem in insert in shelf");
-        rmiUpdateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
+        updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
     private void createShelfButtons(){
@@ -682,14 +681,13 @@ public class GameSceneController {
     }
 
     /**
-     * Displays the argument shelf to the scene
+     * Updates player's shelf in the scene
      */
     private void updateShelf(Shelf shelf){
         for (int rows = 0; rows < 6; rows++)
             for (int columns = 0; columns < 5; columns++){
                 Tile t = shelf.getGrid()[rows][columns];
                 if (t != null){
-                    System.out.println(t.getImgPath());
                     ImageView img = (ImageView) getNodeAt(rows, columns, PlayerShelfGrid);
                     img.setImage(new Image(t.getImgPath(),45,45,true,true));
                 }
@@ -697,9 +695,27 @@ public class GameSceneController {
     }
 
     /**
+     * Updates player's shelf in the scene
+     * @param shelf a matrix of tile representing the state of the shelf
+     */
+    public void updateShelf(Tile[][] shelf, GridPane gridpane){
+        Platform.runLater(() -> {
+            for (int rows = 0; rows < 6; rows++)
+                for (int columns = 0; columns < 5; columns++){
+                    Tile t = shelf[rows][columns];
+                    if (t != null){
+                        ImageView img = (ImageView) getNodeAt(rows, columns, gridpane);
+                        img.setImage(new Image(t.getImgPath(),45,45,true,true));
+                    }
+                }
+        });
+
+    }
+
+    /**
      * Changes the top label to display the new currently playing client
      */
-    public void updateTurnLabel(String player){
+    public void updateTurnLabel(String player) {
         TopLabel.setText(player + "'s turn.");
     }
 
@@ -957,6 +973,8 @@ public class GameSceneController {
             return i;
     }
 
+
+
     //****** socket specific ********//
     /**
      * Creates threads to run updateGUIIfGameHasStarted and socketUpdateGUI
@@ -973,9 +991,10 @@ public class GameSceneController {
         new Thread(() -> {
             try {
                 synchronized (clientSocket) {
-                    while (!clientSocket.areAllObjectsReceived()) clientSocket.wait();    // waits for game objects to be received from server
+                    while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
                 }
                 updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
+                clientSocket.turnHasEnded = false;
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
@@ -988,10 +1007,12 @@ public class GameSceneController {
             while (!clientSocket.getSocket().isClosed()){
                 try {
                     synchronized (clientSocket) {
-                        while (clientSocket.isPlaying.equals("")) clientSocket.wait();
+                        while (!clientSocket.turnHasEnded) clientSocket.wait();
                     }
+                    //System.out.println("Updated game scene");
+                    //System.out.println(clientSocket.isPlaying);
                     updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
-                    clientSocket.isPlaying = "";
+                    clientSocket.turnHasEnded = false;
                 }
                 catch (Exception e){
                     e.printStackTrace();
@@ -1031,15 +1052,15 @@ public class GameSceneController {
                     switch(count){
                         case 0:{
                             Opp1ShelfGrid.setUserData(players.get(i).getNickname());
-                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
                         }break;
                         case 1:{
                             Opp2ShelfGrid.setUserData(players.get(i).getNickname());
-                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
                         }break;
                         case 2:{
                             Opp3ShelfGrid.setUserData(players.get(i).getNickname());
-                            rmiUpdateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
                         }break;
                     }
                     if(clientRMI.getLeaderboard().get(i).hasEndGameToken())
@@ -1131,8 +1152,11 @@ public class GameSceneController {
         int size = alreadyDrawnPositions.size();
 
         // check if drawn tiles are horizontal or vertical
-        for (int i = 0; i < alreadyDrawnPositions.size(); i++){
-            if (alreadyDrawnPositions.get(i).getX() != alreadyDrawnPositions.get(0).getX()) horizontal = false;
+        for (Position alreadyDrawnPosition : alreadyDrawnPositions) {
+            if (alreadyDrawnPosition.getX() != alreadyDrawnPositions.get(0).getX()) {
+                horizontal = false;
+                break;
+            }
         }
 
         // Find leftmost/topmost tile in alreadyDrawnPositions array, send socket its position. Update client's board.
@@ -1157,7 +1181,7 @@ public class GameSceneController {
                 clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.RIGHT);
             } else {
                 clientSocket.clientSpeaker("1");
-                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.RIGHT);
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.DOWN);
             }
         }catch (InvalidMoveException error){
             error.printStackTrace();
@@ -1173,7 +1197,7 @@ public class GameSceneController {
     private void socketHandleShelfButton(ActionEvent e){
         // sends selected column
         Button button = (Button) e.getSource();
-        System.out.println("Button getid: " + button.getId());
+        //System.out.println("Button getid: " + button.getId());
         if (!Objects.isNull(clientSocket)) {
             clientSocket.clientSpeaker(button.getId());
         }
@@ -1185,7 +1209,7 @@ public class GameSceneController {
                 Position p = (Position) n.getUserData();
                 if (p != null) positionList.add(p);
             }
-            System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
+            //System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
             clientSocket.clientSpeaker("[GUI]" + clientSocket.gson.toJson(positionList));
         }
         try {
@@ -1198,7 +1222,7 @@ public class GameSceneController {
 
         }
 
-        updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
+        //updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
     }
 
 
@@ -1208,4 +1232,5 @@ public class GameSceneController {
 //TODO visualize common goal tokens in gui
 //TODO fix wrong order insertion of the tile in shelf on the gui
 //TODO add button to rearrange the drawnTiles
+//TODO socket should display error message when quitting
 

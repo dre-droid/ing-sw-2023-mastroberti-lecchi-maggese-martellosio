@@ -24,8 +24,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 public class ClientSocket {
-
-
     private Board board = null;
     private Shelf shelf = null;
     private PersonalGoalCard personalGoalCard = null;
@@ -42,6 +40,7 @@ public class ClientSocket {
     public String nextScene = "";
     public String chatMessage = "";
     public String turnOfPlayer = "";
+    public boolean turnHasEnded = false;
 
     //used by ClientWithChoice
     public void runServer(){
@@ -170,7 +169,7 @@ public class ClientSocket {
     }
 
     /**
-     * Handles deserializing objects sent from serverSocket
+     * Handles deserializing objects sent from serverSocket. If [CURRENTPLAYER] message is recieved, client sets turnHasEnded to true.
      * @param line: the serialized object sent from the server
      */
     private synchronized void deserializeObjects(String line){
@@ -208,6 +207,7 @@ public class ClientSocket {
         if (line.startsWith("[CURRENTPLAYER]")){
             line = line.replace("[CURRENTPLAYER]", "");
             isPlaying = line;
+            turnHasEnded = true;
         }
         notify();
     }
@@ -313,20 +313,6 @@ public class ClientSocket {
             }
     }
 
-    public boolean areAllObjectsReceived(){
-        Field[] fields = getClass().getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                if (field.get(this) == null) {
-                    return false;
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-        return true;
-    }
     //getters
     public Board getBoard() {
         return board;
@@ -352,6 +338,7 @@ public class ClientSocket {
     public Map<Integer, PersonalGoalCard> getPgcMap() {
         return pgcMap;
     }
+    public boolean isMyTurn() {return isPlaying.equals(nickname);}
 }
 
 

@@ -26,7 +26,7 @@ public class ServerSock {
     private ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
     private final Server server;
-    private final long DISCONNECTION_TIME = 5000;  //disconnection threshold: 5s
+    private final long DISCONNECTION_TIME = 30000;  //disconnection threshold: 30s
     private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public List<String> messageBuffer = new ArrayList<>();
 
@@ -55,34 +55,30 @@ public class ServerSock {
     /**
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
      * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
-     * When clients successfully joins, thread terminates. If game has started, ignores the player.
+     * When clients successfully joins, thread terminates. If the game has already started, client is notified and ignored.
      * @param client - the client's socket
      */
     private void acceptClient(Socket client) {
         Thread acceptClient = new Thread(() -> {
             try {
-                boolean repeat = true;
                 PrintWriter out = new PrintWriter(client.getOutputStream(), true);
                 if (!controller.hasGameStarted()) {
                     out.println("[INFO]: Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
 
-                    while (repeat) {
+                    while (true) {
                         int resultValue = playerJoin(client);
                         if (resultValue == 0 || resultValue == -1) {    //successfully joined
-                            //clientListener(client, getNickFromSocket(client));
-                            repeat = false;
                             server.addPlayerToConnectedClients(getNickFromSocket(client));
-                            // sendMessage("[CONNECTED]", client);
+                            return;
                         }
                         if (resultValue == -4) {
                             //here if the player disconnected before the game is created
-                            repeat = false;
                             return;
                         }
                     }
-                } else
+                }else
                     out.println("[GAMEEND]: Game has already started! Try to join again later.");
-            }catch (IOException | InterruptedException e) {
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
         });
@@ -101,25 +97,29 @@ public class ServerSock {
 
         //asks player nickname
         boolean imbecille = false;
+        boolean nicknameAlreadyInUse = false;
         out.println("[REQUEST] Choose a nickname:");
         do {
-            if (imbecille) {
-                out.println("[REQUEST] Invalid nickname. Try again.");
-            }
             try {
+            if (imbecille) {
+                if (nicknameAlreadyInUse)
+                    out.println("[REQUEST]: Nickame already in use. Try again:");
+                else
+                    out.println("[REQUEST] Invalid nickname. Try again:");
+            }
                 nickname = reader.readLine();
-                boolean nicknameAlreadyInUse = false;
+                nicknameAlreadyInUse = false;
 
                 for (int i = 0; i < server.clientsInLobby.size(); i++) {
-                    if (Objects.equals(server.clientsInLobby.get(i), nickname))
+                    if (Objects.equals(server.clientsInLobby.get(i), nickname)) {
                         nicknameAlreadyInUse = true;
+                    }
                 }
 
                 if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.startsWith("/") || nicknameAlreadyInUse)
                     imbecille = true;
-                else{
+                else
                     break;
-                }
             } catch (Exception e){    //TODO what does this try/catch do?
                 imbecille = false;
             }
@@ -673,7 +673,10 @@ public class ServerSock {
         }
     }
 
-
+    /**
+     * Sends a message to all clients, informing game has begun. Also sends the nickname of the current player.
+     * @param nickname
+     */
     public synchronized void notifyGameStart(String nickname) {
         try {
             for (socketNickStruct c : clients) {
@@ -714,13 +717,19 @@ public class ServerSock {
             String jsonShelf = gson.toJson(updatedShelf);
             pw.println("[GSONSHELF]" + jsonShelf);
             pw.println("[TURNEND] Your turn has ended! Waiting for next player.");
+            updateGameObjectsAfterTurn();
         }
         catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    public void updateGameObjectsAfterTurn(){
+    /**
+     * Sends all clients a serialized copy of the game board and of the leaderboard. Also sends the nick of the current player - this notifies that the turn has ended.
+     * Note: leaderboard is a List<Player>, so it contains
+     * all players' instance fields.
+     */
+    private void updateGameObjectsAfterTurn(){
         try {
             for (socketNickStruct s : clients) {
                 PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
@@ -729,6 +738,8 @@ public class ServerSock {
 
                 String jsonLeaderboard = gson.toJson(controller.getLeaderboard());
                 pw.println("[GSONLEAD]" + jsonLeaderboard);
+
+                pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                 }
         }catch (Exception e){
             e.printStackTrace();

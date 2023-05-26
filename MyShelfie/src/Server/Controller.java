@@ -326,7 +326,6 @@ public class Controller {
                     saveGameProgress();
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
-                    serverSock.updateGameObjectsAfterTurn();
                     invalidMoveFlag = false;
                 } else
                     endGame();

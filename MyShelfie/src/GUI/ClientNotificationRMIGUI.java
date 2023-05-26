@@ -258,7 +258,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
-        gsc.rmiUpdateOppShelf(nickname,grid);
+        gsc.updateOppShelf(nickname,grid);
     }
 
     public void setGameSceneController(GameSceneController controller){
