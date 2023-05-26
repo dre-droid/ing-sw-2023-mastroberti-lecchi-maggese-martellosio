@@ -1,6 +1,9 @@
 package GUI;
 
 import Server.Socket.ClientSocket;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,10 +15,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -90,11 +95,13 @@ public class LoginSceneController {
                     case -2:{
                         errorMessage = "The game has already started";
                         loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                        updateLabelText(messageTextArea, errorMessage);
                     }break;
                     case -3:{
                         //error: need to change nickname -> show alert and do nothing
                         errorMessage = "Nickname already in use";
                         loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                        updateLabelText(messageTextArea, errorMessage);
                     }break;
                     case 0:{
                         nextScenePath = "GameScene.fxml";
@@ -165,15 +172,14 @@ public class LoginSceneController {
                 //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
                 socketSwitchToMatchTypeScene(event);
             }
-            if (clientSocket.nextScene.equals("GameScene")) {
+            else if (clientSocket.nextScene.equals("GameScene")) {
                 //change scene to GameScene
                 socketSwitchToGameScene(event);
-
-            if (clientSocket.nextScene.equals("Unchanged")) {
-                Platform.runLater(() -> {
-                    messageTextArea.setText("Invalid nickname. Try again!");
-                });
             }
+            else{
+                // display error message from server
+                String string = clientSocket.nextScene;
+                Platform.runLater(() -> updateLabelText(messageTextArea, string));
             }
         }catch(InterruptedException | RuntimeException e){
             e.printStackTrace();
@@ -222,6 +228,27 @@ public class LoginSceneController {
             stage.setResizable(false);
             stage.show();
         });
+    }
+
+    private void updateLabelText(Label label, String string) {
+        // if message is unchanged, animate a yellow blink to give feedback
+        if (messageTextArea.getText().equals(string)) {
+            Duration ANIMATION_DURATION = Duration.seconds(0.5);
+
+            Timeline timeline = new Timeline();
+
+            KeyValue keyValue1 = new KeyValue(label.textFillProperty(), Color.YELLOW);
+            KeyFrame keyFrame1 = new KeyFrame(ANIMATION_DURATION, keyValue1);
+            KeyValue keyValue2 = new KeyValue(label.textFillProperty(), label.getTextFill());
+            KeyFrame keyFrame2 = new KeyFrame(ANIMATION_DURATION.multiply(2), keyValue2);
+
+            timeline.getKeyFrames().addAll(keyFrame1, keyFrame2);
+
+            timeline.setOnFinished(event -> label.setText(string));
+
+            timeline.play(); // start the timeline
+        } else
+            messageTextArea.setText(string);
     }
 
 

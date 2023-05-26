@@ -9,20 +9,20 @@
 
 <AnchorPane fx:id="LoginAnchorPane" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="GUI.LoginSceneController">
    <children>
-      <Label id="TopLabel" layoutX="426.0" layoutY="207.0" styleClass="open-sans" text="Insert your username" textFill="WHITE">
-         <font>
-            <Font size="51.0" />
-         </font>
-      </Label>
       <Pane layoutX="426.0" layoutY="265.0" prefHeight="347.0" prefWidth="446.0">
          <children>
+            <Label id="TopLabel" layoutY="-18.0" styleClass="open-sans" text="Insert your username" textFill="WHITE">
+               <font>
+                  <Font size="51.0" />
+               </font>
+            </Label>
             <Button id="LoginButton" layoutX="197.0" layoutY="232.0" mnemonicParsing="false" onAction="#switchToNextScene" text="Login">
                <font>
                   <Font size="20.0" />
                </font>
             </Button>
             <TextField fx:id="usernameText" layoutX="147.0" layoutY="106.0" promptText="username" style="-fx-background-color: white;" styleClass="open-sans" />
-            <Label fx:id="messageTextArea" alignment="CENTER" layoutX="54.0" layoutY="136.0" prefHeight="30.0" prefWidth="337.0" textAlignment="CENTER" textFill="WHITE">
+            <Label fx:id="messageTextArea" alignment="CENTER" layoutX="55.0" layoutY="132.0" prefHeight="45.0" prefWidth="337.0" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font size="22.0" />
                </font>

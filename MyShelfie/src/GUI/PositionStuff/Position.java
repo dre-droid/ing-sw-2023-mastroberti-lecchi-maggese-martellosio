@@ -8,10 +8,16 @@ public class Position {
         this.y = y;
     }
 
+    /**
+     * x is vertical axis, y is horizontal
+     */
     public int getX(){
         return x;
     }
 
+    /**
+     * x is vertical axis, y is horizontal
+     */
     public int getY(){
         return y;
     }

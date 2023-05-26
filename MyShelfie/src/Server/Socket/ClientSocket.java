@@ -140,8 +140,11 @@ public class ClientSocket {
         }
 
         //GUI
-        if (line.startsWith("[REQUEST] Invalid nickname. Try again.") || line.startsWith("[INFO]: Nickname in use, try another one:") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
-            nextScene = "Unchanged";
+        if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST]: Nickame already in use") || line.startsWith("[REQUEST]: Invalid input, you can choose between 2 and 4 players:")){
+            line = line.replace("[REQUEST]", "");
+            line = line.replace("[INFO]", "");
+            nextScene = line.replace(":", "");
+            System.out.println("client socket " + nextScene);
             notify();
         }
         else if (line.startsWith("[REQUEST]: Choose the number of players for the game:")){
