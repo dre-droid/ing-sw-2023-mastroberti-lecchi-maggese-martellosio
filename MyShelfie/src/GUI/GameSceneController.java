@@ -10,7 +10,6 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -36,59 +35,33 @@ import java.util.*;
 public class GameSceneController {
     @FXML
     public Text TopLabel;
-
     @FXML
     public GridPane Opp1ShelfGrid;
-
     @FXML
     private AnchorPane GameAnchor;
-
     @FXML
     public GridPane Opp2ShelfGrid;
-
     @FXML
     public GridPane Opp3ShelfGrid;
-
-    public boolean drawIsOver;
-
-    public GridPane PlayerShelfGrid;
-    public Label PlayerName;
-
-    private int drawnTilesCounter;
-
-    private List<Position> alreadyDrawnPositions;
-    private boolean leaderboardCheck = false;
-    private ClientNotificationRMIGUI clientRMI;
-    private ClientSocket clientSocket;
     @FXML
     private TableView TableLeaderboard;
-
     @FXML
     private TableColumn Player;
-
     @FXML private TableColumn Score;
-
     @FXML
     private GridPane BoardGrid;
-
     @FXML
     private ImageView MyPGC;
-
     @FXML
     private GridPane TileToBeInserted;
-
     @FXML
     private ImageView CG1;
-
     @FXML
     private ImageView CG2;
-
     @FXML
     private Text CG1_id;
-
     @FXML
     private Text CG2_id;
-
     @FXML
     private Label p1Label;
     @FXML
@@ -120,7 +93,14 @@ public class GameSceneController {
     @FXML
     public ImageView EndGameToken3;
 
-
+    public boolean drawIsOver;
+    public GridPane PlayerShelfGrid;
+    public Label PlayerName;
+    private int drawnTilesCounter;
+    private List<Position> alreadyDrawnPositions;
+    private boolean leaderboardCheck = false;
+    private ClientNotificationRMIGUI clientRMI;
+    private ClientSocket clientSocket;
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         //System.out.println(this.toString());
@@ -133,7 +113,6 @@ public class GameSceneController {
     public void setPlayerName(String name){
         Platform.runLater(() -> PlayerName.setText(name));
     }
-
     public ClientNotificationRMIGUI getClientRMI(){
         return this.clientRMI;
     }
@@ -168,7 +147,6 @@ public class GameSceneController {
      */
     public void updateBoard(TilePlacingSpot[][] grid){
         alreadyDrawnPositions = new ArrayList<>();
-        drawnTilesCounter = 0;
         removeDrawnTilesFromBoard(grid);
         EventHandler<MouseEvent> eventHandler = e -> {
             Rectangle sender = (Rectangle) e.getSource();
@@ -455,12 +433,12 @@ public class GameSceneController {
                         sender.setUserData(1);
                         alreadyDrawnPositions.add(new Position(row, column));
                         ImagePattern p = (ImagePattern) sender.getFill();
-                        ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
-                        redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
+                        //ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
+                        //redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
                         StackPane stackPane = new StackPane();
                         stackPane.getChildren().add(new ImageView(p.getImage()));
-                        stackPane.getChildren().add(redx);
-                        stackPane.setAlignment(redx, Pos.TOP_RIGHT);
+                        //stackPane.getChildren().add(redx);
+                        //stackPane.setAlignment(redx, Pos.TOP_RIGHT);
                         TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
                         stackPane.setUserData(new Position(row, column));
                         drawnTilesCounter++;
@@ -475,10 +453,6 @@ public class GameSceneController {
                 }
             }
         }
-
-
-
-
     }
 
     /**
@@ -486,19 +460,42 @@ public class GameSceneController {
      * Updates client's board.
      */
     private void handleCheckmarkButton(ActionEvent event) {
+        Shelf shelf = Objects.isNull(clientSocket) ? new Shelf(clientRMI.getMyShelf()) : clientSocket.getShelf();
+
         if (alreadyDrawnPositions.size() > 0) {
+            // grey out unavailable columns
+            boolean atLeastOneColumnAvailable = false;
+            for (int i = 0; i < 5; i++){
+                if (!shelf.canItFit(drawnTilesCounter, i)) {
+                    // grey out button
+                    ((ImageView) shelfButtonsPane.getChildren().get(i)).setImage(new Image("misc/sort_down_gray.png"));
+                    // find buttons and disable them
+                    for (Node n: shelfButtonsPane.getChildren()){
+                        if (n.getId() != null)
+                            if (n.getId().equals(Integer.toString(i)))
+                                n.setVisible(false);
+                    }
+                }
+                else
+                    atLeastOneColumnAvailable = true;
+            }
+            if (!atLeastOneColumnAvailable) return;
+
             // socket
             if (!Objects.isNull(clientSocket))
                 socketHandleCheckmarkButton(event);
-                // rmi
+            // rmi
             else {
                 if (!clientRMI.isMyTurn())
                     return;
                 drawTilesFromRMIServer();
             }
             drawIsOver = true;
+            TileToBeInserted.getChildren().remove(getNodeAt(0,3,TileToBeInserted));
         }
     }
+
+    //TODO it should be that you cant press checkmark button if drawn tiles cant fit in any column
 
     /**
      * Sends the server a request to insert the tiles in the selected column of the shelf.
@@ -507,29 +504,35 @@ public class GameSceneController {
     private void handleShelfButton(ActionEvent e){
         // socket
         if (!Objects.isNull(clientSocket)) {
-            if (!clientSocket.isMyTurn()){
-                System.out.println("truee");
+            if (!clientSocket.isMyTurn()) {
+                //System.out.println("truee");
                 return;
             }
             socketHandleShelfButton(e);
         }
         // rmi
-        else{
-            if(!clientRMI.isMyTurn())
+        else {
+            if (!clientRMI.isMyTurn())
                 return;
             rmiHandleShelfButton(e);
-            }
+        }
 
         //clean TileToBeInserted
-        for(int column = 0;column<3;column++){
-            TileToBeInserted.getChildren().remove(getNodeAt(0,column,TileToBeInserted));
-    }
+        for (int column = 0; column < 3; column++) {
+            TileToBeInserted.getChildren().remove(getNodeAt(0, column, TileToBeInserted));
+        }
+
+        //clean alreadyDrawnPositions
+        alreadyDrawnPositions.clear();
 
         // hide shelf buttons and tile deck
         shelfButtonsPane.setVisible(false);
-        //((Button) TileToBeInserted.getChildren()).setVisible(false);
-
+        //TileToBeInserted.setVisible(false);
         drawIsOver = false;
+        drawnTilesCounter = 0;
+        //reset greyed out buttons
+        for (int i = 0; i < 5; i++)
+            ((ImageView) shelfButtonsPane.getChildren().get(i)).setImage(new Image("misc/sort-down.png"));
     }
 
     /**
@@ -538,12 +541,12 @@ public class GameSceneController {
      */
     private void rmiHandleShelfButton(Event e){
         Button button = (Button) e.getSource();
-        System.out.println("Button getid: " + button.getId());
+        //System.out.println("Button getid: " + button.getId());
         int column = Integer.parseInt(button.getId());
-        if(clientRMI.insertTilesInShelf(column))
-            System.out.println("Insert in shelf rmi successful");
-        else
-            System.out.println("Problem in insert in shelf");
+        if(clientRMI.insertTilesInShelf(column));
+            //System.out.println("Insert in shelf rmi successful");
+        else;
+            //System.out.println("Problem in insert in shelf");
         updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
@@ -591,7 +594,7 @@ public class GameSceneController {
         amount = drawnTilesCounter;
         //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction)){
-            System.out.println("RMI draw operation was a success");
+            //System.out.println("RMI draw operation was a success");
 
         }
 
@@ -973,8 +976,6 @@ public class GameSceneController {
             return i;
     }
 
-
-
     //****** socket specific ********//
     /**
      * Creates threads to run updateGUIIfGameHasStarted and socketUpdateGUI
@@ -983,6 +984,7 @@ public class GameSceneController {
         socketInitializeGameScene();
         socketUpdateGameScene();
     }
+
     /**
      * Used by socket to wait for server notification that game has started. When it has, updateGUIAtBeginningOfGame is called.
      * @throws InterruptedException
@@ -1076,6 +1078,7 @@ public class GameSceneController {
 
 
     }
+
     /**
      * This method is called in MatchTypeController and in LoginSceneController when the switch to GameScene is called to show incoming
      * messages to the player in messageTextArea
@@ -1100,22 +1103,6 @@ public class GameSceneController {
         }catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * This method is called by ClientNotificationRMIGUI receiveMessage to show incoming messages to the player in messageTextArea
-     * @author Diego Lecchi
-     * @param message is the message received by the client from the server
-     */
-    public void rmiMessageTextArea(String message){
-        if(!Objects.equals(message, "") && !Objects.equals(message, null)){
-            Platform.runLater(() -> {
-                messageTextArea2.appendText(message);
-                messageTextArea2.appendText("\n");
-            });
-
-        }
-
     }
 
     /**
@@ -1149,7 +1136,6 @@ public class GameSceneController {
     private void socketHandleCheckmarkButton(ActionEvent e){
         boolean horizontal = true;
         Position min;
-        int size = alreadyDrawnPositions.size();
 
         // check if drawn tiles are horizontal or vertical
         for (Position alreadyDrawnPosition : alreadyDrawnPositions) {
@@ -1174,14 +1160,14 @@ public class GameSceneController {
         }
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
-        clientSocket.clientSpeaker(Integer.toString(size));
+        clientSocket.clientSpeaker(Integer.toString(drawnTilesCounter));
         try {
             if (horizontal) {
                 clientSocket.clientSpeaker("2");
-                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.RIGHT);
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
             } else {
                 clientSocket.clientSpeaker("1");
-                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), size, Board.Direction.DOWN);
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.DOWN);
             }
         }catch (InvalidMoveException error){
             error.printStackTrace();
@@ -1220,6 +1206,23 @@ public class GameSceneController {
     }
 
     //****** end socket specific ********//
+
+
+    /**
+     * This method is called by ClientNotificationRMIGUI receiveMessage to show incoming messages to the player in messageTextArea
+     * @author Diego Lecchi
+     * @param message is the message received by the client from the server
+     */
+    public void rmiMessageTextArea(String message){
+        if(!Objects.equals(message, "") && !Objects.equals(message, null)){
+            Platform.runLater(() -> {
+                messageTextArea2.appendText(message);
+                messageTextArea2.appendText("\n");
+            });
+
+        }
+
+    }
 }
 //TODO RMI currently can send but not recieve messages to/from socket
 //TODO visualize common goal tokens in gui
