@@ -1133,7 +1133,7 @@ public class GameSceneController {
      * Sends socket server a request to draw the selected tiles. It mimics input from CLI.
      * Sets shelfButtonsPane to visible, draws tiles from board.
      */
-    private void socketHandleCheckmarkButton(ActionEvent e){
+    private void socketHandleCheckmarkButton(ActionEvent e) {
         boolean horizontal = true;
         Position min;
 
@@ -1147,33 +1147,37 @@ public class GameSceneController {
 
         // Find leftmost/topmost tile in alreadyDrawnPositions array, send socket its position. Update client's board.
         min = alreadyDrawnPositions.get(0);
-        if (horizontal){
+        if (horizontal) {
             for (Position p : alreadyDrawnPositions)
-                if (p.getY() < min.getY()){
+                if (p.getY() < min.getY()) {
                     min = p;
                 }
         } else {
             for (Position p : alreadyDrawnPositions)
-                if (p.getX() < min.getX()){
+                if (p.getX() < min.getX()) {
                     min = p;
                 }
         }
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
         clientSocket.clientSpeaker(Integer.toString(drawnTilesCounter));
+        // send direction
         try {
-            if (horizontal) {
-                clientSocket.clientSpeaker("2");
-                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
+            if (drawnTilesCounter > 1) {
+                if (horizontal) {
+                    clientSocket.clientSpeaker("2");
+                    clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
+                } else {
+                    clientSocket.clientSpeaker("1");
+                    clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.DOWN);
+                }
             } else {
-                clientSocket.clientSpeaker("1");
-                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.DOWN);
+                clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
+                updateBoard(clientSocket.getBoard().getBoardForDisplay());
             }
-        }catch (InvalidMoveException error){
+        } catch (InvalidMoveException error) {
             error.printStackTrace();
         }
-
-        updateBoard(clientSocket.getBoard().getBoardForDisplay());
         shelfButtonsPane.setVisible(true);
     }
 
