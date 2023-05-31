@@ -32,6 +32,7 @@ public class ClientSocket {
     private String nickname = null;
     private Socket socket = null;
     private Map<Integer, PersonalGoalCard> pgcMap = null;
+    private boolean GUI;
 
     public final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public String isPlaying = "";
@@ -41,6 +42,10 @@ public class ClientSocket {
     public String chatMessage = "";
     public String turnOfPlayer = "";
     public boolean turnHasEnded = false;
+
+    public ClientSocket(boolean GUI){
+        this.GUI = GUI;
+    }
 
     //used by ClientWithChoice
     public void runServer(){
@@ -112,7 +117,7 @@ public class ClientSocket {
             serverPinger();
         }
         if (line.startsWith("[YOUR TURN]")) {
-            printTurn();
+            if (!GUI) printTurn();
             System.out.println(line);
         }
         if (line.startsWith("[INVALID MOVE]")) {

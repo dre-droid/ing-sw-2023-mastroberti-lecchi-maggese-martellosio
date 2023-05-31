@@ -40,7 +40,7 @@ public class ConnectionTypeController  {
 
             try {
                 if (rButtonRMI.isSelected()) clientRMI = new ClientNotificationRMIGUI();
-                else clientSocket = new ClientSocket();
+                else clientSocket = new ClientSocket(true);
 
                 root = loader.load();
                 LoginSceneController loginSceneController = loader.getController();

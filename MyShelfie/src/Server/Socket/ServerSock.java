@@ -366,6 +366,7 @@ public class ServerSock {
         Socket playerSocket = null;
         List<Tile> drawnTiles = new ArrayList<>();
         drawInfo drawInfo = new drawInfo();
+        messageBuffer.clear();
 
         //find client's socket
         for (socketNickStruct c : clients)

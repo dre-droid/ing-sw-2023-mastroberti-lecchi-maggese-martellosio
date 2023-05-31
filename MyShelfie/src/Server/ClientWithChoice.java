@@ -41,7 +41,7 @@ public class ClientWithChoice {
     }
 
     public void createNewSocketClient(){
-        ClientSocket clientSocket = new ClientSocket();
+        ClientSocket clientSocket = new ClientSocket(false);
         clientSocket.runServer();
     }
 

@@ -1,6 +1,7 @@
 package GUI;
 
 import GUI.PositionStuff.Position;
+import Server.ClientWithChoice;
 import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
 import javafx.application.Platform;
@@ -365,6 +366,8 @@ public class GameSceneController {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
            updateShelf(shelf);
+           for (Player p: leaderboard)
+               updateOppShelf(p.getNickname(), p.getShelf().getGrid());
            createLeaderboard(leaderboard);
            if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
                drawIsOver = false;
@@ -390,22 +393,6 @@ public class GameSceneController {
                 updateShelf(grid,Opp3ShelfGrid);
             }
     }
-
-    public void updateOppShelf(String nickname, Shelf shelf){
-        if(Opp1ShelfGrid.getUserData()!=null)
-            if(((String)Opp1ShelfGrid.getUserData()).equals(nickname)){
-                updateShelf(shelf.getGrid(),Opp1ShelfGrid);
-            }
-        if(Opp2ShelfGrid.getUserData()!=null)
-            if(((String)Opp2ShelfGrid.getUserData()).equals(nickname)){
-                updateShelf(shelf.getGrid(),Opp2ShelfGrid);
-            }
-        if(Opp3ShelfGrid.getUserData()!=null)
-            if(((String)Opp3ShelfGrid.getUserData()).equals(nickname)){
-                updateShelf(shelf.getGrid(),Opp3ShelfGrid);
-            }
-    }
-
 
     /**
      * this method is used to handle the event on click of the tiles in the board, if the tile is not already been drawn then it's drawn
@@ -518,7 +505,7 @@ public class GameSceneController {
         }
 
         //clean TileToBeInserted
-        for (int column = 0; column < 3; column++) {
+        for (int column = 0; column < 4; column++) {
             TileToBeInserted.getChildren().remove(getNodeAt(0, column, TileToBeInserted));
         }
 
@@ -1028,55 +1015,56 @@ public class GameSceneController {
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
         ImageView[] endgametokens = new ImageView[]{EndGameToken1,EndGameToken2,EndGameToken3};
-        int n;
-        if(clientSocket!=null){
-             n = clientSocket.getLeaderboard().size();
-            for(int i=0;i<n;i++){
-                if(!clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname())){
-                    labels[count].setText(clientSocket.getLeaderboard().get(i).getNickname());
-                    shelfs[count].setImage(new Image("boards/bookshelf.png"));
-                    if(clientSocket.getLeaderboard().get(i).hasEndGameToken())
-                        endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
-                    count++;
+        int n = clientSocket == null ? clientRMI.getLeaderboard().size() : clientSocket.getLeaderboard().size();
+        List<Player> players = clientSocket == null ? clientRMI.getLeaderboard() : clientSocket.getLeaderboard();
+        String nickname = clientSocket == null ? clientRMI.getNickname() : clientSocket.getNickname();
+
+        for(int i=0;i<n;i++) {
+            if (!players.get(i).getNickname().equals(nickname)) {
+                labels[count].setText(players.get(i).getNickname());
+                shelfs[count].setImage(new Image("boards/bookshelf.png"));
+                // RMI switch
+                if (clientSocket == null) {
+                    switch (count) {
+                        case 0 -> {
+                            Opp1ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+                        }
+                        case 1 -> {
+                            Opp2ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+                        }
+                        case 2 -> {
+                            Opp3ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+                        }
+                    }
                 }
-                if(clientSocket.getLeaderboard().get(i).getNickname().equals(clientSocket.getNickname()) && clientSocket.getLeaderboard().get(i).hasEndGameToken()){
-                    MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));
+                // socket switch
+                else {
+                    switch (count) {
+                        case 0 -> {
+                            Opp1ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+                        }
+                        case 1 -> {
+                            Opp2ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+                        }
+                        case 2 -> {
+                            Opp3ShelfGrid.setUserData(players.get(i).getNickname());
+                            updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+                        }
+                    }
                 }
 
-            }
-        }else{
-            List<Player> players = clientRMI.getLeaderboard();
-            n = clientRMI.getLeaderboard().size();
-            for(int i=0;i<n;i++){
-                if(!players.get(i).getNickname().equals(clientRMI.getNickname())){
-                    labels[count].setText(players.get(i).getNickname());
-                    shelfs[count].setImage(new Image("boards/bookshelf.png"));
-                    switch(count){
-                        case 0:{
-                            Opp1ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
-                        }break;
-                        case 1:{
-                            Opp2ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
-                        }break;
-                        case 2:{
-                            Opp3ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()),Opp1ShelfGrid);
-                        }break;
-                    }
-                    if(clientRMI.getLeaderboard().get(i).hasEndGameToken())
-                        endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
-                    count++;
-                }
-                if(players.get(i).getNickname().equals(clientRMI.getNickname()) && players.get(i).hasEndGameToken()){
+                if (players.get(i).hasEndGameToken())
+                    endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
+                count++;
+                if (players.get(i).getNickname().equals(nickname) && players.get(i).hasEndGameToken())
                     MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));
-                }
             }
         }
-
-
-
     }
 
     /**
@@ -1158,6 +1146,7 @@ public class GameSceneController {
                     min = p;
                 }
         }
+
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
         clientSocket.clientSpeaker(Integer.toString(drawnTilesCounter));
@@ -1166,12 +1155,15 @@ public class GameSceneController {
             if (drawnTilesCounter > 1) {
                 if (horizontal) {
                     clientSocket.clientSpeaker("2");
+                    //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter + " 2");
                     clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
                 } else {
                     clientSocket.clientSpeaker("1");
+                    //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter + " 1");
                     clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.DOWN);
                 }
             } else {
+                //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter);
                 clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
                 updateBoard(clientSocket.getBoard().getBoardForDisplay());
             }
@@ -1188,9 +1180,7 @@ public class GameSceneController {
         // sends selected column
         Button button = (Button) e.getSource();
         //System.out.println("Button getid: " + button.getId());
-        if (!Objects.isNull(clientSocket)) {
-            clientSocket.clientSpeaker(button.getId());
-        }
+        clientSocket.clientSpeaker(button.getId());
 
         // Sends List<Position>, the positions of the selected tiles, to the server
         if (TileToBeInserted.getChildren().size() > 1) {
@@ -1201,11 +1191,6 @@ public class GameSceneController {
             }
             //System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
             clientSocket.clientSpeaker("[GUI]" + clientSocket.gson.toJson(positionList));
-        }
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException ex) {
-           ex.printStackTrace();
         }
     }
 
@@ -1231,4 +1216,4 @@ public class GameSceneController {
 //TODO RMI currently can send but not recieve messages to/from socket
 //TODO visualize common goal tokens in gui
 //TODO socket should display error message when quitting
-
+//TODO make client locally insert tiles to speed up loading time
