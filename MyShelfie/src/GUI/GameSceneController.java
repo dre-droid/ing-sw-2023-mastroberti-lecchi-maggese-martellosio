@@ -419,28 +419,60 @@ public class GameSceneController {
                         sender.setStyle("-fx-stroke: yellow; -fx-stroke-width: 5;");
                         sender.setUserData(1);
                         alreadyDrawnPositions.add(new Position(row, column));
+                        //sort of the already drawn positions
+
                         ImagePattern p = (ImagePattern) sender.getFill();
-                        //ImageView redx = new ImageView(new Image("game_stuff/x-mark.png"));
-                        //redx.onMouseClickedProperty().set(this::removeTileFromDrawnTiles);
+
                         StackPane stackPane = new StackPane();
                         stackPane.getChildren().add(new ImageView(p.getImage()));
-                        //stackPane.getChildren().add(redx);
-                        //stackPane.setAlignment(redx, Pos.TOP_RIGHT);
+
                         TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
                         stackPane.setUserData(new Position(row, column));
+                        updateTileToBeInserted(alreadyDrawnPositions);
                         drawnTilesCounter++;
-                        if (drawnTilesCounter == 1) {
-                            ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
-                            Button checkmarkButton = new Button();
-                            checkmarkButton.setGraphic(checkImg);
-                            checkmarkButton.setOnAction(this::handleCheckmarkButton);
-                            TileToBeInserted.add(checkmarkButton, 3, 0);
-                        }
+
                     }
                 }
             }
         }
     }
+
+    private void updateTileToBeInserted(List<Position> positions){
+        positions = Position.sortPositions(positions);
+        //we save the images and the positions in two lists with corresponding index
+        List<Position> positionList = new ArrayList<>();
+        List<StackPane>stackPaneList = new ArrayList<>();
+        int i=0;
+        for(int column=0;column<3;column++){
+            if(getNodeAt(0,column, TileToBeInserted)!=null){
+                StackPane n = (StackPane) getNodeAt(0,column,TileToBeInserted);
+                Position pos = (Position) n.getUserData();
+                System.out.println("round "+i+", "+pos.toString()+"//"+n.toString());
+                positionList.add(i,pos);
+                stackPaneList.add(i,n);
+                i++;
+            }
+
+        }
+
+        TileToBeInserted.getChildren().clear();
+        System.out.println("filling the gridpane");
+        System.out.println("size of already drawn positions: "+alreadyDrawnPositions.size());
+        for(Position p: positions){
+            System.out.println("Position to be inserted = "+p.toString());
+            TileToBeInserted.add(stackPaneList.get(positionList.indexOf(p)), getFirstEmptySpot(TileToBeInserted), 0);
+        }
+        if (drawnTilesCounter >= 1) {
+            ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
+            Button checkmarkButton = new Button();
+            checkmarkButton.setGraphic(checkImg);
+            checkmarkButton.setOnAction(this::handleCheckmarkButton);
+            TileToBeInserted.add(checkmarkButton, 3, 0);
+        }
+    }
+
+
+
 
     /**
      * Sends the server a request to draw the selected tiles from the board.
@@ -716,8 +748,10 @@ public class GameSceneController {
      */
     private int getFirstEmptySpot(GridPane gridPane){
         for(int column =0; column<3; column++){
-            if(getNodeAt(0,column,gridPane)==null)
+            if(getNodeAt(0,column,gridPane)==null){
                 return column;
+            }
+            System.out.println("TileToBeInserted in column "+column+" not empty");
         }
         return -1;
     }
@@ -729,125 +763,41 @@ public class GameSceneController {
      * @param event
      */
     private void removeTileFromDrawnTiles(Event event){
-        //System.out.println("remove tile is called ");
         if(!drawIsOver){
-            try{
-                ImageView sender = (ImageView) event.getSource();
-                StackPane stackPane = (StackPane) sender.getParent();
-                //System.out.println("tile counter: "+drawnTilesCounter);
-                if(drawnTilesCounter==3){
-                    //if the tile that is being removed has two tiles selecte around it cannot be removed
-                    Position maybeMiddle = (Position) stackPane.getUserData();
-                    List<Position> otherPositions = new ArrayList<>();
-                    for(Position p: alreadyDrawnPositions){
-                        if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
-                            otherPositions.add(p);
+            Rectangle sender = (Rectangle) event.getSource();
+            int row = transformIntegerToInt(GridPane.getRowIndex(sender));
+            int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
+            Position rmvPos = new Position(row,column);
+            if(drawnTilesCounter==3){
+                //if the tile that is being removed has two tiles selected around it cannot be removed
+                for(int i=0;i<3;i++){
+                    StackPane sp = (StackPane) getNodeAt(0, i, TileToBeInserted);
+                    Position checkPos = (Position) sp.getUserData();
+                    if(rmvPos.equals(checkPos)){
+                        if(i==1){
+                            return;
                         }
                     }
-                    for(Position p: otherPositions){
-                        //System.out.println("("+p.getX()+","+p.getY()+")");
-                    }
-                    boolean allWithSameXs= true;
-                    int x=-1;
-                    for(Position p: alreadyDrawnPositions){
-                        if(x==-1){
-                            x=p.getX();
-                        }else{
-                            if(x!=p.getX())
-                                allWithSameXs = false;
-                        }
-                    }
-                    if(allWithSameXs){
-                        //System.out.println("x uguali");
-                        if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
-                            return;
-                        if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
-                            return;
-                    }
-                    else{
-                        //System.out.println("Y uguali");
-                        if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
-                            return;
-                        if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
-                            return;
-                    }
                 }
-                if(TileToBeInserted.getChildren().remove(stackPane)){
-                    drawnTilesCounter--;
-                    Position p = (Position) stackPane.getUserData();
-                    Rectangle rec = (Rectangle) getNodeAt(p.getX(), p.getY(), BoardGrid);
-                    rec.setUserData(0);
-                    rec.setStyle("-fx-stroke-width: 0;");
-                    alreadyDrawnPositions.remove(
-                            alreadyDrawnPositions.stream().filter(
-                                    position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                            ).toList().get(0)
-                    );
-
-                }
-            }catch(ClassCastException e){
-                //e.printStackTrace();
-                Rectangle sender = (Rectangle) event.getSource();
-                int row = transformIntegerToInt(GridPane.getRowIndex(sender));
-                int column = transformIntegerToInt(GridPane.getColumnIndex(sender));
-                if(drawnTilesCounter==3){
-                    //if the tile that is being removed has two tiles selecte around it cannot be removed
-                    Position maybeMiddle = new Position(row,column);
-                    List<Position> otherPositions = new ArrayList<>();
-                    for(Position p: alreadyDrawnPositions){
-                        if(!(p.getX()==maybeMiddle.getX() && p.getY()==maybeMiddle.getY())){
-                            otherPositions.add(p);
-                        }
-                    }
-                /*for(Position p: otherPositions){
-                    System.out.println("("+p.getX()+","+p.getY()+")");
-                }*/
-                    boolean allWithSameXs= true;
-                    int x=-1;
-                    for(Position p: alreadyDrawnPositions){
-                        if(x==-1){
-                            x=p.getX();
-                        }else{
-                            if(x!=p.getX())
-                                allWithSameXs = false;
-                        }
-                    }
-                    if(allWithSameXs){
-                        //("x uguali");
-                        if(maybeMiddle.getY()==otherPositions.get(0).getY()+1 && maybeMiddle.getY()==otherPositions.get(1).getY()-1)
-                            return;
-                        if(maybeMiddle.getY()==otherPositions.get(0).getY()-1 && maybeMiddle.getY()==otherPositions.get(1).getY()+1)
-                            return;
-                    }
-                    else{
-                        //System.out.println("Y uguali");
-                        if(maybeMiddle.getX()==otherPositions.get(0).getX()+1 && maybeMiddle.getX()==otherPositions.get(1).getX()-1)
-                            return;
-                        if(maybeMiddle.getX()==otherPositions.get(0).getX()-1 && maybeMiddle.getX()==otherPositions.get(1).getX()+1)
-                            return;
-                    }
-                }
-
-                sender.setUserData(0);
-                sender.setStyle("-fx-stroke-width: 0;");
-                //System.out.println(getColumnToRemoveTileFrom(new Position(row,column)));
-                StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
-                //System.out.println(stackPane.toString());
-                if(TileToBeInserted.getChildren().remove(stackPane)){
-                    //System.out.println("ok sono stato cancellato");
-                    drawnTilesCounter--;
-                    Position p = (Position) stackPane.getUserData();
-                    alreadyDrawnPositions.remove(
-                            alreadyDrawnPositions.stream().filter(
-                                    position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                            ).toList().get(0)
-                    );
-
-                }
+            }
+            //we mark the tile on the board as already drawn
+            sender.setUserData(0);
+            sender.setStyle("-fx-stroke-width: 0;");
+            //we now remove the tile from TileToBeInserted
+            StackPane stackPane = (StackPane) getNodeAt(0, getColumnToRemoveTileFrom(new Position(row,column)), TileToBeInserted);
+            if(TileToBeInserted.getChildren().remove(stackPane)){
+                drawnTilesCounter--;
+                Position p = (Position) stackPane.getUserData();
+                alreadyDrawnPositions.stream().filter(
+                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                        ).findFirst().ifPresent(position->alreadyDrawnPositions.remove(position));
+                updateTileToBeInserted(alreadyDrawnPositions);
             }
         }
 
     }
+
+
 
     /**
      * This method is used to check if the tile in position p on the board is drawable according to the game rules (it must have at least one side free)
