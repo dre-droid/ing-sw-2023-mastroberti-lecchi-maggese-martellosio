@@ -26,16 +26,22 @@ public class EightofSameType implements StrategyCommonGoal, Serializable {
                     switch (shelfGrid[i][j].getType()) {
                         case CAT:
                             countCat++;
+                            break;
                         case BOOK:
                             countBook++;
+                            break;
                         case GAME:
                             countGame++;
+                            break;
                         case FRAME:
                             countFrame++;
+                            break;
                         case PLANT:
                             countPlant++;
+                            break;
                         case TROPHY:
                             countTrophy++;
+                            break;
 
                     }
 
@@ -46,8 +52,8 @@ public class EightofSameType implements StrategyCommonGoal, Serializable {
         }
         if(countCat >=8 || countBook>=8 || countFrame>=8 || countTrophy>=8 || countPlant>=8 || countGame>=8){
             return true;
-        }
-        return false;
+        }else{
+        return false;}
 
     }
 
