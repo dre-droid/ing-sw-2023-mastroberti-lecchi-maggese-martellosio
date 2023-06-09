@@ -58,4 +58,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public String getIsPlaying() throws RemoteException;
     public void setLastPing(String nickname)throws RemoteException;
     public String getFirstClientInLobby() throws RemoteException;
+
+    public List<ScoringToken> getMyTokens(String player) throws RemoteException;
 }

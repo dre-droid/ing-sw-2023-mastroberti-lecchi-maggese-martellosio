@@ -36,6 +36,9 @@ import java.util.*;
 public class GameSceneController {
     @FXML
     public Text TopLabel;
+
+    @FXML
+    public GridPane TokenContainer;
     @FXML
     public GridPane Opp1ShelfGrid;
     @FXML
@@ -147,74 +150,75 @@ public class GameSceneController {
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
-        alreadyDrawnPositions = new ArrayList<>();
-        removeDrawnTilesFromBoard(grid);
-        EventHandler<MouseEvent> eventHandler = e -> {
-            Rectangle sender = (Rectangle) e.getSource();
-            if((Integer)sender.getUserData()==1){
-                removeTileFromDrawnTiles(e);
-            }else {
-                boardTileClicked(e);
-            }
-        };
+        Platform.runLater(() -> {
+            alreadyDrawnPositions = new ArrayList<>();
+            removeDrawnTilesFromBoard(grid);
+            EventHandler<MouseEvent> eventHandler = e -> {
+                Rectangle sender = (Rectangle) e.getSource();
+                if ((Integer) sender.getUserData() == 1) {
+                    removeTileFromDrawnTiles(e);
+                } else {
+                    boardTileClicked(e);
+                }
+            };
 
-        Image image;
-        for(int i=0;i<9;i++){
-            for(int j=0;j<9;j++){
-                if (grid[i][j].isAvailable()) {
-                    if(!grid[i][j].isEmpty()) {
-                        Tile t = grid[i][j].showTileInThisPosition();
-                        switch (t.getType()) {
-                            case CAT -> {
-                                image = new Image("item_tiles/Gatti1.1.png", 45, 45, true, true);
-                                //System.out.print("C ");
+            Image image;
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    if (grid[i][j].isAvailable()) {
+                        if (!grid[i][j].isEmpty()) {
+                            Tile t = grid[i][j].showTileInThisPosition();
+                            switch (t.getType()) {
+                                case CAT -> {
+                                    image = new Image("item_tiles/Gatti1.1.png", 45, 45, true, true);
+                                    //System.out.print("C ");
+                                }
+                                case BOOK -> {
+                                    image = new Image("item_tiles/Libri1.1.png", 45, 45, true, true);
+                                    //System.out.print("B ");
+                                }
+                                case GAME -> {
+                                    image = new Image("item_tiles/Giochi1.1.png", 45, 45, true, true);
+                                    //System.out.print("G ");
+                                }
+                                case FRAME -> {
+                                    image = new Image("item_tiles/Cornici1.1.png", 45, 45, true, true);
+                                    //System.out.print("F ");
+                                }
+                                case PLANT -> {
+                                    image = new Image("item_tiles/Piante1.1.png", 45, 45, true, true);
+                                    //System.out.print("P ");
+                                }
+                                case TROPHY -> {
+                                    image = new Image("item_tiles/Trofei1.1.png", 45, 45, true, true);
+                                    //System.out.print("T ");
+                                }
+                                default -> image = null;
                             }
-                            case BOOK -> {
-                                image = new Image("item_tiles/Libri1.1.png", 45, 45, true, true);
-                                //System.out.print("B ");
-                            }
-                            case GAME -> {
-                                image = new Image("item_tiles/Giochi1.1.png", 45, 45, true, true);
-                                //System.out.print("G ");
-                            }
-                            case FRAME -> {
-                                image = new Image("item_tiles/Cornici1.1.png", 45, 45, true, true);
-                                //System.out.print("F ");
-                            }
-                            case PLANT -> {
-                                image = new Image("item_tiles/Piante1.1.png", 45, 45, true, true);
-                                //System.out.print("P ");
-                            }
-                            case TROPHY -> {
-                                image = new Image("item_tiles/Trofei1.1.png", 45, 45, true, true);
-                                //System.out.print("T ");
-                            }
-                            default -> image = null;
+                            ImagePattern imp = new ImagePattern(image);
+                            Rectangle rect = new Rectangle();
+                            rect.setUserData(0);
+                            rect.setFill(imp);
+                            rect.setHeight(42);
+                            rect.setWidth(42);
+                            //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
+                            rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                            //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+                            if (getNodeAt(i, j, BoardGrid) == null)
+                                BoardGrid.add(rect, j, i);
+                            //imv.resize(imv.getFitHeight(), imv.getFitHeight());
+                        } else {
+                            Rectangle rect = (Rectangle) getNodeAt(i, j, BoardGrid);
+
+                            //System.out.print("- ");
                         }
-                        ImagePattern imp = new ImagePattern(image);
-                        Rectangle rect = new Rectangle();
-                        rect.setUserData(0);
-                        rect.setFill(imp);
-                        rect.setHeight(42);
-                        rect.setWidth(42);
-                        //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
-                        rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                        //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                        if(getNodeAt(i,j,BoardGrid)==null)
-                            BoardGrid.add(rect,j,i);
-                        //imv.resize(imv.getFitHeight(), imv.getFitHeight());
-                    }
-                    else{
-                        Rectangle rect = (Rectangle) getNodeAt(i,j,BoardGrid);
-
+                    } else {
                         //System.out.print("- ");
                     }
-                }else{
-                    //System.out.print("- ");
                 }
+                //System.out.println();
             }
-            //System.out.println();
-        }
+        });
     }
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
@@ -426,10 +430,11 @@ public class GameSceneController {
                         StackPane stackPane = new StackPane();
                         stackPane.getChildren().add(new ImageView(p.getImage()));
 
-                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
+                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted).getY(), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
                         stackPane.setUserData(new Position(row, column));
-                        updateTileToBeInserted(alreadyDrawnPositions);
                         drawnTilesCounter++;
+                        updateTileToBeInserted(alreadyDrawnPositions);
+
 
                     }
                 }
@@ -437,6 +442,12 @@ public class GameSceneController {
         }
     }
 
+    /**
+     * This method is used to sort the elements in the gridpane TileToBeInserted based on their position on the board
+     * (if they were on the same y, they are sorted with ascending x value, if they were on the same x with ascending
+     * x value)
+     * @param positions
+     */
     private void updateTileToBeInserted(List<Position> positions){
         positions = Position.sortPositions(positions);
         //we save the images and the positions in two lists with corresponding index
@@ -460,7 +471,7 @@ public class GameSceneController {
         System.out.println("size of already drawn positions: "+alreadyDrawnPositions.size());
         for(Position p: positions){
             System.out.println("Position to be inserted = "+p.toString());
-            TileToBeInserted.add(stackPaneList.get(positionList.indexOf(p)), getFirstEmptySpot(TileToBeInserted), 0);
+            TileToBeInserted.add(stackPaneList.get(positionList.indexOf(p)), getFirstEmptySpot(TileToBeInserted).getY(), 0);
         }
         if (drawnTilesCounter >= 1) {
             ImageView checkImg = new ImageView(new Image("game_stuff/check-mark.png"));
@@ -742,18 +753,19 @@ public class GameSceneController {
     }
 
     /**
-     * This method is used to find the first empty spot on the first row in a gridpane
+     * This method is used to find the first empty spot in a gridpane
      * @param gridPane the gridPane where we want to find the first empty spot
-     * @return the column of the first row that is empty
+     * @return th
      */
-    private int getFirstEmptySpot(GridPane gridPane){
-        for(int column =0; column<3; column++){
-            if(getNodeAt(0,column,gridPane)==null){
-                return column;
+    private Position getFirstEmptySpot(GridPane gridPane){
+        for(int row=0;row<gridPane.getRowCount();row++)
+            for(int column =0; column<gridPane.getColumnCount(); column++){
+                if(getNodeAt(row,column,gridPane)==null){
+                    return new Position(row, column);
+                }
+                System.out.println("TileToBeInserted in column "+column+" not empty");
             }
-            System.out.println("TileToBeInserted in column "+column+" not empty");
-        }
-        return -1;
+        return null;
     }
 
     /**
@@ -1146,6 +1158,40 @@ public class GameSceneController {
 
     //****** end socket specific ********//
 
+
+    public void updateScoringTokens(List<ScoringToken> tokens){
+
+        Platform.runLater(()->{
+            TokenContainer.getChildren().clear();
+            for(ScoringToken st: tokens){
+                ImageView imv = new ImageView();
+                switch(st.getPoints()){
+                    case 1:{
+                        imv.setImage(new Image("scoring_tokens/scoring.jpg", 70, 70, true, false));
+                    }break;
+                    case 2:{
+                        imv.setImage(new Image("scoring_tokens/scoring_2.jpg", 70, 70, true, false));
+                    }break;
+                    case 4:{
+                        imv.setImage(new Image("scoring_tokens/scoring_4.jpg", 70, 70, true, false));
+                    }break;
+                    case 6:{
+                        imv.setImage(new Image("scoring_tokens/scoring_6.jpg", 70, 70, true, false));
+                    }break;
+                    case 8:{
+                        imv.setImage(new Image("scoring_tokens/scoring_8.jpg", 70, 70, true, false));
+                    }break;
+                }
+                Position freePos = getFirstEmptySpot(TokenContainer);
+                if(freePos!=null){
+                    TokenContainer.add(imv,freePos.getY(), freePos.getX());
+                }
+
+            }
+        });
+
+
+    }
 
     /**
      * This method is called by ClientNotificationRMIGUI receiveMessage to show incoming messages to the player in messageTextArea

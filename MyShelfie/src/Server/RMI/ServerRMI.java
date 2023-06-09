@@ -596,6 +596,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public String getFirstClientInLobby() throws RemoteException{
         return server.clientsInLobby.get(0);
     }
+
+    @Override
+    public List<ScoringToken> getMyTokens(String player) throws RemoteException {
+        return controller.getScoringToken(player);
+    }
 }
 
 //TODO unire client e clientsLobby

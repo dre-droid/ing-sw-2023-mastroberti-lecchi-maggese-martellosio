@@ -170,7 +170,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException {
-
+        System.out.println("pappapagaogbiorsnabkjsnbkjanbjkrwankbjrsnjban");
+        if(playerNickname.equals(this.nickname)){
+            List<ScoringToken> tokens = serverRMI.getMyTokens(this.nickname);
+            //update the view
+            this.gsc.updateScoringTokens(tokens);
+        }
     }
 
     @Override

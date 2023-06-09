@@ -394,4 +394,10 @@ public class Controller {
     public List<CommonGoalCard> getCommonGoalCards(){
         return game.getCommonGoalCards();
     }
+
+    public List<ScoringToken> getScoringToken(String playerNickname){
+        Optional<Player> requestingPlayer = game.getPlayerList().stream().filter(player -> player.getNickname().equals(playerNickname))
+                .findFirst();
+        return requestingPlayer.map(Player::getScoringTokensList).orElse(null);
+    }
 }
