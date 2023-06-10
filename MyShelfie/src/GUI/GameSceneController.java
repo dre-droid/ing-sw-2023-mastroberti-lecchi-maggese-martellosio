@@ -167,7 +167,7 @@ public class GameSceneController {
                     boardTileClicked(e);
                 }
             };
-
+            BoardGrid.getChildren().clear();
             Image image;
             for (int i = 0; i < 9; i++) {
                 for (int j = 0; j < 9; j++) {
@@ -210,16 +210,9 @@ public class GameSceneController {
                             //rect.setStyle("-fx-stroke: black; -fx-stroke-width: 5;");
                             rect.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
                             //imv.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-                            if (getNodeAt(i, j, BoardGrid) == null)
-                                BoardGrid.add(rect, j, i);
+                            BoardGrid.add(rect, j, i);
                             //imv.resize(imv.getFitHeight(), imv.getFitHeight());
-                        } else {
-                            Rectangle rect = (Rectangle) getNodeAt(i, j, BoardGrid);
-
-                            //System.out.print("- ");
                         }
-                    } else {
-                        //System.out.print("- ");
                     }
                 }
                 //System.out.println();

@@ -172,26 +172,25 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void someoneHasCompletedACommonGoal(String playerNickname, CommonGoalCard cgc) throws RemoteException {
-        System.out.println("pappapagaogbiorsnabkjsnbkjanbjkrwankbjrsnjban");
-        if(playerNickname.equals(this.nickname)){
+        if(playerNickname.equals(this.nickname)) {
             List<ScoringToken> tokens = serverRMI.getMyTokens(this.nickname);
             //update the view
             this.gsc.updateScoringTokens(tokens);
-            int nOfCommonGoalCard=-1;
-            for(CommonGoalCard c: commonGoalCards){
-                if(cgc.getDescription().equals(c.getDescription())){
-                    nOfCommonGoalCard = commonGoalCards.indexOf(c);
-                }
+        }
+        int nOfCommonGoalCard=-1;
+        for(CommonGoalCard c: commonGoalCards){
+            if(cgc.getDescription().equals(c.getDescription())){
+                nOfCommonGoalCard = commonGoalCards.indexOf(c);
             }
-            System.out.println("common goal number: "+nOfCommonGoalCard);
-            if(nOfCommonGoalCard==0){
-                this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
-            }else if (nOfCommonGoalCard==1){
-                this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
-            }
-            else{
-                System.out.println("errore -1");
-            }
+        }
+        System.out.println("common goal number: "+nOfCommonGoalCard);
+        if(nOfCommonGoalCard==0){
+            this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
+        }else if (nOfCommonGoalCard==1){
+            this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
+        }
+        else{
+            System.out.println("errore -1");
         }
     }
 
