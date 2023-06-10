@@ -14,8 +14,8 @@ public class CommonGoalCardTest {
         Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
-        cgc.addPlayerToAlredyBeenRewarded(player);
-        assertTrue(cgc.hasAlredyBeenRewarded(player));
+        cgc.addPlayerToAlreadyBeenRewarded(player);
+        assertTrue(cgc.hasAlreadyBeenRewarded(player));
     }
 
     @Test
@@ -23,7 +23,7 @@ public class CommonGoalCardTest {
         Player player = new Player("Francesco", false, null);
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
-        assertFalse(cgc.hasAlredyBeenRewarded(player));
+        assertFalse(cgc.hasAlreadyBeenRewarded(player));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class CommonGoalCardTest {
         FourCornerOfTheSameType strategy = new FourCornerOfTheSameType();
         CommonGoalCard cgc = new CommonGoalCard(strategy,3);
         cgc.addPlayerToWhoCompleted(player);
-        cgc.addPlayerToAlredyBeenRewarded(player);
+        cgc.addPlayerToAlreadyBeenRewarded(player);
         assertThrows(CannotCollectRewardException.class,()->{
             cgc.getReward(player);
         });

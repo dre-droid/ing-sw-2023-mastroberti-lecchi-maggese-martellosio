@@ -36,7 +36,6 @@ import java.util.*;
 public class GameSceneController {
     @FXML
     public Text TopLabel;
-
     @FXML
     public GridPane TokenContainer;
     @FXML
@@ -51,6 +50,7 @@ public class GameSceneController {
     private TableView TableLeaderboard;
     @FXML
     private TableColumn Player;
+
     @FXML private TableColumn Score;
     @FXML
     private GridPane BoardGrid;
@@ -97,6 +97,10 @@ public class GameSceneController {
     @FXML
     public ImageView EndGameToken3;
 
+    @FXML ImageView cgc1tokens;
+
+    @FXML ImageView cgc2tokens;
+
     public boolean drawIsOver;
     public GridPane PlayerShelfGrid;
     public Label PlayerName;
@@ -141,6 +145,8 @@ public class GameSceneController {
            setPlayerLabels();
            updateTurnLabel(isPlaying);
            createShelfButtons();
+           updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
+           updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
            drawIsOver = false;
         });
     }
@@ -1158,7 +1164,10 @@ public class GameSceneController {
 
     //****** end socket specific ********//
 
-
+    /**
+     * This method is used to update the view of the scoring token of the player
+     * @param tokens list of the scoring tokens
+     */
     public void updateScoringTokens(List<ScoringToken> tokens){
 
         Platform.runLater(()->{
@@ -1187,6 +1196,43 @@ public class GameSceneController {
                     TokenContainer.add(imv,freePos.getY(), freePos.getX());
                 }
 
+            }
+        });
+    }
+
+    /**
+     * this method is used for updating the view of the tokens of a certain common goal
+     * @param n 1 if the common goal to be updated is the first one, 2 if it is the second one
+     * @param tokens list of the scoring token to add the view
+     */
+    public void updateCommonGoalCardTokens(int n, List<ScoringToken> tokens){
+        Platform.runLater(()->{
+            System.out.println("ciao ho aggiornato i token delle common");
+            if(tokens==null){
+                System.out.println("tokens null");
+                return;
+            }
+            if(tokens.size()==0){
+                System.out.println("token size =0");
+                if(n==1){
+                    cgc1tokens.setImage(null);
+                }else if(n==2){
+                    cgc2tokens.setImage(null);
+                }
+                return;
+            }
+            OptionalInt optionalInt = tokens.stream().mapToInt(ScoringToken::getPoints).max();
+            int maxAvailablePts = optionalInt.getAsInt();
+            if(n==1){
+                //cgc1tokens
+                System.out.println("common goal card 1 token modificati");
+                cgc1tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
+            }else if(n==2){
+                System.out.println("common goal card 2 token modificati");
+                cgc2tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
+            }
+            else{
+                System.out.println("N = "+n);
             }
         });
 

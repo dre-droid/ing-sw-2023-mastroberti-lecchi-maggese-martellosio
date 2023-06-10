@@ -61,7 +61,7 @@ public class CommonGoalCard implements Serializable {
     }
 
 
-    public void addPlayerToAlredyBeenRewarded(Player player) {
+    public void addPlayerToAlreadyBeenRewarded(Player player) {
         this.playersAlredyRewarded.add(player.getNickname());
     }
 
@@ -75,7 +75,7 @@ public class CommonGoalCard implements Serializable {
      * @author Francesco Martellosio
      * This method checks if the player passed in the parameter has alredy collected the reward from this common goal
      */
-    public boolean hasAlredyBeenRewarded(Player player) {
+    public boolean hasAlreadyBeenRewarded(Player player) {
         for (String nickname : this.playersAlredyRewarded) {
             if (player.getNickname().equals(nickname))
                 return true;
@@ -107,7 +107,7 @@ public class CommonGoalCard implements Serializable {
      * @throws CannotCollectRewardException if the player has alredy collected the reward or if he hasn't completed the goal yet
      */
     public ScoringToken getReward(Player player) throws CannotCollectRewardException {
-        if (hasCompletedThisGoal(player) && !hasAlredyBeenRewarded(player)) {
+        if (hasCompletedThisGoal(player) && !hasAlreadyBeenRewarded(player)) {
             ScoringToken collectedToken = tokens.remove(tokens.size() - 1);
             playersAlredyRewarded.add(player.getNickname());
             return collectedToken;
@@ -124,5 +124,11 @@ public class CommonGoalCard implements Serializable {
 
     public int getStrategyID(){
         return strategy.getClassID();
+    }
+
+    public List<ScoringToken> getScoringTokens(){
+        List<ScoringToken> copyTokens = new ArrayList<>();
+        this.tokens.stream().forEach(scoringToken -> {copyTokens.add(new ScoringToken(scoringToken.getPoints()));});
+        return copyTokens;
     }
 }

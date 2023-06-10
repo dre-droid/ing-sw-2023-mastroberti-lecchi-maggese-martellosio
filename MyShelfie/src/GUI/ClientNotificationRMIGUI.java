@@ -31,6 +31,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     private List<Tile> drawnTiles;
 
+    private List<CommonGoalCard> commonGoalCards;
+
     public ClientNotificationRMIGUI() throws RemoteException{
         try{
             Registry registryServer = LocateRegistry.getRegistry();
@@ -117,11 +119,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             TilePlacingSpot[][] board= serverRMI.getBoard();
             Map<Integer, PersonalGoalCard> pgcMap = serverRMI.getPGCmap();
             PersonalGoalCard pgc = serverRMI.getPGC(nickname);
-            List<CommonGoalCard> cgcs = serverRMI.getCommonGoalCards();
+            commonGoalCards = serverRMI.getCommonGoalCards();
             List<Player> leaderboard = serverRMI.getLeaderboard();
             String isPlaying = serverRMI.getIsPlaying();
             if(gsc!=null) {
-                gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, cgcs, leaderboard, isPlaying);
+                gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
             }
         }catch(RemoteException re){
             System.out.println("Problem in the update of the gui at the beginning of the game");
@@ -169,12 +171,27 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     }
 
     @Override
-    public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException {
+    public void someoneHasCompletedACommonGoal(String playerNickname, CommonGoalCard cgc) throws RemoteException {
         System.out.println("pappapagaogbiorsnabkjsnbkjanbjkrwankbjrsnjban");
         if(playerNickname.equals(this.nickname)){
             List<ScoringToken> tokens = serverRMI.getMyTokens(this.nickname);
             //update the view
             this.gsc.updateScoringTokens(tokens);
+            int nOfCommonGoalCard=-1;
+            for(CommonGoalCard c: commonGoalCards){
+                if(cgc.getDescription().equals(c.getDescription())){
+                    nOfCommonGoalCard = commonGoalCards.indexOf(c);
+                }
+            }
+            System.out.println("common goal number: "+nOfCommonGoalCard);
+            if(nOfCommonGoalCard==0){
+                this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
+            }else if (nOfCommonGoalCard==1){
+                this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
+            }
+            else{
+                System.out.println("errore -1");
+            }
         }
     }
 

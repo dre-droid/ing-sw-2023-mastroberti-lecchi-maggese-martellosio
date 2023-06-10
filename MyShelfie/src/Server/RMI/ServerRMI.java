@@ -308,7 +308,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             if (controller.checkIfCommonGoalN1IsFulfilled(playerNickname)) {
 
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard1Description());
+                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(0));
                 }
 
                 /*for (ClientNotificationRecord c : clients) {
@@ -318,7 +318,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname)){
 
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
+                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(1));
                 }
 
                 /*for (ClientNotificationRecord c : clients) {
@@ -600,6 +600,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public List<ScoringToken> getMyTokens(String player) throws RemoteException {
         return controller.getScoringToken(player);
+    }
+
+    @Override
+    public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException {
+        return controller.getAvailableScoringTokens(commonGoalCard);
     }
 }
 

@@ -1,6 +1,7 @@
 package Server.RMI;
 
 import main.java.it.polimi.ingsw.Model.*;
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -71,10 +72,10 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     }
 
     @Override
-    public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException {
+    public void someoneHasCompletedACommonGoal(String playerNickname, CommonGoalCard cgc) throws RemoteException {
         System.out.println(playerNickname+" has completed a common goal, congratulations!");
         System.out.println("The common goal completed is:");
-        System.out.println(commongoal);
+        System.out.println(cgc.getDescription());
     }
 
     @Override

@@ -60,4 +60,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public String getFirstClientInLobby() throws RemoteException;
 
     public List<ScoringToken> getMyTokens(String player) throws RemoteException;
+
+    public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException;
 }

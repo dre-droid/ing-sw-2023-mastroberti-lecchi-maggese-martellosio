@@ -395,9 +395,25 @@ public class Controller {
         return game.getCommonGoalCards();
     }
 
+    /**
+     * this method is used to get the scoring tokens possessed by a player
+     * @param playerNickname name of the player
+     * @return the list of scoring token of the player if the nickname correspond to the one of a player in the game, null otherwise
+     */
     public List<ScoringToken> getScoringToken(String playerNickname){
         Optional<Player> requestingPlayer = game.getPlayerList().stream().filter(player -> player.getNickname().equals(playerNickname))
                 .findFirst();
         return requestingPlayer.map(Player::getScoringTokensList).orElse(null);
+    }
+
+    /**
+     * this method is used to get the scoring tokens of the common goal card passed in the parameter
+     * @param commonGoalCard the common goal card of which we want the scoring tokens
+     * @return the scoring token of the common goal card if commonGoalCard correspond to one of the common goal cards present in the game
+     * null otherwise
+     */
+    public List<ScoringToken> getAvailableScoringTokens(CommonGoalCard commonGoalCard){
+        Optional<CommonGoalCard> opt = game.getCommonGoalCards().stream().filter(cgc->cgc.getDescription().equals(commonGoalCard.getDescription())).findFirst();
+        return opt.map(CommonGoalCard::getScoringTokens).orElse(null);
     }
 }

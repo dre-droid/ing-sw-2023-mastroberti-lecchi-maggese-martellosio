@@ -1,5 +1,6 @@
 package Server.RMI;
 
+import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.TilePlacingSpot;
@@ -20,7 +21,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     public void startingTheGame(String startingPlayer) throws RemoteException;
 
-    public void someoneHasCompletedACommonGoal(String playerNickname, String commongoal) throws RemoteException;
+    public void someoneHasCompletedACommonGoal(String playerNickname, CommonGoalCard cgc) throws RemoteException;
 
     public void aTurnHasEnded(String currentPlayerNickname,String nextPlayerNickname) throws RemoteException;
 
