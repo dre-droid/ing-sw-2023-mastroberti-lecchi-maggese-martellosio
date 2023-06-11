@@ -35,6 +35,8 @@ import java.util.*;
 
 public class GameSceneController {
     @FXML
+    public ImageView firstPlayerSeat;
+    @FXML
     public Text TopLabel;
     @FXML
     public GridPane TokenContainer;
@@ -1228,8 +1230,16 @@ public class GameSceneController {
                 System.out.println("N = "+n);
             }
         });
+    }
 
-
+    /**
+     * this method is used to add the first player seat token to the gui (to be used only by the starting player
+     */
+    public void setFirstPlayerSeat(){
+        Platform.runLater(()->{
+            Image img = new Image("misc/firstplayertoken.png", 60,60,true, false);
+            firstPlayerSeat.setImage(img);
+        });
     }
 
     /**

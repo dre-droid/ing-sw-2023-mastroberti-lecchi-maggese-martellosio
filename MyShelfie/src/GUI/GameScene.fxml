@@ -395,5 +395,6 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
+      <ImageView fx:id="firstPlayerSeat" fitHeight="54.0" fitWidth="54.0" layoutX="397.0" layoutY="339.0" pickOnBounds="true" preserveRatio="true" />
    </children>
 </AnchorPane>

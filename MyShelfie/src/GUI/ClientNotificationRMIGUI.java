@@ -124,6 +124,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             String isPlaying = serverRMI.getIsPlaying();
             if(gsc!=null) {
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
+                if(serverRMI.isMyTurn(nickname)){
+                    gsc.setFirstPlayerSeat();
+                }
             }
         }catch(RemoteException re){
             System.out.println("Problem in the update of the gui at the beginning of the game");
