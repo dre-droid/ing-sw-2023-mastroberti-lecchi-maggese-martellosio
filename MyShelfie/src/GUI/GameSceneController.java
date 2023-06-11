@@ -35,6 +35,8 @@ import java.util.*;
 
 public class GameSceneController {
     @FXML
+    public GridPane RearrangeTiles;
+    @FXML
     public ImageView firstPlayerSeat;
     @FXML
     public Text TopLabel;
@@ -523,11 +525,63 @@ public class GameSceneController {
             }
             drawIsOver = true;
             TileToBeInserted.getChildren().remove(getNodeAt(0,3,TileToBeInserted));
+            //show arrows to rearrange tiles
+            int numOfArrows = drawnTilesCounter*2;
+            for(int i=0;i<numOfArrows;i++){
+                ImageView arrowContainer = new ImageView();
+                Image arrow;
+                int finalI = i/2;
+                if(i%2==0){
+                    //left arrow
+                    arrow = new Image("game_stuff/left_arrow.png", 30,30,true, false);
+                    arrowContainer.setImage(arrow);
+                    EventHandler<MouseEvent> eventHandlerLeft = e -> {
+                        switchDrawnTiles(finalI, finalI -1);
+                    };
+                    arrowContainer.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandlerLeft);
+                }
+                else{
+                    //right arrow
+                    arrow = new Image("game_stuff/right_arrow.png", 30,30,true, false);
+                    arrowContainer.setImage(arrow);
+                    EventHandler<MouseEvent> eventHandlerRight = e -> {
+                        switchDrawnTiles(finalI, finalI +1);
+                    };
+                    arrowContainer.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandlerRight);
+                }
+                RearrangeTiles.add(arrowContainer, i, 0);
+
+
+            }
+        }
+    }
+
+    /**
+     * This method is used to swithc the two elements in the gridpane TileTobBeInserted
+     * @param pos1 column of the first element to swap
+     * @param pos2 column of the second element to swap
+     */
+    public void switchDrawnTiles(int pos1, int pos2){
+        //to be implemented
+        System.out.println("Pos1 = "+pos1+", pos2 = "+pos2);
+        if(pos1>=0 && pos1<drawnTilesCounter && pos2>=0 && pos2<drawnTilesCounter){
+            Node temp1 = getNodeAt(0, pos1, TileToBeInserted);
+            Node temp2 = getNodeAt(0, pos2, TileToBeInserted);
+            TileToBeInserted.getChildren().remove(getNodeAt(0, pos1, TileToBeInserted));
+            TileToBeInserted.getChildren().remove(getNodeAt(0, pos2, TileToBeInserted));
+            TileToBeInserted.add(temp2, pos1, 0);
+            TileToBeInserted.add(temp1, pos2, 0);
+            if(clientRMI!=null){
+                clientRMI.rearrangeDrawnTiles(pos1, pos2);
+            }
+            else if(clientSocket!=null){
+                //socket must rearrange the draw tiles
+                //TODO implement this for socket
+            }
         }
     }
 
     //TODO it should be that you cant press checkmark button if drawn tiles cant fit in any column
-
     /**
      * Sends the server a request to insert the tiles in the selected column of the shelf.
      * Calls updateGameScene().
@@ -564,6 +618,8 @@ public class GameSceneController {
         //reset greyed out buttons
         for (int i = 0; i < 5; i++)
             ((ImageView) shelfButtonsPane.getChildren().get(i)).setImage(new Image("misc/sort-down.png"));
+        //reset rearrange buttons
+        RearrangeTiles.getChildren().clear();
     }
 
     /**
@@ -1253,9 +1309,7 @@ public class GameSceneController {
                 messageTextArea2.appendText(message);
                 messageTextArea2.appendText("\n");
             });
-
         }
-
     }
 }
 //TODO RMI currently can send but not recieve messages to/from socket

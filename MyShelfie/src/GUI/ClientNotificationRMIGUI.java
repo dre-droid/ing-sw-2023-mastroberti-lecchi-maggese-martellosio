@@ -143,6 +143,17 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    public void rearrangeDrawnTiles(int pos1, int pos2){
+        try{
+            Tile temp = drawnTiles.get(pos1);
+            drawnTiles.set(pos1, drawnTiles.get(pos2));
+            drawnTiles.set(pos2, temp);
+        }catch (IndexOutOfBoundsException e){
+            return;
+        }
+
+    }
+
     public boolean insertTilesInShelf(int column ) {
         try {
             boolean returnValue = serverRMI.insertTilesInShelf(nickname,drawnTiles,column);
