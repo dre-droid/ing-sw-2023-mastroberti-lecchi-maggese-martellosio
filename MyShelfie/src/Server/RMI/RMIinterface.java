@@ -3,7 +3,7 @@ package Server.RMI;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
-import java.rmi.Remote;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +15,7 @@ public interface RMIinterface extends java.rmi.Remote{
     public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException;
     public List<Tile> drawTilesFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction) throws java.rmi.RemoteException;
     public boolean isGameBeingCreated() throws RemoteException;
+    public boolean firstInLobby (String nickname) throws RemoteException;
     public void gameIsCreated() throws RemoteException;
 
     public boolean hasGameStarted() throws RemoteException;
@@ -41,7 +42,7 @@ public interface RMIinterface extends java.rmi.Remote{
 
     public String getCommonGoalCardDescription() throws RemoteException;
 
-    public void quitGame(String playerNickname) throws RemoteException;
+    public void quitGame(String playerNickname) throws IOException;
 
     public void chatMessage(String senderName, String text, String receiverName, Boolean pm) throws RemoteException;
 

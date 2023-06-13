@@ -35,6 +35,12 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     public void gameCreatedCorrectly() throws RemoteException{
         System.out.println("Game created successfully");
     }
+    public void joinGameOutcome(int outcome) throws RemoteException{
+        clientRMI.joinGameOutcome = outcome;
+        synchronized (this) {
+            this.notifyAll();
+        }
+    }
 
     /**
      * this method sets the boolean value gameHasBeenCreated in ClientRMI to true and notifies it. Called by ServerRMI method

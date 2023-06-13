@@ -2,16 +2,17 @@ package Server.RMI;
 
 import Server.Controller;
 import Server.Server;
-import Server.Socket.socketNickStruct;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
+import Server.ClientInfoStruct;
 
-import java.net.Socket;
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+
 
 public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
@@ -57,12 +58,18 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
         }
-        for(int i = 0; i < server.clientsInLobby.size(); i++)
-            if(nickname.equals(server.clientsInLobby.get(i))){
+        for(int i = 0; i < server.clientsLobby.size(); i++)                 //search for equal nicknames in server.clientsLobby arrayList
+            if(nickname.equals(server.clientsLobby.get(i).getNickname())){
                 clientToBeNotified.nickNameAlreadyInUse();
                 return -1;
             }
-        server.clientsInLobby.add(nickname);
+        server.clientsLobby.add(new ClientInfoStruct(nickname));            //adds object ClientInfoStruct to server.clientsLobby arrayList
+
+        for(int i = 0; i < server.clientsLobby.size(); i++)                 //sets rmiPort for the ClientInfoStruct object with the same nickname in
+            if(nickname.equals(server.clientsLobby.get(i).getNickname())){  //server.clientsLobby arrayList
+                server.clientsLobby.get(i).setRmiPort(port);
+            }
+        server.notifyServer();                            //notifies server that a new client has been added to arrayList server.clientsLobby
         clientsLobby.put(clientToBeNotified, new RmiNickStruct(nickname));
         clientsLobby.get(clientToBeNotified).setLastPing(System.currentTimeMillis());
         return 0;
@@ -91,21 +98,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             case 0: {
                 clientToBeNotified.gameJoinedCorrectlyNotification();
                 clients.put(nickname, clientToBeNotified);
-                //clients.add(new ClientNotificationRecord(nickname, clientToBeNotified));
-                /*for (ClientNotificationRecord clientNotificationRecord : clients) {
-                    clientNotificationRecord.client.someoneJoinedTheGame(nickname);
-                }*/
                 server.addPlayerToRecord(nickname, Server.connectionType.RMI);
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     client.getValue().someoneJoinedTheGame(nickname);
                 }
                 if (controller.hasGameStarted()) {
-                    /*startTimer(timerDraw, drawDelay);*/
                     notifyStartOfGame();
-                    /*for (ClientNotificationRecord clientNotificationRecord : clients) {
-                        clientNotificationRecord.client.startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        clientNotificationRecord.client.announceCommonGoals(commonGoals);
-                    }*/
                 }
             }break;
             case -1: {
@@ -114,14 +112,21 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             case -2: {
                 clientToBeNotified.problemInJoiningGame("Sorry, the game has already started");
             }break;
+            /*
             case -3: {
                 clientToBeNotified.problemInJoiningGame("The nickname you chose is already being used");
             }break;
+
+             */
         }
+        clientToBeNotified.joinGameOutcome(outcome);
         return outcome;
     }
     public boolean isGameBeingCreated() throws RemoteException{
         return controller.isGameBeingCreated;
+    }
+    public boolean firstInLobby (String nickname) throws RemoteException{
+        return server.clientsLobby.get(0).getNickname().equals(nickname);
     }
 
     /**
@@ -132,7 +137,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     public void gameIsCreated() throws RemoteException{
 
-        new Thread(() -> {
+        /*new Thread(() -> {
             while(!controller.hasGameStarted()) {
                 try {
                     if (clientsLobby.size() > 0) {
@@ -153,28 +158,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             }
         }).start();
 
-    //TODO a client throws exception nullpointerexception after waiting for the other client to choose the number of player for the match
-
-        /*
-        if(controller.hasGameBeenCreated()) {
-            try {
-                if (clientsLobby.size() > 0) {
-                    Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
-                    for (ClientNotificationInterfaceRMI c : set) {      //notifies other player rmi in wait()
-                        c.gameHasBeenCreated();
-                    }
-                }
-            } catch (RemoteException e) {
-                System.out.println("Cannot notify client");
-            }
-            return true;
-        }
-        else
-            return false;
-
          */
-
-
+        //in this version every client enters at the same time so a thread that iterates is not necessary
+        for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()) {
+            client.getKey().gameHasBeenCreated();
+        }
     }
 
 
@@ -206,7 +194,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             //clients.add(new ClientNotificationRecord(nickname,clientToBeNotified));
             clients.put(nickname, clientToBeNotified);
             server.addPlayerToRecord(nickname, Server.connectionType.RMI);
-            System.out.println("Created new game by "+nickname);
+            //System.out.println("Created new game by "+nickname);
             return true;
         }
         clientToBeNotified.cannotCreateNewGame("There is already a game to join");
@@ -497,7 +485,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return controller.getNameOfPlayerWhoIsCurrentlyPlaying();
     }
 
-    public void quitGame(String playerNickname) throws RemoteException{
+    public void quitGame(String playerNickname) throws IOException {
         System.out.println("Server received quit command");
         controller.endGame();
     }
@@ -548,20 +536,24 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 while(Objects.isNull(controller)) Thread.sleep(1000);
                 //while (!controller.hasGameStarted()) Thread.sleep(3000);
                 while (true) {
+                    Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
 
-                    for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()) {
+                    while (iterator.hasNext()) {
+                        Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
+                        ClientNotificationInterfaceRMI client = entry.getKey();
+                        RmiNickStruct nickStruct = entry.getValue();
 
-                        if (System.currentTimeMillis() - client.getValue().getLastPing() > DISCONNECTION_TIME) {
-                            String nickOfDisconnectedPlayer = client.getValue().getNickname();
+                        if (System.currentTimeMillis() - nickStruct.getLastPing() > DISCONNECTION_TIME) {
+                            String nickOfDisconnectedPlayer = nickStruct.getNickname();
 
-                            server.clientsInLobby.remove(nickOfDisconnectedPlayer);
+                            //server.clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
                             System.out.println(nickOfDisconnectedPlayer +" disconnected");
-                            clientsLobby.remove(client.getKey());
-                            server.notifyLobbyDisconnection();
+                            iterator.remove();
+                            server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
                         }
                     }
 
-                    Thread.sleep(2000);
+                    Thread.sleep(300);
                 }
                 //System.out.println("has the game ended: " + controller.hasTheGameEnded());
 
@@ -594,7 +586,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
     }
     public String getFirstClientInLobby() throws RemoteException{
-        return server.clientsInLobby.get(0);
+        return server.clientsLobby.get(0).getNickname();
     }
 
     @Override

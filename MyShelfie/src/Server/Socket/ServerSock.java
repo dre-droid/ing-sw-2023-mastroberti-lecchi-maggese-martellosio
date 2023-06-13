@@ -4,6 +4,7 @@ package Server.Socket;
 import GUI.PositionStuff.Position;
 import Server.Controller;
 import Server.Server;
+import Server.ClientInfoStruct;
 import com.beust.ah.A;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +20,7 @@ import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.rmi.RemoteException;
 import java.util.*;
 
 public class ServerSock {
@@ -26,9 +28,10 @@ public class ServerSock {
     private ArrayList<socketNickStruct> clients = new ArrayList<>();
     private Controller controller;
     private final Server server;
-    private final long DISCONNECTION_TIME = 30000;  //disconnection threshold: 30s
+    private final long DISCONNECTION_TIME = 10000;  //disconnection threshold: 10s
     private final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public List<String> messageBuffer = new ArrayList<>();
+    public final Object clientsLock = new Object();
 
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
@@ -60,15 +63,16 @@ public class ServerSock {
      */
     private void acceptClient(Socket client) {
         Thread acceptClient = new Thread(() -> {
+            /*
             try {
                 PrintWriter out = new PrintWriter(client.getOutputStream(), true);
                 if (!controller.hasGameStarted()) {
-                    out.println("[INFO] Welcome to MyShelfie! Press '/quit' to quit, '/chat ' to chat with other players..");
+                    out.println("[INFO] Welcome to MyShelfie! Type '/quit' to quit, '/chat ' to chat with other players..");
 
                     while (true) {
                         int resultValue = playerJoin(client);
                         if (resultValue == 0 || resultValue == -1) {    //successfully joined
-                            server.addPlayerToConnectedClients(getNickFromSocket(client));
+                            server.addPlayerToConnectedClients(getNickFromSocket(client));      //TODO useless??
                             return;
                         }
                         if (resultValue == -4) {
@@ -81,6 +85,14 @@ public class ServerSock {
             } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
+
+             */
+
+            try {
+                playerJoin(client);
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         });
         acceptClient.start();
     }
@@ -89,7 +101,7 @@ public class ServerSock {
      * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
      * @return result of controller.joinGame()
      */
-    private int playerJoin(Socket client) throws IOException, InterruptedException {
+    private void playerJoin(Socket client) throws IOException, InterruptedException {
         String nickname;
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -111,8 +123,8 @@ public class ServerSock {
                 if (nickname.equals("[PING]")) break;
                 nicknameAlreadyInUse = false;
 
-                for (int i = 0; i < server.clientsInLobby.size(); i++) {
-                    if (Objects.equals(server.clientsInLobby.get(i), nickname)) {
+                for (int i = 0; i < server.clientsLobby.size(); i++) {
+                    if (Objects.equals(server.clientsLobby.get(i).getNickname(), nickname)) {
                         nicknameAlreadyInUse = true;
                     }
                 }
@@ -125,16 +137,28 @@ public class ServerSock {
                 imbecille = false;
             }
         } while (true);
-        server.clientsInLobby.add(nickname);
-        clients.add(new socketNickStruct(client, nickname));
-        clientListener(client, nickname);
+        server.clientsLobby.add(new ClientInfoStruct(nickname));
+        for (int i = 0; i < server.clientsLobby.size(); i++) {
+            if (nickname.equals(server.clientsLobby.get(i).getNickname())) {
+                server.clientsLobby.get(i).setSocket(client);
+                server.clientsLobby.get(i).setOut(out);
+                server.clientsLobby.get(i).setReader(reader);
+            }
+        }
+        server.notifyServer();
+        synchronized (clientsLock){
+            clients.add(new socketNickStruct(client, nickname));
+        }
+        clientListener(client, nickname, reader);
         sendMessage("[CONNECTED]", client);
-
-        out.println("[INFO] Chosen nickname: " + nickname);
+        if (controller.isGameBeingCreated && !server.clientsLobby.get(0).getNickname().equals(nickname))
+            out.println("[INFO] Game is being created by another player...");
+        //out.println("[INFO] Chosen nickname: " + nickname);
+        /*
         if (controller.isGameBeingCreated) {
             out.println("[INFO] Game is being created by another player...");
             synchronized (this){
-                while(!controller.hasGameBeenCreated() && !nickname.equals(server.clientsInLobby.get(0))) {
+                while(!controller.hasGameBeenCreated() && !nickname.equals(server.clientsLobby.get(0).getNickname())) {
                     wait();
                     boolean disconnected = true;
                     for (int i = 0; i < clients.size(); i++) {
@@ -149,6 +173,16 @@ public class ServerSock {
         }
 
         return joinGameSwitch(client, nickname, out, reader);
+
+         */
+        /*
+        synchronized (this){
+            while(clientsLobby.get(nickname).equals(-5))
+                wait();
+        }
+        return clientsLobby.get(nickname);
+
+         */
     }
 
     /**
@@ -170,9 +204,9 @@ public class ServerSock {
                     while(messageBuffer.isEmpty())
                         synchronized (this) {
                             wait();
-                            if(!nickname.equals(server.clientsInLobby.get(0))){ //if this thread is notified and nickname of player isn't
-                                return -4;                                      //equal to the first one in the list means this player
-                            }                                                   //disconnected while choosing the number of players
+                            if(!nickname.equals(server.clientsLobby.get(0).getNickname())){ //if this thread is notified and nickname of player isn't
+                                return -4;                                                  //equal to the first one in the list means this player
+                            }                                                               //disconnected while choosing the number of players
                         }
                     line = messageBuffer.remove(0);
 
@@ -221,23 +255,80 @@ public class ServerSock {
         }
         return -4;  //should never reach!
     }
+    public void joinGame(Socket client, String nickname, PrintWriter out, BufferedReader reader) throws InterruptedException, IOException{
+        new Thread(() -> {
+            boolean imbecille;
+            try {
+                switch (controller.joinGame(nickname)) {
+                    case -1 -> {
+                        String line;
+                        imbecille = false;
+                        do {
+                            if (imbecille)
+                                out.println("[REQUEST] Invalid input, you can choose between 2 and 4 players: ");
+                            else
+                                out.println("[REQUEST] Choose the number of players for the game: ");
+                            while (messageBuffer.isEmpty())
+                                synchronized (this) {
+                                    wait();
+                                    if (!nickname.equals(server.clientsLobby.get(0).getNickname())) {
+                                        //if this thread is notified and nickname of player isn't equal to the first one in the
+                                        // list means this player disconnected while choosing the number of players
+                                        //clientsLobby.put(nickname, -4);
+                                        //notifyAll();
+                                        //server.notifyLobbyDisconnection(nickname);
+                                        return;
+                                    }
+                                }
+                            line = messageBuffer.remove(0);
+                            imbecille = true;
+
+                        } while (!isNumeric(line) || Integer.parseInt(line) < 2 || Integer.parseInt(line) > 4);
+                        controller.createNewGame(nickname, Integer.parseInt(line));
+                        out.println("[INFO] Selected number of players for the game: " + line);
+                        server.addPlayerToRecord(nickname, Server.connectionType.Socket);
+                        out.println("[INFO] Waiting for all players to connect...");
+                    }
+                    case -2 -> {
+                        out.println("[INFO] The game already started, you can't join, try again later");
+                        //synchronized (this) {
+                        //    clientsLobby.put(nickname, -2);
+                            notifyAll();
+                        //}
+                    }
+                    case 0 -> {
+                        server.addPlayerToRecord(nickname, Server.connectionType.Socket);
+                        //synchronized (this) {
+                        //    clientsLobby.put(nickname, 0);
+                        //    notifyAll();
+                        //}
+
+                        server.notifyServer();
+                    }
+                }
+            } catch (RemoteException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+    }
 
     /**
      * Creates a thread to listen and process clients' messages. All received strings are either processed or appended to a List<String> messageBuffer. In
      * the latter case notify() is called to wake up drawInquiry waiting on input from client.
      */
-    public void clientListener(Socket client, String nickname){
+    public void clientListener(Socket client, String nickname, BufferedReader reader){
         Thread clientListener = new Thread(() -> {
             try {
                 String line;
-                InputStream input = client.getInputStream();
+                //InputStream input = client.getInputStream();
                 while (true) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    //BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     while ((line = reader.readLine()) != null) {
                         // if readLine() returns null, the client has disconnected
                         if (Objects.isNull(line)) {
                             controller.endGame();
-                            notifyGameEnd(nickname);
+                            //notifyGameEnd(nickname);
+                            notifyGameEnd();        //TODO not the required behaviour with AF
                         }
                         synchronized (this) {
                             // processes PING message
@@ -248,12 +339,11 @@ public class ServerSock {
                                     }
                                 // processes user's input
                             }
-                            else
-                                if (controller.hasGameStarted()) {
-                                    if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
-                                        messageBuffer.add(line);
-                                        notify();
-                                    }
+                            else if (controller.hasGameStarted()) { //if the game started
+
+                                if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
+                                    messageBuffer.add(line);
+                                    notifyAll();
                                 }
                                 // processes chat message
                                 else if (line.startsWith("/chat ")) {
@@ -278,7 +368,7 @@ public class ServerSock {
                                     }
                                 }
                                 // processes /quit
-                                else if (line.equals("/quit")) {
+                                else if (line.equals("/quit")) {    //todo not working atm
                                     PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
                                     pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
                                     line = reader.readLine();
@@ -288,15 +378,19 @@ public class ServerSock {
                                             pw.println("[GAMEEND]: You quit.");
                                         } else {
                                             controller.endGame();
-                                            notifyGameEnd(nickname);
+                                            //notifyGameEnd(nickname);
+                                            notifyGameEnd();
                                         }
                                         break;  //closes listener on confirmed quit
                                     }
                                 }
-                                else if (!controller.hasGameStarted()) {
-                                    messageBuffer.add(line);
-                                    notifyAll();
-                                }
+
+                            }
+                            else if (!controller.hasGameStarted()) {    //if the game hasn't started yet
+                                messageBuffer.add(line);
+                                notifyAll();
+                            }
+
                         }
                     }
                 }
@@ -319,42 +413,47 @@ public class ServerSock {
             try {
                 while (Objects.isNull(controller)) Thread.sleep(500);
                 while (true) {
-                    if(controller.hasGameStarted()) {
-                        //System.out.println(System.currentTimeMillis());
-                        for (socketNickStruct client : clients) {
-                            //System.out.println(client.getName() + ": " + client.getLastPing());
+                    if(controller.hasGameStarted()) {       //todo not working atm
+                        Iterator<socketNickStruct> iterator = clients.iterator();
+                        while (iterator.hasNext()) {
+                            socketNickStruct client = iterator.next();
                             if (System.currentTimeMillis() - client.getLastPing() > DISCONNECTION_TIME) {
-                                notifyGameEnd(client.getName());
+                                //notifyGameEnd(client.getName());
+                                notifyGameEnd();
                                 controller.endGame();
                             }
                         }
                     }
                     else{
-                        for (int i = 0; i<clients.size(); i++) {
-                            socketNickStruct client = clients.get(i);
-
-                            if (System.currentTimeMillis() - client.getLastPing() > DISCONNECTION_TIME) {
-                                String nickOfDisconnectedPlayer = client.getName();
-
-                                server.clientsInLobby.remove(nickOfDisconnectedPlayer);
-                                //System.out.println(nickOfDisconnectedPlayer +" disconnected");
-                                clients.remove(client);
-                                server.notifyLobbyDisconnection();
-                                //TODO chek more often for disconnection
-                                i--;
-
+                        synchronized (clientsLock) {
+                            Iterator<socketNickStruct> iterator = clients.iterator();
+                            while (iterator.hasNext()) {
+                                socketNickStruct client = iterator.next();
+                                if (System.currentTimeMillis() - client.getLastPing() > 3000) {
+                                    String nickOfDisconnectedPlayer = client.getName();
+                                    System.out.println(nickOfDisconnectedPlayer + " disconnected");
+                                    iterator.remove();
+                                    server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
+                                }
                             }
                         }
                     }
                     //System.out.println("has the game ended: " + controller.hasTheGameEnded());
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 }
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
+            }catch(Exception e){
+                e.printStackTrace();
+            }
         }).start();
     }
+    public void clientDisconnected(String nickname) throws IOException {
 
+        clients.removeIf(client -> client.getName().equals(nickname));
+        if(!controller.hasGameStarted())
+            server.notifyLobbyDisconnection(nickname);
+        else
+            controller.endGame();
+    }
     /**
      * Queries the client for info on his turn's drawn tiles
      * @param nickname - the nickname of the client to query
@@ -630,7 +729,7 @@ public class ServerSock {
      * Prints message to all clients in socketNickStruct clients
      * @param message
      */
-    public synchronized void broadcastMessage(String message){
+    public void broadcastMessage(String message){
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
@@ -678,7 +777,7 @@ public class ServerSock {
      * Sends a message to all clients, informing game has begun. Also sends the nickname of the current player.
      * @param nickname
      */
-    public synchronized void notifyGameStart(String nickname) {
+    public void notifyGameStart(String nickname) {
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
@@ -691,10 +790,11 @@ public class ServerSock {
         }
     }
 
-    public void notifyGameEnd(String nick) throws IOException {
+    public void notifyGameEnd(/*String nick*/) throws IOException {
         for (socketNickStruct c: clients){
             PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            out.println("[GAMEEND]: " + nick + " has quit the game. The game has ended.");
+            //out.println("[GAMEEND]: ",  + nick + " has quit the game. The game has ended.");
+            out.println("[GAMEEND]: The game has ended.");
             c.getSocket().close();
         }
     }

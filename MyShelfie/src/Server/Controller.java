@@ -80,10 +80,13 @@ public class Controller {
                     notifyAll();
                 }
                 return 0;
-            } else {
+            } /*
+            else {
                 //System.out.println("Nickname already used");
                 return -3;
             }
+            */
+        return -4;
     }
 
     /**
@@ -332,12 +335,15 @@ public class Controller {
             } catch (InvalidMoveException e) {
                 invalidMoveFlag = true;
                 e.printStackTrace();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }while(invalidMoveFlag);
     }
 
-    public void endGame(){
+    public void endGame() throws IOException {
         server.serverRMI.notifyEndOfGame();
+        server.serverSock.notifyGameEnd();
         game.endGame();
         deleteProgress();
 

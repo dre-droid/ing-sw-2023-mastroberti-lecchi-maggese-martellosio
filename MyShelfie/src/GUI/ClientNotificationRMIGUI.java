@@ -7,6 +7,7 @@ import Server.RMI.RMIinterface;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -30,6 +31,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     private boolean GameStartFlag;
 
     private List<Tile> drawnTiles;
+    public int  joinGameOutcome = -5;
 
     private List<CommonGoalCard> commonGoalCards;
 
@@ -71,6 +73,25 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public int joinGame() throws RemoteException{
         System.out.println("trying login");
         return serverRMI.joinGame(nickname, port);
+    }
+    public int joinLobby() throws RemoteException{
+        return serverRMI.joinLobby(nickname, port);
+    }
+    public void heartbeat(String playerNickname) {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    serverRMI.setLastPing(playerNickname);
+                } catch (RemoteException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
     }
 
     public boolean createNewGame(int numOfPlayers) throws RemoteException{
@@ -275,7 +296,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void quitGame(){
         try {
             serverRMI.quitGame(nickname);
-        } catch (RemoteException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -327,5 +348,16 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void notifyOfDisconnection() throws RemoteException{
 
     }
-
+    public void joinGameOutcome(int outcome) throws RemoteException{
+        joinGameOutcome = outcome;
+        synchronized (this) {
+            this.notifyAll();
+        }
+    }
+    public boolean isGameBeingCreated() throws RemoteException{
+        return serverRMI.isGameBeingCreated();
+    }
+    public boolean firstInLobby (String nickname) throws RemoteException{
+        return serverRMI.firstInLobby(nickname);
+    }
 }

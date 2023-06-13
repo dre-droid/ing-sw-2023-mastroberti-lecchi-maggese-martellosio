@@ -74,7 +74,7 @@ public class ClientSocket {
                     synchronized (this) {   //writing to output is synchronized with other writing methods
                         output.println("[PING]");
                     }
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

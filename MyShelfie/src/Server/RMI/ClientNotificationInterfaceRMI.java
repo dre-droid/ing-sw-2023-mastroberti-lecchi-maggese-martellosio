@@ -13,6 +13,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void problemInJoiningGame(String problem) throws RemoteException;
 
     public void gameCreatedCorrectly() throws RemoteException;
+    public void joinGameOutcome(int outcome) throws RemoteException;
 
     public void cannotCreateNewGame(String problem) throws RemoteException;
 

@@ -57,12 +57,12 @@ public class LoginSceneController {
      */
     public void switchToNextScene(ActionEvent event) {
         try {
-            if (Objects.isNull(clientSocket)) handleRMI(event);
+            if (Objects.isNull(clientSocket)) handleRMIv2(event);
             else {
                 if (!alive) //handles spamming button
                     new Thread(() -> handleSocket(event)).start();
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
 
         }
@@ -158,7 +158,108 @@ public class LoginSceneController {
         stage.setResizable(false);
         stage.show();
     }
+    private void handleRMIv2(ActionEvent event) throws IOException, InterruptedException{
+        if(clientRMI!=null){
+            System.out.println("rmi active on login scene");
+            clientRMI.setnickname(usernameText.getText());
+            try{
+                FXMLLoader loader;
+                String errorMessage="";
+                clientRMI.startNotificationServer();
+                int outcome = clientRMI.joinLobby();
+                System.out.println(outcome);
+                String nextScenePath="";
+                switch(outcome){
+                    case -1:{
+                        errorMessage = "Nickname already in use";
+                        loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                        updateLabelText(messageTextArea, errorMessage);
+                    }break;
+                    case 0:{
+                       clientRMI.heartbeat(clientRMI.getNickname());
+                        if(clientRMI.isGameBeingCreated() && !clientRMI.firstInLobby(clientRMI.getNickname())){
+                            System.out.println("Game is being created by another player...");
+                            updateLabelText(messageTextArea, "Game is being created by another player...");
+                        }
+                        synchronized (clientRMI){
+                            while(clientRMI.joinGameOutcome == -5)
+                                clientRMI.wait();
+                        }
+                        switch(clientRMI.joinGameOutcome){
+                            case -1:{
+                                nextScenePath = "MatchType.fxml";
+                                System.out.println("createnewgamecommand");
+                                loader = new FXMLLoader(getClass().getResource(nextScenePath));
+                                Parent root = loader.load();
+                                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                                scene = new Scene(root);
+                                stage.setScene(scene);
+                                MatchTypeController mtt = loader.getController();
+                                mtt.setClient(clientRMI);
+                                stage.show();
+                            }break;
+                            case -2:{
+                                errorMessage = "The game has already started";
+                                loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                                updateLabelText(messageTextArea, errorMessage);
+                            }break;
+                            case 0:{
+                                nextScenePath = "GameScene.fxml";
+                                loader = new FXMLLoader(getClass().getResource(nextScenePath));
+                                Parent root = loader.load();
+                                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                                scene = new Scene(root);
+                                stage.setScene(scene);
+                                stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
+                                    e.consume();
+                                    Popup popup = new Popup();
+                                    HBox buttons = new HBox(30);
+                                    Button quit = new Button("Quit game");
+                                    Button cancel = new Button("Cancel");
+                                    buttons.getChildren().addAll(quit, cancel);
+                                    buttons.setPadding(new Insets(5,5,5,5));
+                                    buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
+                                    popup.getContent().add(buttons);
+                                    popup.show(stage);
+                                    quit.setOnAction(eq->{
+                                        if(clientRMI!=null){
+                                            clientRMI.quitGame();
+                                        }
+                                        Platform.exit();
+                                    });
+                                    cancel.setOnAction(ec->{
+                                        popup.hide();
+                                    });
+                                });
+                                GameSceneController gsc = loader.getController();
+                                gsc.setClient(clientRMI);
+                                if(gsc.getClientRMI().hasGameStarted())
+                                    gsc.getClientRMI().updateGUIAtBeginningOfGame();
+                                gsc.setPlayerName(clientRMI.getNickname());
 
+                                stage.setResizable(false);
+                                stage.show();
+                            }break;
+                            default:{
+                                //not yet implemented
+                                loader = new FXMLLoader(getClass().getResource("error.fxml"));
+                            }
+                        }
+                    }break;
+                }
+                return;
+            }catch(RemoteException e){
+                //send to error page
+                e.printStackTrace();
+            }
+        }
+        Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
+        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setResizable(false);
+        stage.show();
+    }
     private void handleSocket(ActionEvent event){
         try {
             alive = true;

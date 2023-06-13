@@ -1,12 +1,11 @@
 package Server.RMI;
 
-import Server.ClientWithChoice;
 import main.java.it.polimi.ingsw.Model.Board;
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.TilePlacingSpot;
-import org.junit.jupiter.api.MethodOrderer;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -24,6 +23,7 @@ public class ClientRMI implements Runnable{
     private boolean GameStartFlag;
     private boolean gameHasBeenCreated;
     int myport;
+    int joinGameOutcome;
 
     public ClientRMI(){
         startClientNotificationServer();
@@ -31,6 +31,7 @@ public class ClientRMI implements Runnable{
         EndGameFlag = false;
         GameStartFlag = false;
         gameHasBeenCreated = false;
+        joinGameOutcome = -5;
     }
 
     public void setMyTurnFlag(boolean value){
@@ -89,25 +90,23 @@ public class ClientRMI implements Runnable{
     }
 
     private void joinGame(Scanner userInput) throws RemoteException, InterruptedException {
-        int returnCode;
+        //int returnCode;
         do{
             playerNickname = userInput.nextLine();
 
             while(serverRMI.joinLobby(playerNickname, myport) != 0)
                 playerNickname = userInput.nextLine();
             heartbeat();
-            if(serverRMI.isGameBeingCreated()){
+            if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
                 System.out.println("Game is being created by another player...");
-
-                synchronized (notifications){
-                    while(!gameHasBeenCreated && !playerNickname.equals(serverRMI.getFirstClientInLobby()) ){
-                        notifications.wait();
-                    }
-                }
-
             }
-            returnCode = serverRMI.joinGame(playerNickname,myport);
-            switch(returnCode){
+
+            //returnCode = serverRMI.joinGame(playerNickname,myport);
+            synchronized (notifications){
+                while (joinGameOutcome == -5)
+                    notifications.wait();
+            }
+            switch(joinGameOutcome){
                 case -1: {
                     System.out.println("Enter 1 if you want to load the saved game progress, 2 if you want to create a new game");
                     int decisionAboutNewGame=-1;
@@ -127,7 +126,7 @@ public class ClientRMI implements Runnable{
                     int numPlayers = checkedInputForIntValues(userInput,2,4,"Insert a valid value for the number of players (2, 3, 4)");
 
                     if(serverRMI.createNewGame(playerNickname,numPlayers,myport)){
-                        returnCode=0;
+                        joinGameOutcome=0;
                     }
                     else{
                         System.out.println("Somebody already created the game, try to join again, insert your nickname");
@@ -140,7 +139,7 @@ public class ClientRMI implements Runnable{
                     System.out.println("Try a different nickname");
                 }break;
             }
-        }while(returnCode!=0);
+        }while(joinGameOutcome!=0);
     }
 
     private void reconnectToGame(Scanner userInput){
@@ -181,7 +180,7 @@ public class ClientRMI implements Runnable{
         return value;
     }
 
-    private boolean checkForCommand(String userInput) throws RemoteException {
+    private boolean checkForCommand(String userInput) throws IOException {
         if(userInput.equals("/quit")){
             System.out.println("Quit command sent to the server");
             serverRMI.quitGame(playerNickname);
@@ -368,7 +367,7 @@ public class ClientRMI implements Runnable{
             }
         }catch(RemoteException e){
             e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
     }
