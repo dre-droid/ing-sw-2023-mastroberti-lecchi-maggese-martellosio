@@ -132,6 +132,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {
         GameStartFlag=true;
+        System.out.println("GAME HAS STARTED LETSGOOOOOOO");
         updateGUIAtBeginningOfGame();
     }
 
@@ -144,10 +145,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             List<Player> leaderboard = serverRMI.getLeaderboard();
             String isPlaying = serverRMI.getIsPlaying();
             if(gsc!=null) {
+                System.out.println("gsc non è null per "+nickname);
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
                 if(serverRMI.isMyTurn(nickname)){
                     gsc.setFirstPlayerSeat();
                 }
+            }
+            else{
+                System.out.println("gsc null ma non si sa perchè");
             }
         }catch(RemoteException re){
             System.out.println("Problem in the update of the gui at the beginning of the game");
@@ -318,7 +323,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     }
 
     public void setGameSceneController(GameSceneController controller){
+        System.out.println("controller set");
         gsc = controller;
+        if(gsc!=null){
+            System.out.println("gsc non è nullo nel set");
+        }
     }
 
     public TilePlacingSpot[][] getBoard(){

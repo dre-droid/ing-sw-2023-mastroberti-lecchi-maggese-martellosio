@@ -34,6 +34,8 @@ public class MatchTypeController {
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
 
+
+
     public void switchtoGameScene(ActionEvent event){
         if (rButton2p.isSelected() || rButton3p.isSelected() || rButton4p.isSelected()) {
             try {

@@ -113,11 +113,17 @@ public class GameSceneController {
     private boolean leaderboardCheck = false;
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
+
+
+
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         //System.out.println(this.toString());
-        //System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
+        System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
+        if(clientRMI.hasGameStarted()){
+            clientRMI.updateGUIAtBeginningOfGame();
+        }
     }
     public void setClient(ClientSocket clientSocket){
         this.clientSocket = clientSocket;
