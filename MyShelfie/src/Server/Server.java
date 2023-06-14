@@ -3,6 +3,8 @@ package Server;
 import Server.RMI.ServerRMI;
 import Server.Socket.ServerSock;
 import main.java.it.polimi.ingsw.Model.InvalidMoveException;
+import main.java.it.polimi.ingsw.Model.Player;
+
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -22,7 +24,7 @@ public class Server {
     private Controller controller;
     //public ArrayList<String> clientsInLobby = new ArrayList<>();
     public ArrayList<ClientInfoStruct> clientsLobby;
-    public Object clientsLobbyLock = new Object();
+    public final Object clientsLobbyLock = new Object();
 
     public void run() throws InterruptedException {
         //run Socket and RMI servers
@@ -53,7 +55,7 @@ public class Server {
                     controller.wait();
                 }
             }
-
+            Thread.sleep(1000);
             // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             while (!controller.hasTheGameEnded()) {
@@ -154,8 +156,7 @@ public class Server {
     }
     public void joinGame() {
         new Thread (()->{
-            try {       //TODO fare che si entra uno alla volta dopo che si e' scelto il numero di giocatori
-                int oldClientsLobbySize = 0;
+            try {
                 ClientInfoStruct oldFirstClientInList = null;
                 while(!controller.hasGameBeenCreated()) {       //while the number of player for the game hasn't been selected yet
                     synchronized (this) {
@@ -166,77 +167,39 @@ public class Server {
                     oldFirstClientInList = clientsLobby.get(0);
                     if (clientsLobby.get(0).getRmiPort() != 0) {        //if client is rmi
                         serverRMI.joinGame(clientsLobby.get(0).getNickname(), clientsLobby.get(0).getRmiPort(), clientsLobby.get(0).getRmiIp());
-                        //System.out.println("chiamata la join per "+ clientsLobby.get(0).getNickname());
                     } else {                                            //else client is socket
                         serverSock.joinGame(clientsLobby.get(0).getSocket(), clientsLobby.get(0).getNickname(),
                                 clientsLobby.get(0).getOut(), clientsLobby.get(0).getReader());
-                        System.out.println("chiamata la join per "+ clientsLobby.get(0).getNickname());
                     }
                 }
+                Thread.sleep(1000);
 
-                synchronized (this) {
-                    while (clientsLobby.size() < controller.game.getNumOfPlayers()) {
-                        //System.out.println("entrato in clientsLobby.size() < controller.game.getNumOfPlayers()");
-                        this.wait();
-                    }
-                }
-                synchronized(clientsLobbyLock) {
-                    for (int i = 1; i < clientsLobby.size(); i++) {
-                        if (clientsLobby.get(i).getRmiPort() != 0) {        //if client is rmi
-                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort(), clientsLobby.get(i).getRmiIp());
-                            System.out.println("chiamata la join per " + clientsLobby.get(i).getNickname());
-                        } else {                                            //else client is socket
-                            serverSock.joinGame(clientsLobby.get(i).getSocket(), clientsLobby.get(i).getNickname(),
-                                    clientsLobby.get(i).getOut(), clientsLobby.get(i).getReader());
-                            System.out.println("chiamata la join per "+ clientsLobby.get(i).getNickname());
-                        }
-                    }
-                }
-
-                //join for the rest of the players that will try to connect even tho a game is already being played
-                oldClientsLobbySize = clientsLobby.size();
-                while(controller.hasGameBeenCreated()){
-                    synchronized (this){
-                        while(oldClientsLobbySize == clientsLobby.size())
-                            this.wait();
-                    }
-                    for (int i = oldClientsLobbySize; i < clientsLobby.size(); i++) {
-                        if (clientsLobby.get(i).getRmiPort() != 0) {        //if client is rmi
-                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort(), clientsLobby.get(i).getRmiIp());
-                            //System.out.println("chiamata la join per "+ clientsLobby.get(i).getNickname());
-                        } else {                                            //else client is socket
-                            serverSock.joinGame(clientsLobby.get(i).getSocket(), clientsLobby.get(i).getNickname(),
-                                    clientsLobby.get(i).getOut(), clientsLobby.get(i).getReader());
-                            System.out.println("chiamata la join per "+ clientsLobby.get(i).getNickname());
-                        }
-                    }
-                    oldClientsLobbySize = clientsLobby.size();
-                }
-
-
-                /*
                 synchronized (this) {
                     while (true) {
                         synchronized (clientsLobbyLock) {
                             Iterator<ClientInfoStruct> iterator = clientsLobby.iterator();
-                            ClientInfoStruct client = iterator.next();
-                            while (client.getNickname().equals(clientsLobby.get(0).getNickname()))  //skip the first element
-                                iterator.next();
                             while (iterator.hasNext()) {
-                                client = iterator.next();
-                                if (client.getRmiPort() != 0) { // if client is RMI
-                                    serverRMI.joinGame(client.getNickname(), client.getRmiPort());
-                                    System.out.println("chiamata la join per " + client.getNickname());
-                                } else { // else client is socket
-                                    serverSock.joinGame(client.getSocket(), client.getNickname(), client.getOut(), client.getReader());
-                                    System.out.println("chiamata la join per " + client.getNickname());
+                                ClientInfoStruct client = iterator.next();
+                                boolean alreadyInGame = false;
+                                for (int i = 0; i < controller.game.getPlayerList().size(); i++) {      //if the player is already in the game
+                                    if(client.getNickname().equals(controller.game.getPlayerList().get(i).getNickname()))
+                                        alreadyInGame = true;       //set this bool to true so join won't be executed
+                                }
+
+                                if(!alreadyInGame) {
+                                    if (client.getRmiPort() != 0) { // if client is RMI
+                                        serverRMI.joinGame(client.getNickname(), client.getRmiPort(), client.getRmiIp());
+                                    } else { // else client is socket
+                                        serverSock.joinGame(client.getSocket(), client.getNickname(), client.getOut(), client.getReader());
+                                    }
+                                    notifyGameHasBeenCreated();
                                 }
                             }
                         }
                         wait();
                     }
                 }
-                */
+
             } catch (InterruptedException | IOException e) {
                 throw new RuntimeException(e);
             }
@@ -248,6 +211,11 @@ public class Server {
     public void notifyServer(){
         synchronized (this){
             notifyAll();
+        }
+    }
+    public void removeFromClientsLobby(String nickname){
+        synchronized (clientsLobbyLock) {
+            clientsLobby.removeIf(clientInfoStruct -> nickname.equals(clientInfoStruct.getNickname()));
         }
     }
 

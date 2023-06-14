@@ -116,6 +116,9 @@ public class ClientSocket {
         if (line.equals("[CONNECTED]")) {
             serverPinger();
         }
+        if(line.equals("[EXIT]")){
+            System.exit(0);
+        }
         if (line.startsWith("[YOUR TURN]")) {
             if (!GUI) printTurn();
             System.out.println(line);

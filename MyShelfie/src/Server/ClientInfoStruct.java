@@ -7,7 +7,7 @@ import java.net.Socket;
 public class ClientInfoStruct {
     private String nickname;
     private Socket socket = null;
-
+    private boolean disconnected = false;
     private PrintWriter out;
     private BufferedReader reader;
     private int rmiPort = 0;
@@ -59,4 +59,11 @@ public class ClientInfoStruct {
     }
 
 
+    public boolean isDisconnected() {
+        return disconnected;
+    }
+
+    public void setDisconnected(boolean disconnected) {
+        this.disconnected = disconnected;
+    }
 }

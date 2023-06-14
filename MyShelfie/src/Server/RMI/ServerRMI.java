@@ -13,7 +13,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 
-
+//TODO client will receive chat messages from socket clients while a game hasn't started yet, but won't send any until the game started, the previous messages will appear
 public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
 
     //Timer timerDraw;

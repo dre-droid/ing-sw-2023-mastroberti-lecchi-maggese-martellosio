@@ -8,6 +8,8 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 import java.io.*;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Controller {
     Game game;
@@ -421,5 +423,8 @@ public class Controller {
     public List<ScoringToken> getAvailableScoringTokens(CommonGoalCard commonGoalCard){
         Optional<CommonGoalCard> opt = game.getCommonGoalCards().stream().filter(cgc->cgc.getDescription().equals(commonGoalCard.getDescription())).findFirst();
         return opt.map(CommonGoalCard::getScoringTokens).orElse(null);
+    }
+    public List<String> getGamePlayerListNickname(){
+        return game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList());
     }
 }

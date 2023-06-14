@@ -96,7 +96,7 @@ public class ClientRMI implements Runnable{
     }
 
     private void joinGame(Scanner userInput) throws RemoteException, InterruptedException {
-        //int returnCode;
+
         do{
             playerNickname = userInput.nextLine();
 
@@ -116,7 +116,6 @@ public class ClientRMI implements Runnable{
                 System.out.println("Game is being created by another player...");
             }
 
-            //returnCode = serverRMI.joinGame(playerNickname,myport);
             synchronized (notifications){
                 while (joinGameOutcome == -5)
                     notifications.wait();
