@@ -11,6 +11,8 @@ public class ClientInfoStruct {
     private PrintWriter out;
     private BufferedReader reader;
     private int rmiPort = 0;
+
+    private String rmiIp;
     public ClientInfoStruct(String nickname){
         this.nickname = nickname;
     }
@@ -47,5 +49,14 @@ public class ClientInfoStruct {
     public BufferedReader getReader() {
         return reader;
     }
+
+    public void setRmiIp(String ip){
+        this.rmiIp = ip;
+    }
+
+    public String getRmiIp(){
+        return this.rmiIp;
+    }
+
 
 }

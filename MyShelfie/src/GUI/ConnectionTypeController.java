@@ -2,6 +2,7 @@ package GUI;
 
 import Server.ClientWithChoice;
 import Server.RMI.ClientRMI;
+import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -13,6 +14,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Objects;
 
 public class ConnectionTypeController  {
@@ -28,6 +36,9 @@ public class ConnectionTypeController  {
     @FXML
     private RadioButton rButtonRMI;
 
+    @FXML
+    private TextField ipAddress;
+
 
     public void switchToLoginScene(ActionEvent event){
         ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
@@ -39,8 +50,22 @@ public class ConnectionTypeController  {
             ClientNotificationRMIGUI clientRMI = null;
 
             try {
-                if (rButtonRMI.isSelected()) clientRMI = new ClientNotificationRMIGUI();
-                else clientSocket = new ClientSocket(true);
+                if (rButtonRMI.isSelected()) {
+                    if(ipAddress.getText()!=null){
+                        String serverIp = ipAddress.getText();
+                        if(!checkIp(serverIp)){
+                            return;
+                        }
+                        clientRMI = new ClientNotificationRMIGUI(serverIp);
+                    }
+
+
+
+                }
+                else {
+                    //TODO: add the ip address of the server from the text field
+                    clientSocket = new ClientSocket(true);
+                }
 
                 root = loader.load();
                 LoginSceneController loginSceneController = loader.getController();
@@ -61,4 +86,31 @@ public class ConnectionTypeController  {
             }
         }
     }
+
+    private boolean checkIp(String ip){
+        try{
+            InetAddress inetAddress = InetAddress.getByName(ip);
+            if(inetAddress instanceof Inet4Address) {
+                if (ip.equals(inetAddress.getHostAddress())) {
+                    if (ip.equals("127.0.0.2")) {
+                        return false;
+                    } else {
+                        try {
+                            Registry registryServer = LocateRegistry.getRegistry(ip);
+                            RMIinterface serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
+                            serverRMI.ping();
+                            return true;
+                        } catch (RemoteException | NotBoundException e) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return false;
+        }catch(UnknownHostException uhe){
+            return false;
+        }
+    }
+
+
 }

@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface RMIinterface extends java.rmi.Remote{
-    public int joinLobby(String nickname, int port) throws RemoteException;
-    public int joinGame(String nickname,int port) throws java.rmi.RemoteException;
+    public int joinLobby(String nickname, int port, String ip) throws RemoteException;
+    public int joinGame(String nickname,int port, String ip) throws java.rmi.RemoteException;
 
     public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException;
     public List<Tile> drawTilesFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction) throws java.rmi.RemoteException;
@@ -63,4 +63,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public List<ScoringToken> getMyTokens(String player) throws RemoteException;
 
     public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException;
+
+    public void ping() throws RemoteException;
 }

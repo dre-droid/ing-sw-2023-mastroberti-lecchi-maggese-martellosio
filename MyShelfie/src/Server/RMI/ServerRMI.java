@@ -50,10 +50,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @return 0 if the player has been added to the map
      * @throws RemoteException
      */
-    public int joinLobby(String nickname, int port) throws RemoteException{
+    @Override
+    public int joinLobby(String nickname, int port, String ip) throws RemoteException{
         ClientNotificationInterfaceRMI clientToBeNotified;
         try{
-            Registry registry = LocateRegistry.getRegistry(port);
+            Registry registry = LocateRegistry.getRegistry(ip, port);
             clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
@@ -68,6 +69,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         for(int i = 0; i < server.clientsLobby.size(); i++)                 //sets rmiPort for the ClientInfoStruct object with the same nickname in
             if(nickname.equals(server.clientsLobby.get(i).getNickname())){  //server.clientsLobby arrayList
                 server.clientsLobby.get(i).setRmiPort(port);
+                server.clientsLobby.get(i).setRmiIp(ip);
             }
         server.notifyServer();                            //notifies server that a new client has been added to arrayList server.clientsLobby
         clientsLobby.put(clientToBeNotified, new RmiNickStruct(nickname));
@@ -85,10 +87,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @throws java.rmi.RemoteException
      */
     @Override
-    public int joinGame(String nickname,int port) throws java.rmi.RemoteException {
+    public int joinGame(String nickname,int port,String ip) throws java.rmi.RemoteException {
         ClientNotificationInterfaceRMI clientToBeNotified;
         try{
-            Registry registry = LocateRegistry.getRegistry(port);
+            Registry registry = LocateRegistry.getRegistry(ip, port);
             clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
@@ -597,6 +599,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException {
         return controller.getAvailableScoringTokens(commonGoalCard);
+    }
+
+    @Override
+    public void ping() throws RemoteException{
     }
 }
 

@@ -165,7 +165,7 @@ public class Server {
                     }
                     oldFirstClientInList = clientsLobby.get(0);
                     if (clientsLobby.get(0).getRmiPort() != 0) {        //if client is rmi
-                        serverRMI.joinGame(clientsLobby.get(0).getNickname(), clientsLobby.get(0).getRmiPort());
+                        serverRMI.joinGame(clientsLobby.get(0).getNickname(), clientsLobby.get(0).getRmiPort(), clientsLobby.get(0).getRmiIp());
                         //System.out.println("chiamata la join per "+ clientsLobby.get(0).getNickname());
                     } else {                                            //else client is socket
                         serverSock.joinGame(clientsLobby.get(0).getSocket(), clientsLobby.get(0).getNickname(),
@@ -183,7 +183,7 @@ public class Server {
                 synchronized(clientsLobbyLock) {
                     for (int i = 1; i < clientsLobby.size(); i++) {
                         if (clientsLobby.get(i).getRmiPort() != 0) {        //if client is rmi
-                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort());
+                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort(), clientsLobby.get(i).getRmiIp());
                             System.out.println("chiamata la join per " + clientsLobby.get(i).getNickname());
                         } else {                                            //else client is socket
                             serverSock.joinGame(clientsLobby.get(i).getSocket(), clientsLobby.get(i).getNickname(),
@@ -202,7 +202,7 @@ public class Server {
                     }
                     for (int i = oldClientsLobbySize; i < clientsLobby.size(); i++) {
                         if (clientsLobby.get(i).getRmiPort() != 0) {        //if client is rmi
-                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort());
+                            serverRMI.joinGame(clientsLobby.get(i).getNickname(), clientsLobby.get(i).getRmiPort(), clientsLobby.get(i).getRmiIp());
                             //System.out.println("chiamata la join per "+ clientsLobby.get(i).getNickname());
                         } else {                                            //else client is socket
                             serverSock.joinGame(clientsLobby.get(i).getSocket(), clientsLobby.get(i).getNickname(),

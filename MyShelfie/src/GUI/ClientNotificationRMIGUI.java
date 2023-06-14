@@ -8,6 +8,8 @@ import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -33,14 +35,24 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     private List<Tile> drawnTiles;
     public int  joinGameOutcome = -5;
 
+    private String myIp;
+
     private List<CommonGoalCard> commonGoalCards;
 
-    public ClientNotificationRMIGUI() throws RemoteException{
+    public ClientNotificationRMIGUI(String serverIp) throws RemoteException{
         try{
-            Registry registryServer = LocateRegistry.getRegistry();
+            Registry registryServer = LocateRegistry.getRegistry(serverIp);
             serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
         }catch(RemoteException | NotBoundException e){
             System.out.println("ClientNotificationRMIGUI--> ERROR: cannot connect to server");
+        }
+        //ip address
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            myIp = inetAddress.getHostAddress();
+            //System.out.println("my ip is = "+myIp);
+        } catch (UnknownHostException e) {
+            System.out.println("cannot get ip address ");
         }
         MyTurnFlag = false;
         EndGameFlag = false;
@@ -72,10 +84,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public int joinGame() throws RemoteException{
         System.out.println("trying login");
-        return serverRMI.joinGame(nickname, port);
+        return serverRMI.joinGame(nickname, port, myIp);
     }
     public int joinLobby() throws RemoteException{
-        return serverRMI.joinLobby(nickname, port);
+        return serverRMI.joinLobby(nickname, port, myIp);
     }
     public void heartbeat(String playerNickname) {
         new Thread(() -> {

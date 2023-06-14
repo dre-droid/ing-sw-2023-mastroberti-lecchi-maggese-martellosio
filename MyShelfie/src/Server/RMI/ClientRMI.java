@@ -6,6 +6,9 @@ import main.java.it.polimi.ingsw.Model.Tile;
 import main.java.it.polimi.ingsw.Model.TilePlacingSpot;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -62,11 +65,14 @@ public class ClientRMI implements Runnable{
         return GameStartFlag;
     }
 
+    private String myIp;
+
 
     private boolean connectToRMIserver(String url){
         try{
             Registry registryServer = LocateRegistry.getRegistry(url);
             serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
+            serverRMI.ping();
         }catch(RemoteException | NotBoundException e){
             return false;
         }
@@ -94,7 +100,16 @@ public class ClientRMI implements Runnable{
         do{
             playerNickname = userInput.nextLine();
 
-            while(serverRMI.joinLobby(playerNickname, myport) != 0)
+            //ip address
+            try {
+                InetAddress inetAddress = InetAddress.getLocalHost();
+                myIp = inetAddress.getHostAddress();
+                System.out.println("my ip is = "+myIp);
+            } catch (UnknownHostException e) {
+                System.out.println("cannot get ip address ");
+            }
+
+            while(serverRMI.joinLobby(playerNickname, myport, myIp) != 0)
                 playerNickname = userInput.nextLine();
             heartbeat();
             if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
@@ -224,13 +239,43 @@ public class ClientRMI implements Runnable{
             List<Tile> rearrangedTiles=null;
 
 
-            if(connectToRMIserver(null))
-                System.out.println("Connected to the server");
+
 
             Scanner userInput = new Scanner(System.in);
             boolean connected;
+            String serverIp;
+            System.out.println("First of all insert the ip address of the server:");
+            do {
+                serverIp = userInput.nextLine();
+                try{
+                    InetAddress inetAddress = InetAddress.getByName(serverIp);
+                    if(inetAddress instanceof Inet4Address){
+                        if(serverIp.equals(inetAddress.getHostAddress())){
+                            if(serverIp.equals("127.0.0.2")){
+                                connected = false;
+                            }
+                            else{
+                                System.out.println("correct ip: "+serverIp);
+                                connected = connectToRMIserver(inetAddress.getHostAddress());
+                            }
+                        }
+                        else{
+                            connected = false;
+                        }
+                    }
+                    else{
+                        connected=false;
+                    }
+                }catch(UnknownHostException uhe){
+                    connected = false;
+                }
+                if(!connected){
+                    System.out.println("The ip you used is not a correct ip or it does not correspond to the server ip");
+                }
+            }while(!connected);
 
-
+            System.out.println("Connected to the server");
+            System.out.println("correct ip: "+serverIp);
             System.out.println("Enter (1) if you want to join a game, (2) if you are trying to reconnect to a game");
             int typeOfConnection = checkedInputForIntValues(userInput, 1, 2,"Insert (1) or (2)!");
 
