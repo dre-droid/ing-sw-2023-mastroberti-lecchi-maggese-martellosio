@@ -291,7 +291,10 @@ public class Controller {
         if(playerNickname.equals(game.getIsPlaying().getNickname())){
             game.endOfTurn(game.getIsPlaying());
             saveGameProgress();
-            server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
+            if(server.serverRMI.isHeARmiPlayer(getNameOfPlayerWhoIsCurrentlyPlaying())){
+                server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
+            }
+
         }
     }
 

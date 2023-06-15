@@ -111,7 +111,7 @@ public class ClientRMI implements Runnable{
 
             while(serverRMI.joinLobby(playerNickname, myport, myIp) != 0)
                 playerNickname = userInput.nextLine();
-            heartbeat();
+            periodicPing();
             if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
                 System.out.println("Game is being created by another player...");
             }
@@ -525,7 +525,7 @@ public class ClientRMI implements Runnable{
      * this method is used to ping serverRMI
      * @author Diego Lecchi
      */
-    public void heartbeat() {
+    public void periodicPing() {
         new Thread(() -> {
             while (true) {
                 try {

@@ -604,6 +604,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public void ping() throws RemoteException{
     }
+
+    public boolean isHeARmiPlayer(String nickname){
+        return clients.containsKey(nickname);
+    }
 }
 
 //TODO unire client e clientsLobby
