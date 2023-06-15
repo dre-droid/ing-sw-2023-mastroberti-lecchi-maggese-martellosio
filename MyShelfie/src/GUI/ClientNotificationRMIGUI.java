@@ -108,7 +108,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public boolean createNewGame(int numOfPlayers) throws RemoteException{
         System.out.println("creating new game...");
-        return serverRMI.createNewGame(nickname, numOfPlayers, port);
+        return serverRMI.createNewGame(nickname, numOfPlayers, port, myIp);
     }
 
 

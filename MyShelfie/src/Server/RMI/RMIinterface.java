@@ -12,7 +12,7 @@ public interface RMIinterface extends java.rmi.Remote{
     public int joinLobby(String nickname, int port, String ip) throws RemoteException;
     public int joinGame(String nickname,int port, String ip) throws java.rmi.RemoteException;
 
-    public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException;
+    public boolean createNewGame(String nickname, int numOfPlayers,int port, String ip) throws java.rmi.RemoteException;
     public List<Tile> drawTilesFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction) throws java.rmi.RemoteException;
     public boolean isGameBeingCreated() throws RemoteException;
     public boolean firstInLobby (String nickname) throws RemoteException;

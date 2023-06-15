@@ -139,7 +139,7 @@ public class ClientRMI implements Runnable{
                     System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
                     int numPlayers = checkedInputForIntValues(userInput,2,4,"Insert a valid value for the number of players (2, 3, 4)");
 
-                    if(serverRMI.createNewGame(playerNickname,numPlayers,myport)){
+                    if(serverRMI.createNewGame(playerNickname,numPlayers,myport,myIp)){
                         joinGameOutcome=0;
                     }
                     else{

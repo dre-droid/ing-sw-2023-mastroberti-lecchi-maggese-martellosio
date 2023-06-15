@@ -178,7 +178,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @throws java.rmi.RemoteException
      */
     @Override
-    public boolean createNewGame(String nickname, int numOfPlayers,int port) throws java.rmi.RemoteException{
+    public boolean createNewGame(String nickname, int numOfPlayers,int port, String ip) throws java.rmi.RemoteException{
         if(numOfPlayers<0 || numOfPlayers>4){
             System.out.println("Wrong parameters");
             return false;
@@ -186,7 +186,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
         ClientNotificationInterfaceRMI clientToBeNotified;
         try{
-            Registry registry = LocateRegistry.getRegistry(port);
+            Registry registry = LocateRegistry.getRegistry(ip,port);
             clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
