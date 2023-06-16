@@ -102,7 +102,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 clients.put(nickname, clientToBeNotified);
                 server.addPlayerToRecord(nickname, Server.connectionType.RMI);
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                    client.getValue().someoneJoinedTheGame(nickname);
+                    if(client.getValue()!=null)
+                        client.getValue().someoneJoinedTheGame(nickname);
                 }
                 if (controller.hasGameStarted()) {
                     notifyStartOfGame();
@@ -228,7 +229,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         timerInsert = new Timer();
         startTimer(timerInsert,insertDelay);*/
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-            client.getValue().updateBoard(controller.getTilePlacingSpot());
+            if(client.getValue()!=null){
+                client.getValue().updateBoard(controller.getTilePlacingSpot());
+            }
         }
         return drawnTiles;
     }
@@ -278,7 +281,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             System.out.println("ServerRMI-->tiles correctly inserted");
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                 if(!client.getKey().equals(playernickName)){
-                    client.getValue().updateOppShelf(playernickName, controller.getMyShelf(playernickName));
+                    if(client.getValue()!=null)
+                        client.getValue().updateOppShelf(playernickName, controller.getMyShelf(playernickName));
                 }
             }
             endOfTurn(playernickName);
@@ -298,7 +302,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             if (controller.checkIfCommonGoalN1IsFulfilled(playerNickname)) {
 
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(0));
+                    if(client.getValue()!=null)
+                        client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(0));
                 }
 
                 /*for (ClientNotificationRecord c : clients) {
@@ -308,7 +313,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname)){
 
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                    client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(1));
+                    if(client.getValue()!=null)
+                        client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(1));
                 }
 
                 /*for (ClientNotificationRecord c : clients) {
@@ -337,7 +343,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             server.notifySocketOfTurnEnd(playerNickname);
             controller.endOfTurn(playerNickname);
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                if(client.getValue()!=null)
+                    client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
             if(controller.hasTheGameEnded()){
                 notifyEndOfGame();
@@ -395,9 +402,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 server.addPlayerToRecord(playerNickname, Server.connectionType.RMI);
                 if(server.isEveryoneConnected()){
                     for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                        client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
-                            client.getValue().startTurn();
+                        if(client.getValue()!=null){
+                            client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                            if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
+                                client.getValue().startTurn();
+                        }
                     }
                 }
 
@@ -456,10 +465,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyStartOfGame() {
         try{
             for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-                client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                client.getValue().announceCommonGoals(controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description());
-                if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
-                    notifyStartOfTurn(client.getKey());
+                if(client.getValue()!=null){
+                    client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    client.getValue().announceCommonGoals(controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description());
+                    if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
+                        notifyStartOfTurn(client.getKey());
+                }
+
             }
         } catch (RemoteException e) {
             System.out.println("Cannot notify client");
@@ -471,7 +483,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
                 List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
-                client.getValue().gameIsOver(leaderboard);
+                if(client.getValue()!=null)
+                    client.getValue().gameIsOver(leaderboard);
             } catch (RemoteException e) {
                 e.printStackTrace();
                 System.out.println("Cannot notify controller");
@@ -506,10 +519,24 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         clients.put(playerName, null);
     }
 
+    /**
+     * this method is used to get the personal goal card of the requesting player
+     * @param playerNickname name of the requesting player
+     * @return the personal goal card of the player if the game has started, null otherwise
+     * @throws RemoteException
+     */
     public PersonalGoalCard getPGC(String playerNickname) throws RemoteException{
-        return controller.getPGC(playerNickname);
+        if(controller.hasGameStarted()){
+            return controller.getPGC(playerNickname);
+        }
+        else return null;
     }
 
+    /**
+     * this method is used to get the leaderboard of the current game
+     * @return the leaderboard if the game has started, null otherwise
+     * @throws RemoteException
+     */
     @Override
     public List<Player> getLeaderboard() throws RemoteException {
         if(controller.hasGameStarted())
@@ -518,6 +545,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             return null;
     }
 
+    /**
+     * this method is used to get the common goal cards of the actual game
+     * @return the list of common goals if the game has already started, null otherwise
+     * @throws RemoteException
+     */
     @Override
     public List<CommonGoalCard> getCommonGoalCards() throws RemoteException {
         if(controller.hasGameStarted()){
@@ -537,7 +569,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             try {
                 while(Objects.isNull(controller)) Thread.sleep(1000);
                 //while (!controller.hasGameStarted()) Thread.sleep(3000);
-                while (true) {
+                while(!controller.hasGameBeenCreated()) Thread.sleep(1000);
+                while (!controller.hasTheGameEnded()) {
                     Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
 
                     while (iterator.hasNext()) {
@@ -551,11 +584,25 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                             //server.clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
                             System.out.println(nickOfDisconnectedPlayer +" disconnected");
                             iterator.remove();
+                            clients.put(nickOfDisconnectedPlayer, null);//we set null the value in clients
+                            if(controller.isMyTurn(nickOfDisconnectedPlayer)){
+                                endOfTurn(nickOfDisconnectedPlayer);
+                            }
                             server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
                         }
                     }
+                    //if only one connected player remains than the game must end in 30 seconds if nobody reconnects
+                    if(getNumOfConnectedPlayers()==1 && controller.hasGameBeenCreated()){
+                        //end the game (after a timer)
+                        if(hasGameStarted()){
+                            System.out.println("only one player left, the game must end dun dun dunnnn");
+                            controller.endGame();
+                        }
 
+                        //notifyEndOfGame();
+                    }
                     Thread.sleep(300);
+
                 }
                 //System.out.println("has the game ended: " + controller.hasTheGameEnded());
 
@@ -573,8 +620,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     public synchronized void setLastPing(String nickname){
         for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
-            if(nickname.equals(client.getValue().getNickname()))
-                client.getValue().setLastPing(System.currentTimeMillis());
+            if(client.getValue()!=null)
+                if(nickname.equals(client.getValue().getNickname()))
+                    client.getValue().setLastPing(System.currentTimeMillis());
         }
     }
 
@@ -587,15 +635,28 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             client.getKey().notifyOfDisconnection();
         }
     }
+
     public String getFirstClientInLobby() throws RemoteException{
         return server.clientsLobby.get(0).getNickname();
     }
 
+    /**
+     * this method is called to get the scoring tokens of the requesting players
+     * @param player name of the requesting player
+     * @return the list of all the scoring tokens of this player
+     * @throws RemoteException
+     */
     @Override
     public List<ScoringToken> getMyTokens(String player) throws RemoteException {
         return controller.getScoringToken(player);
     }
 
+    /**
+     * this method is called to get the list of tokens of the requested common goal
+     * @param commonGoalCard the requested common goal card
+     * @return the list of scoring token of the commonGoalCard
+     * @throws RemoteException
+     */
     @Override
     public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException {
         return controller.getAvailableScoringTokens(commonGoalCard);
@@ -605,8 +666,37 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void ping() throws RemoteException{
     }
 
+    /**
+     * Thie method is used to check if the player with this nickname is connected with rmi or not
+     * @param nickname nickname of the player
+     * @return true if the player is connected with rmi, false otherwise
+     */
     public boolean isHeARmiPlayer(String nickname){
         return clients.containsKey(nickname);
+    }
+
+    /**
+     * this method is used to check if the player is disconnected or not
+     * @param nickname the name of the player
+     * @return true if the player is disconnected, false otherwise
+     */
+    public boolean isHeDisconnected(String nickname){
+        return clients.get(nickname)==null;
+    }
+
+    /**
+     * This method is used to get the number of player that are not disconnected
+     * @return the number of connected players
+     */
+    public int getNumOfConnectedPlayers(){
+        int counter=0;
+        for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
+            if(client.getValue()!=null){
+                counter++;
+            }
+        }
+        System.out.println("Num of connected players = "+counter);
+        return counter;
     }
 }
 

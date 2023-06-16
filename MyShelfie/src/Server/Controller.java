@@ -292,6 +292,9 @@ public class Controller {
             game.endOfTurn(game.getIsPlaying());
             saveGameProgress();
             if(server.serverRMI.isHeARmiPlayer(getNameOfPlayerWhoIsCurrentlyPlaying())){
+                if(server.serverRMI.isHeDisconnected(getNameOfPlayerWhoIsCurrentlyPlaying())){
+                    endOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
+                }
                 server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
             }
 
