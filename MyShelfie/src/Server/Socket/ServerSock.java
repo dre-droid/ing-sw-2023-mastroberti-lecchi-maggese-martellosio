@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.Buffer;
 import java.rmi.RemoteException;
 import java.util.*;
 
@@ -98,8 +99,12 @@ public class ServerSock {
                 nicknameAlreadyInUse = false;
 
                 for (int i = 0; i < server.clientsLobby.size(); i++) {
-                    if (Objects.equals(server.clientsLobby.get(i).getNickname(), nickname)) {
+                    if (server.clientsLobby.get(i).getNickname().equals(nickname)) {
                         nicknameAlreadyInUse = true;
+                        if(server.clientsLobby.get(i).isDisconnected()) {
+                            rejoinGame(nickname, client, reader, out);
+                            return;
+                        }
                     }
                 }
 
@@ -191,7 +196,27 @@ public class ServerSock {
             }
         }).start();
     }
-
+    public void rejoinGame(String nickname, Socket client, BufferedReader reader, PrintWriter out){
+        for (int i = 0; i < server.clientsLobby.size(); i++) {
+            if (server.clientsLobby.get(i).getNickname().equals(nickname)){
+                server.clientsLobby.get(i).setSocket(client);
+                server.clientsLobby.get(i).setDisconnected(false);
+                clientListener(client, nickname, reader);
+                break;
+            }
+        }
+        for (int i = 0; i < clients.size(); i++) {
+            if(clients.get(i).getName().equals(nickname)){
+                clients.get(i).setSocket(client);
+                clients.get(i).setLastPing(System.currentTimeMillis());
+                checkForDisconnectionsV2(clients.get(i));
+                sendMessage("[CONNECTED]", client);
+                sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
+                server.notifyServer();
+                break;
+            }
+        }
+    }
     /**
      * Creates a thread to listen and process clients' messages. All received strings are either processed or appended to a List<String> messageBuffer. In
      * the latter case notify() is called to wake up drawInquiry waiting on input from client.
@@ -204,12 +229,7 @@ public class ServerSock {
                 while (true) {
                     //BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     while ((line = reader.readLine()) != null) {
-                        // if readLine() returns null, the client has disconnected
-                        if (Objects.isNull(line)) {
-                            controller.endGame();
-                            //notifyGameEnd(nickname);
-                            notifyGameEnd();        //TODO not the required behaviour with AF
-                        }
+
                         synchronized (this) {
                             // processes PING message
                             if (line.equals("[PING]")) {
@@ -230,21 +250,24 @@ public class ServerSock {
                                     chatHandler(nickname, line);
                                 }
                                 // processes /quit
-                                else if (line.equals("/quit")) {    //todo not working atm, should be a separate method
+                                else if (line.equals("/quit")) {    //TODO needs to advise everyone who quitted the game "player1 quitted"
                                     PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
-                                    pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
-                                    line = reader.readLine();
-                                    if (line.equals("y")) {
+                                    //pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
+                                    //line = reader.readLine();
+                                    //if (line.equals("y")) {
                                         if (!controller.hasGameStarted()) {
                                             controller.removePlayer(nickname);
+                                            server.notifyLobbyDisconnection(nickname);
+                                            server.clientsMap.remove(nickname);
+                                            clients.remove(client);
                                             pw.println("[GAMEEND]: You quit.");
                                         } else {
                                             controller.endGame();
                                             //notifyGameEnd(nickname);
-                                            notifyGameEnd();
+                                            //notifyGameEnd();
                                         }
                                         break;  //closes listener on confirmed quit
-                                    }
+                                    //}
                                 }
 
                             }
@@ -259,6 +282,7 @@ public class ServerSock {
 
                         }
                     }
+
                 }
             } catch (SocketException e){
                 System.out.println(nickname + "'s socket has been closed.");
@@ -325,13 +349,14 @@ public class ServerSock {
                         //if player is in the game and the game started
                         else {
                             if (System.currentTimeMillis() - client.getLastPing() > 5000){
-                                System.out.println("gestisci disoconnessione facendo saltare il turno");
                                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getName())){
                                         server.clientsLobby.get(i).setDisconnected(true);
+                                        server.notifyLobbyDisconnection(client.getName());
+                                        return;
                                     }
                                 }
-                                return;
+
                             }
                         }
                     }
@@ -343,52 +368,8 @@ public class ServerSock {
             }
         }).start();
     }
-    public void checkForDisconnections() throws IOException {
-        new Thread(() -> {
-            try {
-                while (Objects.isNull(controller)) Thread.sleep(500);
-                while (true) {
-                    if(controller.hasGameStarted()) {       //todo not working atm
-                        Iterator<socketNickStruct> iterator = clients.iterator();
-                        while (iterator.hasNext()) {
-                            socketNickStruct client = iterator.next();
-                            if (System.currentTimeMillis() - client.getLastPing() > DISCONNECTION_TIME) {
-                                //notifyGameEnd(client.getName());
-                                notifyGameEnd();
-                                controller.endGame();
-                            }
-                        }
-                    }
-                    else{
-                        synchronized (clientsLock) {
-                            Iterator<socketNickStruct> iterator = clients.iterator();
-                            while (iterator.hasNext()) {
-                                socketNickStruct client = iterator.next();
-                                if (System.currentTimeMillis() - client.getLastPing() > 3000) {
-                                    String nickOfDisconnectedPlayer = client.getName();
-                                    System.out.println(nickOfDisconnectedPlayer + " disconnected");
-                                    iterator.remove();
-                                    server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
-                                }
-                            }
-                        }
-                    }
-                    //System.out.println("has the game ended: " + controller.hasTheGameEnded());
-                    Thread.sleep(500);
-                }
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }).start();
-    }
-    public void clientDisconnected(String nickname) throws IOException {
 
-        clients.removeIf(client -> client.getName().equals(nickname));
-        if(!controller.hasGameStarted())
-            server.notifyLobbyDisconnection(nickname);
-        else
-            controller.endGame();
-    }
+
     /**
      * Queries the client for info on his turn's drawn tiles
      * @param nickname - the nickname of the client to query
@@ -407,6 +388,12 @@ public class ServerSock {
             if (c.getName().equals(nickname)) {
                 playerSocket = c.getSocket();
             }
+        //finds ClientInfoStruct in server.clientsLobby
+        ClientInfoStruct clientInfoStruct = null;
+        for (int i = 0; i < server.clientsLobby.size(); i++) {
+            if(server.clientsLobby.get(i).getNickname().equals(nickname))
+                clientInfoStruct = server.clientsLobby.get(i);
+        }
 
         try {
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
@@ -427,10 +414,12 @@ public class ServerSock {
                     else
                         out.println("[YOUR TURN] Select the row from which to draw from:");
                     //waits for input
-                    while(messageBuffer.isEmpty())
+                    while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                         synchronized (this) {
                             wait();
                         }
+                    if (clientInfoStruct.isDisconnected())
+                        return null;
 
                     line = messageBuffer.remove(0);
                     imbecille = true;
@@ -445,10 +434,13 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Select the column from which to draw from:");
                     //waits for input
-                    while(messageBuffer.isEmpty())
+                    while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                         synchronized (this) {
                             wait();
                         }
+                    if (clientInfoStruct.isDisconnected())
+                        return null;
+
                     line = messageBuffer.remove(0);
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 8 || Integer.parseInt(line) < 0);
@@ -462,10 +454,13 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] How many tiles do you want to draw?");
                     //waits for input
-                    while(messageBuffer.isEmpty())
+                    while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                         synchronized (this) {
                             wait();
                         }
+                    if (clientInfoStruct.isDisconnected())
+                        return null;
+
                     line = messageBuffer.remove(0);
                     imbecille = true;
                 } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
@@ -480,10 +475,13 @@ public class ServerSock {
                         else
                             out.println("[REQUEST] In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
                         //waits for input
-                        while(messageBuffer.isEmpty())
+                        while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                             synchronized (this) {
                                 wait();
                             }
+                        if (clientInfoStruct.isDisconnected())
+                            return null;
+
                         line = messageBuffer.remove(0);
                         imbecille = true;
                     } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 0);
@@ -529,10 +527,13 @@ public class ServerSock {
                 }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
-                while(messageBuffer.isEmpty())
+                while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                     synchronized (this) {
                         wait();
                     }
+                if (clientInfoStruct.isDisconnected())
+                    return null;
+
                 line = messageBuffer.remove(0);
                 if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
@@ -551,10 +552,13 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert first: [e.g. 1)C 2)G 3)T -> type 1 to insert C]");
-                            while(messageBuffer.isEmpty())
+                            while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                                 synchronized (this) {
                                     wait();
                                 }
+                            if (clientInfoStruct.isDisconnected())
+                                return null;
+
                             line = messageBuffer.remove(0);
                             if (line.startsWith("[GUI]")) break;
                             imbecille = true;
@@ -569,10 +573,13 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            while(messageBuffer.isEmpty())
+                            while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                                 synchronized (this) {
                                     wait();
                                 }
+                            if (clientInfoStruct.isDisconnected())
+                                return null;
+
                             line = messageBuffer.remove(0);
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
@@ -585,10 +592,13 @@ public class ServerSock {
                                 out.println("[REQUEST]: Invalid input! Try again with a valid value: ");
                             else
                                 out.println("[REQUEST]: Choose which tile to insert next");
-                            while(messageBuffer.isEmpty())
+                            while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                                 synchronized (this) {
                                     wait();
                                 }
+                            if (clientInfoStruct.isDisconnected())
+                                return null;
+
                             line = messageBuffer.remove(0);
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1 || insertedValues.contains(Integer.parseInt(line)));
@@ -805,7 +815,6 @@ public class ServerSock {
             }
     }
     public void notifyLobbyDisconnectionSocket(){
-        //controller.isGameBeingCreated = false;
         synchronized (this){
             notifyAll();
         }

@@ -26,7 +26,7 @@ public class Server {
     public ArrayList<ClientInfoStruct> clientsLobby;
     public final Object clientsLobbyLock = new Object();
 
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, IOException {
         //run Socket and RMI servers
         serverSock = new ServerSock(controller, this);
         serverSock.runServer();
@@ -60,6 +60,23 @@ public class Server {
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             while (!controller.hasTheGameEnded()) {
                 Thread.sleep(100);
+
+                //if only one player remains the game is put on hold. If nobody rejoins the game ends
+                //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
+                if(numberOfPlayersLeft() == 1){
+                    synchronized (this){
+                        wait(60000);
+                    }
+                    if(numberOfPlayersLeft() == 1){
+                        controller.endGame();
+                    }
+                }
+                for (int i = 0; i < clientsLobby.size(); i++) {
+                    if(clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()){
+                        controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    }
+                }
+
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
                     notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
@@ -135,8 +152,10 @@ public class Server {
     public void notifyLobbyDisconnection(String nickOfDisconnectedPlayer) throws RemoteException{
         serverRMI.notifyLobbyDisconnectionRMI();
         serverSock.notifyLobbyDisconnectionSocket();
-        synchronized (clientsLobbyLock){
-            clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
+        if(!controller.hasGameStarted()) {
+            synchronized (clientsLobbyLock) {
+                clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
+            }
         }
         notifyServer();
         System.out.println("a player disconnected from the lobby");
@@ -208,6 +227,19 @@ public class Server {
 
         }).start();
     }
+    public void broadcastMessage(String message){
+        //TODO fare una funzione broadcast in rmi e socket che scrive tramite chat un errore o notifica (cosi funziona anche in GUI), una sorta di [Message from Server]
+    }
+    public int numberOfPlayersLeft(){
+        int numOfPlayerLeft = 0;
+        for (int i = 0; i < clientsLobby.size(); i++) {
+            if (controller.getGamePlayerListNickname().contains(clientsLobby.get(i).getNickname())){
+                if(!clientsLobby.get(i).isDisconnected())
+                    numOfPlayerLeft++;
+            }
+        }
+        return numOfPlayerLeft;
+    }
     public void notifyServer(){
         synchronized (this){
             notifyAll();
@@ -219,7 +251,7 @@ public class Server {
         }
     }
 
-    public static void main(String[] args) throws InvalidMoveException, InterruptedException {
+    public static void main(String[] args) throws InvalidMoveException, InterruptedException, IOException {
         Server server = new Server();
         server.run();
     }

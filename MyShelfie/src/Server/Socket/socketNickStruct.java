@@ -21,6 +21,10 @@ public class socketNickStruct {
         return socket;
     }
 
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
     public String getName() {
         return name;
     }
