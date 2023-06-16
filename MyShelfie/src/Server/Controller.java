@@ -62,7 +62,6 @@ public class Controller {
      * @return a numerical code representing the outcome of the operation
      *          (-1) if there is not any game to join
      *          (-2) if the game has already started
-     *          (-3) if the chosen nickname is already being used by someone else
      *          (0) if the player joined the game correctly
      */
     public synchronized int joinGame(String nickname) {
@@ -82,13 +81,8 @@ public class Controller {
                     notifyAll();
                 }
                 return 0;
-            } /*
-            else {
-                //System.out.println("Nickname already used");
-                return -3;
             }
-            */
-        return -4;
+        return -4;  //should never reach
     }
 
     /**
@@ -338,8 +332,11 @@ public class Controller {
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
                     invalidMoveFlag = false;
-                } else
-                    endGame();
+                }
+                else {
+                    if(game.hasTheGameEnded())
+                        endGame();
+                }
             } catch (InvalidMoveException e) {
                 invalidMoveFlag = true;
                 e.printStackTrace();

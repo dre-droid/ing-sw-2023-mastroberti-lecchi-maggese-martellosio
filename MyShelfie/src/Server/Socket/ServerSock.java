@@ -60,7 +60,7 @@ public class ServerSock {
      * Creates thread to let a client join the game (thread allows multiple connections simultaneously). Adds client's socket to
      * List<socketNickStruct> clients if successful. Also creates a clientListener thread for each client.
      * When clients successfully joins, thread terminates. If the game has already started, client is notified and ignored.
-     * @param client - the client's socket
+     * @param client - the client's Socket
      */
     private void acceptClient(Socket client) {
         Thread acceptClient = new Thread(() -> {
@@ -74,8 +74,14 @@ public class ServerSock {
     }
 
     /**
-     * Helper function for acceptClient. Lets client pick a nickname and - if first to join - create a new game
-     * @return result of controller.joinGame()
+     * Helper function for acceptClient. Lets client pick a nickname and, if the nickname isn't in use by any other player,
+     * adds him to the ArrayLists server.clientsLobby and clients and starts the method clientListener() to listen to
+     * the inputs sent by that client and checkForDisconnectionV2 to check if the client is still connected to the server.
+     * If the nickname is already in use and there's an ongoing match but the client who was holding that nickname has
+     * disconnected, then the method rejoin() will be called to allow a disconnected player to rejoin a game by simply
+     * using the same nickname
+     * @author Diego Lecchi, Andrea Mastroberti
+     * @param client - the client's Socket
      */
     private void playerJoin(Socket client) throws IOException, InterruptedException {
         String nickname;
@@ -102,7 +108,7 @@ public class ServerSock {
                     if (server.clientsLobby.get(i).getNickname().equals(nickname)) {
                         nicknameAlreadyInUse = true;
                         if(server.clientsLobby.get(i).isDisconnected()) {
-                            rejoinGame(nickname, client, reader, out);
+                            rejoinGame(nickname, client, reader);
                             return;
                         }
                     }
@@ -147,12 +153,23 @@ public class ServerSock {
 
     }
 
-    public void joinGame(Socket client, String nickname, PrintWriter out, BufferedReader reader) throws InterruptedException, IOException{
+    /**
+     * This method is called by Server, it's used to join a game by calling the method controller.joinGame(nickname).
+     * Based on the value returned by that function it will either join a game (0), create a new game by choosing the
+     * number of player and joining that game (-1) or warns that the game has already started, and therefore it will
+     * remove the player from the ArrayLists clients and from server.clientsLobby by calling server.removeFromClientsLobby(nickname)
+     * @param nickname - the nickname of the client
+     * @param out - the PrintWriter of the client
+     * @throws InterruptedException
+     * @throws IOException
+     * @author Diego Lecchi, Andrea Mastroberti
+     */
+    public void joinGame(String nickname, PrintWriter out) throws InterruptedException, IOException{
         new Thread(() -> {
             boolean imbecille;
             try {
                 switch (controller.joinGame(nickname)) {
-                    case -1 -> {
+                    case -1 -> {    //there is not any game to join
                         String line;
                         imbecille = false;
                         do {
@@ -178,14 +195,14 @@ public class ServerSock {
                         server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                         out.println("[INFO] Waiting for all players to connect...");
                     }
-                    case -2 -> {
+                    case -2 -> {    //the game has already started
                         out.println("[INFO] The game already started, you can't join, try again later");
                         out.println("[EXIT]");
                         clients.removeIf(socketNickStruct -> nickname.equals(socketNickStruct.getName()));
-                        server.clientsMap.remove(nickname);
+                        //server.clientsMap.remove(nickname);
                         server.removeFromClientsLobby(nickname);
                     }
-                    case 0 -> {
+                    case 0 -> {     //the player joined the game correctly
                         server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                         out.println("[INFO] Joined a Game");
                         server.notifyServer();
@@ -196,12 +213,24 @@ public class ServerSock {
             }
         }).start();
     }
-    public void rejoinGame(String nickname, Socket client, BufferedReader reader, PrintWriter out){
+
+    /**
+     * Called by playerJoin() when a player chooses the same nickname as a disconnected player, it updates the Socket
+     * and sets the Boolean disconnected to false in the respective ClientInfoStruct object in Server.clientsLobby,
+     * launches clientListener(), then updates the respective socketNickStruct object in the Arraylist clients with the
+     * Socket client passed as parameter, sets lastPing to the current time and then launches checkForDisconnectionV2 and
+     * notifies Server
+     * @author Diego Lecchi
+     * @param nickname - nickname of the client rejoining a game
+     * @param client - Socket of the client
+     * @param reader - BufferedReader of the client
+     */
+    public void rejoinGame(String nickname, Socket client, BufferedReader reader){
         for (int i = 0; i < server.clientsLobby.size(); i++) {
-            if (server.clientsLobby.get(i).getNickname().equals(nickname)){
-                server.clientsLobby.get(i).setSocket(client);
-                server.clientsLobby.get(i).setDisconnected(false);
-                clientListener(client, nickname, reader);
+            if (server.clientsLobby.get(i).getNickname().equals(nickname)){     //search for the object in server.clientsLobby with the same nickname
+                server.clientsLobby.get(i).setSocket(client);           //updates the Socket
+                server.clientsLobby.get(i).setDisconnected(false);      //set boolean disconnected to false
+                clientListener(client, nickname, reader);               //launches clientListener
                 break;
             }
         }
@@ -217,17 +246,20 @@ public class ServerSock {
             }
         }
     }
+
     /**
-     * Creates a thread to listen and process clients' messages. All received strings are either processed or appended to a List<String> messageBuffer. In
-     * the latter case notify() is called to wake up drawInquiry waiting on input from client.
+     * Creates a thread to listen and process a client messages. All received strings are either processed or appended
+     * to a List<String> messageBuffer. In the latter case notify() is called to wake up drawInquiry waiting on input from client.
+     * @author Diego Lecchi, Andrea Mastroberti
+     * @param client - Socket of the client
+     * @param nickname - nickname of the client
+     * @param reader - BufferedReader of the client
      */
     public void clientListener(Socket client, String nickname, BufferedReader reader){
         Thread clientListener = new Thread(() -> {
             try {
                 String line;
-                //InputStream input = client.getInputStream();
                 while (true) {
-                    //BufferedReader reader = new BufferedReader(new InputStreamReader(input));
                     while ((line = reader.readLine()) != null) {
 
                         synchronized (this) {
@@ -263,8 +295,6 @@ public class ServerSock {
                                             pw.println("[GAMEEND]: You quit.");
                                         } else {
                                             controller.endGame();
-                                            //notifyGameEnd(nickname);
-                                            //notifyGameEnd();
                                         }
                                         break;  //closes listener on confirmed quit
                                     //}
@@ -292,6 +322,16 @@ public class ServerSock {
         });
         clientListener.start();
     }
+
+    /**
+     * Handles chat messages sent by a client. If the message starts with "/chat @" then the character after "@" and before
+     * " " wil be treated as the nickname of the receiver when the method sendMessageToClient() is called, otherwise
+     * receiver = "all" and the message will be sent to all players connected
+     * @author Diego Lecchi
+     * @param nickname - nickname of the client
+     * @param line - message of the client
+     * @throws IOException
+     */
     private void chatHandler(String nickname, String line) throws IOException {
         String text = "", receiver = "";
 
@@ -315,9 +355,16 @@ public class ServerSock {
     }
 
     /**
-     * This thread waits until the game starts, then periodically checks that all clients have sent a [PING] message
-     * within DISCONNECTION_TIME seconds. If they haven't, it is assumed they disconnected and the game ends.
-     * @throws IOException
+     * Periodically checks if the System.currentTimeMillis() minus the attribute lastPing of the respective socketNickStruct
+     * client in the ArrayList clients is greater than a certain amount of milliseconds, if so the client will be declared
+     * disconnected and:
+     * - if the game hasn't been created yet, the client will be removed from Server.clientsLobby and clients
+     * - if the game has been created but note yet started the player will be removed from the Game playersList,
+     *   server.clientsMap, clients and server.clientsLobby through server.notifyLobbyDisconnection
+     * - if the game started Boolean disconnected in the respective ClientInfoStruct in Server.clientsLobby will be set
+     *   to true and server notified of a disconnection
+     * @author Diego Lecchi
+     * @param client - Socket of the client
      */
     public void checkForDisconnectionsV2(socketNickStruct client) {
         new Thread(() -> {
@@ -771,9 +818,9 @@ public class ServerSock {
     }
 
     /**
-     * Sends all clients a serialized copy of the game board and of the leaderboard. Also sends the nick of the current player - this notifies that the turn has ended.
-     * Note: leaderboard is a List<Player>, so it contains
-     * all players' instance fields.
+     * Sends all clients a serialized copy of the game board and of the leaderboard. Also sends the nick of the current
+     * player - this notifies that the turn has ended.
+     * Note: leaderboard is a List<Player>, so it contains all players' instance fields.
      */
     private void updateGameObjectsAfterTurn(){
         try {
