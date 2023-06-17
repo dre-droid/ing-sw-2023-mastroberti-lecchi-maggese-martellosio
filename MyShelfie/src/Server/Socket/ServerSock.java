@@ -148,6 +148,7 @@ public class ServerSock {
 
         clientListener(client, nickname, reader);
         sendMessage("[CONNECTED]", client);
+        sendMessage("[NICKNAME]" + nickname, client);
         if (controller.isGameBeingCreated && !server.clientsLobby.get(0).getNickname().equals(nickname))
             out.println("[INFO] Game is being created by another player...");
 

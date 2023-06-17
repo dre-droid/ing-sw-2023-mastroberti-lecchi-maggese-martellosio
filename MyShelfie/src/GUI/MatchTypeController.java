@@ -87,6 +87,8 @@ public class MatchTypeController {
                     gsc.setClient(clientRMI);
                     gsc.setPlayerName(clientRMI.getNickname());
                     stage.show();
+
+                // client socket
                 } else {
                     clientSocket.clientSpeaker(Integer.toString(numOfPlayers));
                     //TODO check that RMI hasnt created a game in the mean time
