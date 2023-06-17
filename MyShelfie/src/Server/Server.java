@@ -15,14 +15,10 @@ public class Server {
     public enum connectionType {
         RMI, Socket
     }
-
-    public boolean disconnection;
     public ServerRMI serverRMI;
     public ServerSock serverSock;
     public Map<String, connectionType> clientsMap;
-    public ArrayList<String> connectedClients = new ArrayList<>();      //TODO need to add in RMI
     private Controller controller;
-    //public ArrayList<String> clientsInLobby = new ArrayList<>();
     public ArrayList<ClientInfoStruct> clientsLobby;
     public final Object clientsLobbyLock = new Object();
 
@@ -38,56 +34,54 @@ public class Server {
             e.printStackTrace();
         }
 
-        //server iterates do-while for every new game
-        do {
-            //resets clients and creates new controller (hence new game)
-            clientsMap = new HashMap<>();
-            clientsLobby = new ArrayList<>();
-            controller = new Controller(this);
-            serverSock.setController(controller);
-            controller.setServerSock(serverSock);
-            serverRMI.setController(controller);
-            joinGame();
+        //initiates clients and creates new controller
+        clientsMap = new HashMap<>();
+        clientsLobby = new ArrayList<>();
+        controller = new Controller(this);
+        serverSock.setController(controller);
+        controller.setServerSock(serverSock);
+        serverRMI.setController(controller);
+        joinGame();
 
-            // waits that all players connect and game starts
-            synchronized (controller) {
-                while (!controller.hasGameStarted() && isEveryoneConnected()) {
-                    controller.wait();
-                }
+        // waits that all players connect and game starts
+        synchronized (controller) {
+            while (!controller.hasGameStarted() && isEveryoneConnected()) {
+                controller.wait();
             }
-            Thread.sleep(1000);
-            // game starts
-            serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            while (!controller.hasTheGameEnded()) {
-                Thread.sleep(100);
+        }
+        Thread.sleep(1000);
+        // game starts
+        serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+        while (!controller.hasTheGameEnded()) {
+            Thread.sleep(100);
 
-                //if only one player remains the game is put on hold. If nobody rejoins the game ends
-                //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
+            //if only one player remains the game is put on hold. If nobody rejoins the game ends
+            //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
+            if(numberOfPlayersLeft() == 1){
+                synchronized (this){
+                    wait(60000);
+                }
                 if(numberOfPlayersLeft() == 1){
-                    synchronized (this){
-                        wait(60000);
-                    }
-                    if(numberOfPlayersLeft() == 1){
-                        controller.endGame();
-                    }
+                    controller.endGame();
                 }
-                for (int i = 0; i < clientsLobby.size(); i++) {
-                    if(clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()){
-                        controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                    }
-                }
-
-                if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
-                    controller.playTurn();
-                    notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            }
+            for (int i = 0; i < clientsLobby.size(); i++) {
+                if(clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()){
+                    controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                 }
             }
 
-            //game end handling
-            System.out.println("Game has ended. Accepting players for new game...");
-            serverSock.flushServer();
-            serverRMI.flushServer();    //needs testing
-        } while (true);
+            if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
+                controller.playTurn();
+                notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            }
+        }
+
+        //game end handling
+        System.out.println("Game has ended. Accepting players for new game...");
+        serverSock.flushServer();
+        serverRMI.flushServer();    //needs testing
+
     }
 
     public void addPlayerToRecord(String nickname, connectionType conn) {
@@ -176,13 +170,6 @@ public class Server {
         notifyServer();
     }
 
-    public void addPlayerToConnectedClients(String nick){
-        connectedClients.add(nick);
-    }
-
-    public String getConnectedPlayer(int index){
-        return connectedClients.get(index);
-    }
     public void joinGame() {
         new Thread (()->{
             try {
@@ -197,8 +184,8 @@ public class Server {
                     if (clientsLobby.get(0).getRmiPort() != 0) {        //if client is rmi
                         serverRMI.joinGame(clientsLobby.get(0).getNickname(), clientsLobby.get(0).getRmiPort(), clientsLobby.get(0).getRmiIp());
                     } else {                                            //else client is socket
-                        serverSock.joinGame(clientsLobby.get(0).getSocket(), clientsLobby.get(0).getNickname(),
-                                clientsLobby.get(0).getOut(), clientsLobby.get(0).getReader());
+                        serverSock.joinGame(clientsLobby.get(0).getNickname(),
+                                clientsLobby.get(0).getOut());
                     }
                 }
                 Thread.sleep(1000);
@@ -219,7 +206,7 @@ public class Server {
                                     if (client.getRmiPort() != 0) { // if client is RMI
                                         serverRMI.joinGame(client.getNickname(), client.getRmiPort(), client.getRmiIp());
                                     } else { // else client is socket
-                                        serverSock.joinGame(client.getSocket(), client.getNickname(), client.getOut(), client.getReader());
+                                        serverSock.joinGame(client.getNickname(), client.getOut());
                                     }
                                     notifyGameHasBeenCreated();
                                 }
