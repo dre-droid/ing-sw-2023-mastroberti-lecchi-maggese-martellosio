@@ -570,7 +570,7 @@ public class ServerSock {
                         out.println("[REQUEST]: The tiles won't fit there! Try again: ");
                         tooManyTiles = false;
                     }
-                    else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
+                    else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [1 ... 5]");
                 }
                 else
                     out.println("[REQUEST] Choose in which column you want to insert the tiles: [1 ... 5]");
@@ -582,7 +582,7 @@ public class ServerSock {
                     return null;
 
                 line = messageBuffer.remove(0);
-                if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
+                if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line) - 1)) tooManyTiles = true;
                 imbecille = true;
             } while (!isNumeric(line) || Integer.parseInt(line) > 5 || Integer.parseInt(line) < 1 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
