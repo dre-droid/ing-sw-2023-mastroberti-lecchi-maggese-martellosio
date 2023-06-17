@@ -41,7 +41,7 @@ public class drawInfo {
 
     //setters
     public void setColumn(int column) {
-        this.column = column;
+        this.column = column - 1;
     }
     public void setAmount(int amount) {
         this.amount = amount;

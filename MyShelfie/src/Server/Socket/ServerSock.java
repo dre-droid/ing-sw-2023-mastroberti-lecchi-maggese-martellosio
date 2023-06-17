@@ -573,7 +573,7 @@ public class ServerSock {
                     else out.println("[REQUEST] Invalid Input! Choose in which column you want to insert the tiles: [0 ... 4]");
                 }
                 else
-                    out.println("[REQUEST] Choose in which column you want to insert the tiles: [0 ... 4]");
+                    out.println("[REQUEST] Choose in which column you want to insert the tiles: [1 ... 5]");
                 while(messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
                     synchronized (this) {
                         wait();
@@ -584,7 +584,7 @@ public class ServerSock {
                 line = messageBuffer.remove(0);
                 if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line))) tooManyTiles = true;
                 imbecille = true;
-            } while (!isNumeric(line) || Integer.parseInt(line) > 4 || Integer.parseInt(line) < 0 || tooManyTiles);
+            } while (!isNumeric(line) || Integer.parseInt(line) > 5 || Integer.parseInt(line) < 1 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
 
             //ask in which order to insert the tiles
