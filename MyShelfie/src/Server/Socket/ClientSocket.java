@@ -51,7 +51,7 @@ public class ClientSocket {
     public void runServer(){
         try{
             //connect to server
-            socket= new Socket("192.168.178.57",59010);
+            socket= new Socket("192.168.1.6",59010);
             socket.setKeepAlive(true);
 
             try{

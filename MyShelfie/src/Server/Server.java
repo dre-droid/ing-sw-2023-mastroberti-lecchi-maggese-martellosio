@@ -157,6 +157,16 @@ public class Server {
                 clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
             }
         }
+        //add when game has already started
+        else{
+            synchronized (clientsLobbyLock) {
+                for(ClientInfoStruct cis: clientsLobby){
+                    if(cis.getNickname().equals(nickOfDisconnectedPlayer)){
+                        cis.setDisconnected(true);
+                    }
+                }
+            }
+        }
         notifyServer();
         System.out.println("a player disconnected from the lobby");
     }
@@ -238,6 +248,7 @@ public class Server {
                     numOfPlayerLeft++;
             }
         }
+        System.out.println("num of players connected = "+numOfPlayerLeft);
         return numOfPlayerLeft;
     }
     public void notifyServer(){
