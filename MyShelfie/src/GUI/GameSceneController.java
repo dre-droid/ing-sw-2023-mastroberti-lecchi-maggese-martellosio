@@ -930,7 +930,6 @@ public class GameSceneController {
                 okButton.setOnAction(endgameEvent->{
                     Platform.exit();
                 });
-
             }
         });
     }

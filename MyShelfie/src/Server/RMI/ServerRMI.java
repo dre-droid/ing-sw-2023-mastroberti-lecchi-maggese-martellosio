@@ -591,17 +591,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                             server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
                         }
                     }
-                    //if only one connected player remains than the game must end in 30 seconds if nobody reconnects
-                    if(server.numberOfPlayersLeft()==1 && controller.hasGameBeenCreated()){
-                        //end the game (after a timer)
-                        if(hasGameStarted()){
-                            System.out.println("only one player left, the game must end dun dun dunnnn");
-                            controller.endGame();
-                        }
 
-                        //notifyEndOfGame();
-                    }
-                    Thread.sleep(300);
+                    Thread.sleep(1000);
 
                 }
                 //System.out.println("has the game ended: " + controller.hasTheGameEnded());
