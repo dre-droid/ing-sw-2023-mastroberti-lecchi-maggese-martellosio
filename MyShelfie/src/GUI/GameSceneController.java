@@ -507,18 +507,15 @@ public class GameSceneController {
             for (int i = 0; i < 5; i++){
                 if (!shelf.canItFit(drawnTilesCounter, i)) {
                     // grey out button
-                    ((ImageView) shelfButtonsPane.getChildren().get(i)).setImage(new Image("misc/sort_down_gray.png"));
-                    // find buttons and disable them
-                    for (Node n: shelfButtonsPane.getChildren()){
-                        if (n.getId() != null)
-                            if (n.getId().equals(Integer.toString(i)))
-                                n.setVisible(false);
-                    }
+                    ImageView img = ((ImageView) shelfButtonsPane.getChildren().get(i));
+                    img.setImage(new Image("misc/sort_down_gray.png"));
+                    img.setOnMouseClicked(e -> {}); // do nothing
                 }
                 else
                     atLeastOneColumnAvailable = true;
             }
             if (!atLeastOneColumnAvailable) return;
+            shelfButtonsPane.setVisible(true);
 
             // socket
             if (!Objects.isNull(clientSocket))
@@ -592,25 +589,24 @@ public class GameSceneController {
      * Sends the server a request to insert the tiles in the selected column of the shelf.
      * Calls updateGameScene().
      */
-    private void handleShelfButton(ActionEvent e){
+    private void handleShelfButton(String column){
         // socket
         if (!Objects.isNull(clientSocket)) {
             if (!clientSocket.isMyTurn()) {
-                //System.out.println("truee");
                 return;
             }
-            socketHandleShelfButton(e);
+            socketHandleShelfButton(column);
         }
         // rmi
         else {
             if (!clientRMI.isMyTurn())
                 return;
-            rmiHandleShelfButton(e);
+            rmiHandleShelfButton(column);
         }
 
         //clean TileToBeInserted
-        for (int column = 0; column < 4; column++) {
-            TileToBeInserted.getChildren().remove(getNodeAt(0, column, TileToBeInserted));
+        for (int i = 0; i < 4; i++) {
+            TileToBeInserted.getChildren().remove(getNodeAt(0, i, TileToBeInserted));
         }
 
         //clean alreadyDrawnPositions
@@ -622,36 +618,37 @@ public class GameSceneController {
         drawIsOver = false;
         drawnTilesCounter = 0;
         //reset greyed out buttons
-        for (int i = 0; i < 5; i++)
-            ((ImageView) shelfButtonsPane.getChildren().get(i)).setImage(new Image("misc/sort-down.png"));
+        for (int i = 0; i < 5; i++) {
+            ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
+            img.setImage(new Image("misc/sort-down.png"));
+            img.setOnMouseClicked(shelfButtonsHandler);
+        }
         //reset rearrange buttons
         RearrangeTiles.getChildren().clear();
     }
 
     /**
      * This method is called to insert the tile picked with the gui in the shelf on the rmi server
-     * @param e
      */
-    private void rmiHandleShelfButton(Event e){
-        Button button = (Button) e.getSource();
-        //System.out.println("Button getid: " + button.getId());
-        int column = Integer.parseInt(button.getId());
-        if(clientRMI.insertTilesInShelf(column));
+    private void rmiHandleShelfButton(String column){
+        if(clientRMI.insertTilesInShelf(Integer.parseInt(column)));
             //System.out.println("Insert in shelf rmi successful");
         else;
             //System.out.println("Problem in insert in shelf");
         updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
+    EventHandler<MouseEvent> shelfButtonsHandler = e -> {
+        ImageView img = (ImageView) e.getSource();
+        handleShelfButton(img.getId());
+    };
     private void createShelfButtons(){
+        shelfButtonsPane.setVisible(false);
         for (int i = 0; i < 5; i++) {
-            Button shelfButton = new Button();
-            shelfButton.setId(Integer.toString(i));
-            shelfButton.setPrefSize(47, 47);
-            shelfButton.setOpacity(0);
-            shelfButton.setVisible(true);
-            shelfButton.setOnAction(this::handleShelfButton);
-            shelfButtonsPane.add(shelfButton, i, 0);
+            ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
+            img.setId(Integer.toString(i));
+            img.setVisible(true);
+            img.setOnMouseClicked(shelfButtonsHandler);
         }
     }
 
@@ -1200,11 +1197,9 @@ public class GameSceneController {
     /**
      * Sends server selected column and GUI message with serialized List<Position>
      */
-    private void socketHandleShelfButton(ActionEvent e){
+    private void socketHandleShelfButton(String column){
         // sends selected column
-        Button button = (Button) e.getSource();
-        //System.out.println("Button getid: " + button.getId());
-        clientSocket.clientSpeaker(button.getId());
+        clientSocket.clientSpeaker(column);
 
         // Sends List<Position>, the positions of the selected tiles, to the server
         if (TileToBeInserted.getChildren().size() > 1) {
