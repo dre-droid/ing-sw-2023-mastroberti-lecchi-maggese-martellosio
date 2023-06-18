@@ -340,14 +340,19 @@ public class ClientRMI implements Runnable{
                         amount = checkedInputForIntValues(userInput, 1, 3, "Insert a valid value for the amount (1, 2, 3)");
 
                         //read the value for the direction
-                        System.out.println("In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                        directionInput = checkedInputForIntValues(userInput, 0, 3, "Insert a valid value for the direction (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
-                        switch(directionInput){
-                            case 0: direction = Board.Direction.UP;break;
-                            case 1: direction = Board.Direction.DOWN;break;
-                            case 2: direction = Board.Direction.RIGHT;break;
-                            case 3: direction = Board.Direction.LEFT;break;
+                        if(amount==1){
+                            direction = Board.Direction.RIGHT;
+                        }else{
+                            System.out.println("In which direction? (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                            directionInput = checkedInputForIntValues(userInput, 0, 3, "Insert a valid value for the direction (0=UP, 1=DOWN, 2=RIGHT, 3=LEFT)");
+                            switch(directionInput){
+                                case 0: direction = Board.Direction.UP;break;
+                                case 1: direction = Board.Direction.DOWN;break;
+                                case 2: direction = Board.Direction.RIGHT;break;
+                                case 3: direction = Board.Direction.LEFT;break;
+                            }
                         }
+
 
                         //now we try to draw the tiles
                         drawnTiles = serverRMI.drawTilesFromBoard(playerNickname,x,y,amount,direction);
@@ -380,22 +385,27 @@ public class ClientRMI implements Runnable{
 
                         //rearrange the drawn tiles
                         System.out.println("Now choose in which order you want to insert the tiles");
-                        for(int i=0;i<drawnTiles.size();i++){
-                            do{
-                                System.out.println("Select the next tile to insert in the column: ");
-                                tileToBeRearranged=checkedInputForIntValues(userInput, 1, amount, "Insert a number between 1 and "+amount);
+                        if(drawnTiles.size()==1){
+                            rearrangedTiles = drawnTiles;
+                        }else{
+                            for(int i=0;i<drawnTiles.size();i++){
+                                do{
+                                    System.out.println("Select the next tile to insert in the column: ");
+                                    tileToBeRearranged=checkedInputForIntValues(userInput, 1, amount, "Insert a number between 1 and "+amount);
 
-                                int finalTileToBeRearranged = tileToBeRearranged;
-                                if(alreadyInsertedTiles.stream().noneMatch((num)->(num== finalTileToBeRearranged))){
-                                    alreadyInsertedTiles.add(tileToBeRearranged);
-                                    rearrangedTiles.add(drawnTiles.get(tileToBeRearranged-1));
-                                    correctlyRearranged=true;
-                                }else{
-                                    System.out.println("You already inserted this tile, try again");
-                                }
-                            }while(!correctlyRearranged);
-                            correctlyRearranged=false;
+                                    int finalTileToBeRearranged = tileToBeRearranged;
+                                    if(alreadyInsertedTiles.stream().noneMatch((num)->(num== finalTileToBeRearranged))){
+                                        alreadyInsertedTiles.add(tileToBeRearranged);
+                                        rearrangedTiles.add(drawnTiles.get(tileToBeRearranged-1));
+                                        correctlyRearranged=true;
+                                    }else{
+                                        System.out.println("You already inserted this tile, try again");
+                                    }
+                                }while(!correctlyRearranged);
+                                correctlyRearranged=false;
+                            }
                         }
+
                         //inser the tiles in the shelf
                         correctlyInserted= serverRMI.insertTilesInShelf(playerNickname,rearrangedTiles,column-1);
 
