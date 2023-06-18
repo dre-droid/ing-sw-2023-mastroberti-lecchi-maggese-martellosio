@@ -114,7 +114,7 @@ public class ServerSock {
                     }
                 }
 
-                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.startsWith("/") || nicknameAlreadyInUse)
+                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") || nickname.startsWith("/") || nicknameAlreadyInUse)
                     imbecille = true;
                 else
                     break;
@@ -217,10 +217,10 @@ public class ServerSock {
 
     /**
      * Called by playerJoin() when a player chooses the same nickname as a disconnected player, it updates the Socket
-     * and sets the Boolean disconnected to false in the respective ClientInfoStruct object in Server.clientsLobby,
-     * launches clientListener(), then updates the respective socketNickStruct object in the Arraylist clients with the
-     * Socket client passed as parameter, sets lastPing to the current time and then launches checkForDisconnectionV2 and
-     * notifies Server
+     * and sets the Boolean disconnected to false in the respective ClientInfoStruct object in Server.clientsLobby, adds
+     * client to server.clientsMap launches clientListener(), then updates the respective socketNickStruct object in the
+     * Arraylist clients with the Socket client passed as parameter, sets lastPing to the current time and then launches
+     * checkForDisconnectionV2 and notifies Server
      * @author Diego Lecchi
      * @param nickname - nickname of the client rejoining a game
      * @param client - Socket of the client
@@ -228,23 +228,41 @@ public class ServerSock {
      */
     public void rejoinGame(String nickname, Socket client, BufferedReader reader){
         for (int i = 0; i < server.clientsLobby.size(); i++) {
-            if (server.clientsLobby.get(i).getNickname().equals(nickname)){     //search for the object in server.clientsLobby with the same nickname
-                server.clientsLobby.get(i).setSocket(client);           //updates the Socket
-                server.clientsLobby.get(i).setDisconnected(false);      //set boolean disconnected to false
-                clientListener(client, nickname, reader);               //launches clientListener
+            if (server.clientsLobby.get(i).getNickname().equals(nickname)){         //search for the object in server.clientsLobby with the same nickname
+                server.clientsLobby.get(i).setSocket(client);                       //updates the Socket
+                server.clientsLobby.get(i).setDisconnected(false);                  //set boolean disconnected to false
+                server.addPlayerToRecord(nickname, Server.connectionType.Socket);   //adds client to server.clientsMap
+                clientListener(client, nickname, reader);                           //launches clientListener
                 break;
             }
         }
-        for (int i = 0; i < clients.size(); i++) {
-            if(clients.get(i).getName().equals(nickname)){
-                clients.get(i).setSocket(client);
-                clients.get(i).setLastPing(System.currentTimeMillis());
-                checkForDisconnectionsV2(clients.get(i));
-                sendMessage("[CONNECTED]", client);
-                sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
-                server.notifyServer();
-                break;
+        if(clients.stream().anyMatch(socketNickStruct -> socketNickStruct.getName().equals(nickname))) {    //if the same nickname already exists in clients
+            for (int i = 0; i < clients.size(); i++) {
+                if (clients.get(i).getName().equals(nickname)) {
+                    clients.get(i).setSocket(client);                           //update Socket
+                    clients.get(i).setLastPing(System.currentTimeMillis());     //set lastPing to current time
+                    checkForDisconnectionsV2(clients.get(i));                   //launch check for disconnection
+                    sendMessage("[CONNECTED]", client);
+                    sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
+                    server.notifyServer();                                      //notify server
+                    break;
+                }
             }
+        }
+        else{                           //otherwise the client is trying to rejoin a saved game, so we need to add a new socketNickStruct in clients
+            synchronized (clientsLock){
+                clients.add(new socketNickStruct(client, nickname));
+                for (int i = 0; i < clients.size(); i++) {
+                    if(clients.get(i).getName().equals(nickname)) {
+                        clients.get(i).setLastPing(System.currentTimeMillis()); //set lastPing to current time
+                        checkForDisconnectionsV2(clients.get(i));               //launch check for disconnection
+                        break;
+                    }
+                }
+            }
+            sendMessage("[CONNECTED]", client);
+            sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
+            server.notifyServer();  //notify server
         }
     }
 
