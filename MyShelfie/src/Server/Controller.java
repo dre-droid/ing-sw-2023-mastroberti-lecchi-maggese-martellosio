@@ -314,7 +314,7 @@ public class Controller {
     }
 
     /**
-     * this method is called
+     * this method is called to performo the turn dynamic in the gameplay.
      * @author Saverio Maggese
      *
      */
@@ -430,4 +430,15 @@ public class Controller {
     public List<String> getGamePlayerListNickname(){
         return game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList());
     }
+
+    /**
+     *This method is used to get the Game and is meant to be used for testing purposes only.
+     */
+    public Game getGame() {
+        Game copy;
+        copy = this.game;
+        return copy;
+    }
+
+
 }

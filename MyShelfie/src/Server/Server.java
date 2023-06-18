@@ -254,4 +254,21 @@ public class Server {
         server.run();
     }
 
+    /**
+     * To use only fot testing purposes
+     * @param serverRMI
+     */
+    public void setServerRMI(ServerRMI serverRMI){
+        this.serverRMI=serverRMI;
+    }
+
+    /**
+     * To use only fot testing purposes
+     * @param serverSock
+     */
+    public void setServerSock(ServerSock serverSock){
+        this.serverSock=serverSock;
+    }
+
+
 }

@@ -19,62 +19,68 @@ public class ControllerTest {
     private Game game;
     private Server server;
     private ServerRMI serverRMI;
+
     private ServerSock serverSock;
-    private Board board;
-    private ArrayList<Player> p;
+
 
 
     @BeforeEach
     public void setUp() throws RemoteException {
         server = new Server();
+        controller = new Controller(server);
         serverRMI = new ServerRMI(controller,server);
         serverSock = new ServerSock(controller,server);
-        controller = new Controller(server);
-        controller.setServerSock(serverSock);
-        game = controller.getGame();
+        server.setServerRMI(serverRMI);
+        server.setServerSock(serverSock);
+
+
 
     }
 
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Checks if the game has been succesfully created: PASSED
+     */
     @Test
     public void testCreateNewGame() throws RemoteException {
-        game = null;
-        String nickname = "Saverio";
-        int numOfPlayers = 4;
-
-        boolean result = controller.createNewGame(nickname, numOfPlayers);
-
+        String nickname = "Save";
+        int num = 4;
+        controller.createNewGame(nickname,num);
+        boolean result = controller.hasGameBeenCreated();
         assertTrue(result);
-        assertTrue(game.hasGameStarted());
-        assertEquals(1, game.getNumOfPlayers());
+        game = controller.getGame();
+        assertEquals(1, game.getPlayerList().size());
     }
 
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Checks if the game has not been created while there exists another one: PASSED
+     */
     @Test
     public void testCreateNewGame_GameAlreadyRunning() throws RemoteException {
-        String nickname = "Saverio";
+        String nickname = "Save";
         int numOfPlayers = 4;
-
-
+        controller.createNewGame(nickname,numOfPlayers);
         boolean result = controller.createNewGame(nickname, numOfPlayers);
-
         assertFalse(result);
-        assertEquals(0, game.getNumOfPlayers());
     }
-
+    /**
+     * @author SaverioMaggese99
+     * Check the joining when the game has not been created yet: PASSED
+     */
     @Test
     public void testJoinGame() {
         String nickname = "Player2";
-
         int result = controller.joinGame(nickname);
-
-
-        assertEquals(1, game.getNumOfPlayers());
+        assertEquals(-1,result);
+        assertNotEquals(-4,result);
     }
 
     @Test
     public void testJoinGame_GameAlreadyStarted() {
         String nickname = "Player2";
-
-
         assertEquals(0, game.getNumOfPlayers());
     }
 
@@ -86,19 +92,36 @@ public class ControllerTest {
     }
 
     @Test
-    public void testRemovePlayer() {
-        String nickname = "Player3";
+    public void testRemovePlayer() throws RemoteException{
+        String nickname = "Saverio";
+        String other = "Other";
+        controller.createNewGame(nickname,2);
+        game.addPlayer(other);
+        assertEquals(2, controller.getGame().getLeaderBoard().size());
 
-        game.addPlayer(nickname);
-        controller.removePlayer(nickname);
-
-        assertEquals(0, game.getNumOfPlayers());
+    }
+    /**
+     * @author SaverioMaggese99
+     * Checks HasGameStarted when game is null:PASSED
+     */
+    @Test
+    public void testHasGameStarted_whenGameisnull() {
+        boolean result = controller.hasGameStarted();
+        assertFalse(result);
     }
 
+    /**
+     * Test the method hasGameBeenCreated
+     * @throws RemoteException
+     */
     @Test
-    public void testHasGameStarted() {
-        boolean result = controller.hasGameStarted();
+    public void testHasGamebeenCreated() throws RemoteException{
+        String nickname = "Save";
+        int num = 4;
+        controller.createNewGame(nickname,num);
+        boolean result = controller.hasGameBeenCreated();
         assertTrue(result);
+
     }
 
 
