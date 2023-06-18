@@ -5,10 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Random;
@@ -645,35 +642,41 @@ public class Game {
         builder.registerTypeAdapter(StrategyCommonGoal.class, new JsonStrategyConverter());
         Gson gson = builder.create();
         turnCount = 1;
-        try{
-            JsonReader reader = new JsonReader(new FileReader(filePath));
-            //reader.setLenient(true);
-            isPlaying = gson.fromJson(reader, Player.class);
-            //System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
-            board= gson.fromJson(reader, Board.class);
-            //b.printGridMap();
-            Type listType = new TypeToken<List<Player>>() {}.getType();
-            playersList = gson.fromJson(reader, listType);
-            //players.stream().forEach(player->System.out.println(player.getNickname()));
-
-            //playersList.stream().forEach(player->System.out.println(player.getNickname()));
-            numOfPlayers = playersList.size();
-            iterator = playersList.iterator();
-            while (!iterator.next().getNickname().equals(isPlaying.getNickname()));
-
-            Type commongoalType = new TypeToken<List<CommonGoalCard>>(){}.getType();
-            commonGoalCards = gson.fromJson(reader, commongoalType);
-
-            boolean[] flags = gson.fromJson(reader, boolean[].class);
-            lastTurn = flags[0];
-            lastRound = flags[1];
-            gameHasEnded = flags[2];
-            gameHasStarted = flags[3];
-
-
-        }catch(IOException e){
-            System.out.println("Error in loading the game progress from file");
+        FileReader fr = null;
+        try {
+            fr = new FileReader(filePath);
+        } catch (FileNotFoundException e) {
+            System.out.println("cannot open json file");
             return false;
+        }
+
+        JsonReader reader = new JsonReader(fr);
+        //reader.setLenient(true);
+        isPlaying = gson.fromJson(reader, Player.class);
+        //System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
+        board= gson.fromJson(reader, Board.class);
+        //b.printGridMap();
+        Type listType = new TypeToken<List<Player>>() {}.getType();
+        playersList = gson.fromJson(reader, listType);
+        //players.stream().forEach(player->System.out.println(player.getNickname()));
+
+        //playersList.stream().forEach(player->System.out.println(player.getNickname()));
+        numOfPlayers = playersList.size();
+        iterator = playersList.iterator();
+        while (!iterator.next().getNickname().equals(isPlaying.getNickname()));
+
+        Type commongoalType = new TypeToken<List<CommonGoalCard>>(){}.getType();
+        commonGoalCards = gson.fromJson(reader, commongoalType);
+
+        boolean[] flags = gson.fromJson(reader, boolean[].class);
+        lastTurn = flags[0];
+        lastRound = flags[1];
+        gameHasEnded = flags[2];
+        gameHasStarted = flags[3];
+        try {
+            fr.close();
+        } catch (IOException e) {
+            System.out.println("cannot close json file");
         }
         return true;
     }

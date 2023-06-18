@@ -287,6 +287,7 @@ public class Controller {
             saveGameProgress();
             if(server.serverRMI.isHeARmiPlayer(getNameOfPlayerWhoIsCurrentlyPlaying())){
                 if(server.serverRMI.isHeDisconnected(getNameOfPlayerWhoIsCurrentlyPlaying())){
+                    System.out.println("skipped disconnected person turn");
                     endOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
                 }
                 server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
@@ -372,8 +373,7 @@ public class Controller {
     public boolean loadGameProgress(){
         if(checkForSavedGameProgress() && game==null){
             game = new Game("MyShelfie/src/Server/GameProgress.json");
-            game.getPlayerList().stream().forEach(player->server.serverRMI.addClient(player.getNickname()));
-            game.getPlayerList().stream().forEach(player -> server.addPlayerToRecord(player.getNickname(),null));
+
             return true;
         }
         else
@@ -438,6 +438,10 @@ public class Controller {
         Game copy;
         copy = this.game;
         return copy;
+    }
+
+    public int getNumOfPlayers(){
+        return game.getNumOfPlayers();
     }
 
 

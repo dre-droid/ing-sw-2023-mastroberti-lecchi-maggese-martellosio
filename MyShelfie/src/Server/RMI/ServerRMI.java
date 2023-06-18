@@ -47,7 +47,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @author Diego Lecchi
      * @param nickname name of the player that wants to join the lobby
      * @param port used to connect to the rmi client
-     * @return 0 if the player has been added to the map
+     * @return 0 if the player has been added to the map, -2 if something goes wrong with reconnect, -3 if the game has been created
+     * and the nickname does not correspond to one of the players in the game who are disconnected
      * @throws RemoteException
      */
     @Override
@@ -76,18 +77,22 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         clientsLobby.get(clientToBeNotified).setLastPing(System.currentTimeMillis());
         return 0;
     }
+
     //TODO gestire se più giocatori joinano rispetto a numero partita
     /**
      * This method is called to join the game, if the controller added the player correctly it alerts the client and add it to the
      * clients list, if the controller cannot add the player to the game (outcome=-1,-2,-3) it sends a message to the client with the
      * corresponding error
+     * if the game has already started, or it has been loaded from file it will do a reconnect instead of a join
      * @param nickname name of the player that wants to join the game
      * @param port used to connect to the rmi client
      * @return 0 if the player has been added to the game, -1, -2, -3 if there has been an error in the joining of the game
+     *          -4 means problems in reconnecting
      * @throws java.rmi.RemoteException
      */
     @Override
     public int joinGame(String nickname,int port,String ip) throws java.rmi.RemoteException {
+        int outcome;
         ClientNotificationInterfaceRMI clientToBeNotified;
         try{
             Registry registry = LocateRegistry.getRegistry(ip, port);
@@ -95,7 +100,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         } catch (NotBoundException e) {
             throw new RuntimeException(e);
         }
-        int outcome = controller.joinGame(nickname);
+        outcome = controller.joinGame(nickname);
         switch (outcome){
             case 0: {
                 clientToBeNotified.gameJoinedCorrectlyNotification();
@@ -115,13 +120,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             case -2: {
                 clientToBeNotified.problemInJoiningGame("Sorry, the game has already started");
             }break;
-            /*
-            case -3: {
-                clientToBeNotified.problemInJoiningGame("The nickname you chose is already being used");
-            }break;
-
-             */
         }
+
         clientToBeNotified.joinGameOutcome(outcome);
         return outcome;
     }
@@ -383,44 +383,28 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
     @Override
-    public boolean reconnect(String playerNickname, int port)  throws RemoteException{
+    public boolean reconnect(String playerNickname, int port, String ip)  throws RemoteException{
         //we check if there is a player with this name in the game
-        if(clients.containsKey(playerNickname)){
-            //we check if the client is already connected with a ping, if the client is not connected we proceed to the reconnection
-            System.out.println("Correct nickname");
-            //we update the list of the clients with the new client if we can connect to it
-            if(clients.get(playerNickname)==null){
+        for(ClientInfoStruct cis: server.clientsLobby){
+            if(cis.getNickname().equals(playerNickname) && cis.isDisconnected()){
+                cis.setRmiIp(ip);
+                cis.setRmiPort(port);
+                cis.setDisconnected(false);
                 ClientNotificationInterfaceRMI clientToBeNotified;
                 try{
-                    Registry registry = LocateRegistry.getRegistry(port);
+                    Registry registry = LocateRegistry.getRegistry(ip, port);
                     clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
-                } catch (NotBoundException | java.rmi.RemoteException  ex) {
-                    System.out.println("Cannot connect to the new client");
-                    return false;
+                } catch (NotBoundException e) {
+                    throw new RuntimeException(e);
                 }
-                clients.put(playerNickname, clientToBeNotified);
+                clients.put(playerNickname,clientToBeNotified);
                 server.addPlayerToRecord(playerNickname, Server.connectionType.RMI);
-                if(server.isEveryoneConnected()){
-                    for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
-                        if(client.getValue()!=null){
-                            client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                            if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
-                                client.getValue().startTurn();
-                        }
-                    }
-                }
-
-                System.out.println("Connected to the new client");
+                tryToStartLoadedGame();
                 return true;
             }
-            return false;
-
-            //}
         }
-        else{
-            System.out.println("nickname not correct");
-            return false;
-        }
+        System.out.println("nickname not correct");
+        return false;
     }
 
     public boolean loadGameProgressFromFile() throws RemoteException{
@@ -675,20 +659,31 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return clients.get(nickname)==null;
     }
 
-    /**
-     * This method is used to get the number of player that are not disconnected
-     * @return the number of connected players
-     */
-    public int getNumOfConnectedPlayers(){
-        int counter=0;
-        for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
-            if(client.getValue()!=null){
-                counter++;
+    public void tryToStartLoadedGame() throws RemoteException {
+        System.out.println("trying to start the game...");
+        if(server.numberOfPlayersLeft() == controller.getNumOfPlayers()){
+            System.out.println("all players ok");
+            if(server.loadedFromFile){
+                System.out.println("loaded check ok...");
+                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                    if(client.getValue()!=null){
+                        System.out.println("start game sent");
+                        client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                        if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
+                            client.getValue().startTurn();
+                            System.out.println("start turn sent to "+client.getKey());
+                        }
+
+                    }
+                }
+                server.loadedFromFile = false;
+                server.notifyServer();
             }
+
         }
-        System.out.println("Num of connected players = "+counter);
-        return counter;
     }
+
+
 }
 
 //TODO unire client e clientsLobby

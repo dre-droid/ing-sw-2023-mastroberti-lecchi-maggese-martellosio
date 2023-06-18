@@ -245,6 +245,7 @@ public class ServerSock {
                     sendMessage("[CONNECTED]", client);
                     sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
                     server.notifyServer();                                      //notify server
+
                     break;
                 }
             }
@@ -262,6 +263,12 @@ public class ServerSock {
             }
             sendMessage("[CONNECTED]", client);
             sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
+            try {
+                if(server.loadedFromFile)
+                    server.serverRMI.tryToStartLoadedGame();
+            } catch (RemoteException e) {
+                System.out.println("cannot start loaded game");
+            }
             server.notifyServer();  //notify server
         }
     }

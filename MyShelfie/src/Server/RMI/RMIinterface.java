@@ -36,7 +36,7 @@ public interface RMIinterface extends java.rmi.Remote{
 
     public boolean isGameOver() throws RemoteException;
 
-    public boolean reconnect(String playerNickname, int port) throws RemoteException;
+    public boolean reconnect(String playerNickname, int port, String ip) throws RemoteException;
 
     public Tile[][] getMyPersonalGoal(String playerNickname) throws  RemoteException;
 

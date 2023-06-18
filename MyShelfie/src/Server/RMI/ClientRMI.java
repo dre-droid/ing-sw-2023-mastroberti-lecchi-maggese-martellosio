@@ -96,9 +96,11 @@ public class ClientRMI implements Runnable{
     }
 
     private void joinGame(Scanner userInput) throws RemoteException, InterruptedException {
-
+        boolean reconnected = false;
         do{
+            System.out.println("Insert your nickname:");
             playerNickname = userInput.nextLine();
+
 
             //ip address
             try {
@@ -109,51 +111,57 @@ public class ClientRMI implements Runnable{
                 System.out.println("cannot get ip address ");
             }
 
-            while(serverRMI.joinLobby(playerNickname, myport, myIp) != 0)
-                playerNickname = userInput.nextLine();
-            periodicPing();
-            if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
-                System.out.println("Game is being created by another player...");
-            }
+            if(serverRMI.hasGameStarted()){
+                System.out.println("Trying to reconnect...");
+                while(!serverRMI.reconnect(playerNickname,myport,myIp)){
+                    System.out.println("Your nickname does not correspond to the one of the players in the game, insert your nickname to try again:");
+                    playerNickname = userInput.nextLine();
+                }
+                System.out.println("Reconnected to the game! Now wait for your turn");
+                reconnected = true;
+                setGameStartFlag(true);
 
-            synchronized (notifications){
-                while (joinGameOutcome == -5)
-                    notifications.wait();
-            }
-            switch(joinGameOutcome){
-                case -1: {
-                    System.out.println("Enter 1 if you want to load the saved game progress, 2 if you want to create a new game");
-                    int decisionAboutNewGame=-1;
-                    decisionAboutNewGame=checkedInputForIntValues(userInput,1,2,"Enter 1 if you want to load the saved game progress, 2 if you want to create a new game");
-                    if(decisionAboutNewGame==1){
-                        if(serverRMI.loadGameProgressFromFile()){
-                            System.out.println("Loaded the saved game progress on the server");
-                            reconnectToGame(userInput);
-                            return;
+
+                periodicPing();
+            }else{
+                while(serverRMI.joinLobby(playerNickname, myport, myIp) != 0)
+                    playerNickname = userInput.nextLine();
+                periodicPing();
+                if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
+                    System.out.println("Game is being created by another player...");
+                }
+
+                synchronized (notifications){
+                    while (joinGameOutcome == -5)
+                        notifications.wait();
+                }
+                switch(joinGameOutcome){
+                    case 0:{
+                        System.out.println("waiting for players...");
+                    }break;
+                    case -1: {
+                        System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
+                        int numPlayers = checkedInputForIntValues(userInput,2,4,"Insert a valid value for the number of players (2, 3, 4)");
+
+                        if(serverRMI.createNewGame(playerNickname,numPlayers,myport,myIp)){
+                            joinGameOutcome=0;
                         }
                         else{
-                            System.out.println("There is no saved game progress, create a new game");
+                            System.out.println("Somebody already created the game, try to join again, insert your nickname");
                         }
+                    }break;
+                    case -2:{
+                        System.out.println("Try again later");
+                    }break;
+                    case -3:{ //should never reach
+                        System.out.println("Try a different nickname");
+                    }break;
+                    case -4:{
+                        System.out.println("The game has already started and the nickname you provided does not correspond to a player that have to reconnect");
                     }
-
-                    System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
-                    int numPlayers = checkedInputForIntValues(userInput,2,4,"Insert a valid value for the number of players (2, 3, 4)");
-
-                    if(serverRMI.createNewGame(playerNickname,numPlayers,myport,myIp)){
-                        joinGameOutcome=0;
-                    }
-                    else{
-                        System.out.println("Somebody already created the game, try to join again, insert your nickname");
-                    }
-                }break;
-                case -2:{
-                    System.out.println("Try again later");
-                }break;
-                case -3:{ //should never reach
-                    System.out.println("Try a different nickname");
-                }break;
+                }
             }
-        }while(joinGameOutcome!=0);
+        }while(joinGameOutcome!=0 && !reconnected);
     }
 
     private void reconnectToGame(Scanner userInput){
@@ -162,7 +170,7 @@ public class ClientRMI implements Runnable{
         boolean reconnected = false;
         do{
             try{
-                reconnected= serverRMI.reconnect(playerNickname, myport);
+                reconnected= serverRMI.reconnect(playerNickname, myport,myIp);
             }catch(RemoteException e){
             }
 
@@ -275,23 +283,10 @@ public class ClientRMI implements Runnable{
 
             System.out.println("Connected to the server");
             System.out.println("correct ip: "+serverIp);
-            System.out.println("Enter (1) if you want to join a game, (2) if you are trying to reconnect to a game");
-            int typeOfConnection = checkedInputForIntValues(userInput, 1, 2,"Insert (1) or (2)!");
-
-            System.out.println("Now insert the nickname for the game: ");
-            int returnCode;
-            String nickname;
-
-            if(typeOfConnection==1){
-                //join the game
-                joinGame(userInput);
-                if(!serverRMI.hasGameStarted())
-                    System.out.println("waiting for players...");
-            }
-            else{
-                //reconnect to the game
-                reconnectToGame(userInput);
-            }
+            //join the game
+            joinGame(userInput);
+            if(!serverRMI.hasGameStarted())
+                System.out.println("waiting for players...");
 
             //wait for the game to start
             synchronized (notifications){
@@ -377,7 +372,7 @@ public class ClientRMI implements Runnable{
                     printShelf(serverRMI.getMyShelf(playerNickname));
 
                     do{
-                        alreadyInsertedTiles = new ArrayList<Integer>();
+                        alreadyInsertedTiles = new ArrayList<>();
 
                         //read the value for the column
                         System.out.println("Choose in which column you want to insert the tiles: ");
