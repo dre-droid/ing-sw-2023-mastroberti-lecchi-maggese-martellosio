@@ -69,10 +69,9 @@ public class ClientSocket {
     private void serverPinger(){
         Runnable serverPinger = () -> {
             try {
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 while (!socket.isClosed()) {
                     synchronized (this) {   //writing to output is synchronized with other writing methods
-                        output.println("[PING]");
+                        clientSpeaker("[PING]");
                     }
                     Thread.sleep(1000);
                 }
@@ -297,8 +296,9 @@ public class ClientSocket {
                 while(!socket.isClosed()){
                     BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
                     message = bufferRead.readLine();
+                    message = GUI ? "[GUI]" + message : "[CLI]" + message;
                     synchronized (this) {   //writing to output is synchronized with other writing methods
-                        if (!message.startsWith("[GUI])")) output.println(message);
+                        output.println(message);
                     }
                 }
 
@@ -316,6 +316,7 @@ public class ClientSocket {
             try{
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), false);
                 synchronized (this){     // writing to output is synchronized with other writing methods
+                    message = GUI ? "[GUI]" + message : "[CLI]" + message;
                     output.println(message);
                     output.flush();
                 }

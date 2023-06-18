@@ -103,8 +103,8 @@ public class Game {
        chooseCommonGoals();
        drawPersonalGoalCard();
        this.gameHasStarted = true;
-       System.out.println("Game is starting... Players list: " + playersList);
-       System.out.println();
+//       System.out.println("Game is starting... Players list: " + playersList);
+//       System.out.println();
 
     }
 
@@ -202,7 +202,7 @@ public class Game {
      * @author Andrea Mastroberti
      */
     public void playTurn(int x, int y, int amount, Board.Direction direction, int column, List<Tile> reorderedTiles) throws InvalidMoveException{
-        System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
+//        System.out.println("********* Turn n." + turnCount + " - " + isPlaying.getNickname() + " is playing." + "*********");
         //player draws from board and inserts in his shelf - is the shelf is full sets lastTurnFlag
         List<Tile> drawnTiles = board.drawTiles(x, y, amount, direction);
 
@@ -258,10 +258,10 @@ public class Game {
         turnCount++;                                            //increase turnCount
 
         getBoard().printGridMap();
-        System.out.println();
-        System.out.println("Leaderboard");
+//        System.out.println();
+//        System.out.println("Leaderboard");
         printLeaderBoard();
-        System.out.println("******************************\n");
+//        System.out.println("******************************\n");
     }
     /**
      * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
@@ -450,10 +450,10 @@ public class Game {
     public void printLeaderBoard(){
         int i = 0;
         for (Player p: leaderBoard) {
-            System.out.println(i + 1 + ". " + p.getNickname() + ", score: " + p.getScore());
+//            System.out.println(i + 1 + ". " + p.getNickname() + ", score: " + p.getScore());
             i++;
         }
-        System.out.println();
+//        System.out.println();
     }
 
     /**
@@ -602,13 +602,13 @@ public class Game {
         try{
             if(file.exists()){
                 jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",false);
-                System.out.println("File opened in overwriting");
+////                System.out.println("File opened in overwriting");
             }
             else{
                 jsonFile = new FileWriter("MyShelfie/src/Server/GameProgress.json",true);
-                System.out.println("File opened in append");
+//                System.out.println("File opened in append");
             }
-            //System.out.println("player playing: "+isPlaying.getNickname());
+//            //System.out.println("player playing: "+isPlaying.getNickname());
             //we save the players
             gson.toJson(isPlaying, isPlaying.getClass(), jsonFile);
             jsonFile.close();
@@ -618,7 +618,7 @@ public class Game {
             //we save the players
             gson.toJson(playersList, playersList.getClass(), jsonFile);
             //we save the commongoals
-            //commonGoalCards.stream().forEach(commonGoalCard -> System.out.println(commonGoalCard.getDescription()));
+//            //commonGoalCards.stream().forEach(commonGoalCard -> System.out.println(commonGoalCard.getDescription()));
             gson.toJson(commonGoalCards, commonGoalCards.getClass(),jsonFile);
             //we save the flags
             boolean[] flags = {lastTurn, lastRound, gameHasEnded, gameHasStarted};
