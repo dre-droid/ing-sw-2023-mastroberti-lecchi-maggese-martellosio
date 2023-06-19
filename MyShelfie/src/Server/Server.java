@@ -44,7 +44,6 @@ public class Server {
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
             //todo this doesn't work in GUI yet, to remove this simply comment from line 45 to 58 and uncomment line 59
-            /*
             if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
                 loadedFromFile = true;
                 for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
@@ -60,8 +59,7 @@ public class Server {
             else {      //otherwise GameProgress.json is not present so the usual join is called
                 joinGame();
             }
-            */
-            joinGame();
+            //joinGame();
 
             // waits that all players connect and game starts
             synchronized (controller) {
@@ -256,7 +254,7 @@ public class Server {
                     numOfPlayerLeft++;
             }
         }
-//        System.out.println("num of players connected = "+numOfPlayerLeft);
+        //System.out.println("num of players connected = "+numOfPlayerLeft);
         return numOfPlayerLeft;
     }
     public void notifyServer(){

@@ -43,17 +43,17 @@ public class ServerSock {
      * Creates a thread to accept clients.
      */
     public void runServer(){
-        System.out.println("Socket server up and running...");
-        Thread runServer = new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(59010)) {
-                //checkForDisconnections();
-                while (true) {
-                    Socket client = serverSocket.accept();
-                    acceptClient(client);
-                }
-            }catch (IOException e) {e.printStackTrace();}
-        });
-        runServer.start();
+            System.out.println("Socket server up and running...");
+            Thread runServer = new Thread(() -> {
+                try (ServerSocket serverSocket = new ServerSocket(59010)) {
+                    //checkForDisconnections();
+                    while (true) {
+                        Socket client = serverSocket.accept();
+                        acceptClient(client);
+                    }
+                }catch (IOException e) {e.printStackTrace();}
+            });
+            runServer.start();
     }
 
     /**
@@ -85,11 +85,9 @@ public class ServerSock {
      */
     private void playerJoin(Socket client) throws IOException, InterruptedException {
         String nickname;
-        boolean GUI = false;
         InputStream input = client.getInputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
         PrintWriter out = new PrintWriter(client.getOutputStream(), true);
-
         //asks player nickname
         boolean imbecille = false;
         boolean nicknameAlreadyInUse = false;
@@ -102,21 +100,10 @@ public class ServerSock {
                     else
                         out.println("[REQUEST] Invalid nickname. Try again:");
                 }
-
                 nickname = reader.readLine();
-                // remove message tags
-                if (nickname.startsWith("[GUI]")){
-                    nickname = nickname.substring(5);
-                    GUI = true;
-                }
-                if (nickname.startsWith("[CLI]")){
-                    nickname = nickname.substring(5);
-                    GUI = false;
-                }
                 if (nickname.equals("[PING]")) break;
-
                 nicknameAlreadyInUse = false;
-                System.out.println(server.clientsLobby.size());
+
                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                     if (server.clientsLobby.get(i).getNickname().equals(nickname)) {
                         nicknameAlreadyInUse = true;
@@ -126,7 +113,8 @@ public class ServerSock {
                         }
                     }
                 }
-                if (nickname.length() > 15 || nickname.equals("") || nickname.contains(" ") || nickname.contains("@") || nickname.startsWith("/") || nickname.startsWith("[") || nicknameAlreadyInUse)
+
+                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") || nickname.startsWith("/") || nicknameAlreadyInUse)
                     imbecille = true;
                 else
                     break;
@@ -151,7 +139,7 @@ public class ServerSock {
         }
         server.notifyServer();
         synchronized (clientsLock){
-            clients.add(new socketNickStruct(client, nickname, GUI));
+            clients.add(new socketNickStruct(client, nickname));
             for (int i = 0; i < clients.size(); i++) {
                 if(clients.get(i).getName().equals(nickname))
                     checkForDisconnectionsV2(clients.get(i));
@@ -264,7 +252,7 @@ public class ServerSock {
         }
         else{                           //otherwise the client is trying to rejoin a saved game, so we need to add a new socketNickStruct in clients
             synchronized (clientsLock){
-                clients.add(new socketNickStruct(client, nickname, false));//TODO GUI OR CLI boolean needs to be stored! - temporarily set to false
+                clients.add(new socketNickStruct(client, nickname));
                 for (int i = 0; i < clients.size(); i++) {
                     if(clients.get(i).getName().equals(nickname)) {
                         clients.get(i).setLastPing(System.currentTimeMillis()); //set lastPing to current time
@@ -299,7 +287,7 @@ public class ServerSock {
                 String line;
                 while (true) {
                     while ((line = reader.readLine()) != null) {
-                        line = line.substring(5);   // ignores [GUI] or [CLI] tag
+
                         synchronized (this) {
                             // processes PING message
                             if (line.equals("[PING]")) {
@@ -307,10 +295,10 @@ public class ServerSock {
                                     if (s.getName().equals(nickname)) {
                                         s.setLastPing(System.currentTimeMillis());
                                     }
+                                // processes user's input
                             }
-                            // processes user's input
-                            else if (controller.hasGameStarted()) {
-                                // if the game started
+                            else if (controller.hasGameStarted()) { //if the game started
+
                                 if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
                                     messageBuffer.add(line);
                                     notifyAll();
@@ -325,16 +313,16 @@ public class ServerSock {
                                     //pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
                                     //line = reader.readLine();
                                     //if (line.equals("y")) {
-                                    if (!controller.hasGameStarted()) {
-                                        controller.removePlayer(nickname);
-                                        server.notifyLobbyDisconnection(nickname);
-                                        server.clientsMap.remove(nickname);
-                                        clients.remove(client);
-                                        pw.println("[GAMEEND]: You quit.");
-                                    } else {
-                                        controller.endGame();
-                                    }
-                                    break;  //closes listener on confirmed quit
+                                        if (!controller.hasGameStarted()) {
+                                            controller.removePlayer(nickname);
+                                            server.notifyLobbyDisconnection(nickname);
+                                            server.clientsMap.remove(nickname);
+                                            clients.remove(client);
+                                            pw.println("[GAMEEND]: You quit.");
+                                        } else {
+                                            controller.endGame();
+                                        }
+                                        break;  //closes listener on confirmed quit
                                     //}
                                 }
 
@@ -463,17 +451,16 @@ public class ServerSock {
      * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
     public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard) throws InvalidMoveException {
-        boolean GUI = false;
+        Socket playerSocket = null;
+        List<Tile> drawnTiles = new ArrayList<>();
+        drawInfo drawInfo = new drawInfo();
         messageBuffer.clear();
 
         //find client's socket
-        Socket playerSocket = null;
         for (socketNickStruct c : clients)
             if (c.getName().equals(nickname)) {
                 playerSocket = c.getSocket();
-                GUI = c.getGUI();
             }
-
         //finds ClientInfoStruct in server.clientsLobby
         ClientInfoStruct clientInfoStruct = null;
         for (int i = 0; i < server.clientsLobby.size(); i++) {
@@ -481,68 +468,6 @@ public class ServerSock {
                 clientInfoStruct = server.clientsLobby.get(i);
         }
 
-        if (GUI) return GUIdrawInquiry(nickname, b, shelf, pgc, cgc, leaderboard, playerSocket, clientInfoStruct);
-        else return CLIdrawInquiry(nickname, b, shelf, pgc, cgc, leaderboard, playerSocket, clientInfoStruct);
-    }
-
-    private drawInfo GUIdrawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard, Socket playerSocket, ClientInfoStruct clientInfoStruct) {
-        drawInfo drawInfo = new drawInfo();
-        try {
-            PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
-            String line;
-            sendSerializedObjects(out, nickname, b, shelf, pgc, cgc, leaderboard);
-
-            // draw tiles
-            while (messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected())
-                synchronized (this) {
-                    wait();
-                }
-            line = messageBuffer.remove(0);
-            if (line.startsWith("[DRAW]")) {
-                line = line.substring(6);
-                drawInfo.setX(line.charAt(0) - 48);
-                drawInfo.setY(line.charAt(1) - 48);
-                drawInfo.setAmount(line.charAt(2) - 48);
-                drawInfo.setDirection(Board.Direction.values()[line.charAt(3) - 48]);
-            }
-
-            // insert tiles
-            while (messageBuffer.isEmpty() && !clientInfoStruct.isDisconnected()) {
-                synchronized (this) {
-                    wait();
-                }
-            }
-            line = messageBuffer.remove(0);
-            if (line.startsWith("[INSERT]")) {
-                line = line.substring(8);
-                drawInfo.setColumn(line.charAt(0) - 48 + 1);
-
-                // deserialize List<Position> sent by GUI, create corresponding List<Tile>
-                line = line.substring(1);
-                TypeToken<List<Position>> typeToken = new TypeToken<>() {
-                };
-                List<Position> positionList = gson.fromJson(line, typeToken.getType());
-                List<Tile> tileList = new ArrayList<>();
-
-                for (Position p : positionList) {
-                    tileList.add(controller.getTilePlacingSpot()[p.getX()][p.getY()].drawTileFromSpot());
-                }
-                drawInfo.setTiles(tileList);
-            }
-        } catch (IOException | InterruptedException | InvalidMoveException e) {
-            e.printStackTrace();
-        }
-        finally {
-            System.out.println(drawInfo.getX());
-            System.out.println(drawInfo.getY());
-            System.out.println(drawInfo.getAmount());
-            System.out.println(drawInfo.getDirection());
-        }
-        return drawInfo;
-    }
-    private drawInfo CLIdrawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard, Socket playerSocket, ClientInfoStruct clientInfoStruct) throws InvalidMoveException {
-        List<Tile> drawnTiles = new ArrayList<>();
-        drawInfo drawInfo = new drawInfo();
         try {
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
             sendSerializedObjects(out, nickname, b, shelf, pgc, cgc, leaderboard);
@@ -683,9 +608,7 @@ public class ServerSock {
                     return null;
 
                 line = messageBuffer.remove(0);
-                try {
-                    tooManyTiles = !shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line) - 1);
-                } catch (IndexOutOfBoundsException e) {}
+                if (!shelf.canItFit(drawInfo.getAmount(), Integer.parseInt(line) - 1)) tooManyTiles = true;
                 imbecille = true;
             } while (!isNumeric(line) || Integer.parseInt(line) > 5 || Integer.parseInt(line) < 1 || tooManyTiles);
             drawInfo.setColumn(Integer.parseInt(line));
@@ -770,7 +693,7 @@ public class ServerSock {
             }
             drawInfo.setTiles(reorderedTiles);
         } catch(IOException | InterruptedException e){
-            e.printStackTrace();
+                e.printStackTrace();
         }
         return drawInfo;
     }
@@ -936,7 +859,7 @@ public class ServerSock {
                 pw.println("[GSONLEAD]" + jsonLeaderboard);
 
                 pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            }
+                }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -945,7 +868,7 @@ public class ServerSock {
      *  Creates new instance of clients array
      */
     public void flushServer(){
-        clients = new ArrayList<>();
+            clients = new ArrayList<>();
     }
 
     public void setController(Controller c){ this.controller = c;}

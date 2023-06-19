@@ -10,18 +10,17 @@ public class socketNickStruct {
     private Socket socket;
     private String name;
     private long lastPing;
-    private boolean GUI;
 
-    public socketNickStruct(Socket socket, String name, boolean GUI){
+    public socketNickStruct(Socket socket, String name){
         this.name = name;
         this.socket = socket;
         this.lastPing = System.currentTimeMillis();
-        this.GUI = GUI;
     }
 
     public Socket getSocket() {
         return socket;
     }
+
     public void setSocket(Socket socket) {
         this.socket = socket;
     }
@@ -29,7 +28,7 @@ public class socketNickStruct {
     public String getName() {
         return name;
     }
-    public boolean getGUI() { return GUI;}
+
     public long getLastPing() { return lastPing;}
     public void setLastPing(long lastPing) {this.lastPing = lastPing;}
 }
