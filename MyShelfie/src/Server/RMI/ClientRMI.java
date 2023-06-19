@@ -304,7 +304,8 @@ public class ClientRMI implements Runnable{
                 while(!MyTurnFlag){
                     String input = userInput.nextLine();
                     if(!checkForCommand(input))
-                        System.out.println("Not a valid command!");
+                        if(!input.isEmpty())
+                            System.out.println("Not a valid command!");
                 }
 
 

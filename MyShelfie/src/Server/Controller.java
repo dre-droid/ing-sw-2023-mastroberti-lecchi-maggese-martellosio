@@ -444,5 +444,9 @@ public class Controller {
         return game.getNumOfPlayers();
     }
 
+    public List<Player> getPlayers(){
+        return game.getPlayerList();
+    }
+
 
 }

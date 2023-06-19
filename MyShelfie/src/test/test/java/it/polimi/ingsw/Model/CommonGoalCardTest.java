@@ -349,7 +349,7 @@ public class CommonGoalCardTest {
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingColumnsStartingFrom5Height_returnTrue(){
-             Player player = new Player("Francesco", false, null);
+        Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();

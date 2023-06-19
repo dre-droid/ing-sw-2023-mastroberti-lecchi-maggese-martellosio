@@ -659,7 +659,9 @@ public class Game {
         Type listType = new TypeToken<List<Player>>() {}.getType();
         playersList = gson.fromJson(reader, listType);
         //players.stream().forEach(player->System.out.println(player.getNickname()));
-
+        leaderBoard.addAll(playersList);
+        leaderBoard.sort(new scoreComparator());
+        fillValidTileMap();
         //playersList.stream().forEach(player->System.out.println(player.getNickname()));
         numOfPlayers = playersList.size();
         iterator = playersList.iterator();

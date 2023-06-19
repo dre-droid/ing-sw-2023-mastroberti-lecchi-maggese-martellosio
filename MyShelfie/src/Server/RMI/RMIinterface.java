@@ -65,4 +65,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public List<ScoringToken> getCgcTokens(CommonGoalCard commonGoalCard) throws RemoteException;
 
     public void ping() throws RemoteException;
+
+    public List<Player> getPlayers() throws RemoteException;
 }

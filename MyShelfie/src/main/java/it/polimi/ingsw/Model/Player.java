@@ -103,7 +103,7 @@ public class Player implements Serializable{
     private int getTokensScore(){
         int sum = 0;
         if (scoringTokensList.isEmpty()) return 0;
-        for (ScoringToken t : scoringTokensList) sum += t.points;
+        for (ScoringToken t : scoringTokensList) sum += t.getPoints();
         return sum;
     }
 

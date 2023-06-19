@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class ScoringToken implements Serializable {
 
-    int points;
+    private int points;
     public ScoringToken(int points){
         this.points= points;
     }

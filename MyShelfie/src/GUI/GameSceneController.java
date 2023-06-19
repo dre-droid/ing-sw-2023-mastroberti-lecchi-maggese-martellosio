@@ -156,6 +156,11 @@ public class GameSceneController {
            setPlayerLabels();
            updateTurnLabel(isPlaying);
            createShelfButtons();
+           updateShelf(clientRMI.getMyShelf(), PlayerShelfGrid);
+           clientRMI.updateOpponentsShelf();
+           updateLeaderboard(clientRMI.getLeaderboard());
+           updateScoringTokens(clientRMI.getMyToken());
+
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
            drawIsOver = false;
@@ -167,6 +172,7 @@ public class GameSceneController {
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
+        System.out.println("board should be updated 777777777");
         Platform.runLater(() -> {
             alreadyDrawnPositions = new ArrayList<>();
             removeDrawnTilesFromBoard(grid);
@@ -235,6 +241,12 @@ public class GameSceneController {
         int id=-1;
         Image image=null;
         boolean flag;
+        if(pgcMap==null || pgc ==null){
+            System.out.println("oh no la pgc map è nulla");
+        }
+        if(pgcMap.isEmpty()){
+            System.out.println("mappa vuota per le pgc");
+        }
         for(Map.Entry<Integer, PersonalGoalCard> pgcKey: pgcMap.entrySet()){
             /*System.out.println(pgcKey.getValue().toString());
             System.out.println("/////////////////////////////");
@@ -261,6 +273,7 @@ public class GameSceneController {
 
             //System.out.println("-------------------------------");
         }
+        System.out.println("ID = "+id);
         switch (id){
             case 1:image = new Image("personal_goal_cards/Personal_Goals.png") ;break;
             case 2:image = new Image("personal_goal_cards/Personal_Goals2.png") ;break;
@@ -274,7 +287,7 @@ public class GameSceneController {
             case 10:image = new Image("personal_goal_cards/Personal_Goals10.png") ;break;
             case 11:image = new Image("personal_goal_cards/Personal_Goals11.png") ;break;
             case 12:image = new Image("personal_goal_cards/Personal_Goals12.png") ;break;
-            default://.out.println("MANNAGGIAAA");
+            default:System.out.println("MANNAGGIAAA");
         }
         MyPGC.setImage(image);
     }
@@ -1225,6 +1238,8 @@ public class GameSceneController {
     public void updateScoringTokens(List<ScoringToken> tokens){
 
         Platform.runLater(()->{
+            if(tokens==null)
+                return;
             TokenContainer.getChildren().clear();
             for(ScoringToken st: tokens){
                 ImageView imv = new ImageView();

@@ -69,6 +69,18 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     }
 
+    public boolean reconnectToGame(){
+        System.out.println("Trying to reconnect...");
+        try{
+            boolean reconnected = serverRMI.reconnect(nickname,port,myIp);
+            periodicPing();
+            return reconnected;
+        }catch(RemoteException re){
+            return false;
+        }
+    }
+
+
     public void startNotificationServer() throws RemoteException{
         Random random = new Random();
         port = random.nextInt(3000,6000);
@@ -89,11 +101,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public int joinLobby() throws RemoteException{
         return serverRMI.joinLobby(nickname, port, myIp);
     }
-    public void heartbeat(String playerNickname) {
+    public void periodicPing() {
         new Thread(() -> {
             while (true) {
                 try {
-                    serverRMI.setLastPing(playerNickname);
+                    serverRMI.setLastPing(nickname);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -189,7 +201,6 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }catch (IndexOutOfBoundsException e){
             return;
         }
-
     }
 
     public boolean insertTilesInShelf(int column ) {
@@ -385,5 +396,24 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void broadcastedMessage(String message) throws RemoteException {
         gsc.rmiMessageTextArea(message);
+    }
+
+    public List<ScoringToken> getMyToken(){
+        try {
+            return serverRMI.getMyTokens(nickname);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateOpponentsShelf(){
+        try {
+            List<Player> players = serverRMI.getPlayers();
+            for(Player p: players){
+                updateOppShelf(p.getNickname(), p.getShelf().getGridForDisplay());
+            }
+        } catch (RemoteException e) {
+            //
+        }
     }
 }

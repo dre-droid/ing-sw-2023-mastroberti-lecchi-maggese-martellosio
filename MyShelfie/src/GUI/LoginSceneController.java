@@ -64,7 +64,6 @@ public class LoginSceneController {
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-
         }
     }
 
@@ -159,16 +158,68 @@ public class LoginSceneController {
         stage.show();
     }
     private void handleRMIv2(ActionEvent event) throws IOException, InterruptedException{
+        System.out.println("ciao v3");
         if(clientRMI!=null){
             System.out.println("rmi active on login scene");
             clientRMI.setnickname(usernameText.getText());
+            String nextScenePath;
             try{
                 FXMLLoader loader;
                 String errorMessage="";
                 clientRMI.startNotificationServer();
+                if(clientRMI.hasGameStarted()){
+                    System.out.println("riconnessione in corso...");
+                    if(clientRMI.reconnectToGame()){
+                        //switch to game scene
+                        nextScenePath = "GameScene.fxml";
+                        loader = new FXMLLoader(getClass().getResource(nextScenePath));
+                        Parent root = loader.load();
+                        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                        scene = new Scene(root);
+                        stage.setScene(scene);
+                        stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
+                            e.consume();
+                            Popup popup = new Popup();
+                            HBox buttons = new HBox(30);
+                            Button quit = new Button("Quit game");
+                            Button cancel = new Button("Cancel");
+                            buttons.getChildren().addAll(quit, cancel);
+                            buttons.setPadding(new Insets(5,5,5,5));
+                            buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
+                            popup.getContent().add(buttons);
+                            popup.show(stage);
+                            quit.setOnAction(eq->{
+                                if(clientRMI!=null){
+                                    clientRMI.quitGame();
+                                }
+                                Platform.exit();
+                            });
+                            cancel.setOnAction(ec->{
+                                popup.hide();
+                            });
+                        });
+                        GameSceneController gsc = loader.getController();
+                        gsc.setClient(clientRMI);
+                        if(gsc.getClientRMI().hasGameStarted())
+                            gsc.getClientRMI().updateGUIAtBeginningOfGame();
+                        gsc.setPlayerName(clientRMI.getNickname());
+
+                        stage.setResizable(false);
+                        stage.show();
+
+                    }
+                    else{
+                        updateLabelText(messageTextArea, "Non è stato possibile riconnettersi, prova con un altro nickname");
+                        System.out.println("ERRORE RICONNESIONE");
+                        return;
+
+                    }
+                }
+                else{
+                    System.out.println("game has not started");
+                }
                 int outcome = clientRMI.joinLobby();
                 System.out.println(outcome);
-                String nextScenePath="";
                 switch(outcome){
                     case -1:{
                         errorMessage = "Nickname already in use";
@@ -176,7 +227,7 @@ public class LoginSceneController {
                         updateLabelText(messageTextArea, errorMessage);
                     }break;
                     case 0:{
-                       clientRMI.heartbeat(clientRMI.getNickname());
+                       clientRMI.periodicPing();
                         if(clientRMI.isGameBeingCreated() && !clientRMI.firstInLobby(clientRMI.getNickname())){
                             System.out.println("Game is being created by another player...");
                             updateLabelText(messageTextArea, "Game is being created by another player...");

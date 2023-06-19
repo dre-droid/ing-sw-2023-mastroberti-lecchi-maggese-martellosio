@@ -621,6 +621,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void ping() throws RemoteException{
     }
 
+    @Override
+    public List<Player> getPlayers() throws RemoteException {
+        return controller.getPlayers();
+    }
+
     /**
      * Thie method is used to check if the player with this nickname is connected with rmi or not
      * @param nickname nickname of the player
