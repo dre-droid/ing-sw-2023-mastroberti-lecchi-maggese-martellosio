@@ -293,8 +293,8 @@
 
          </children>
       </GridPane>
-      <Text fx:id="CG1_id" layoutX="805.0" layoutY="332.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="158.95574951171864" />
-      <Text fx:id="CG2_id" layoutX="846.0" layoutY="521.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="117.95574951171864" />
+      <Text fx:id="CG1_id" layoutX="805.0" layoutY="324.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="222.95574951171864" />
+      <Text fx:id="CG2_id" layoutX="802.0" layoutY="482.0" strokeType="OUTSIDE" strokeWidth="0.0" wrappingWidth="222.95574951171875" />
       <ImageView fx:id="MyShelf" fitHeight="317.0" fitWidth="333.0" layoutX="11.0" layoutY="539.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@../../../MyShelfie/Resources/boards/bookshelf.png" />

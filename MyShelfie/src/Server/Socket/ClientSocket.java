@@ -35,6 +35,8 @@ public abstract class ClientSocket {
     public String turnOfPlayer = "";
     public String nextScene = "";
     public List<Tile> drawnTiles;
+    public long lastPing;
+    public final long disconnectionTime = 10000;
 
     public void runServer(){
         try{
@@ -143,6 +145,9 @@ public abstract class ClientSocket {
             isPlaying = line;
             turnHasEnded = true;
         }
+        if (line.equals("[PING]")){
+            lastPing = System.currentTimeMillis();
+        }
 //        if (line.startsWith("[DRAWNTILES]")){
 //            TypeToken<List<Tile>> typeToken = new TypeToken<>() {};
 //            String gsonString = line.replace("[DRAWNTILES]", "");
@@ -189,6 +194,23 @@ public abstract class ClientSocket {
             throw new RuntimeException(e);
         }
     }
+    public void disconnectionCheck(){
+        new Thread(() -> {
+            lastPing = System.currentTimeMillis();
+            while(true){
+                if(System.currentTimeMillis() - lastPing > disconnectionTime) {
+                    disconnectionAlert();
+                    break;
+                }
+                try{
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+    }
+    protected void disconnectionAlert(){}
 
     //getters
     public Board getBoard() {

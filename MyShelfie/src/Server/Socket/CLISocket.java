@@ -11,6 +11,7 @@ public class CLISocket extends ClientSocket{
      protected synchronized void handleServerRequest(String line){
         if (line.equals("[CONNECTED]")) {
             serverPinger();
+            disconnectionCheck();
         }
          if (line.startsWith("[INFO] Chosen nickname:")){
              nickname = line.replace("[INFO] Chosen nickname: ", "");
@@ -106,5 +107,7 @@ public class CLISocket extends ClientSocket{
         }
         System.out.println("*************");
     }
-
+    protected void disconnectionAlert(){
+        System.out.println("Connection lost, try again later");
+    }
 }

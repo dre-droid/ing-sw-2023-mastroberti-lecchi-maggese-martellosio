@@ -5,6 +5,10 @@ public class GUISocket extends ClientSocket{
      * Handles server's received messages
      */
     protected synchronized void handleServerRequest(String line){
+        if (line.equals("[CONNECTED]")) {
+            serverPinger();
+            disconnectionCheck();
+        }
         if (line.startsWith("[INFO] Chosen nickname:")){
             nickname = line.replace("[INFO] Chosen nickname: ", "");
         }
@@ -32,13 +36,6 @@ public class GUISocket extends ClientSocket{
             System.out.println(line);
             System.exit(0);
         }
-
-
-
-
-        if (line.equals("[CONNECTED]")) {
-            serverPinger();
-        }
         if (line.startsWith("[INFO] Chosen nickname:")){
             nickname = line.replace("[INFO] Chosen nickname: ", "");
         }
@@ -61,5 +58,8 @@ public class GUISocket extends ClientSocket{
             turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
         }
         notify();
+    }
+    protected void disconnectionAlert(){
+        chatMessage = "Connection lost, try again later";
     }
 }

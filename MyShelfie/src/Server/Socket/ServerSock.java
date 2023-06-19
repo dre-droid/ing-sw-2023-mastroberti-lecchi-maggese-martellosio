@@ -108,7 +108,7 @@ public class ServerSock {
                     if (server.clientsLobby.get(i).getNickname().equals(nickname)) {
                         nicknameAlreadyInUse = true;
                         if(server.clientsLobby.get(i).isDisconnected()) {
-                            rejoinGame(nickname, client, reader);
+                            rejoinGame(nickname, client, reader, out);
                             return;
                         }
                     }
@@ -147,7 +147,7 @@ public class ServerSock {
             }
         }
 
-        clientListener(client, nickname, reader);
+        clientListener(client, nickname, reader, out);
         sendMessage("[CONNECTED]", client);
         sendMessage("[NICKNAME]" + nickname, client);
         if (controller.isGameBeingCreated && !server.clientsLobby.get(0).getNickname().equals(nickname))
@@ -228,13 +228,13 @@ public class ServerSock {
      * @param client - Socket of the client
      * @param reader - BufferedReader of the client
      */
-    public void rejoinGame(String nickname, Socket client, BufferedReader reader){
+    public void rejoinGame(String nickname, Socket client, BufferedReader reader, PrintWriter out){
         for (int i = 0; i < server.clientsLobby.size(); i++) {
             if (server.clientsLobby.get(i).getNickname().equals(nickname)){         //search for the object in server.clientsLobby with the same nickname
                 server.clientsLobby.get(i).setSocket(client);                       //updates the Socket
                 server.clientsLobby.get(i).setDisconnected(false);                  //set boolean disconnected to false
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);   //adds client to server.clientsMap
-                clientListener(client, nickname, reader);                           //launches clientListener
+                clientListener(client, nickname, reader, out);                           //launches clientListener
                 break;
             }
         }
@@ -284,7 +284,7 @@ public class ServerSock {
      * @param nickname - nickname of the client
      * @param reader - BufferedReader of the client
      */
-    public void clientListener(Socket client, String nickname, BufferedReader reader){
+    public void clientListener(Socket client, String nickname, BufferedReader reader, PrintWriter out){
         Thread clientListener = new Thread(() -> {
             try {
                 String line;
@@ -294,10 +294,12 @@ public class ServerSock {
                         synchronized (this) {
                             // processes PING message
                             if (line.equals("[PING]")) {
-                                for (socketNickStruct s : clients)
+                                for (socketNickStruct s : clients) {
                                     if (s.getName().equals(nickname)) {
                                         s.setLastPing(System.currentTimeMillis());
                                     }
+                                    out.println("[PING]");
+                                }
                                 // processes user's input
                             }
                             else if (controller.hasGameStarted()) { //if the game started
