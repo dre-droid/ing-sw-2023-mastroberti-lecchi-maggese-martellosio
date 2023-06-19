@@ -453,7 +453,7 @@ public class GameSceneController {
                         StackPane stackPane = new StackPane();
                         stackPane.getChildren().add(new ImageView(p.getImage()));
 
-                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted).getY(), 0);    //TODO Exception in thread "JavaFX Application Thread" java.lang.IllegalArgumentException: columnIndex must be greater or equal to 0, but was -1
+                        TileToBeInserted.add(stackPane, getFirstEmptySpot(TileToBeInserted).getY(), 0);
                         stackPane.setUserData(new Position(row, column));
                         drawnTilesCounter++;
                         updateTileToBeInserted(alreadyDrawnPositions);
@@ -481,7 +481,7 @@ public class GameSceneController {
             if(getNodeAt(0,column, TileToBeInserted)!=null){
                 StackPane n = (StackPane) getNodeAt(0,column,TileToBeInserted);
                 Position pos = (Position) n.getUserData();
-                System.out.println("round "+i+", "+pos.toString()+"//"+n.toString());
+               //System.out.println("round "+i+", "+pos.toString()+"//"+n.toString());
                 positionList.add(i,pos);
                 stackPaneList.add(i,n);
                 i++;
@@ -490,10 +490,10 @@ public class GameSceneController {
         }
 
         TileToBeInserted.getChildren().clear();
-        System.out.println("filling the gridpane");
-        System.out.println("size of already drawn positions: "+alreadyDrawnPositions.size());
+//        System.out.println("filling the gridpane");
+//        System.out.println("size of already drawn positions: "+alreadyDrawnPositions.size());
         for(Position p: positions){
-            System.out.println("Position to be inserted = "+p.toString());
+//            System.out.println("Position to be inserted = "+p.toString());
             TileToBeInserted.add(stackPaneList.get(positionList.indexOf(p)), getFirstEmptySpot(TileToBeInserted).getY(), 0);
         }
         if (drawnTilesCounter >= 1) {
@@ -528,7 +528,14 @@ public class GameSceneController {
                 else
                     atLeastOneColumnAvailable = true;
             }
-            if (!atLeastOneColumnAvailable) return;
+            if (!atLeastOneColumnAvailable) {
+                for (int i = 0; i < 5; i++) {
+                    ImageView img = (ImageView) shelfButtonsPane.getChildren().get(i);
+                    img.setImage(new Image("misc/sort-down.png"));
+                    img.setOnMouseClicked(shelfButtonsHandler);
+                }
+                return;
+            }
             shelfButtonsPane.setVisible(true);
 
             // socket
@@ -541,7 +548,9 @@ public class GameSceneController {
                 drawTilesFromRMIServer();
             }
             drawIsOver = true;
+            // hide checkmark button
             TileToBeInserted.getChildren().remove(getNodeAt(0,3,TileToBeInserted));
+
             //show arrows to rearrange tiles
             int numOfArrows = drawnTilesCounter*2;
             for(int i=0;i<numOfArrows;i++){
@@ -574,13 +583,11 @@ public class GameSceneController {
     }
 
     /**
-     * This method is used to swithc the two elements in the gridpane TileTobBeInserted
+     * This method is used to switch the two elements in the gridpane TileTobBeInserted
      * @param pos1 column of the first element to swap
      * @param pos2 column of the second element to swap
      */
-    public void switchDrawnTiles(int pos1, int pos2){
-        //to be implemented
-        System.out.println("Pos1 = "+pos1+", pos2 = "+pos2);
+    public synchronized void switchDrawnTiles(int pos1, int pos2){
         if(pos1>=0 && pos1<drawnTilesCounter && pos2>=0 && pos2<drawnTilesCounter){
             Node temp1 = getNodeAt(0, pos1, TileToBeInserted);
             Node temp2 = getNodeAt(0, pos2, TileToBeInserted);
@@ -588,12 +595,10 @@ public class GameSceneController {
             TileToBeInserted.getChildren().remove(getNodeAt(0, pos2, TileToBeInserted));
             TileToBeInserted.add(temp2, pos1, 0);
             TileToBeInserted.add(temp1, pos2, 0);
+            getNodeAt(0, pos1, TileToBeInserted).setUserData(temp2.getUserData());
+            getNodeAt(0, pos2, TileToBeInserted).setUserData(temp1.getUserData());
             if(clientRMI!=null){
                 clientRMI.rearrangeDrawnTiles(pos1, pos2);
-            }
-            else if(clientSocket!=null){
-                //socket must rearrange the draw tiles
-                //TODO implement this for socket
             }
         }
     }
@@ -837,7 +842,7 @@ public class GameSceneController {
                 if(getNodeAt(row,column,gridPane)==null){
                     return new Position(row, column);
                 }
-                System.out.println("TileToBeInserted in column "+column+" not empty");
+//                System.out.println("TileToBeInserted in column "+column+" not empty");
             }
         return null;
     }
@@ -973,9 +978,9 @@ public class GameSceneController {
      */
     private Node getNodeAt(int row, int column, GridPane gridPane){
         Node result = null;
-        ObservableList<Node> childrens = gridPane.getChildren();
+        ObservableList<Node> children = gridPane.getChildren();
         //.out.println(gridPane.toString());
-        for (Node node : childrens) {
+        for (Node node : children) {
             //System.out.println(node.toString());
             if(transformIntegerToInt(GridPane.getRowIndex(node)) == row && transformIntegerToInt(GridPane.getColumnIndex(node)) == column) {
                 result = node;
@@ -1211,7 +1216,8 @@ public class GameSceneController {
      */
     private void socketHandleShelfButton(String column){
         // sends selected column
-        clientSocket.clientSpeaker(column + 1);
+        int adjustedColumn = Integer.parseInt(column) + 1;
+        clientSocket.clientSpeaker(String.valueOf(adjustedColumn));
 
         // map tiles to their position
         List<Position> positionList = TileToBeInserted.getChildren().stream().map(c -> (Position) c.getUserData()).toList();
@@ -1224,7 +1230,6 @@ public class GameSceneController {
             else positionList.forEach(p -> coordinates.add(p.getX()));
 
             int min = coordinates.stream().mapToInt(Integer::intValue).min().orElseThrow();
-            coordinates.forEach(c -> System.out.println((Integer.toString(c - min + 1))));
             coordinates.forEach(c -> clientSocket.clientSpeaker(Integer.toString(c - min + 1)));
         }
     }
@@ -1276,13 +1281,13 @@ public class GameSceneController {
      */
     public void updateCommonGoalCardTokens(int n, List<ScoringToken> tokens){
         Platform.runLater(()->{
-            System.out.println("ciao ho aggiornato i token delle common");
+//            System.out.println("ciao ho aggiornato i token delle common");
             if(tokens==null){
                 System.out.println("tokens null");
                 return;
             }
             if(tokens.size()==0){
-                System.out.println("token size =0");
+//                System.out.println("token size =0");
                 if(n==1){
                     cgc1tokens.setImage(null);
                 }else if(n==2){
@@ -1294,10 +1299,10 @@ public class GameSceneController {
             int maxAvailablePts = optionalInt.getAsInt();
             if(n==1){
                 //cgc1tokens
-                System.out.println("common goal card 1 token modificati");
+//                System.out.println("common goal card 1 token modificati");
                 cgc1tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }else if(n==2){
-                System.out.println("common goal card 2 token modificati");
+//                System.out.println("common goal card 2 token modificati");
                 cgc2tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }
             else{
