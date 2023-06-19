@@ -10,69 +10,66 @@ public class IncreasingOrDecreasingHeight implements StrategyCommonGoal, Seriali
     @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] grid = shelf.getGrid();
-        boolean asc1, desc1, asc2, desc2;
-        desc1 = true;
-        asc1 = true;
-        asc2 = true;
-        desc2 = true;
+        int height = grid.length;
+        int width = grid[0].length;
 
-        // Descending height=6
-        for (int col = 0; col < 5; col++) {
-            for (int row = 0; row < 6 - col; row++) {
+        // Check descending height=6
+        for (int col = 0; col < width; col++) {
+            boolean columnDesc = true;
+            for (int row = 0; row < height - col; row++) {
                 if (grid[row][col] == null) {
-                    desc1 = false;
+                    columnDesc = false;
+                    break;
                 }
             }
-            for (int row = 6 - col; row < 6; row++) {
-                if (grid[row][col] != null) {
-                    desc1 = false;
-                }
+            if (columnDesc) {
+                return true;
             }
         }
 
-        // Descending height=5
-        for (int col = 0; col < 5; col++) {
-            for (int row = 0; row < 5 - col; row++) {
+        // Check descending height=5
+        for (int col = 0; col < width; col++) {
+            boolean columnDesc = true;
+            for (int row = 0; row < height - 1 - col; row++) {
                 if (grid[row][col] == null) {
-                    desc2 = false;
+                    columnDesc = false;
+                    break;
                 }
             }
-            for (int row = 5 - col; row < 6; row++) {
-                if (grid[row][col] != null) {
-                    desc2 = false;
-                }
+            if (columnDesc) {
+                return true;
             }
         }
 
-        // Ascending height=6
-        for (int col = 0; col < 5; col++) {
-            for (int row = 0; row < 6 - 4 + col; row++) {
-                if (grid[row][col] == null) {
-                    asc1 = false;
+        // Check ascending height=6
+        for (int col = 0; col < width; col++) {
+            boolean columnAsc = true;
+            for (int row = height - col; row < height; row++) {
+                if (grid[row][col] != null) {
+                    columnAsc = false;
+                    break;
                 }
             }
-            for (int row = 6 - 4 + col; row < 6; row++) {
-                if (grid[row][col] != null) {
-                    asc1 = false;
-                }
+            if (columnAsc) {
+                return true;
             }
         }
 
-        // Ascending height=5
-        for (int col = 0; col < 5; col++) {
-            for (int row = 0; row < 5 - 4 + col; row++) {
-                if (grid[row][col] == null) {
-                    asc2 = false;
+        // Check ascending height=5
+        for (int col = 0; col < width; col++) {
+            boolean columnAsc = true;
+            for (int row = height - 1 - col; row < height; row++) {
+                if (grid[row][col] != null) {
+                    columnAsc = false;
+                    break;
                 }
             }
-            for (int row = 5 - 4 + col; row < 6; row++) {
-                if (grid[row][col] != null) {
-                    asc2 = false;
-                }
+            if (columnAsc) {
+                return true;
             }
         }
 
-        return (desc1 || desc2 || asc1 || asc2);
+        return false;  // None of the conditions satisfied
     }
 
     @Override
