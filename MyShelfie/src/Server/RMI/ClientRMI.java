@@ -99,8 +99,7 @@ public class ClientRMI implements Runnable{
         boolean reconnected = false;
         do{
             System.out.println("Insert your nickname:");
-            playerNickname = userInput.nextLine();
-
+            playerNickname = getPlayerNickname(userInput);
 
             //ip address
             try {
@@ -115,7 +114,7 @@ public class ClientRMI implements Runnable{
                 System.out.println("Trying to reconnect...");
                 while(!serverRMI.reconnect(playerNickname,myport,myIp)){
                     System.out.println("Your nickname does not correspond to the one of the players in the game, insert your nickname to try again:");
-                    playerNickname = userInput.nextLine();
+                    playerNickname = getPlayerNickname(userInput);
                 }
                 System.out.println("Reconnected to the game! Now wait for your turn");
                 reconnected = true;
@@ -125,7 +124,7 @@ public class ClientRMI implements Runnable{
                 periodicPing();
             }else{
                 while(serverRMI.joinLobby(playerNickname, myport, myIp) != 0)
-                    playerNickname = userInput.nextLine();
+                    playerNickname = getPlayerNickname(userInput);
                 periodicPing();
                 if(serverRMI.isGameBeingCreated() && !serverRMI.firstInLobby(playerNickname)){
                     System.out.println("Game is being created by another player...");
@@ -546,5 +545,13 @@ public class ClientRMI implements Runnable{
             }
         }).start();
     }
-
+    public String getPlayerNickname(Scanner userInput){
+        String nickname =  userInput.nextLine();
+        while (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") ||
+                nickname.startsWith("/") || nickname.equals("Server")){
+            System.out.println("Invalid nickname. Try again:");
+            nickname = userInput.nextLine();
+        }
+        return nickname;
+    }
 }

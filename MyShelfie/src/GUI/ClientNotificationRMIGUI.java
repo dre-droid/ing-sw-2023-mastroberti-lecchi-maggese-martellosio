@@ -381,4 +381,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public boolean firstInLobby (String nickname) throws RemoteException{
         return serverRMI.firstInLobby(nickname);
     }
+
+    @Override
+    public void broadcastedMessage(String message) throws RemoteException {
+        gsc.rmiMessageTextArea(message);
+    }
 }

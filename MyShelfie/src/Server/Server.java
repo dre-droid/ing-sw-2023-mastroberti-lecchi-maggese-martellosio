@@ -44,6 +44,7 @@ public class Server {
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
             //todo this doesn't work in GUI yet, to remove this simply comment from line 45 to 58 and uncomment line 59
+
             if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
                 loadedFromFile = true;
                 for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
@@ -59,6 +60,7 @@ public class Server {
             else {      //otherwise GameProgress.json is not present so the usual join is called
                 joinGame();
             }
+
             //joinGame();
 
             // waits that all players connect and game starts
@@ -152,7 +154,7 @@ public class Server {
      * sends Socket client the name of the current player
      */
     public void notifySocketOfTurnEnd(String isPlaying){
-        serverSock.broadcastMessage("[CURRENTPLAYER]" + isPlaying);
+        serverSock.broadcastMessage("[CURRENTPLAYER]" + isPlaying, "Server");
     }
 
     public boolean isEveryoneConnected(){
@@ -180,6 +182,7 @@ public class Server {
                 }
             }
         }
+        broadcastMessage("Player " + nickOfDisconnectedPlayer + " disconnected", "Server");
         notifyServer();
         System.out.println("a player disconnected from the lobby");
     }
@@ -243,8 +246,9 @@ public class Server {
 
         }).start();
     }
-    public void broadcastMessage(String message){
-        //TODO fare una funzione broadcast in rmi e socket che scrive tramite chat un errore o notifica (cosi funziona anche in GUI), una sorta di [Message from Server]
+    public void broadcastMessage(String message, String sender){
+        serverSock.broadcastMessage("[MESSAGE FROM SERVER] " + message, sender);
+        serverRMI.broadcastMessage(message, sender);
     }
     public int numberOfPlayersLeft(){
         int numOfPlayerLeft = 0;
@@ -254,7 +258,7 @@ public class Server {
                     numOfPlayerLeft++;
             }
         }
-        //System.out.println("num of players connected = "+numOfPlayerLeft);
+//        System.out.println("num of players connected = "+numOfPlayerLeft);
         return numOfPlayerLeft;
     }
     public void notifyServer(){

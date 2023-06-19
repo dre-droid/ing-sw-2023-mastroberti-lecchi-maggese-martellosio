@@ -106,10 +106,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 clientToBeNotified.gameJoinedCorrectlyNotification();
                 clients.put(nickname, clientToBeNotified);
                 server.addPlayerToRecord(nickname, Server.connectionType.RMI);
-                for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
+                server.broadcastMessage("Player " + nickname + " joined the game!", nickname);
+                /*for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     if(client.getValue()!=null)
                         client.getValue().someoneJoinedTheGame(nickname);
                 }
+
+                 */
                 if (controller.hasGameStarted()) {
                     notifyStartOfGame();
                 }
@@ -139,30 +142,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * @throws RemoteException
      */
     public void gameIsCreated() throws RemoteException{
-
-        /*new Thread(() -> {
-            while(!controller.hasGameStarted()) {
-                try {
-                    if (clientsLobby.size() > 0) {
-                        Set<ClientNotificationInterfaceRMI> set = clientsLobby.keySet();
-                        for (ClientNotificationInterfaceRMI c : set) {
-                            c.gameHasBeenCreated();
-
-                        }
-                    }
-                } catch (RemoteException e) {
-                    System.out.println("Cannot notify client");
-                }
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }).start();
-
-         */
-        //in this version every client enters at the same time so a thread that iterates is not necessary
         for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()) {
             client.getKey().gameHasBeenCreated();
         }
@@ -400,6 +379,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 clients.put(playerNickname,clientToBeNotified);
                 server.addPlayerToRecord(playerNickname, Server.connectionType.RMI);
                 tryToStartLoadedGame();
+                server.broadcastMessage("Player " + playerNickname + " rejoined the game!", playerNickname);
                 return true;
             }
         }
@@ -682,9 +662,17 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
         }
     }
-
+    public void broadcastMessage(String message, String sender){
+        try{
+            for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+                if(client.getValue()!=null) {
+                    if(!client.getKey().equals(sender))
+                        client.getValue().broadcastedMessage("Message from Server: " + message);
+                }
+            }
+        } catch (RemoteException e) {
+            System.out.println("Cannot send message");
+        }
+    }
 
 }
-
-//TODO unire client e clientsLobby
-//TODO aggiungere la possibilità di connettersi da due computer con rmi

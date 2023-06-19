@@ -114,7 +114,8 @@ public class ServerSock {
                     }
                 }
 
-                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") || nickname.startsWith("/") || nicknameAlreadyInUse)
+                if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") ||
+                        nickname.startsWith("/") || nickname.equals("Server") || nicknameAlreadyInUse)
                     imbecille = true;
                 else
                     break;
@@ -207,6 +208,7 @@ public class ServerSock {
                         server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                         out.println("[INFO] Joined a Game");
                         server.notifyServer();
+                        server.broadcastMessage("Player " + nickname + " joined the game!", nickname);
                     }
                 }
             } catch (RemoteException | InterruptedException e) {
@@ -245,7 +247,7 @@ public class ServerSock {
                     sendMessage("[CONNECTED]", client);
                     sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
                     server.notifyServer();                                      //notify server
-
+                    server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
                     break;
                 }
             }
@@ -270,6 +272,7 @@ public class ServerSock {
                 System.out.println("cannot start loaded game");
             }
             server.notifyServer();  //notify server
+            server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
         }
     }
 
@@ -747,11 +750,12 @@ public class ServerSock {
      * Prints message to all clients in socketNickStruct clients
      * @param message
      */
-    public void broadcastMessage(String message){
+    public void broadcastMessage(String message, String sender){
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                pw.println(message);
+                if(!sender.equals(c.getName()))
+                    pw.println(message);
             }
         }catch (IOException e){
             e.printStackTrace();

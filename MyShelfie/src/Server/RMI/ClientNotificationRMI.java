@@ -156,4 +156,8 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
             notifyAll();
         }
     }
+
+    public void broadcastedMessage(String message) throws RemoteException{
+        System.out.println(message);
+    }
 }
