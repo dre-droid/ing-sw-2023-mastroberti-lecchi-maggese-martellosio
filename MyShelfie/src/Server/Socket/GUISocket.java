@@ -5,9 +5,6 @@ public class GUISocket extends ClientSocket{
      * Handles server's received messages
      */
     protected synchronized void handleServerRequest(String line){
-        if (line.equals("[CONNECTED]")) {
-            serverPinger();
-        }
         if (line.startsWith("[INFO] Chosen nickname:")){
             nickname = line.replace("[INFO] Chosen nickname: ", "");
         }
