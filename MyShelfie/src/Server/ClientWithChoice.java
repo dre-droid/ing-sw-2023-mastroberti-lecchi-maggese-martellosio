@@ -2,6 +2,7 @@ package Server;
 
 import Server.RMI.ClientNotificationRMI;
 import Server.RMI.ClientRMI;
+import Server.Socket.CLISocket;
 import Server.Socket.ClientSocket;
 
 import java.rmi.RemoteException;
@@ -41,7 +42,7 @@ public class ClientWithChoice {
     }
 
     public void createNewSocketClient(){
-        ClientSocket clientSocket = new ClientSocket(false);
+        ClientSocket clientSocket = new CLISocket();
         clientSocket.runServer();
     }
 

@@ -639,7 +639,6 @@ public class ServerSock {
                             if (line.startsWith("[GUI]")) break;
                             imbecille = true;
                         } while (!isNumeric(line) || Integer.parseInt(line) > drawInfo.getAmount() || Integer.parseInt(line) < 1);
-                        if (line.startsWith("[GUI]")) break;
                         reorderedTiles.add(drawnTiles.get(Integer.parseInt(line) - 1));
                         insertedValues.add(Integer.parseInt(line));
                     }
@@ -682,19 +681,9 @@ public class ServerSock {
                     }
                 }
             else reorderedTiles = drawnTiles;
-            if (line.startsWith("[GUI]")){
-                // deserialize List<Position> sent by GUI, create corresponding List<Tile>
-                line = line.replace("[GUI]", "");
-                TypeToken<List<Position>> typeToken = new TypeToken<>() {};
-                List<Position> positionList = gson.fromJson(line, typeToken.getType());
-                List<Tile> tileList = new ArrayList<>();
-
-                for (Position p: positionList){
-                    tileList.add(controller.getTilePlacingSpot()[p.getX()][p.getY()].drawTileFromSpot());
-                }
-                reorderedTiles = tileList;
-            }
             drawInfo.setTiles(reorderedTiles);
+            // send client drawn tiles
+            out.println("[DRAWNTILES]" + gson.toJson(reorderedTiles));
         } catch(IOException | InterruptedException e){
                 e.printStackTrace();
         }

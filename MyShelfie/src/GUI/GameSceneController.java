@@ -32,6 +32,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GameSceneController {
     @FXML
@@ -1176,18 +1177,16 @@ public class GameSceneController {
             if (drawnTilesCounter > 1) {
                 if (horizontal) {
                     clientSocket.clientSpeaker("2");
-                    //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter + " 2");
                     clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
                 } else {
                     clientSocket.clientSpeaker("1");
-                    //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter + " 1");
                     clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.DOWN);
                 }
             } else {
-                //System.out.println("Socket is sending the move: " + min.getX() + " " + min.getY() +" " + drawnTilesCounter);
                 clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
-                updateBoard(clientSocket.getBoard().getBoardForDisplay());
             }
+            // should make drawing feel quicker by updating locally
+            updateBoard(clientSocket.getBoard().getBoardForDisplay());
         } catch (InvalidMoveException error) {
             error.printStackTrace();
         }
@@ -1195,21 +1194,25 @@ public class GameSceneController {
     }
 
     /**
-     * Sends server selected column and GUI message with serialized List<Position>
+     * Sends server selected column and reordering info
      */
     private void socketHandleShelfButton(String column){
         // sends selected column
-        clientSocket.clientSpeaker(column);
+        clientSocket.clientSpeaker(column + 1);
 
-        // Sends List<Position>, the positions of the selected tiles, to the server
-        if (TileToBeInserted.getChildren().size() > 1) {
-            List<Position> positionList = new ArrayList<>();
-            for (Node n : TileToBeInserted.getChildren()) {
-                Position p = (Position) n.getUserData();
-                if (p != null) positionList.add(p);
-            }
-            //System.out.println("[GUI]" + clientSocket.gson.toJson(positionList));
-            clientSocket.clientSpeaker("[GUI]" + clientSocket.gson.toJson(positionList));
+        // map tiles to their position
+        List<Position> positionList = TileToBeInserted.getChildren().stream().map(c -> (Position) c.getUserData()).toList();
+
+        // send the coordinates reordered by the player
+        if (positionList.size() > 1) {
+            List<Integer> coordinates = new ArrayList<>();
+            //find horizontal or vertical
+            if (positionList.get(0).getX() == positionList.get(1).getX()) positionList.forEach(p -> coordinates.add(p.getY()));
+            else positionList.forEach(p -> coordinates.add(p.getX()));
+
+            int min = coordinates.stream().mapToInt(Integer::intValue).min().orElseThrow();
+            coordinates.forEach(c -> System.out.println((Integer.toString(c - min + 1))));
+            coordinates.forEach(c -> clientSocket.clientSpeaker(Integer.toString(c - min + 1)));
         }
     }
 

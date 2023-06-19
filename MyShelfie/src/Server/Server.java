@@ -43,6 +43,7 @@ public class Server {
             serverSock.setController(controller);
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
+
             //todo this doesn't work in GUI yet, to remove this simply comment from line 45 to 58 and uncomment line 59
 
             if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
@@ -60,7 +61,6 @@ public class Server {
             else {      //otherwise GameProgress.json is not present so the usual join is called
                 joinGame();
             }
-
             //joinGame();
 
             // waits that all players connect and game starts
@@ -69,12 +69,10 @@ public class Server {
                     controller.wait();
                 }
             }
-            Thread.sleep(1000);
+            Thread.sleep(500);
             // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             while (!controller.hasTheGameEnded()) {
-                Thread.sleep(100);
-
                 //if only one player remains the game is put on hold. If nobody rejoins the game ends
                 //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
                 if (numberOfPlayersLeft() == 1) {

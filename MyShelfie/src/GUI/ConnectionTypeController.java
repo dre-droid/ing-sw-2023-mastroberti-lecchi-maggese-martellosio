@@ -4,6 +4,7 @@ import Server.ClientWithChoice;
 import Server.RMI.ClientRMI;
 import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
+import Server.Socket.GUISocket;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -64,7 +65,7 @@ public class ConnectionTypeController  {
                 }
                 else {
                     //TODO: add the ip address of the server from the text field
-                    clientSocket = new ClientSocket(true);
+                    clientSocket = new GUISocket();
                 }
 
                 root = loader.load();
