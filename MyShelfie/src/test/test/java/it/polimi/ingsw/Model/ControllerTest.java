@@ -242,15 +242,100 @@ public class ControllerTest {
         assertEquals(game.checkIfCommonGoalN2IsFulfilled(game.getIsPlaying()),controller.checkIfCommonGoalN2IsFulfilled(playingrn));
     }
     /**
-     * Tests method endOfTurn
+     * Tests method endOfTurn when the player is the one that is playing:PASSED
      * @author SaverioMaggese99
      * @throws RemoteException
      */
     @Test
-    public void testendOfTurn(){
+    public void testendOfTurn_CorrectPlayer() throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        String vecchio = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+        String nuovo = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        assertNotEquals(vecchio,nuovo);
+    }
 
+    /**
+     * Tests method endOfTurn when the player is not the one that is playing: PASSED
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     */
+    @Test
+    public void testendOfTurn_WrongPlayer() throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        String nuovo;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        String vecchio = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        for(Player p: game.getPlayerList()){
+            if(!p.getNickname().equals(vecchio)){
+                controller.endOfTurn(p.getNickname());
+                nuovo = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+                assertEquals(nuovo,vecchio);
+
+            }
+        }
+    }
+    /**
+     * Tests method testHasTheGameEnded both when game is ended and isn't: PASSED
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     */
+    @Test
+    public void testHasTheGameEnded() throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        assertEquals(game.hasTheGameEnded(),controller.hasTheGameEnded());
+        game.endGame();
+        assertEquals(game.hasTheGameEnded(),controller.hasTheGameEnded());
 
     }
+
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * @throws InvalidMoveException
+     * test play turn when the move is not valid
+     */
+    @Test
+    public void testplayTurn_InvalidMove() throws RemoteException,InvalidMoveException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        List<Tile> tiles = new ArrayList<>();
+        Tile x = new Tile(Type.CAT);
+        Tile y= new Tile(Type.PLANT);
+        tiles.add(x);
+        tiles.add(y);
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        assertThrows(InvalidMoveException.class, () -> game.playTurn(0, 0, 3, Board.Direction.DOWN, 1, tiles));
+    }
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * @throws InvalidMoveException
+     * test play turn when the move is not valid
+     */
+    @Test
+    public void testplayTurn() throws RemoteException,InvalidMoveException{
+    assertTrue(true);
+
+    }
+
 
 
 
