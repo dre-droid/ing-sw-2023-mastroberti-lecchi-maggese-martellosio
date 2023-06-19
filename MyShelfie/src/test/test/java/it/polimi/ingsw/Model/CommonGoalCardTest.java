@@ -363,8 +363,8 @@ public class CommonGoalCardTest {
     }
 
     @Test
-    public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingHeightsButWithHoles_returnTrue(){
-             Player player = new Player("Francesco", false, null);
+    public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingHeightsButWithHoles_returnFalse(){
+        Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
@@ -374,23 +374,23 @@ public class CommonGoalCardTest {
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
-        grid[0][0]=null;
+        grid[0][0] = null;
         assertFalse(cgc.isSatisfiedBy(player));
     }
 
     @Test
-    public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingHeightsButWithHoles_returnTrue(){
+    public void isSatisfied_IncreasingOrDecreasingHeight_IncreasingHeightsButWithHoles_returnFalse(){
              Player player = new Player("Francesco", false, null);
         IncreasingOrDecreasingHeight increasingOrDecreasingHeight = new IncreasingOrDecreasingHeight();
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
-        for(int j = 0;j<5;j++){
-            for(int i=0;i<6-4+j;i++){
+        for(int j = 1;j<5;j++){
+            for(int i=1;i<6-4+j;i++){
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
-        grid[1][3]=null;
+        grid[1][3] = null;
         assertFalse(cgc.isSatisfiedBy(player));
     }
 

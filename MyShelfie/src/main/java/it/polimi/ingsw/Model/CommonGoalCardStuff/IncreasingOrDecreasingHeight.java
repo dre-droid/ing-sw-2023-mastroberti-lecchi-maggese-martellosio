@@ -12,59 +12,58 @@ public class IncreasingOrDecreasingHeight implements StrategyCommonGoal, Seriali
         Tile[][] grid = shelf.getGrid();
         int height = grid.length;
         int width = grid[0].length;
-
+        boolean columnDesc6 = true;
+        boolean columnDesc5 = true;
+        boolean columnAsc6 = true;
+        boolean columnAsc5 = true;
         // Check descending height=6
         for (int col = 0; col < width; col++) {
-            boolean columnDesc = true;
             for (int row = 0; row < height - col; row++) {
                 if (grid[row][col] == null) {
-                    columnDesc = false;
+                    columnDesc6 = false;
                     break;
                 }
             }
-            if (columnDesc) {
+            if (columnDesc6) {
                 return true;
             }
         }
 
         // Check descending height=5
         for (int col = 0; col < width; col++) {
-            boolean columnDesc = true;
             for (int row = 0; row < height - 1 - col; row++) {
                 if (grid[row][col] == null) {
-                    columnDesc = false;
+                    columnDesc5 = false;
                     break;
                 }
             }
-            if (columnDesc) {
+            if (columnDesc5) {
                 return true;
             }
         }
 
         // Check ascending height=6
         for (int col = 0; col < width; col++) {
-            boolean columnAsc = true;
-            for (int row = height - col; row < height; row++) {
-                if (grid[row][col] != null) {
-                    columnAsc = false;
+            for (int row = 0; row <= col; row++) {
+                if (grid[row][col] == null) {
+                    columnAsc6 = false;
                     break;
                 }
             }
-            if (columnAsc) {
+            if (columnAsc6) {
                 return true;
             }
         }
 
         // Check ascending height=5
         for (int col = 0; col < width; col++) {
-            boolean columnAsc = true;
-            for (int row = height - 1 - col; row < height; row++) {
-                if (grid[row][col] != null) {
-                    columnAsc = false;
+            for (int row = 0; row <= col + 1; row++) {
+                if (grid[row][col] == null) {
+                    columnAsc5 = false;
                     break;
                 }
             }
-            if (columnAsc) {
+            if (columnAsc5) {
                 return true;
             }
         }

@@ -1,4 +1,4 @@
-package test.test.java.it.polimi.ingsw.Model;
+package test.java.it.polimi.ingsw.Model;
 
 import java.rmi.RemoteException;
 import Server.Controller;
@@ -137,7 +137,7 @@ public class ControllerTest {
      * @author SaverioMaggese99
      */
     @Test
-    public void test_getNameOfPlayerWhoIsCurrentlyPlaying() throws RemoteException{
+    public void testgetNameOfPlayerWhoIsCurrentlyPlaying() throws RemoteException{
         String nick1 = "Save";
         String nick2 = "Chiara";
         int num = 2 ;
@@ -154,7 +154,7 @@ public class ControllerTest {
      * @author SaverioMaggese99
      */
     @Test
-    public void test_isMyTurn() throws RemoteException{
+    public void testisMyTurn() throws RemoteException{
         String nick1 = "Save";
         String nick2 = "Chiara";
         int num = 2 ;
@@ -170,7 +170,7 @@ public class ControllerTest {
      * @author SaverioMaggese99
      */
     @Test
-    public void test_drawFromBoard() throws RemoteException,InvalidMoveException,Exception{
+    public void testdrawFromBoard() throws RemoteException,InvalidMoveException,Exception{
         List<Tile> result = new ArrayList<>();
         List<Tile> x = new ArrayList<>();
         String nick1 = "Save";
@@ -184,21 +184,74 @@ public class ControllerTest {
         assertEquals(result,x);
     }
     /**
-     * Test the method drawFromBoard:
-     * @throws RemoteException,Exception,InvalidMoveException
+     * Tests method insertTilesInShelf: PASSED
+     * @throws RemoteException
      * @author SaverioMaggese99
      */
     @Test
-    public void test_insertTilesInShelf() throws Exception{
+    public void testinsertTilesInShelf() throws RemoteException{
+        List<Tile> tiles = new ArrayList<>();
+        Tile x = new Tile(Type.CAT);
+        Tile y= new Tile(Type.PLANT);
+        tiles.add(x);
+        tiles.add(y);
         String nick1 = "Save";
         String nick2 = "Chiara";
         int num = 2 ;
         controller.createNewGame(nick1,num);
         game = controller.getGame();
         controller.joinGame(nick2);
+        boolean result1 = controller.insertTilesInShelf(controller.getNameOfPlayerWhoIsCurrentlyPlaying(),tiles,1 );
+        boolean result2 = controller.insertTilesInShelf(controller.getNameOfPlayerWhoIsCurrentlyPlaying(),tiles,-1);
+        boolean result3 = controller.insertTilesInShelf(controller.getNameOfPlayerWhoIsCurrentlyPlaying(),tiles,6);
+        assertTrue(result1);
+        assertFalse(result2);
+        assertFalse(result3);
+    }
+
+    /**
+     * Tests method checkIfCommonGoalN1isFulfilled: PASSED
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     */
+    @Test
+    public void testcheckIfCommonGoalN1IsFulfilled()throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        String playingrn = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        assertEquals(game.checkIfCommonGoalN1IsFulfilled(game.getIsPlaying()),controller.checkIfCommonGoalN1IsFulfilled(playingrn));
+    }
+    /**
+     * Tests method checkIfCommonGoalN2isFulfilled: PASSED
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     */
+    @Test
+    public void testcheckIfCommonGoalN2IsFulfilled()throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        String playingrn = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        assertEquals(game.checkIfCommonGoalN2IsFulfilled(game.getIsPlaying()),controller.checkIfCommonGoalN2IsFulfilled(playingrn));
+    }
+    /**
+     * Tests method endOfTurn
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     */
+    @Test
+    public void testendOfTurn(){
 
 
     }
+
 
 
 
