@@ -240,7 +240,8 @@ public class Controller {
             if(column<0 || column>5)
                 return false;
             try{
-                if(game.insertTilesInShelf(tiles,column,game.getIsPlaying()))
+                Player current = getPlayers().stream().filter(player -> player.getNickname().equals(playerNickname)).toList().get(0);
+                if(game.insertTilesInShelf(tiles,column,current))
                     return true;
                 else
                     return false;

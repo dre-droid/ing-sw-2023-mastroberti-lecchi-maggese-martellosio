@@ -666,6 +666,18 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             System.out.println("all players ok");
             if(server.loadedFromFile){
                 System.out.println("loaded check ok...");
+                /*//scam the problem
+                List<Tile> ts = new ArrayList<>();
+                Tile t = new Tile(Type.CAT);
+                ts.add(t);
+                String currentname = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+                Player current = controller.getPlayers().stream().filter(player -> player.getNickname().equals(currentname)).toList().get(0);
+                try {
+                    controller.insertTilesInShelf(currentname, ts, 1);
+                } catch (Exception e) {
+                    System.out.println("fake insertion problem");
+                }
+                //*/
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     if(client.getValue()!=null){
                         System.out.println("start game sent");
