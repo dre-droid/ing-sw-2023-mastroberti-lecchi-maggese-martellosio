@@ -1,9 +1,12 @@
 package test.java.it.polimi.ingsw.Model;
 
+import java.io.*;
 import java.rmi.RemoteException;
 import Server.Controller;
 import Server.RMI.ServerRMI;
 import Server.Server;
+import Server.Socket.ClientSocket;
+import Server.ClientWithChoice;
 import Server.Socket.ServerSock;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.Tile;
@@ -12,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,6 +27,9 @@ public class ControllerTest {
     private ServerRMI serverRMI;
 
     private ServerSock serverSock;
+    private ClientWithChoice client1;
+    private ClientWithChoice client2;
+
 
 
 
@@ -33,6 +41,7 @@ public class ControllerTest {
         serverSock = new ServerSock(controller,server);
         server.setServerRMI(serverRMI);
         server.setServerSock(serverSock);
+
     }
 
     /**
@@ -330,9 +339,150 @@ public class ControllerTest {
      * @throws InvalidMoveException
      * test play turn when the move is not valid
      */
+   /* public void testplayTurn() throws RemoteException,InvalidMoveException, IOException,InterruptedException {
+        OutputStream outputStream = System.out;
+        PrintWriter printWriter = new PrintWriter(outputStream);
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        List<Tile> tiles = new ArrayList<>();
+        Tile x = new Tile(Type.CAT);
+        Tile y= new Tile(Type.PLANT);
+        tiles.add(x);
+        tiles.add(y);
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        String old = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        serverSock.joinGame(nick1,printWriter);
+        serverSock.joinGame(nick2,printWriter);
+        game.playTurn(3,1,2, Board.Direction.RIGHT,1,tiles);
+        String n = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
+        assertNotEquals(old,n);
+
+
+    }
+
+    */
+
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * @throws FileNotFoundException
+     * Tests the saving of Game Process: PASSED
+     */
     @Test
-    public void testplayTurn() throws RemoteException,InvalidMoveException{
-    assertTrue(true);
+    public void testsaveGameProgress() throws RemoteException,FileNotFoundException{
+        File file= new File("MyShelfie/src/Server/GameProgress.json");
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        controller.saveGameProgress();
+        assertTrue(file.exists());
+        String fileContent = readFileContent("MyShelfie/src/Server/GameProgress.json");
+        System.out.println("File content: " + fileContent);
+        assertNotEquals(null,fileContent);
+
+    }
+
+    /**
+     * @author SaverioMaggese99
+     * Tests method for loading game process: PASSED
+     * @throws FileNotFoundException
+     */
+    @Test
+    public void testloadGameProgress() throws RemoteException{
+        File file= new File("MyShelfie/src/Server/GameProgress.json");
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        controller.saveGameProgress();
+        assertFalse(controller.loadGameProgress());
+
+    }
+
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Tests the correct deletion of the game progress file: PASSED
+     */
+    @Test
+    public void testdeleteGameProgress() throws RemoteException{
+        File file = new File("MyShelfie/src/Server/GameProgress.json");
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        controller.saveGameProgress();
+        controller.deleteProgress();
+        boolean result = !file.exists();
+        assertTrue(result);
+    }
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Tests the correct check of the game progress file: PASSED
+     */
+    @Test
+    public void testcheckForSavedGameProgress() throws RemoteException{
+        File file = new File("MyShelfie/src/Server/GameProgress.json");
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        controller.saveGameProgress();
+        boolean result = controller.checkForSavedGameProgress();
+        assertTrue(result);
+        controller.deleteProgress();
+        boolean result2 = controller.checkForSavedGameProgress();
+        assertFalse(result2);
+    }
+
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Tests the correct number of players: PASSED
+     */
+    @Test
+    public void testgetNumOfPlayers() throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        int result = controller.getNumOfPlayers();
+        assertEquals(2,result);
+    }
+    /**
+     * @author SaverioMaggese99
+     * @throws RemoteException
+     * Tests all the getters: PASSED
+     */
+
+    @Test
+    public void testGetters() throws RemoteException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        assertEquals(game.getValidTilesMap(),controller.getPGCmap());
+        assertEquals(game.getCommonGoalCards(),controller.getCommonGoalCards());
+        assertEquals(game.getPlayerList(),controller.getPlayers());
+        assertEquals(game,controller.getGame());
+        assertEquals(game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList()),controller.getGamePlayerListNickname());
 
     }
 
@@ -347,6 +497,26 @@ public class ControllerTest {
 
 
 
-    // Add more tests to cover other methods in the Controller class
 
+
+
+
+
+
+
+
+    // Add more tests to cover other methods in the Controller class
+    private static String readFileContent(String filePath) throws FileNotFoundException {
+        StringBuilder content = new StringBuilder();
+        File file = new File(filePath);
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine()) {
+            content.append(scanner.nextLine());
+            if (scanner.hasNextLine()) {
+                content.append(System.lineSeparator());
+            }
+        }
+        scanner.close();
+        return content.toString();
+    }
 }
