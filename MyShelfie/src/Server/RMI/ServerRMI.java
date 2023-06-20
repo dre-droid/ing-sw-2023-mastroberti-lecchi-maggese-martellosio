@@ -21,7 +21,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     Server server;
     Controller controller;
-    private final long DISCONNECTION_TIME = 7000;  //disconnection threshold: 5s
+    private final long DISCONNECTION_TIME = 5000;  //disconnection threshold: 5s
     private final int drawDelay= 60000;
     private final int insertDelay = 70000;
     //private List<ClientNotificationRecord> clients;
@@ -367,6 +367,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public boolean reconnect(String playerNickname, int port, String ip)  throws RemoteException{
         //we check if there is a player with this name in the game
         for(ClientInfoStruct cis: server.clientsLobby){
+            if(cis.getNickname().equals(playerNickname) && !cis.isDisconnected())
+                System.out.println("problema è che il player risulta ancora connesso");
             if(cis.getNickname().equals(playerNickname) && cis.isDisconnected()){
                 cis.setRmiIp(ip);
                 cis.setRmiPort(port);
@@ -376,7 +378,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     Registry registry = LocateRegistry.getRegistry(ip, port);
                     clientToBeNotified = (ClientNotificationInterfaceRMI) registry.lookup("Client");
                 } catch (NotBoundException e) {
-                    throw new RuntimeException(e);
+                    return false;
                 }
                 clients.put(playerNickname,clientToBeNotified);
                 server.addPlayerToRecord(playerNickname, Server.connectionType.RMI);
@@ -543,7 +545,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                         Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
                         ClientNotificationInterfaceRMI client = entry.getKey();
                         RmiNickStruct nickStruct = entry.getValue();
-
+                        try{
+                            client.ping();
+                        }catch(RemoteException re){
+                            Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
+                            if(opt.isPresent()){
+                                opt.get().setDisconnected(true);
+                            }
+                        }
                         if (System.currentTimeMillis() - nickStruct.getLastPing() > DISCONNECTION_TIME) {
                             String nickOfDisconnectedPlayer = nickStruct.getNickname();
 
@@ -559,7 +568,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     }
 
                     Thread.sleep(1000);
-
+                    System.out.println("number of remaining players: "+server.numberOfPlayersLeft());
                 }
                 //System.out.println("has the game ended: " + controller.hasTheGameEnded());
 

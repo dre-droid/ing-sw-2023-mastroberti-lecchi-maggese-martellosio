@@ -42,6 +42,7 @@ public class Player implements Serializable{
      */
     public boolean insertTiles(List<Tile> currentTiles, int column) {
         try {
+            System.out.println("player--> insert tiles called");
             shelf.insertTiles(currentTiles, column);
             if (shelf.isFull()) setEndGameToken();
             return true;

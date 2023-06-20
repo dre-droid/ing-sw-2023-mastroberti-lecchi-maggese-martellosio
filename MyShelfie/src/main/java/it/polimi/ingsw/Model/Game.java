@@ -145,10 +145,14 @@ public class Game {
     }
     public boolean insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
         if(!gameHasEnded){
+            System.out.println("insert shelf ok called");
             if(!player.getNickname().equals(isPlaying.getNickname()))
                 throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
             if(player.insertTiles(drawnTiles,column))
                 return true;
+            else{
+                System.out.println("problemone nell'inserimento");
+            }
         }
         return false;
     }

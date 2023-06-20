@@ -235,6 +235,7 @@ public class Controller {
      * is not the one playing the current turn
      */
     public boolean insertTilesInShelf(String playerNickname, List<Tile> tiles, int column){
+        System.out.println("controller-->insert tiles in shelf"+ tiles.size());
         if(playerNickname.equals(game.getIsPlaying().getNickname())){
             if(column<0 || column>5)
                 return false;

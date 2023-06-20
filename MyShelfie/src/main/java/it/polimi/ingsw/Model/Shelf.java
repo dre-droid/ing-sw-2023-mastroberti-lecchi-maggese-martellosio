@@ -30,6 +30,7 @@ public class Shelf implements Serializable {
      * @throws IndexOutOfBoundsException if the chosen column can't hold all the players tiles or the selected column is out of bounds of the shelf
      */
     public void insertTiles(List<Tile> t, int column) throws IndexOutOfBoundsException{
+        System.out.println("shelf--->insert tiles finally called"+t.size());
         int size = t.size();
         if (size > 3 || size < 1) throw new IndexOutOfBoundsException("Too few or too many tiles");
 
