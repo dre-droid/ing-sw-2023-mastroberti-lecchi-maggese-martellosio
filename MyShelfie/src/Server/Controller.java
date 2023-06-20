@@ -448,5 +448,13 @@ public class Controller {
         return game.getPlayerList();
     }
 
+    public boolean hasEndgameToken(String nickname){
+        Optional<Player>  p = game.getPlayerList().stream().filter(player -> player.getNickname().equals(nickname)).findFirst();
+        if(p.isEmpty())
+            return false;
+        else
+            return p.get().hasEndGameToken();
+    }
+
 
 }
