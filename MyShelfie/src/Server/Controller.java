@@ -352,6 +352,7 @@ public class Controller {
         server.serverSock.notifyGameEnd();
         game.endGame();
         deleteProgress();
+
     }
 
     /**
@@ -365,7 +366,10 @@ public class Controller {
         return game.getPlayerList().stream().filter(player->(player.getNickname().equals(playerNickname))).toList().get(0).getPersonalGoalCard().getValidTiles().getGridForDisplay();
     }
 
-    private void saveGameProgress(){
+    /**
+     * This method has been made public for testing purposes
+     */
+    public void saveGameProgress(){
         game.saveGameProgress("MyShelfie/src/Server/GameProgress.json");
     }
 
@@ -378,15 +382,19 @@ public class Controller {
         else
             return false;
     }
-
+    /**
+     * This method has been made public for testing purposes
+     */
     public void deleteProgress(){
         File toBeDeleted = new File("MyShelfie/src/Server/GameProgress.json");
         if(toBeDeleted.delete())
             System.out.println("File deleted correctly");
         else System.out.println("File not deleted");
     }
-
-    private boolean checkForSavedGameProgress(){
+    /**
+     * This method has been made public for testing purposes
+     */
+    public boolean checkForSavedGameProgress(){
         File toBeChecked = new File("MyShelfie/src/Server/GameProgress.json");
         if(toBeChecked.exists())
             return true;
