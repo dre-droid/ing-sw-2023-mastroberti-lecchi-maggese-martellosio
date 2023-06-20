@@ -185,10 +185,9 @@ public abstract class ClientSocket {
      */
     public void clientSpeaker(String message){
         try{
-            PrintWriter output = new PrintWriter(socket.getOutputStream(), false);
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             synchronized (this){     // writing to output is synchronized with other writing methods
-                output.println(message);
-                output.flush();
+                out.println(message);
             }
         }catch (Exception e){
             throw new RuntimeException(e);

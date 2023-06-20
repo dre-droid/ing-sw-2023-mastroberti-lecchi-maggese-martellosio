@@ -57,7 +57,7 @@ public class GUISocket extends ClientSocket{
             nextScene = "GameStart";
             turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
         }
-        notify();
+        notifyAll();
     }
     protected void disconnectionAlert(){
         chatMessage = "Connection lost, try again later";

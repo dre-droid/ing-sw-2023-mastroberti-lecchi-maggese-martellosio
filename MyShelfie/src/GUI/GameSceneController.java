@@ -4,6 +4,7 @@ import GUI.PositionStuff.Position;
 import Server.ClientWithChoice;
 import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
+import com.sun.glass.ui.Clipboard;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -115,10 +116,10 @@ public class GameSceneController {
     public Label PlayerName;
     private int drawnTilesCounter;
     private List<Position> alreadyDrawnPositions;
+    private int[] reorderedList = new int[3];
     private boolean leaderboardCheck = false;
     private ClientNotificationRMIGUI clientRMI;
     private ClientSocket clientSocket;
-
 
 
     public void setClient(ClientNotificationRMIGUI client) {
@@ -160,11 +161,12 @@ public class GameSceneController {
            setPlayerLabels();
            updateTurnLabel(isPlaying);
            createShelfButtons();
-           updateShelf(clientRMI.getMyShelf(), PlayerShelfGrid);
-           clientRMI.updateOpponentsShelf();
-           updateLeaderboard(clientRMI.getLeaderboard());
-           updateScoringTokens(clientRMI.getMyToken());
-
+           if (!Objects.isNull(clientRMI)) {
+               updateShelf(clientRMI.getMyShelf(), PlayerShelfGrid);
+               clientRMI.updateOpponentsShelf();
+               updateLeaderboard(clientRMI.getLeaderboard());
+               updateScoringTokens(clientRMI.getMyToken());
+           }
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
            drawIsOver = false;
@@ -176,7 +178,7 @@ public class GameSceneController {
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
-        System.out.println("board should be updated 777777777");
+//        System.out.println("board should be updated 777777777");
         Platform.runLater(() -> {
             alreadyDrawnPositions = new ArrayList<>();
             removeDrawnTilesFromBoard(grid);
@@ -246,10 +248,10 @@ public class GameSceneController {
         Image image=null;
         boolean flag;
         if(pgcMap==null || pgc ==null){
-            System.out.println("oh no la pgc map è nulla");
+//            System.out.println("oh no la pgc map è nulla");
         }
         if(pgcMap.isEmpty()){
-            System.out.println("mappa vuota per le pgc");
+//            System.out.println("mappa vuota per le pgc");
         }
         for(Map.Entry<Integer, PersonalGoalCard> pgcKey: pgcMap.entrySet()){
             /*System.out.println(pgcKey.getValue().toString());
@@ -277,7 +279,7 @@ public class GameSceneController {
 
             //System.out.println("-------------------------------");
         }
-        System.out.println("ID = "+id);
+//        System.out.println("ID = "+id);
         switch (id){
             case 1:image = new Image("personal_goal_cards/Personal_Goals.png") ;break;
             case 2:image = new Image("personal_goal_cards/Personal_Goals2.png") ;break;
@@ -595,16 +597,30 @@ public class GameSceneController {
         if(pos1>=0 && pos1<drawnTilesCounter && pos2>=0 && pos2<drawnTilesCounter){
             Node temp1 = getNodeAt(0, pos1, TileToBeInserted);
             Node temp2 = getNodeAt(0, pos2, TileToBeInserted);
+            Position p1 = (Position) temp1.getUserData();
+            Position p2 = (Position) temp2.getUserData();
             TileToBeInserted.getChildren().remove(getNodeAt(0, pos1, TileToBeInserted));
             TileToBeInserted.getChildren().remove(getNodeAt(0, pos2, TileToBeInserted));
-            TileToBeInserted.add(temp2, pos1, 0);
             TileToBeInserted.add(temp1, pos2, 0);
-            getNodeAt(0, pos1, TileToBeInserted).setUserData(temp2.getUserData());
-            getNodeAt(0, pos2, TileToBeInserted).setUserData(temp1.getUserData());
+            TileToBeInserted.add(temp2, pos1, 0);
+            getNodeAt(0, pos1, TileToBeInserted).setUserData(p2);
+            getNodeAt(0, pos2, TileToBeInserted).setUserData(p1);
             if(clientRMI!=null){
                 clientRMI.rearrangeDrawnTiles(pos1, pos2);
             }
         }
+        // socket reordered list
+        System.out.println("REORDERED before");
+        for (int i = 0; i < 3; i++)
+            System.out.println(reorderedList[i]);
+
+        int temp = reorderedList[pos2];
+        reorderedList[pos2] = reorderedList[pos1];
+        reorderedList[pos1] = temp;
+
+        System.out.println("REORDERED after");
+        for (int i = 0; i < 3; i++)
+            System.out.println(reorderedList[i]);
     }
 
     //TODO it should be that you cant press checkmark button if drawn tiles cant fit in any column
@@ -1212,6 +1228,8 @@ public class GameSceneController {
         } catch (InvalidMoveException error) {
             error.printStackTrace();
         }
+        for (int i = 0; i < drawnTilesCounter; i++)
+            reorderedList[i] = i + 1;
         shelfButtonsPane.setVisible(true);
     }
 
@@ -1223,19 +1241,13 @@ public class GameSceneController {
         int adjustedColumn = Integer.parseInt(column) + 1;
         clientSocket.clientSpeaker(String.valueOf(adjustedColumn));
 
-        // map tiles to their position
-        List<Position> positionList = TileToBeInserted.getChildren().stream().map(c -> (Position) c.getUserData()).toList();
-
         // send the coordinates reordered by the player
-        if (positionList.size() > 1) {
-            List<Integer> coordinates = new ArrayList<>();
-            //find horizontal or vertical
-            if (positionList.get(0).getX() == positionList.get(1).getX()) positionList.forEach(p -> coordinates.add(p.getY()));
-            else positionList.forEach(p -> coordinates.add(p.getX()));
-
-            int min = coordinates.stream().mapToInt(Integer::intValue).min().orElseThrow();
-            coordinates.forEach(c -> clientSocket.clientSpeaker(Integer.toString(c - min + 1)));
-        }
+        if (drawnTilesCounter > 1)
+            for (int i = 0; i < drawnTilesCounter; i++) {
+                System.out.println("DRAWN TILES COUNTER " + drawnTilesCounter);
+                clientSocket.clientSpeaker(String.valueOf(reorderedList[i]));
+                System.out.println(String.valueOf(reorderedList[i]));
+            }
     }
 
     //****** end socket specific ********//
@@ -1287,7 +1299,7 @@ public class GameSceneController {
         Platform.runLater(()->{
 //            System.out.println("ciao ho aggiornato i token delle common");
             if(tokens==null){
-                System.out.println("tokens null");
+//                System.out.println("tokens null");
                 return;
             }
             if(tokens.size()==0){
@@ -1310,7 +1322,7 @@ public class GameSceneController {
                 cgc2tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }
             else{
-                System.out.println("N = "+n);
+//                System.out.println("N = "+n);
             }
         });
     }
@@ -1341,7 +1353,7 @@ public class GameSceneController {
 
     public void switchToEndGameScene(List<Player> leaderboard){
         Platform.runLater(()->{
-            System.out.println("end game scene loading...");
+//            System.out.println("end game scene loading...");
             Scene scene;
             Parent root;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("EndGameScene.fxml"));
