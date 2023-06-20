@@ -1,6 +1,9 @@
 package Server.Socket;
 
 public class GUISocket extends ClientSocket{
+    public GUISocket(String ip){
+        this.ip = ip;
+    }
     /**
      * Handles server's received messages
      */

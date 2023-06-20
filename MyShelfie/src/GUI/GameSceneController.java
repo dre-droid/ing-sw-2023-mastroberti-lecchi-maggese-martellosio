@@ -605,22 +605,16 @@ public class GameSceneController {
             TileToBeInserted.add(temp2, pos1, 0);
             getNodeAt(0, pos1, TileToBeInserted).setUserData(p2);
             getNodeAt(0, pos2, TileToBeInserted).setUserData(p1);
+
+            // socket reordered list
+            int temp = reorderedList[pos2];
+            reorderedList[pos2] = reorderedList[pos1];
+            reorderedList[pos1] = temp;
+
             if(clientRMI!=null){
                 clientRMI.rearrangeDrawnTiles(pos1, pos2);
             }
         }
-        // socket reordered list
-        System.out.println("REORDERED before");
-        for (int i = 0; i < 3; i++)
-            System.out.println(reorderedList[i]);
-
-        int temp = reorderedList[pos2];
-        reorderedList[pos2] = reorderedList[pos1];
-        reorderedList[pos1] = temp;
-
-        System.out.println("REORDERED after");
-        for (int i = 0; i < 3; i++)
-            System.out.println(reorderedList[i]);
     }
 
     //TODO it should be that you cant press checkmark button if drawn tiles cant fit in any column

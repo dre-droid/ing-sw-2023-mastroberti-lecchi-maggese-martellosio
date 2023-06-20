@@ -42,30 +42,35 @@ public class ConnectionTypeController  {
 
 
     public void switchToLoginScene(ActionEvent event){
-        ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
-        if (selectedToggle.isSelected()) {
-            Scene scene;
-            Parent root;
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
-            ClientSocket clientSocket = null;
-            ClientNotificationRMIGUI clientRMI = null;
+        try {
+            ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
+            if (selectedToggle.isSelected()) {
+                Scene scene;
+                Parent root;
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                ClientSocket clientSocket = null;
+                ClientNotificationRMIGUI clientRMI = null;
 
-            try {
                 if (rButtonRMI.isSelected()) {
-                    if(ipAddress.getText()!=null){
-                        String serverIp = ipAddress.getText();
-                        if(!checkIp(serverIp)){
+                    String serverIp = ipAddress.getText();
+                    if (ipAddress.getText() != null) {
+                        if (!checkIp(serverIp)) {
                             return;
                         }
                         clientRMI = new ClientNotificationRMIGUI(serverIp);
                     }
+                    // if nothing was typed try localhost
+                    else clientRMI = new ClientNotificationRMIGUI("127.0.0.1");
 
-
-
-                }
-                else {
-                    //TODO: add the ip address of the server from the text field
-                    clientSocket = new GUISocket();
+                } else {
+                    String serverIp = ipAddress.getText();
+                    if (!Objects.equals(ipAddress.getText(), "")) {
+                        if (!checkIp(serverIp)) {
+                            return;
+                        }
+                    }
+                    // if nothing was typed try localhost
+                    clientSocket = new GUISocket(serverIp);
                 }
 
                 root = loader.load();
@@ -81,10 +86,9 @@ public class ConnectionTypeController  {
                 stage.setScene(scene);
                 stage.setResizable(false);
                 stage.show();
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

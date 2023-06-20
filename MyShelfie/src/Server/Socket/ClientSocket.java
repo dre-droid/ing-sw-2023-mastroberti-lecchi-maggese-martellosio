@@ -37,11 +37,12 @@ public abstract class ClientSocket {
     public List<Tile> drawnTiles;
     public long lastPing;
     public final long disconnectionTime = 10000;
+    protected String ip = "127.0.0.1";
 
     public void runServer(){
         try{
             //connect to server
-            socket= new Socket("127.0.0.1",59010);
+            socket= new Socket(ip,59010);
             socket.setKeepAlive(true);
 
             try{
