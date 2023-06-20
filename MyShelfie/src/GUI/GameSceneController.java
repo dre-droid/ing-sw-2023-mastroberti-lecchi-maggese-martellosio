@@ -11,7 +11,10 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -30,6 +33,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import javafx.scene.input.MouseEvent;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1333,6 +1337,29 @@ public class GameSceneController {
                 messageTextArea2.appendText("\n");
             });
         }
+    }
+
+    public void switchToEndGameScene(List<Player> leaderboard){
+        Platform.runLater(()->{
+            System.out.println("end game scene loading...");
+            Scene scene;
+            Parent root;
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("EndGameScene.fxml"));
+            try {
+                root = loader.load();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            EndGameController endGameController = loader.getController();
+            Stage stage = (Stage) chatButton.getScene().getWindow();
+
+            scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setResizable(false);
+            stage.show();
+            endGameController.showLeaderboard(clientRMI.getLeaderboard());
+        });
+
     }
 }
 //TODO RMI currently can send but not recieve messages to/from socket

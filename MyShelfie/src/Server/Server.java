@@ -98,9 +98,13 @@ public class Server {
 
             //game end handling
             System.out.println("Game has ended. Accepting players for new game...");
-            serverSock.flushServer();
-            serverRMI.flushServer();    //needs testing
-        }while (true);
+            serverRMI.notifyEndOfGame();
+            //wait(100000);
+            //Thread.sleep(100000);
+            //serverSock.flushServer();
+            //serverRMI.flushServer();    //needs testing
+
+        }while (!controller.hasTheGameEnded());
     }
 
     public void addPlayerToRecord(String nickname, connectionType conn) {

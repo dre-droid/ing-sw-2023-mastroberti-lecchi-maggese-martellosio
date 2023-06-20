@@ -28,7 +28,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
 
     //void myTurnIsStarting() throws RemoteException;
 
-    public void gameIsOver(List<String> leaderboard) throws RemoteException;
+    public void gameIsOver(List<Player> leaderboard) throws RemoteException;
 
     public void moveIsNotValid() throws RemoteException;
 

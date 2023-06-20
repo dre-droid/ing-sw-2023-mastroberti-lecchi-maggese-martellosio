@@ -312,6 +312,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     public void endOfTurn(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())){
+            if(controller.hasTheGameEnded()){
+                System.out.println("notifying end of game");
+                notifyEndOfGame();
+            }
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
 
 
@@ -325,9 +329,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 if(client.getValue()!=null)
                     client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
-            if(controller.hasTheGameEnded()){
-                notifyEndOfGame();
-            }
+
             //saveGameProgress();
 
         }
@@ -446,9 +448,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyEndOfGame() {
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
-                List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
+                //List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
                 if(client.getValue()!=null)
-                    client.getValue().gameIsOver(leaderboard);
+                    client.getValue().gameIsOver(controller.getLeaderboard());
             } catch (RemoteException e) {
                 e.printStackTrace();
                 System.out.println("Cannot notify controller");
