@@ -171,9 +171,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             if(gsc!=null) {
                 System.out.println("gsc non è null per "+nickname);
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
-                if(serverRMI.isMyTurn(nickname)){
-                    gsc.setFirstPlayerSeat();
-                }
+                if(serverRMI.haveIEndGameToken(nickname))
+                    gsc.setEndGameToken();
+
             }
             else{
                 System.out.println("gsc null ma non si sa perchè");
@@ -262,6 +262,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         gsc.updateTurnLabel(nextPlayerNickname);
         gsc.updateLeaderboard(serverRMI.getLeaderboard());
         gsc.updateBoard(serverRMI.getBoard());
+        if(serverRMI.haveIEndGameToken(nickname))
+            gsc.setEndGameToken();
     }
 
     @Override

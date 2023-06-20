@@ -352,7 +352,6 @@ public class Controller {
         server.serverSock.notifyGameEnd();
         game.endGame();
         deleteProgress();
-
     }
 
     /**
@@ -380,7 +379,7 @@ public class Controller {
             return false;
     }
 
-    private void deleteProgress(){
+    public void deleteProgress(){
         File toBeDeleted = new File("MyShelfie/src/Server/GameProgress.json");
         if(toBeDeleted.delete())
             System.out.println("File deleted correctly");

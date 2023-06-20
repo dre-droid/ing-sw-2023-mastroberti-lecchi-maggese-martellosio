@@ -628,6 +628,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return controller.getPlayers();
     }
 
+    @Override
+    public boolean haveIEndGameToken(String nickname) throws RemoteException {
+        return controller.hasEndgameToken(nickname);
+    }
+
     /**
      * Thie method is used to check if the player with this nickname is connected with rmi or not
      * @param nickname nickname of the player
