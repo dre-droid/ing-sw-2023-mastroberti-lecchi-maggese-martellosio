@@ -14,6 +14,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,19 +29,25 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
 import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class GameSceneController {
+
+    @FXML
+    public ImageView MyShelf;
     @FXML
     public GridPane RearrangeTiles;
     @FXML
@@ -122,6 +129,8 @@ public class GameSceneController {
     private ClientNotificationRMIGUI clientRMI;
     private GUISocket clientSocket;
 
+    public boolean alreadySet;
+
 
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
@@ -148,6 +157,7 @@ public class GameSceneController {
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
+
             //TODO refactor code below (chat setting) to a private method
             messageTextArea2.setVisible(true);
             messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
@@ -171,7 +181,42 @@ public class GameSceneController {
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
            drawIsOver = false;
+
+           //this is used to quit the game when exiting the gui
+            if(!alreadySet)
+                setCloseAlert();
+
         });
+
+    }
+
+    public void setCloseAlert(){
+        alreadySet=true;
+        Platform.runLater(()->{
+            Stage st = (Stage) this.MyShelf.getScene().getWindow();
+            st.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e->{
+                e.consume();
+                Platform.runLater(()->{
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Do you want to quit the game?");
+                    alert.setHeaderText("If you quit the game, the current game will end");
+
+                    if(alert.showAndWait().get()==ButtonType.OK){
+                        if(clientRMI!=null){
+                            clientRMI.quitGame();
+                        }
+                        else if(clientSocket!=null){
+                            //socket quit
+                        }
+                        st.close();
+                        //Platform.exit();
+                    }
+                });
+
+            });
+
+        });
+
     }
 
     /**
@@ -1418,7 +1463,7 @@ public class GameSceneController {
                 throw new RuntimeException(e);
             }
             EndGameController endGameController = loader.getController();
-            Stage stage = (Stage) chatButton.getScene().getWindow();
+            Stage stage = (Stage) MyShelf.getScene().getWindow();
 
             scene = new Scene(root);
             stage.setScene(scene);
@@ -1452,6 +1497,12 @@ public class GameSceneController {
 
             }
 
+        });
+    }
+
+    public void close(){
+        Platform.runLater(()->{
+            Platform.exit();
         });
     }
 }

@@ -61,27 +61,7 @@ public class MatchTypeController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource(nextScenePath));
                     Parent root = loader.load();
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e->{
-                        e.consume();
-                        Popup popup = new Popup();
-                        HBox buttons = new HBox(30);
-                        javafx.scene.control.Button quit = new javafx.scene.control.Button("Quit game");
-                        javafx.scene.control.Button cancel = new Button("Cancel");
-                        buttons.getChildren().addAll(quit, cancel);
-                        buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
-                        buttons.setPadding(new Insets(5,5,5,5));
-                        popup.getContent().add(buttons);
-                        popup.show(stage);
-                        quit.setOnAction(eq->{
-                            if(clientRMI!=null){
-                                clientRMI.quitGame();
-                            }
-                            Platform.exit();
-                        });
-                        cancel.setOnAction(ec->{
-                            popup.hide();
-                        });
-                    });
+
                     scene = new Scene(root);
                     stage.setScene(scene);
                     GameSceneController gsc = loader.getController();

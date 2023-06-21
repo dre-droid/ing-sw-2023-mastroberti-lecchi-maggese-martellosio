@@ -29,6 +29,8 @@ import java.util.Random;
 public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObject implements ClientNotificationInterfaceRMI {
     private RMIinterface serverRMI;
 
+    private boolean quit;
+
     GameSceneController gsc;
 
     private String serverIp;
@@ -132,6 +134,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             while (!cannotContactServer) {
                 try {
                     serverRMI.setLastPing(nickname);
+                    if(quit)
+                        Platform.runLater(Platform::exit);
+
                 } catch (RemoteException e) {
                     backToLogin();
                 }
@@ -367,6 +372,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public void quitGame(){
         try {
+            this.quit = true;
             serverRMI.quitGame(nickname);
         } catch (IOException e) {
             backToLogin();

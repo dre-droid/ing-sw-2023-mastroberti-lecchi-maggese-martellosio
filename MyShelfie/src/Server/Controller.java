@@ -355,7 +355,7 @@ public class Controller {
     }
 
     public void endGame() throws IOException {
-        server.serverRMI.notifyEndOfGame();
+        //server.serverRMI.notifyEndOfGame();
         server.serverSock.notifyGameEnd();
         game.endGame();
         deleteProgress();

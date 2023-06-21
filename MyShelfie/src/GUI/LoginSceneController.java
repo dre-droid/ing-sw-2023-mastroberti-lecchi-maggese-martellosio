@@ -8,12 +8,12 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -24,10 +24,13 @@ import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
-public class LoginSceneController {
+public class LoginSceneController{
     @FXML
     public Label messageTextArea;
     @FXML
@@ -110,27 +113,7 @@ public class LoginSceneController {
                         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                         scene = new Scene(root);
                         stage.setScene(scene);
-                        stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
-                            e.consume();
-                            Popup popup = new Popup();
-                            HBox buttons = new HBox(30);
-                            Button quit = new Button("Quit game");
-                            Button cancel = new Button("Cancel");
-                            buttons.getChildren().addAll(quit, cancel);
-                            buttons.setPadding(new Insets(5,5,5,5));
-                            buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
-                            popup.getContent().add(buttons);
-                            popup.show(stage);
-                            quit.setOnAction(eq->{
-                                if(clientRMI!=null){
-                                    clientRMI.quitGame();
-                                }
-                                Platform.exit();
-                            });
-                            cancel.setOnAction(ec->{
-                                popup.hide();
-                            });
-                        });
+
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
                         if(gsc.getClientRMI().hasGameStarted())
@@ -178,27 +161,7 @@ public class LoginSceneController {
                         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                         scene = new Scene(root);
                         stage.setScene(scene);
-                        stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
-                            e.consume();
-                            Popup popup = new Popup();
-                            HBox buttons = new HBox(30);
-                            Button quit = new Button("Quit game");
-                            Button cancel = new Button("Cancel");
-                            buttons.getChildren().addAll(quit, cancel);
-                            buttons.setPadding(new Insets(5,5,5,5));
-                            buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
-                            popup.getContent().add(buttons);
-                            popup.show(stage);
-                            quit.setOnAction(eq->{
-                                if(clientRMI!=null){
-                                    clientRMI.quitGame();
-                                }
-                                Platform.exit();
-                            });
-                            cancel.setOnAction(ec->{
-                                popup.hide();
-                            });
-                        });
+
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
                         if(gsc.getClientRMI().hasGameStarted())
@@ -262,27 +225,7 @@ public class LoginSceneController {
                                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                                 scene = new Scene(root);
                                 stage.setScene(scene);
-                                stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST,e->{
-                                    e.consume();
-                                    Popup popup = new Popup();
-                                    HBox buttons = new HBox(30);
-                                    Button quit = new Button("Quit game");
-                                    Button cancel = new Button("Cancel");
-                                    buttons.getChildren().addAll(quit, cancel);
-                                    buttons.setPadding(new Insets(5,5,5,5));
-                                    buttons.setStyle("-fx-background-color: white; -fx-padding: 13px;");
-                                    popup.getContent().add(buttons);
-                                    popup.show(stage);
-                                    quit.setOnAction(eq->{
-                                        if(clientRMI!=null){
-                                            clientRMI.quitGame();
-                                        }
-                                        Platform.exit();
-                                    });
-                                    cancel.setOnAction(ec->{
-                                        popup.hide();
-                                    });
-                                });
+
                                 GameSceneController gsc = loader.getController();
                                 gsc.setClient(clientRMI);
                                 if(gsc.getClientRMI().hasGameStarted())
@@ -404,6 +347,7 @@ public class LoginSceneController {
         } else
             messageTextArea.setText(string);
     }
+
 
 
 }

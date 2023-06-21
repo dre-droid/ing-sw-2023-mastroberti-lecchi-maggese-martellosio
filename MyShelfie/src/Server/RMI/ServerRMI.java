@@ -502,6 +502,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     public void quitGame(String playerNickname) throws IOException {
         System.out.println("Server received quit command");
+        clients.remove(playerNickname);
         controller.endGame();
     }
 
