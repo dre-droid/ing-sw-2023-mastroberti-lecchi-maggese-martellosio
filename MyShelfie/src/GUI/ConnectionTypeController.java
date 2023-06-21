@@ -13,6 +13,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -25,6 +26,9 @@ import java.rmi.registry.Registry;
 import java.util.Objects;
 
 public class ConnectionTypeController  {
+
+    @FXML
+    private Text errorLabel;
     @FXML
     ToggleGroup MatchTypeGroup;
     @FXML
@@ -43,6 +47,10 @@ public class ConnectionTypeController  {
 
     public void switchToLoginScene(ActionEvent event){
         try {
+            if(MatchTypeGroup.getSelectedToggle()==null){
+                errorLabel.setText("You must select the connection, RMI or Socket");
+                return;
+            }
             ToggleButton selectedToggle = (ToggleButton) MatchTypeGroup.getSelectedToggle();
             if (selectedToggle.isSelected()) {
                 Scene scene;
@@ -55,6 +63,7 @@ public class ConnectionTypeController  {
                     String serverIp = ipAddress.getText();
                     if (ipAddress.getText() != null) {
                         if (!checkIp(serverIp)) {
+                            errorLabel.setText("Wrong ip address, can't ping the server at this address");
                             return;
                         }
                         clientRMI = new ClientNotificationRMIGUI(serverIp);
@@ -66,6 +75,7 @@ public class ConnectionTypeController  {
                     String serverIp = ipAddress.getText();
                     if (!Objects.equals(ipAddress.getText(), "")) {
                         if (!checkIp(serverIp)) {
+                            errorLabel.setText("Wrong ip address, can't ping the server at this address");
                             return;
                         }
                     }

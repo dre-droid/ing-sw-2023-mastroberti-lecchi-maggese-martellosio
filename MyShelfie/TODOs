@@ -5,6 +5,7 @@ GUI
     4. Interazione socket/RMI con GUI non funziona (non si alternano i turni)
     5. Chat non visibile appena si joina la partita (solo in socket)
     6 Socket GUI deve tornare alla pagina di inizio dame quand ocrasha il server
+    7. Socket deve chiedere l'indirizzo ip del server (anche su cli)
     //optional
 
 CLI
