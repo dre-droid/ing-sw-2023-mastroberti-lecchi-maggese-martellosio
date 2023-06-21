@@ -288,6 +288,7 @@ public class ServerSock {
     public void clientListener(Socket client, String nickname, BufferedReader reader, PrintWriter out){
         Thread clientListener = new Thread(() -> {
             try {
+                PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
                 String line;
                 while (true) {
                     while ((line = reader.readLine()) != null) {
@@ -305,7 +306,7 @@ public class ServerSock {
                             }
                             else if (controller.hasGameStarted()) { //if the game started
 
-                                if (controller.isMyTurn(nickname) && !line.startsWith("/chat ")) {
+                                if (controller.isMyTurn(nickname) && !line.startsWith("/chat ") && !line.equals("/quit")) {
                                     messageBuffer.add(line);
                                     notifyAll();
                                 }
@@ -313,33 +314,31 @@ public class ServerSock {
                                 else if (line.startsWith("/chat ")) {
                                     chatHandler(nickname, line);
                                 }
-                                // processes /quit
-                                else if (line.equals("/quit")) {    //TODO needs to advise everyone who quitted the game "player1 quitted"
-                                    PrintWriter pw = new PrintWriter(client.getOutputStream(), true);
-                                    //pw.println("[REQUEST]: Are you sure you want to quit? (y/n): ");
-                                    //line = reader.readLine();
-                                    //if (line.equals("y")) {
-                                        if (!controller.hasGameStarted()) {
-                                            controller.removePlayer(nickname);
-                                            server.notifyLobbyDisconnection(nickname);
-                                            server.clientsMap.remove(nickname);
-                                            clients.remove(client);
-                                            pw.println("[GAMEEND]: You quit.");
-                                        } else {
-                                            controller.endGame();
-                                        }
-                                        break;  //closes listener on confirmed quit
-                                    //}
-                                }
 
+                                    // processes /quit
+                                else if (line.equals("/quit")) {    //TODO needs to advise everyone who quitted the game "player1 quitted"
+                                    controller.endGame();
+                                    break;  //closes listener on confirmed quit
+                                }
                             }
+
                             else if (!controller.hasGameStarted()) {    //if the game hasn't started yet
-                                if(!line.startsWith("/chat ")) {
+                                if(!line.startsWith("/chat ") && !line.equals("/quit")) {
                                     messageBuffer.add(line);
                                     notifyAll();
                                 }
-                                else
+                                else if (line.startsWith("/chat ")) {
                                     chatHandler(nickname, line);
+                                }
+                                else if (line.equals("/quit")) {
+                                    if(controller.hasGameBeenCreated())
+                                        controller.removePlayer(nickname);
+                                    server.notifyLobbyDisconnection(nickname);
+                                    server.clientsMap.remove(nickname);
+                                    clients.removeIf(c -> c.getName().equals(nickname));
+                                    pw.println("[GAMEEND]: You quit.");
+                                    break;
+                                }
                             }
 
                         }
