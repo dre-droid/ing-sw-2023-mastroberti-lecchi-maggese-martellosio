@@ -46,22 +46,22 @@ public class Server {
 
             //todo this doesn't work in GUI yet, to remove this simply comment from line 45 to 58 and uncomment line 59
 
-            if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
-                loadedFromFile = true;
-                for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
-                    clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
-                    clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
-                }                                               //and set disconnected as true to trigger a rejoin
-                synchronized (this) {
-                    while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
-                        this.wait();        //wait for all the player in the saved game to join to resume the game
-                    }
-                }
-            }
-            else {      //otherwise GameProgress.json is not present so the usual join is called
-                joinGame();
-            }
-            //joinGame();
+//            if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
+//                loadedFromFile = true;
+//                for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
+//                    clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
+//                    clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
+//                }                                               //and set disconnected as true to trigger a rejoin
+//                synchronized (this) {
+//                    while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
+//                        this.wait();        //wait for all the player in the saved game to join to resume the game
+//                    }
+//                }
+//            }
+//            else {      //otherwise GameProgress.json is not present so the usual join is called
+//                joinGame();
+//            }
+            joinGame();
 
             // waits that all players connect and game starts
             synchronized (controller) {
@@ -75,6 +75,7 @@ public class Server {
             while (!controller.hasTheGameEnded()) {
                 //if only one player remains the game is put on hold. If nobody rejoins the game ends
                 //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
+                Thread.sleep(500);
                 if (numberOfPlayersLeft() == 1) {
                     synchronized (this) {
                         wait(60000);
@@ -90,11 +91,12 @@ public class Server {
                     }
                 }
                 //notifies clients socket whose turn is it
-                notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                notifySocketOfTurnEnd();
                 //calls playTurn() of the player who is currently playing according to controller
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
-                    notifySocketOfTurnEnd(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    // notify clients that turn has ended
+                    notifySocketOfTurnEnd();
                 }
             }
 
@@ -158,8 +160,8 @@ public class Server {
     /**
      * sends Socket client the name of the current player
      */
-    public void notifySocketOfTurnEnd(String isPlaying){
-        serverSock.broadcastMessage("[CURRENTPLAYER]" + isPlaying, "Server");
+    public void notifySocketOfTurnEnd(){
+        serverSock.updateGameObjectsAfterTurn();
     }
 
     public boolean isEveryoneConnected(){
