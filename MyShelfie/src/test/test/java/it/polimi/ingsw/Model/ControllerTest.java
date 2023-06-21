@@ -113,7 +113,7 @@ public class ControllerTest {
         controller.createNewGame(nickname,2);
         game = controller.getGame();
         game.addPlayer(other);
-        game.removePlayer(other);
+        controller.removePlayer(other);
         assertEquals(1, game.getPlayerList().size());
 
     }
@@ -339,7 +339,9 @@ public class ControllerTest {
      * @throws InvalidMoveException
      * test play turn when the move is not valid
      */
-   /* public void testplayTurn() throws RemoteException,InvalidMoveException, IOException,InterruptedException {
+    /*
+    @Test
+   public void testplayTurn() throws RemoteException,InvalidMoveException, IOException,InterruptedException {
         OutputStream outputStream = System.out;
         PrintWriter printWriter = new PrintWriter(outputStream);
         String nick1 = "Save";
@@ -363,7 +365,8 @@ public class ControllerTest {
 
     }
 
-    */
+     */
+
 
     /**
      * @author SaverioMaggese99
@@ -471,20 +474,72 @@ public class ControllerTest {
      */
 
     @Test
-    public void testGetters() throws RemoteException{
+    public void testGetters() throws RemoteException {
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2;
+        controller.createNewGame(nick1, num);
+        assertNull(controller.getMyShelf(nick1));
+        assertNull(controller.getTilePlacingSpot());
+        game = controller.getGame();
+        assertNull(controller.getCommonGoalCard1Description());
+        controller.joinGame(nick2);
+        assertEquals(game.getValidTilesMap(), controller.getPGCmap());
+        assertEquals(game.getCommonGoalCards(), controller.getCommonGoalCards());
+        assertEquals(game.getPlayerList(), controller.getPlayers());
+        assertEquals(game, controller.getGame());
+        assertEquals(game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList()), controller.getGamePlayerListNickname());
+        assertEquals(game.getLeaderBoard(), controller.getLeaderboard());
+        assertEquals(game.getCommonGoalCards().get(1).getDescription(), controller.getCommonGoalCard2Description());
+        assertEquals(game.getCommonGoalCards().get(0).getDescription(), controller.getCommonGoalCard1Description());
+        for (Player x : game.getPlayerList()) {
+            assertEquals(controller.getPGC(x.getNickname()), game.getPlayerList().stream().filter(p -> p.getNickname().equals(x.getNickname())).toList().get(0).getPersonalGoalCard());
+            assertEquals(controller.getPoints(x.getNickname()), game.getPlayerList().stream().filter(p -> p.getNickname().equals(x.getNickname())).toList().get(0).getScore());
+        }
+    }
+    @Test
+    public void testsetServerSock(){
+        ServerSock s = new ServerSock(controller,server);
+        controller.setServerSock(s);
+        assertEquals(controller.getServerSock(),s);
+
+
+    }
+    @Test
+    public void testEmptyConstructor(){
+        Controller x = new Controller();
+        Controller y = new Controller(serverSock);
+        assertNotNull(x);
+        assertNotNull(y);
+        assertEquals(serverSock,y.getServerSock());
+    }
+    @Test
+    public void testhasEndgameToken() throws RemoteException{
         String nick1 = "Save";
         String nick2 = "Chiara";
         int num = 2 ;
         controller.createNewGame(nick1,num);
         game = controller.getGame();
         controller.joinGame(nick2);
-        assertEquals(game.getValidTilesMap(),controller.getPGCmap());
-        assertEquals(game.getCommonGoalCards(),controller.getCommonGoalCards());
-        assertEquals(game.getPlayerList(),controller.getPlayers());
-        assertEquals(game,controller.getGame());
-        assertEquals(game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList()),controller.getGamePlayerListNickname());
-
+        boolean x = controller.hasEndgameToken(nick1);
+        assertFalse(x);
+        boolean y = controller.hasEndgameToken(nick2);
+        assertFalse(y);
     }
+    @Test
+    public void testendGame() throws RemoteException,IOException{
+        String nick1 = "Save";
+        String nick2 = "Chiara";
+        int num = 2 ;
+        controller.createNewGame(nick1,num);
+        game = controller.getGame();
+        controller.joinGame(nick2);
+        controller.endGame();
+        assertTrue(game.hasTheGameEnded());
+    }
+
+
+
 
 
 
