@@ -44,24 +44,21 @@ public class Server {
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
 
-            //todo this doesn't work in GUI yet, to remove this simply comment from line 45 to 58 and uncomment line 59
-
-//            if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
-//                loadedFromFile = true;
-//                for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
-//                    clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
-//                    clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
-//                }                                               //and set disconnected as true to trigger a rejoin
-//                synchronized (this) {
-//                    while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
-//                        this.wait();        //wait for all the player in the saved game to join to resume the game
-//                    }
-//                }
-//            }
-//            else {      //otherwise GameProgress.json is not present so the usual join is called
-//                joinGame();
-//            }
-            joinGame();
+            if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
+                loadedFromFile = true;
+                for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
+                    clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
+                    clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
+                }                                               //and set disconnected as true to trigger a rejoin
+                synchronized (this) {
+                    while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
+                        this.wait();        //wait for all the player in the saved game to join to resume the game
+                    }
+                }
+            }
+            else {      //otherwise GameProgress.json is not present so the usual join is called
+                joinGame();
+            }
 
             // waits that all players connect and game starts
             synchronized (controller) {
