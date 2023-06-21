@@ -117,7 +117,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
 
     @Override
     public void ping() throws RemoteException {
-        System.out.println("Server checking if client is alive");
+        //System.out.println("Server checking if client is alive");
     }
 
     @Override

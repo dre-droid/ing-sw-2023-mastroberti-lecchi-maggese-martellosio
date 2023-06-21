@@ -547,17 +547,18 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                         RmiNickStruct nickStruct = entry.getValue();
                         try{
                             client.ping();
+                            System.out.println("can ping " + nickStruct.getNickname());
                         }catch(RemoteException re){
                             Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                            if(opt.isPresent()){
-                                opt.get().setDisconnected(true);
-                            }
+                            opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
                         }
                         if (System.currentTimeMillis() - nickStruct.getLastPing() > DISCONNECTION_TIME) {
                             String nickOfDisconnectedPlayer = nickStruct.getNickname();
 
                             //server.clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
                             System.out.println(nickOfDisconnectedPlayer +" disconnected");
+                            Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
+                            opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
                             iterator.remove();
                             clients.put(nickOfDisconnectedPlayer, null);//we set null the value in clients
                             if(controller.isMyTurn(nickOfDisconnectedPlayer)){
