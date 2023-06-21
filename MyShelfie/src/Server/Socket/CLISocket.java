@@ -57,7 +57,8 @@ public class CLISocket extends ClientSocket{
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
-        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() + "\n" + commonGoalCards.get(1).getDescription());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getTokens().get(commonGoalCards.get(0).getTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getTokens().get(commonGoalCards.get(1).getTokens().size() - 1).getPoints());
+
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {
@@ -96,6 +97,7 @@ public class CLISocket extends ClientSocket{
 
             }
         }
+
     }
 
     private void printTurn(String currentPlayer){
@@ -104,7 +106,7 @@ public class CLISocket extends ClientSocket{
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
-        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() + "\n" + commonGoalCards.get(1).getDescription());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getTokens().get(commonGoalCards.get(0).getTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getTokens().get(commonGoalCards.get(1).getTokens().size() - 1).getPoints());
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {
