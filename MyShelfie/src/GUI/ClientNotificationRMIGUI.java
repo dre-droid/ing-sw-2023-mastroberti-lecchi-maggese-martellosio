@@ -134,8 +134,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             while (!cannotContactServer) {
                 try {
                     serverRMI.setLastPing(nickname);
-                    if(quit)
+                    if(quit){
                         Platform.runLater(Platform::exit);
+                        System.exit(0);
+                    }
+
 
                 } catch (RemoteException e) {
                     backToLogin();

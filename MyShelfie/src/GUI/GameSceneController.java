@@ -206,7 +206,7 @@ public class GameSceneController {
                             clientRMI.quitGame();
                         }
                         else if(clientSocket!=null){
-                            //socket quit
+                            clientSocket.clientSpeaker("/quit");
                         }
                         st.close();
                         //Platform.exit();

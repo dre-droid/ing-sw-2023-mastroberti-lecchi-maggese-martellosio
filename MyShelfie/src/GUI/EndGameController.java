@@ -1,5 +1,6 @@
 package GUI;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -9,6 +10,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import main.java.it.polimi.ingsw.Model.Player;
 
 import java.util.List;
@@ -50,5 +53,9 @@ public class EndGameController {
             GridPane.setValignment(points, Pos.CENTER.getVpos());
         }
         winnerLabel.setText("The winner is "+leaderboard.get(0).getNickname());
+        Stage st = (Stage) winnerLabel.getScene().getWindow();
+        st.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e->{
+            Platform.exit();
+        });
     }
 }
