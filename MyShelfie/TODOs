@@ -1,0 +1,21 @@
+GUI
+    1. Handle match type selector quitting
+    2. Add alert when quitting for socket (already working in RMI)
+    3. Sistemare gestione errori per GUI
+    4. Interazione socket/RMI con GUI non funziona (non si alternano i turni)
+    5. Chat non visibile appena si joina la partita (solo in socket)
+
+    //optional
+
+CLI
+    1. Mostrare quanti token ci sono sulle common goal (sia RMI che socket)
+    2. Gestire fine gioco (sia RMI che socket)
+
+    //optional
+    1. Shrink CLI print
+    2. Make RMI and Socket prints more alike
+
+Both
+
+    //optional
+    1. No one notified of who disconnected

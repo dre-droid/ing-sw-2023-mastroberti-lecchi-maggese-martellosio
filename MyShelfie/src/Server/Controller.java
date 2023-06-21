@@ -24,6 +24,9 @@ public class Controller {
         this.server = server;
 
     }
+    public ServerSock getServerSock(){
+        return this.serverSock;
+    }
 
     public void setServerSock(ServerSock s){
         this.serverSock = s;
@@ -317,7 +320,7 @@ public class Controller {
     }
 
     /**
-     * this method is called to performo the turn dynamic in the gameplay.
+     * this method is called to perform the turn dynamic in the gameplay.
      * @author Saverio Maggese
      *
      */
