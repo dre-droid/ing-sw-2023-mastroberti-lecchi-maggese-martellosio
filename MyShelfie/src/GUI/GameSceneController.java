@@ -1038,6 +1038,7 @@ public class GameSceneController {
                     while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
                 }
                 updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
+                setPlayerName(clientSocket.getNickname());
                 clientSocket.turnHasEnded = false;
             }catch (InterruptedException e){
                 e.printStackTrace();

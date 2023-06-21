@@ -248,6 +248,7 @@ public class ServerSock {
                     sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
                     server.notifyServer();                                      //notify server
                     server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
+                    notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     break;
                 }
             }
@@ -264,7 +265,7 @@ public class ServerSock {
                 }
             }
             sendMessage("[CONNECTED]", client);
-            sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
+            sendMessage("[INFO] You have successfully rejoined the game, wait for all players to rejoin", client);
             try {
                 if(server.loadedFromFile)
                     server.serverRMI.tryToStartLoadedGame();
@@ -885,6 +886,7 @@ public class ServerSock {
     public void notifyLobbyDisconnectionSocket(){
         synchronized (this){
             notifyAll();
+
         }
 
     }

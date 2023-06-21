@@ -56,7 +56,8 @@ public class GUISocket extends ClientSocket{
             else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
                 nextScene = "MatchType";
             }
-            else if (line.startsWith("[INFO] Game is being created by another player") || line.startsWith("[INFO] Waiting for all players to connect...")) {
+            else if (line.startsWith("[INFO] Game is being created by another player") || line.startsWith("[INFO] Waiting for all players to connect...")
+            || line.startsWith("[INFO] You have successfully rejoined the game")) {
                 nextScene = "GameScene";
             }
             //else if (line.startsWith("[MESSAGE FROM")){
@@ -85,6 +86,12 @@ public class GUISocket extends ClientSocket{
             synchronized (insertLock){
                 insert = true;
                 insertLock.notifyAll();
+            }
+        }
+        if(line.startsWith("[INFO] You have successfully rejoined the game")){
+            synchronized (chatMessageLock){
+                chatMessage = "Connection lost, try again later";
+                chatMessageLock.notifyAll();
             }
         }
     }

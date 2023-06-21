@@ -4,7 +4,7 @@ GUI
     3. Sistemare gestione errori per GUI
     4. Interazione socket/RMI con GUI non funziona (non si alternano i turni)
     5. Chat non visibile appena si joina la partita (solo in socket)
-
+    6 Socket GUI deve tornare alla pagina di inizio dame quand ocrasha il server
     //optional
 
 CLI
