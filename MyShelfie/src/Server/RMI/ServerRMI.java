@@ -568,7 +568,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     }
 
                     Thread.sleep(1000);
-                    System.out.println("number of remaining players: "+server.numberOfPlayersLeft());
+                    //System.out.println("number of remaining players: "+server.numberOfPlayersLeft());
                 }
                 //System.out.println("has the game ended: " + controller.hasTheGameEnded());
 

@@ -4,6 +4,7 @@ import GUI.PositionStuff.Position;
 import Server.ClientWithChoice;
 import Server.RMI.RMIinterface;
 import Server.Socket.ClientSocket;
+import Server.Socket.GUISocket;
 import com.sun.glass.ui.Clipboard;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -119,7 +120,7 @@ public class GameSceneController {
     private int[] reorderedList = new int[3];
     private boolean leaderboardCheck = false;
     private ClientNotificationRMIGUI clientRMI;
-    private ClientSocket clientSocket;
+    private GUISocket clientSocket;
 
 
     public void setClient(ClientNotificationRMIGUI client) {
@@ -131,7 +132,7 @@ public class GameSceneController {
             clientRMI.updateGUIAtBeginningOfGame();
         }
     }
-    public void setClient(ClientSocket clientSocket){
+    public void setClient(GUISocket clientSocket){
         this.clientSocket = clientSocket;
     }
     public void setPlayerName(String name){
@@ -1129,7 +1130,7 @@ public class GameSceneController {
     public void socketMessageTextArea() {
         String message;
         try {
-            synchronized (clientSocket) {
+            synchronized (clientSocket.chatMessageLock) {
                 while (true) {
                     message = clientSocket.chatMessage;
                     if(!Objects.equals(message, "") && !Objects.equals(message, null)) {
@@ -1139,7 +1140,7 @@ public class GameSceneController {
                             messageTextArea2.appendText("\n");
                         });
                     }
-                    clientSocket.wait();
+                    clientSocket.chatMessageLock.wait();
                 }
             }
         }catch (InterruptedException e) {
@@ -1200,13 +1201,52 @@ public class GameSceneController {
                     min = p;
                 }
         }
-
+        synchronized (clientSocket.drawLock){
+            while(!clientSocket.draw){
+                try {
+                    clientSocket.drawLock.wait();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            clientSocket.draw = false;
+        }
         clientSocket.clientSpeaker(Integer.toString(min.getX()));
+        synchronized (clientSocket.drawLock){
+            while(!clientSocket.draw){
+                try {
+                    clientSocket.drawLock.wait();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            clientSocket.draw = false;
+        }
         clientSocket.clientSpeaker(Integer.toString(min.getY()));
+        synchronized (clientSocket.drawLock){
+            while(!clientSocket.draw){
+                try {
+                    clientSocket.drawLock.wait();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            clientSocket.draw = false;
+        }
         clientSocket.clientSpeaker(Integer.toString(drawnTilesCounter));
         // send direction
         try {
             if (drawnTilesCounter > 1) {
+                synchronized (clientSocket.drawLock){
+                    while(!clientSocket.draw){
+                        try {
+                            clientSocket.drawLock.wait();
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                    clientSocket.draw = false;
+                }
                 if (horizontal) {
                     clientSocket.clientSpeaker("2");
                     clientSocket.getBoard().drawTiles(min.getX(), min.getY(), drawnTilesCounter, Board.Direction.RIGHT);
@@ -1233,12 +1273,32 @@ public class GameSceneController {
     private void socketHandleShelfButton(String column){
         // sends selected column
         int adjustedColumn = Integer.parseInt(column) + 1;
+        synchronized (clientSocket.insertLock){
+            while(!clientSocket.insert){
+                try {
+                    clientSocket.insertLock.wait();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            clientSocket.insert = false;
+        }
         clientSocket.clientSpeaker(String.valueOf(adjustedColumn));
 
         // send the coordinates reordered by the player
         if (drawnTilesCounter > 1)
             for (int i = 0; i < drawnTilesCounter; i++) {
                 System.out.println("DRAWN TILES COUNTER " + drawnTilesCounter);
+                synchronized (clientSocket.insertLock){
+                    while(!clientSocket.insert){
+                        try {
+                            clientSocket.insertLock.wait();
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }
+                    clientSocket.insert = false;
+                }
                 clientSocket.clientSpeaker(String.valueOf(reorderedList[i]));
                 System.out.println(String.valueOf(reorderedList[i]));
             }

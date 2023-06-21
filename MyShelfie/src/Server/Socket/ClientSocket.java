@@ -87,7 +87,8 @@ public abstract class ClientSocket {
 //                    synchronized (object) {
                     messageFromServer = line;
                     deserializeObjects(line);
-                    handleServerRequest(line);
+                    if(!line.equals("[PING]"))
+                        handleServerRequest(line);
 //                    }
                 }
             }

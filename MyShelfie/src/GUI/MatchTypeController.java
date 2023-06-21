@@ -1,6 +1,7 @@
 package GUI;
 
 import Server.Socket.ClientSocket;
+import Server.Socket.GUISocket;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -32,7 +33,7 @@ public class MatchTypeController {
     private Parent root;
 
     private ClientNotificationRMIGUI clientRMI;
-    private ClientSocket clientSocket;
+    private GUISocket clientSocket;
 
 
 
@@ -136,7 +137,7 @@ public class MatchTypeController {
         this.clientRMI = clientRMI;
     }
 
-    public void setClient(ClientSocket clientSocket){
+    public void setClient(GUISocket clientSocket){
         this.clientSocket = clientSocket;
     }
 

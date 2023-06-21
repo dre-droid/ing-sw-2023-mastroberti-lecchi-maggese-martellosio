@@ -1,6 +1,7 @@
 package GUI;
 
 import Server.Socket.ClientSocket;
+import Server.Socket.GUISocket;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -40,11 +41,11 @@ public class LoginSceneController {
     private Scene scene;
     private Parent root;
     private FXMLLoader loader;
-    private ClientSocket clientSocket;
+    private GUISocket clientSocket;
     private ClientNotificationRMIGUI clientRMI;
     private boolean alive = false;
 
-    public void setClient(ClientSocket client){
+    public void setClient(GUISocket client){
         this.clientSocket = client;
         client.runServer();
     }

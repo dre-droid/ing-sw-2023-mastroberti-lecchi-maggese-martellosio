@@ -80,7 +80,7 @@ public class ConnectionTypeController  {
                     //stage.setUserData(clientRMI);
                     loginSceneController.setClient(clientRMI);
                 } else {
-                    loginSceneController.setClient(clientSocket);
+                    loginSceneController.setClient((GUISocket) clientSocket);
                 }
                 scene = new Scene(root);
                 stage.setScene(scene);
