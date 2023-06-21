@@ -29,6 +29,9 @@ public class CLISocket extends ClientSocket{
          if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
             System.out.println(line);
         }
+         if (line.startsWith("[INFO]: Game is starting.")){
+             if (!isPlaying.equals(nickname)) printTurn(isPlaying);
+         }
         if (line.startsWith("[SHELF]")) {
             System.out.println(line);
             printShelf(getShelf());
@@ -51,6 +54,53 @@ public class CLISocket extends ClientSocket{
     private void printTurn(){
         System.out.println();
         System.out.println("*********  " + nickname + ": your turn  *********");
+
+        //shelf & personalGoal print
+        Scanner scannerpg = new Scanner(personalGoalCard.toString());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() + "\n" + commonGoalCards.get(1).getDescription());
+
+        System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
+        for (int i = 0; i < 6; i++) {
+            System.out.print("   ");
+            for (int j = 0; j < 5; j++){
+                if (shelf.getGrid()[i][j] == null) System.out.print("x ");
+                else System.out.printf("%s ", shelf.getGrid()[i][j].toString());
+            }
+            System.out.print("   ");
+            System.out.print(scannerpg.nextLine());
+            System.out.print("   ");
+            if (scannercg.hasNextLine()) System.out.print(scannercg.nextLine());
+            System.out.println();
+        }
+        System.out.println();
+
+        //board print
+        board.printGridMap();
+        System.out.println();
+
+        //leaderboard print
+        System.out.println("Leaderboard");
+        int i = 0;
+        for (Player p: leaderboard) {
+            System.out.print(i + 1 + ". " + p.getNickname() + ": ");
+            System.out.println(p.getScore());
+            i++;
+        }
+        System.out.println();
+
+        //print other player shelfs
+        for(Player p: leaderboard){
+            if(!p.getNickname().equals(getNickname())){
+                System.out.println(p.getNickname()+"'s Shelf");
+                printShelf(p.getShelf());
+
+            }
+        }
+    }
+
+    private void printTurn(String currentPlayer){
+        System.out.println();
+        System.out.println("*********  " + nickname + "'s turn  *********");
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
