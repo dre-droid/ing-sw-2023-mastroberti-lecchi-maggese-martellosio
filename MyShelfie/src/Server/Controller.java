@@ -334,9 +334,11 @@ public class Controller {
                 info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
                 if (!Objects.isNull(info)) {    //null object is passed when game ends
                     game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getTiles());
-                    saveGameProgress();
-                    server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());//edit
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
+                    saveGameProgress();
+                    server.serverRMI.updateBoard();
+                    server.serverRMI.updateEndOfTurnObjects(thisTurnsPlayer.getNickname());
+                    server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
                     invalidMoveFlag = false;
                 }
                 else {

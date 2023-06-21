@@ -844,7 +844,7 @@ public class ServerSock {
      * player - this notifies that the turn has ended.
      * Note: leaderboard is a List<Player>, so it contains all players' instance fields.
      */
-    private void updateGameObjectsAfterTurn(){
+    public void updateGameObjectsAfterTurn(){
         try {
             for (socketNickStruct s : clients) {
                 PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
@@ -860,6 +860,7 @@ public class ServerSock {
             e.printStackTrace();
         }
     }
+
     /**
      *  Creates new instance of clients array
      */

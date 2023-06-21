@@ -44,7 +44,6 @@ public class CLISocket extends ClientSocket{
         }
         if (line.startsWith("[GAMEEND]")) {
             System.out.println(line);
-            System.exit(0);
         }
     }
 
@@ -57,7 +56,7 @@ public class CLISocket extends ClientSocket{
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
-        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getTokens().get(commonGoalCards.get(0).getTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getTokens().get(commonGoalCards.get(1).getTokens().size() - 1).getPoints());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getScoringTokens().get(commonGoalCards.get(0).getScoringTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getScoringTokens().get(commonGoalCards.get(1).getScoringTokens().size() - 1).getPoints());
 
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
@@ -102,11 +101,11 @@ public class CLISocket extends ClientSocket{
 
     private void printTurn(String currentPlayer){
         System.out.println();
-        System.out.println("*********  " + nickname + "'s turn  *********");
+        System.out.println("*********  " + currentPlayer + "'s turn  *********");
 
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
-        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getTokens().get(commonGoalCards.get(0).getTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getTokens().get(commonGoalCards.get(1).getTokens().size() - 1).getPoints());
+        Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getScoringTokens().get(commonGoalCards.get(0).getScoringTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getScoringTokens().get(commonGoalCards.get(1).getScoringTokens().size() - 1).getPoints());
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {

@@ -16,6 +16,7 @@ CLI
     2. Make RMI and Socket prints more alike
 
 Both
+    1. Inform socket when rejoining that game is starting again.
 
     //optional
     1. No one notified of who disconnected

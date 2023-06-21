@@ -216,6 +216,38 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
     /**
+     * Updates all RMI clients' boards with the controller's version
+     */
+    public void updateBoard(){
+        try {
+            for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+                if (client.getValue() != null) {
+                    client.getValue().updateBoard(controller.getTilePlacingSpot());
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Updates all RMI clients game objects at the end of the turn
+     * @param playerNickname - the name of the player whose turn just ended
+     */
+    public void updateEndOfTurnObjects(String playerNickname){
+        try {
+            for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+                if (client.getValue() != null) {
+                    client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    client.getValue().updateOppShelf(playerNickname, controller.getMyShelf(playerNickname));
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * this method is used to check if the game has started
      * @return true if the game has started, false otherwise
      * @throws RemoteException
@@ -323,8 +355,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             //ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             /*if(clientToBeNotified!=null)
                 clientToBeNotified.startTurn();*/
-            server.notifySocketOfTurnEnd(playerNickname);
             controller.endOfTurn(playerNickname);
+            server.notifySocketOfTurnEnd();
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                 if(client.getValue()!=null)
                     client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
@@ -547,7 +579,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                         RmiNickStruct nickStruct = entry.getValue();
                         try{
                             client.ping();
-                            System.out.println("can ping " + nickStruct.getNickname());
+//                            System.out.println("can ping " + nickStruct.getNickname());
                         }catch(RemoteException re){
                             Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
                             opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
