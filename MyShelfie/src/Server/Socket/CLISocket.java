@@ -44,6 +44,7 @@ public class CLISocket extends ClientSocket{
         }
         if (line.startsWith("[GAMEEND]")) {
             System.out.println(line);
+            System.exit(0);
         }
     }
 
