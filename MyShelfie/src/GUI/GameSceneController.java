@@ -1427,6 +1427,32 @@ public class GameSceneController {
         });
 
     }
+
+    public void backToLogin(){
+        Platform.runLater(()->{
+            try{
+                try{
+                    System.out.println("hey ritorniamo al login");
+                    Scene scene;
+                    Parent root;
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
+                    root = loader.load();
+                    LoginSceneController loginSceneController = loader.getController();
+                    loginSceneController.setClient(this.clientRMI);
+                    Stage stage = (Stage) chatButton.getScene().getWindow();
+                    scene = new Scene(root);
+                    stage.setScene(scene);
+                    stage.setResizable(false);
+                    stage.show();
+                }catch(IOException e){
+
+                }
+            }catch(NullPointerException ne){
+
+            }
+
+        });
+    }
 }
 //TODO RMI currently can send but not recieve messages to/from socket
 //TODO visualize common goal tokens in gui

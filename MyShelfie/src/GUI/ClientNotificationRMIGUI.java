@@ -4,6 +4,12 @@ import Server.RMI.ClientNotificationInterfaceRMI;
 import Server.RMI.ClientNotificationRMI;
 import Server.RMI.ClientRMI;
 import Server.RMI.RMIinterface;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import main.java.it.polimi.ingsw.Model.*;
 import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 
@@ -25,6 +31,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     GameSceneController gsc;
 
+    private String serverIp;
+
     private int port;
 
     private String nickname;
@@ -39,21 +47,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     private List<CommonGoalCard> commonGoalCards;
 
+    public boolean cannotContactServer;
+
     public ClientNotificationRMIGUI(String serverIp) throws RemoteException{
-        try{
-            Registry registryServer = LocateRegistry.getRegistry(serverIp);
-            serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
-        }catch(RemoteException | NotBoundException e){
-            System.out.println("ClientNotificationRMIGUI--> ERROR: cannot connect to server");
-        }
-        //ip address
-        try {
-            InetAddress inetAddress = InetAddress.getLocalHost();
-            myIp = inetAddress.getHostAddress();
-            //System.out.println("my ip is = "+myIp);
-        } catch (UnknownHostException e) {
-            System.out.println("cannot get ip address ");
-        }
+        this.serverIp = serverIp;
         MyTurnFlag = false;
         EndGameFlag = false;
         GameStartFlag = false;
@@ -64,9 +61,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try{
             return serverRMI.getLeaderboard();
         }catch(RemoteException remoteException){
-            throw new RuntimeException(remoteException);
+            backToLogin();
+            return null;
         }
-
     }
 
     public boolean reconnectToGame(){
@@ -82,6 +79,25 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
 
     public void startNotificationServer() throws RemoteException{
+        try{
+            Registry registryServer = LocateRegistry.getRegistry(serverIp);
+            serverRMI = (RMIinterface) registryServer.lookup("MyShelfie");
+            cannotContactServer = false;
+        }catch(RemoteException | NotBoundException e){
+            System.out.println("ClientNotificationRMIGUI--> ERROR: cannot connect to server");
+            backToLogin();
+        }
+        //ip address
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            myIp = inetAddress.getHostAddress();
+            //System.out.println("my ip is = "+myIp);
+        } catch (UnknownHostException e) {
+            System.out.println("cannot get ip address ");
+        }
+        MyTurnFlag = false;
+        EndGameFlag = false;
+        GameStartFlag = false;
         Random random = new Random();
         port = random.nextInt(3000,6000);
         Registry clientRegistry = LocateRegistry.createRegistry(port);
@@ -94,20 +110,30 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public String getNickname(){return this.nickname;}
 
-    public int joinGame() throws RemoteException{
+    public int joinGame() {
         System.out.println("trying login");
-        return serverRMI.joinGame(nickname, port, myIp);
+        try {
+            return serverRMI.joinGame(nickname, port, myIp);
+        } catch (RemoteException e) {
+            backToLogin();
+            return -3;
+        }
     }
-    public int joinLobby() throws RemoteException{
-        return serverRMI.joinLobby(nickname, port, myIp);
+    public int joinLobby() {
+        try {
+            return serverRMI.joinLobby(nickname, port, myIp);
+        } catch (RemoteException e) {
+            backToLogin();
+            return -3;
+        }
     }
     public void periodicPing() {
         new Thread(() -> {
-            while (true) {
+            while (!cannotContactServer) {
                 try {
                     serverRMI.setLastPing(nickname);
                 } catch (RemoteException e) {
-                    throw new RuntimeException(e);
+                    backToLogin();
                 }
                 try {
                     Thread.sleep(1000);
@@ -118,9 +144,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }).start();
     }
 
-    public boolean createNewGame(int numOfPlayers) throws RemoteException{
+    public boolean createNewGame(int numOfPlayers){
         System.out.println("creating new game...");
-        return serverRMI.createNewGame(nickname, numOfPlayers, port, myIp);
+        try {
+            return serverRMI.createNewGame(nickname, numOfPlayers, port, myIp);
+        } catch (RemoteException e) {
+            backToLogin();
+            return false;
+        }
     }
 
 
@@ -179,8 +210,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
                 System.out.println("gsc null ma non si sa perchè");
             }
         }catch(RemoteException re){
-            System.out.println("Problem in the update of the gui at the beginning of the game");
-            re.printStackTrace();
+            backToLogin();
         }
     }
 
@@ -213,7 +243,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return returnValue;
 
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            backToLogin();
+            return false;
         }
     }
 
@@ -221,7 +252,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try {
             return serverRMI.getMyShelf(nickname);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            backToLogin();
+            return null;
         }
     }
 
@@ -229,7 +261,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try {
             return serverRMI.getMyShelf(player);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            backToLogin();
+            return null;
         }
     }
 
@@ -268,6 +301,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void gameIsOver(List<Player> leaderboard) throws RemoteException {
+        if(leaderboard==null)
+            return;
         //popup
         if(leaderboard.size()==1)
             gsc.endGamePopup();
@@ -308,29 +343,33 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             gsc.rmiMessageTextArea("[MESSAGE FROM "+sender+"]: "+text);
     }
 
-    public void sendChatMessage(String message) throws RemoteException{
+    public void sendChatMessage(String message){
         String text = "", receiver = "";
         int atIndex;
-        if(message.startsWith("@")){
-            receiver = message.substring( 1);
-            atIndex = receiver.indexOf(' ');
-            text = receiver.substring(atIndex + 1);
-            receiver = receiver.substring(0, atIndex);
-            if(!Objects.equals(receiver, nickname))
-                serverRMI.chatMessage(nickname, text, receiver, true);
+        try{
+            if(message.startsWith("@")){
+                receiver = message.substring( 1);
+                atIndex = receiver.indexOf(' ');
+                text = receiver.substring(atIndex + 1);
+                receiver = receiver.substring(0, atIndex);
+                if(!Objects.equals(receiver, nickname))
+                    serverRMI.chatMessage(nickname, text, receiver, true);
+            }
+            else {
+                receiver = "all";
+                serverRMI.chatMessage(nickname, message, receiver, false);
+            }
+        }catch(RemoteException re){
+            backToLogin();
         }
-        else {
-            receiver = "all";
-            serverRMI.chatMessage(nickname, message, receiver, false);
 
-        }
     }
 
     public void quitGame(){
         try {
             serverRMI.quitGame(nickname);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            backToLogin();
         }
     }
 
@@ -362,7 +401,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try {
             return serverRMI.getBoard();
         } catch (RemoteException e) {
-            System.out.println("problem in getting the board");
+            backToLogin();
             return null;
         }
 
@@ -372,7 +411,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try {
             return serverRMI.hasGameStarted();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            backToLogin();
+            return false;
         }
     }
 
@@ -391,11 +431,21 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             this.notifyAll();
         }
     }
-    public boolean isGameBeingCreated() throws RemoteException{
-        return serverRMI.isGameBeingCreated();
+    public boolean isGameBeingCreated() {
+        try {
+            return serverRMI.isGameBeingCreated();
+        } catch (RemoteException e) {
+            backToLogin();
+            return false;
+        }
     }
-    public boolean firstInLobby (String nickname) throws RemoteException{
-        return serverRMI.firstInLobby(nickname);
+    public boolean firstInLobby (String nickname){
+        try {
+            return serverRMI.firstInLobby(nickname);
+        } catch (RemoteException e) {
+            backToLogin();
+            return false;
+        }
     }
 
     @Override
@@ -407,7 +457,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         try {
             return serverRMI.getMyTokens(nickname);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            backToLogin();
+            return null;
         }
     }
 
@@ -418,7 +469,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
                 updateOppShelf(p.getNickname(), p.getShelf().getGridForDisplay());
             }
         } catch (RemoteException e) {
-            //
+            backToLogin();
         }
+    }
+
+    public void backToLogin(){
+        cannotContactServer = true;
+        this.gsc.backToLogin();
     }
 }

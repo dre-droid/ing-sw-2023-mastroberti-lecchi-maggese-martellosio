@@ -302,15 +302,15 @@ public class LoginSceneController {
                 return;
             }catch(RemoteException e){
                 //send to error page
-                e.printStackTrace();
+                updateLabelText(messageTextArea, "cannot connect to server");
             }
         }
-        Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
+       /* Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         scene = new Scene(root);
         stage.setScene(scene);
         stage.setResizable(false);
-        stage.show();
+        stage.show();*/
     }
     private void handleSocket(ActionEvent event){
         try {
@@ -384,6 +384,7 @@ public class LoginSceneController {
     }
 
     private void updateLabelText(Label label, String string) {
+        System.out.println("ciao pappappero");
         // if message is unchanged, animate a yellow blink to give feedback
         if (messageTextArea.getText().equals(string)) {
             Duration ANIMATION_DURATION = Duration.seconds(0.3);

@@ -54,4 +54,6 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void nickNameAlreadyInUse() throws RemoteException;
     public void notifyOfDisconnection() throws RemoteException;
     public void broadcastedMessage(String message) throws RemoteException;
+
+
 }
