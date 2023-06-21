@@ -104,11 +104,11 @@ public class ServerSock {
                 if (nickname.equals("[PING]")) break;
                 nicknameAlreadyInUse = false;
 
-                for (int i = 0; i < server.clientsLobby.size(); i++) {
+                for (int i = 0; i < server.clientsLobby.size(); i++) {  //looks if the name is in use by other players
                     if (server.clientsLobby.get(i).getNickname().equals(nickname)) {
                         nicknameAlreadyInUse = true;
-                        if(server.clientsLobby.get(i).isDisconnected()) {
-                            rejoinGame(nickname, client, reader, out);
+                        if(server.clientsLobby.get(i).isDisconnected()) {   //if nickname is present in clientsLobby but is disconnected
+                            rejoinGame(nickname, client, reader, out);      //calls reJoinGame
                             return;
                         }
                     }
@@ -125,7 +125,7 @@ public class ServerSock {
         } while (true);
         if(controller.hasGameStarted()){
             out.println("[INFO] The game already started, you can't join, try again later");
-            out.println("[EXIT]");
+            //out.println("[EXIT]");
             return;
         }
 

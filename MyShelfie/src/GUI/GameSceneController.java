@@ -1186,6 +1186,7 @@ public class GameSceneController {
                             messageTextArea2.appendText("\n");
                         });
                     }
+                    clientSocket.chatMessage = "";
                     clientSocket.chatMessageLock.wait();
                 }
             }

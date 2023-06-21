@@ -56,13 +56,13 @@ public class GUISocket extends ClientSocket{
             else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
                 nextScene = "MatchType";
             }
-            else if (line.startsWith("[INFO] Game is being created by another player") || line.startsWith("[INFO] Waiting for all players to connect...")
-            || line.startsWith("[INFO] You have successfully rejoined the game")) {
+            else if (line.startsWith("[INFO] Waiting for all players to connect...") || line.startsWith("[INFO] You have successfully rejoined the game")
+            || line.equals("[INFO] Joined a Game")) {
                 nextScene = "GameScene";
             }
-            //else if (line.startsWith("[MESSAGE FROM")){
-            //    chatMessage = line;
-            //}
+            if(line.equals("[INFO] Game is being created by another player...") || line.startsWith("[INFO] The game already started")){
+                nextScene = line.replace("[INFO] ", "");
+            }
             if (line.startsWith("[INFO] Game is starting.")){
                 nextScene = "GameStart";
                 turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
