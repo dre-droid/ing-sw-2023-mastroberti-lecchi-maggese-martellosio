@@ -22,7 +22,7 @@
                </font>
             </Button>
             <TextField fx:id="usernameText" layoutX="147.0" layoutY="106.0" promptText="username" style="-fx-background-color: white;" styleClass="open-sans" />
-            <Label fx:id="messageTextArea" alignment="CENTER" layoutX="55.0" layoutY="132.0" prefHeight="45.0" prefWidth="337.0" textAlignment="CENTER" textFill="WHITE">
+            <Label fx:id="messageTextArea" alignment="CENTER" layoutX="-160.0" layoutY="132.0" prefHeight="45.0" prefWidth="763.0" textAlignment="CENTER" textFill="WHITE">
                <font>
                   <Font size="22.0" />
                </font>

@@ -260,23 +260,24 @@ public class LoginSceneController{
             alive = true;
             clientSocket.clientSpeaker(usernameText.getText());
             // wait for server response being handled by clientSocket
-            synchronized (clientSocket) {
-                while (clientSocket.nextScene.equals("")) clientSocket.wait();
-            }
+            do {
+                synchronized (clientSocket) {
+                    while (clientSocket.nextScene.equals("")) clientSocket.wait();
+                }
 
-            if (clientSocket.nextScene.equals("MatchType")) {
-                //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
-                socketSwitchToMatchTypeScene(event);
-            }
-            else if (clientSocket.nextScene.equals("GameScene")) {
-                //change scene to GameScene
-                socketSwitchToGameScene(event);
-            }
-            else{
-                // display error message from server
-                String string = clientSocket.nextScene;
-                Platform.runLater(() -> updateLabelText(messageTextArea, string));
-            }
+                if (clientSocket.nextScene.equals("MatchType")) {
+                    //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
+                    socketSwitchToMatchTypeScene(event);
+                } else if (clientSocket.nextScene.equals("GameScene")) {
+                    //change scene to GameScene
+                    socketSwitchToGameScene(event);
+                } else {
+                    // display error message from server
+                    String string = clientSocket.nextScene;
+                    Platform.runLater(() -> updateLabelText(messageTextArea, string));
+                    clientSocket.nextScene = "";
+                }
+            }while(!clientSocket.nextScene.equals("GameScene") && !clientSocket.nextScene.equals("MatchType"));
         }catch(InterruptedException | RuntimeException e){
             e.printStackTrace();
         }
