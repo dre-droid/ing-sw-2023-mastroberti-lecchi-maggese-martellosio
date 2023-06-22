@@ -85,76 +85,7 @@ public class LoginSceneController{
         }
     }
 
-    private void handleRMI(ActionEvent event) throws IOException{
-        if(clientRMI!=null){
-            System.out.println("rmi active on login scene");
-            clientRMI.setnickname(usernameText.getText());
-            try{
-                FXMLLoader loader;
-                String errorMessage="";
-                clientRMI.startNotificationServer();
-                int outcome = clientRMI.joinGame();
-                System.out.println(outcome);
-                String nextScenePath="";
-                switch(outcome){
-                    case -1:{
-                        nextScenePath = "MatchType.fxml";
-                        System.out.println("createnewgamecommand");
-                        loader = new FXMLLoader(getClass().getResource(nextScenePath));
-                        Parent root = loader.load();
-                        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                        scene = new Scene(root);
-                        stage.setScene(scene);
-                        MatchTypeController mtt = loader.getController();
-                        mtt.setClient(clientRMI);
-                        stage.show();
-                    }break;
-                    case -2:{
-                        errorMessage = "The game has already started";
-                        loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
-                        updateLabelText(messageTextArea, errorMessage);
-                    }break;
-                    case -3:{
-                        //error: need to change nickname -> show alert and do nothing
-                        errorMessage = "Nickname already in use";
-                        loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
-                        updateLabelText(messageTextArea, errorMessage);
-                    }break;
-                    case 0:{
-                        nextScenePath = "GameScene.fxml";
-                        loader = new FXMLLoader(getClass().getResource(nextScenePath));
-                        Parent root = loader.load();
-                        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                        scene = new Scene(root);
-                        stage.setScene(scene);
 
-                        GameSceneController gsc = loader.getController();
-                        gsc.setClient(clientRMI);
-                        if(gsc.getClientRMI().hasGameStarted())
-                            gsc.getClientRMI().updateGUIAtBeginningOfGame();
-                        gsc.setPlayerName(clientRMI.getNickname());
-
-                        stage.setResizable(false);
-                        stage.show();
-                    }break;
-                    default:{
-                        //not yet implemented
-                        loader = new FXMLLoader(getClass().getResource("error.fxml"));
-                    }
-                }
-                return;
-            }catch(RemoteException e){
-                //send to error page
-                e.printStackTrace();
-            }
-        }
-        Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();
-    }
     private void handleRMIv2(ActionEvent event) throws IOException, InterruptedException{
         System.out.println("ciao v3");
         if(clientRMI!=null){
@@ -290,6 +221,8 @@ public class LoginSceneController{
                     String string = clientSocket.nextScene;
                     Platform.runLater(() -> updateLabelText(messageTextArea, string));
                     clientSocket.nextScene = "";
+                    if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname"))
+                        break;
                 }
             }while(!clientSocket.nextScene.equals("GameScene") && !clientSocket.nextScene.equals("MatchType"));
         }catch(InterruptedException | RuntimeException e){

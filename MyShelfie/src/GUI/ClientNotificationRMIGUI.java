@@ -459,7 +459,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     @Override
     public void broadcastedMessage(String message) throws RemoteException {
-        gsc.rmiMessageTextArea(message);
+        if(!Objects.isNull(gsc))
+            gsc.rmiMessageTextArea(message);
     }
 
     public List<ScoringToken> getMyToken(){

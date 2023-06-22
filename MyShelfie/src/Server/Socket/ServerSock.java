@@ -96,7 +96,7 @@ public class ServerSock {
             try {
                 if (imbecille) {
                     if (nicknameAlreadyInUse)
-                        out.println("[REQUEST] Nickame already in use. Try again:");
+                        out.println("[REQUEST] Nickname already in use. Try again:");
                     else
                         out.println("[REQUEST] Invalid nickname. Try again:");
                 }

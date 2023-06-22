@@ -48,9 +48,9 @@ public class GUISocket extends ClientSocket{
             if (line.startsWith("[INFO] Chosen nickname:")){
                 nickname = line.replace("[INFO] Chosen nickname: ", "");
             }
-            if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST] Nickame already in use")){
+            if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST] Nickname already in use")){
                 line = line.replace("[REQUEST] ", "");
-                nextScene = line.replace("[INFO] ", "");
+                nextScene = line;
                 System.out.println("client socket " + nextScene);
             }
             else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){

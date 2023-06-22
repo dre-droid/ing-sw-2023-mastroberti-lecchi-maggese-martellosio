@@ -137,6 +137,7 @@ public class GameSceneController {
         //System.out.println(this.toString());
         System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
+        chatSetUp();
         if(clientRMI.hasGameStarted()){
             clientRMI.updateGUIAtBeginningOfGame();
         }
@@ -159,11 +160,13 @@ public class GameSceneController {
         Platform.runLater(() -> {
 
             //TODO refactor code below (chat setting) to a private method
+            /*
             messageTextArea2.setVisible(true);
             messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
             messageTextArea2.appendText("\n");
             chatButton.setVisible(true);
             chatTextField.setVisible(true);
+             */
            updateBoard(board);
            setPersonalGoalCardImage(pgc, pgcMap);
            createLeaderboard(leaderboard);
@@ -1067,6 +1070,7 @@ public class GameSceneController {
      * Creates threads to run updateGUIIfGameHasStarted and socketUpdateGUI
      */
     public void runGameSceneThreads(){
+        chatSetUp();
         socketInitializeGameScene();
         socketUpdateGameScene();
     }
@@ -1504,6 +1508,13 @@ public class GameSceneController {
             }
 
         });
+    }
+    public void chatSetUp (){
+        messageTextArea2.setVisible(true);
+        messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
+        messageTextArea2.appendText("\n");
+        chatButton.setVisible(true);
+        chatTextField.setVisible(true);
     }
 
     public void close(){
