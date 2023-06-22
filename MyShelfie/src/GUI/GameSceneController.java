@@ -1474,7 +1474,7 @@ public class GameSceneController {
             stage.setScene(scene);
             stage.setResizable(false);
             stage.show();
-            endGameController.showLeaderboard(clientRMI.getLeaderboard());
+            endGameController.showLeaderboard(leaderboard);
         });
 
     }

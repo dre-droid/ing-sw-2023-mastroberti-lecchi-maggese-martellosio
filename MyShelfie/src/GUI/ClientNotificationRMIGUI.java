@@ -312,11 +312,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void gameIsOver(List<Player> leaderboard) throws RemoteException {
         if(leaderboard==null)
             return;
-        //popup
-        if(leaderboard.size()==1)
-            gsc.endGamePopup();
-        else
-            gsc.switchToEndGameScene(leaderboard);
+        gsc.switchToEndGameScene(leaderboard);
     }
 
     @Override

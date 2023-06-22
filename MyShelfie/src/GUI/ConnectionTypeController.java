@@ -59,27 +59,17 @@ public class ConnectionTypeController  {
                 ClientSocket clientSocket = null;
                 ClientNotificationRMIGUI clientRMI = null;
 
+                String serverIp = ipAddress.getText();
+                // check that ip is valid or empty: if the
+                if (!Objects.equals(ipAddress.getText(), "")) {
+                    if (!checkIp(serverIp)) {
+                        errorLabel.setText("Wrong ip address, can't ping the server at this address");
+                        return;
+                    }
+                }
                 if (rButtonRMI.isSelected()) {
-                    String serverIp = ipAddress.getText();
-                    if (ipAddress.getText() != null) {
-                        if (!checkIp(serverIp)) {
-                            errorLabel.setText("Wrong ip address, can't ping the server at this address");
-                            return;
-                        }
-                        clientRMI = new ClientNotificationRMIGUI(serverIp);
-                    }
-                    // if nothing was typed try localhost
-                    else clientRMI = new ClientNotificationRMIGUI("127.0.0.1");
-
+                    clientRMI = new ClientNotificationRMIGUI(serverIp);
                 } else {
-                    String serverIp = ipAddress.getText();
-                    if (!Objects.equals(ipAddress.getText(), "")) {
-                        if (!checkIp(serverIp)) {
-                            errorLabel.setText("Wrong ip address, can't ping the server at this address");
-                            return;
-                        }
-                    }
-                    // if nothing was typed try localhost
                     clientSocket = new GUISocket(serverIp);
                 }
 

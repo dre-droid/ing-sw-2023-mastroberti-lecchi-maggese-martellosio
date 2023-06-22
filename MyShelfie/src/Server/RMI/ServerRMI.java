@@ -500,7 +500,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      * Notifies all clients that game has ended by disconnection.
      * @param disconnection true if game has ended by disconnection
      */
-    public void notifyEndOfGame(boolean disconnection) {
+    public void notifyEndOfGame(List<Player> finalLead, boolean disconnection) {
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
                 if (!disconnection) {
@@ -508,9 +508,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     if (client.getValue() != null)
                         client.getValue().gameIsOver(controller.getLeaderboard());
                 }else{
-                    if (client.getValue() != null)
-                        client.getValue().broadcastedMessage("All players disconnected. You win!");
-                    //TODO kill client
+                    if (client.getValue() != null) {
+                        System.out.println("Leaderboard");
+                        finalLead.stream().forEach(System.out::println);
+                        client.getValue().gameIsOver(finalLead);
+                    }
                 }
             } catch (RemoteException e) {
                 e.printStackTrace();

@@ -12,7 +12,7 @@ import java.rmi.registry.Registry;
 import java.util.*;
 
 public class Server {
-    private static final int TIMEOUT_THRESH = 60000; //in millis
+    private static final int TIMEOUT_THRESH = 10000; //in millis
 
     public enum connectionType {
         RMI, Socket;
@@ -75,17 +75,24 @@ public class Server {
             // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             onePlayerLeftTimeout();
-            while (!controller.hasTheGameEnded() && !onlyOnePlayer) {
+            while (!controller.hasTheGameEnded()) {
+                // if only one player left, wait
+                synchronized (this) {
+                    while (numberOfPlayersLeft() == 1) wait();
+                }
+
+                // skip turn of disconnected player if current
                 for (int i = 0; i < clientsLobby.size(); i++) {
                     if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     }
                 }
+
                 //calls playTurn() of the player who is currently playing according to controller
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
-                    // notify clients that turn has ended
                     notifySocketOfTurnEnd();
+                    // RMI update in controller.playTurn()
                 }
             }
 
@@ -115,16 +122,14 @@ public class Server {
                     synchronized (this) {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
-                    onlyOnePlayer = true;
 
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
                     synchronized (o) {
                         if (numberOfPlayersLeft() == 1) o.wait(TIMEOUT_THRESH);
                         if (numberOfPlayersLeft() == 1) {
-                            controller.disconnectionEndGame();
+                            controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
                         }
                     }
-                    onlyOnePlayer = false;
                 }
             }
             catch (Exception e){
@@ -194,7 +199,7 @@ public class Server {
     }
 
     /**
-     * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() waits for it).
+     * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() and run() wait for it).
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
      * @throws RemoteException
      */
@@ -219,7 +224,7 @@ public class Server {
         broadcastMessage("Player " + nickOfDisconnectedPlayer + " disconnected", "Server");
         notifyServer();
         System.out.println("a player disconnected from the lobby");
-        notify();
+        notifyAll();
     }
 
     public void notifyGameHasBeenCreated() throws RemoteException{

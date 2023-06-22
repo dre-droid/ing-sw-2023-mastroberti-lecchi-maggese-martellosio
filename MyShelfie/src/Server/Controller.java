@@ -336,7 +336,8 @@ public class Controller {
         do {
             try {
                 info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
-                if (!Objects.isNull(info)) {    //null object is passed when game ends
+                if (!Objects.isNull(info)) {    //null object is passed when player disconnects during turn
+                    //System.out.println("Object was passed");
                     game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getTiles());
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
                     saveGameProgress();
@@ -348,9 +349,6 @@ public class Controller {
                         System.out.println("Correctly ended game.");
                         endGame();
                     }
-                }
-                else {
-                    endGame();
                 }
             } catch (InvalidMoveException e) {
                 invalidMoveFlag = true;
@@ -371,10 +369,11 @@ public class Controller {
     /**
      * Ends the game due to all but one player disconnecting.
      */
-    public void disconnectionEndGame() {
-        game.endGame();
+    public void disconnectionEndGame(String nicknameOfRemainingPlayer) {
+        List<Player> finalLead = getLeaderboard().stream().filter(p -> p.getNickname().equals(nicknameOfRemainingPlayer)).toList();
         server.serverSock.broadcastMessage("[ALLDISCONNECTED]", "Server");
-        server.serverRMI.notifyEndOfGame(true);
+        server.serverRMI.notifyEndOfGame(finalLead, true);
+        game.endGame();
     }
 
     /**
