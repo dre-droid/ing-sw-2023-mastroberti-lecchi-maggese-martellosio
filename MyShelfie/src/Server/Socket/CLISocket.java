@@ -9,22 +9,6 @@ public class CLISocket extends ClientSocket{
      * Handles server's received messages
      */
      protected synchronized void handleServerRequest(String line){
-         if (line.startsWith("[GAMEEND]")) {
-             System.out.println(line);
-             printLeaderboard();
-             System.exit(0);
-         }
-
-        if (line.equals("[CONNECTED]")) {
-            serverPinger();
-            disconnectionCheck();
-        }
-         if (line.startsWith("[INFO] Chosen nickname:")){
-             nickname = line.replace("[INFO] Chosen nickname: ", "");
-         }
-         if(line.equals("[EXIT]")){
-            System.exit(0);
-        }
          if (line.startsWith("[YOUR TURN]")) {
             printTurn();
             System.out.println(line);
@@ -48,6 +32,14 @@ public class CLISocket extends ClientSocket{
             System.out.println(line);
             System.out.println("******************************");
         }
+         if (line.startsWith("[GAMEEND]")) {
+             System.out.println(line);
+             printLeaderboard();
+             System.exit(0);
+         }
+         if(line.equals("[EXIT]")){
+             System.exit(0);
+         }
 
     }
 

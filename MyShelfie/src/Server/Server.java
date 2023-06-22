@@ -22,6 +22,7 @@ public class Server {
     public Map<String, connectionType> clientsMap;
     private Controller controller;
     public ArrayList<ClientInfoStruct> clientsLobby;
+    public boolean onlyOnePlayer = false;
     public final Object clientsLobbyLock = new Object();
 
     public boolean loadedFromFile;
@@ -69,17 +70,18 @@ public class Server {
                     controller.wait();
                 }
             }
-            Thread.sleep(500);
+            Thread.sleep(1000);
 
             // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             onePlayerLeftTimeout();
-            while (!controller.hasTheGameEnded()) {
+            while (!controller.hasTheGameEnded() && !onlyOnePlayer) {
                 for (int i = 0; i < clientsLobby.size(); i++) {
                     if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     }
                 }
+                Thread.sleep(500);
                 //notifies clients socket whose turn is it
                 notifySocketOfTurnEnd();
                 //calls playTurn() of the player who is currently playing according to controller
@@ -116,6 +118,8 @@ public class Server {
                     synchronized (this) {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
+                    onlyOnePlayer = true;
+
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
                     synchronized (o) {
                         if (numberOfPlayersLeft() == 1) o.wait(TIMEOUT_THRESH);
@@ -123,6 +127,7 @@ public class Server {
                             controller.disconnectionEndGame();
                         }
                     }
+                    onlyOnePlayer = false;
                 }
             }
             catch (Exception e){

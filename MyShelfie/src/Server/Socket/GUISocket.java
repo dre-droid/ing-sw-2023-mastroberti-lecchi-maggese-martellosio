@@ -14,17 +14,9 @@ public class GUISocket extends ClientSocket{
      */
     protected void handleServerRequest(String line){
         synchronized (this){
-            if (line.equals("[CONNECTED]")) {
-                serverPinger();
-                disconnectionCheck();
-            }
-            if (line.startsWith("[INFO] Chosen nickname:")){
-                nickname = line.replace("[INFO] Chosen nickname: ", "");
-            }
-            if(line.equals("[EXIT]")){
-                System.exit(0);
-            }
+            // temporary CLI for debugging
             if (line.startsWith("[YOUR TURN]")) {
+                //printTurn();
                 System.out.println(line);
             }
             if (line.startsWith("[INVALID MOVE]")) {
@@ -33,21 +25,31 @@ public class GUISocket extends ClientSocket{
             if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
                 System.out.println(line);
             }
+            if (line.startsWith("[INFO]: Game is starting.")){
+                //if (!isPlaying.equals(nickname)) printTurn(isPlaying);
+            }
             if (line.startsWith("[SHELF]")) {
                 System.out.println(line);
+                //printShelf(getShelf());
             }
             if (line.startsWith("[TURNEND]")) {
+                //printShelf(getShelf());
                 System.out.println();
                 System.out.println(line);
                 System.out.println("******************************");
             }
             if (line.startsWith("[GAMEEND]")) {
                 System.out.println(line);
+                //printLeaderboard();
                 System.exit(0);
             }
-            if (line.startsWith("[INFO] Chosen nickname:")){
-                nickname = line.replace("[INFO] Chosen nickname: ", "");
+            if(line.equals("[EXIT]")){
+                System.exit(0);
             }
+
+
+
+            //GUI
             if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST] Nickname already in use")){
                 line = line.replace("[REQUEST] ", "");
                 nextScene = line;

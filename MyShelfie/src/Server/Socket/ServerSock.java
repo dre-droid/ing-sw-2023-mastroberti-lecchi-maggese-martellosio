@@ -726,14 +726,6 @@ public class ServerSock {
         //*********************************************
     }
 
-    /**
-     * @return the name of the corresponding client, null if not present
-     */
-    private String getNickFromSocket(Socket client){
-        for (socketNickStruct c: clients) if (c.getSocket().equals(client)) return c.getName();
-        return null;
-    }
-
     private static boolean isNumeric(String str) {
         try {
             Integer.parseInt(str);
@@ -854,6 +846,7 @@ public class ServerSock {
                 PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
                 String jsonBoard = gson.toJson(controller.getBoard());
                 pw.println("[GSONBOARD]" + jsonBoard);
+                System.out.println("Serialized board");
 
                 String jsonLeaderboard = gson.toJson(controller.getLeaderboard());
                 pw.println("[GSONLEAD]" + jsonLeaderboard);
