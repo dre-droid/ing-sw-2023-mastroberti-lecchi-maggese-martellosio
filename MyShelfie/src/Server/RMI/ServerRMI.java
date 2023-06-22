@@ -599,49 +599,71 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     private void checkForDisconnections(){
         new Thread(() -> {
-            try {
-                while(Objects.isNull(controller)) Thread.sleep(1000);
-                //while (!controller.hasGameStarted()) Thread.sleep(3000);
-                while(!controller.hasGameBeenCreated()) Thread.sleep(1000);
-                while (!controller.hasTheGameEnded()) {
-                    Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
-
-                    while (iterator.hasNext()) {
-                        Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
-                        ClientNotificationInterfaceRMI client = entry.getKey();
-                        RmiNickStruct nickStruct = entry.getValue();
-                        try{
-                            client.ping();
-//                            System.out.println("can ping " + nickStruct.getNickname());
-                        }catch(RemoteException re){
-                            Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                            opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
-                        }
-                        if (System.currentTimeMillis() - nickStruct.getLastPing() > DISCONNECTION_TIME) {
-                            String nickOfDisconnectedPlayer = nickStruct.getNickname();
-
-                            //server.clientsLobby.removeIf(clientInfoStruct -> nickOfDisconnectedPlayer.equals(clientInfoStruct.getNickname()));
-                            System.out.println(nickOfDisconnectedPlayer +" disconnected");
-                            Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                            opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
-                            iterator.remove();
-                            clients.put(nickOfDisconnectedPlayer, null);//we set null the value in clients
-                            if(controller.isMyTurn(nickOfDisconnectedPlayer)){
-                                endOfTurn(nickOfDisconnectedPlayer);
-                            }
-                            server.notifyLobbyDisconnection(nickOfDisconnectedPlayer);
-                        }
-                    }
-
-                    Thread.sleep(1000);
-                    //System.out.println("number of remaining players: "+server.numberOfPlayersLeft());
+            while(controller==null){
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    System.out.println("sleep problem");
                 }
-                //System.out.println("has the game ended: " + controller.hasTheGameEnded());
-
-
-            }catch(Exception e){
-                e.printStackTrace();
             }
+            System.out.println("checkfordisconnections-->controller not null");
+            while(!controller.hasGameBeenCreated()){
+                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
+                while(iterator.hasNext()){
+                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
+                    ClientNotificationInterfaceRMI client = entry.getKey();
+                    RmiNickStruct nickStruct = entry.getValue();
+                    try{
+                        client.ping();
+                    }catch(RemoteException re){
+                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
+                        opt.ifPresent(clientInfoStruct -> server.clientsLobby.remove(clientInfoStruct));
+                        opt.ifPresent(clientInfoStruct -> clients.remove(clientInfoStruct.getNickname()));
+                        server.notifyLobbyDisconnection(nickStruct.getNickname());
+                    }
+                    System.out.println(nickStruct.getNickname()+" check before game created");
+                }
+            }
+            System.out.println("checkfordisconnections-->game created");
+            while(!controller.hasGameStarted()){
+                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
+                while(iterator.hasNext()){
+                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
+                    ClientNotificationInterfaceRMI client = entry.getKey();
+                    RmiNickStruct nickStruct = entry.getValue();
+                    try{
+                        client.ping();
+                    }catch(RemoteException re){
+                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
+                        opt.ifPresent(clientInfoStruct -> server.clientsLobby.remove(clientInfoStruct));
+                        opt.ifPresent(clientInfoStruct -> clients.remove(clientInfoStruct.getNickname()));
+                        server.notifyLobbyDisconnection(nickStruct.getNickname());
+                        server.clientsMap.remove(nickStruct.getNickname());
+                    }
+                    System.out.println(nickStruct.getNickname()+" check before game started");
+                }
+            }
+            System.out.println("checkfordisconnections-->game started");
+            while(!controller.hasTheGameEnded()){
+                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
+                while(iterator.hasNext()){
+                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
+                    ClientNotificationInterfaceRMI client = entry.getKey();
+                    RmiNickStruct nickStruct = entry.getValue();
+                    try{
+                        client.ping();
+                    }catch(RemoteException re){
+                        System.out.println(nickStruct.getNickname()+" got disconnected");
+                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
+                        opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
+                        opt.ifPresent(clientInfoStruct -> clients.put(clientInfoStruct.getNickname(), null));
+                        server.notifyLobbyDisconnection(nickStruct.getNickname());
+                        server.clientsMap.remove(nickStruct.getNickname());
+                    }
+                    System.out.println(nickStruct.getNickname()+" check before game ended");
+                }
+            }
+            System.out.println("checkfordisconnections-->game ended");
         }).start();
     }
 
@@ -679,6 +701,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getNickname())){
                                         server.clientsLobby.get(i).setDisconnected(true);
+                                        if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getNickname())){
+                                            endOfTurn(client.getNickname());
+                                        }
                                         server.notifyLobbyDisconnection(nickname);
                                         return;
                                     }
