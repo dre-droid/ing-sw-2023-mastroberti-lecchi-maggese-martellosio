@@ -94,6 +94,7 @@ public class Board {
      */
     public List<Tile> drawTiles(int x, int y, int amount, Direction direction) throws InvalidMoveException, InvalidParameterException {
         List<Tile> drawnTiles = new ArrayList<Tile>();
+        System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
         //checking that the tiles selected don't go out of the matrix or if the selected tiles are not drawable
         int increasingX = x;
         int increasingY = y;
@@ -177,14 +178,36 @@ public class Board {
      */
     private boolean isThisTileDrawable(int x, int y) {
         if (grid[x][y].isEmpty()) return false;
-        for (int i = -1; i <= 1; i += 2) {  //checks tiles to the left, right, up and down
-            if (x + i > 9 || y + i > 9 || x + i < 0 || y + i < 0)
-                return true;  //if indexes are out of grids bounds, the tile has an empty edge
+        //check up and down
+        if(x+1>8 || x-1 <0){
+            return true;
+        }
+        else{
+            if(grid[x+1][y].isEmpty())
+                return true;
+            if(grid[x-1][y].isEmpty())
+                return true;
+        }
+        //check left and right
+        if(y-1 <0 || y+1>8){
+            return true;
+        }else{
+            if(grid[x][y-1].isEmpty())
+                return true;
+            if(grid[x][y+1].isEmpty())
+                return true;
+        }
+        return false;
+
+        /*for (int i = -1; i <= 1; i += 2) {  //checks tiles to the left, right, up and down
+            if (!(x+i < 0 || x+i > 9) || !(y+i < 0 || y+i > 9)) {
+                return true;
+            }
             else {
                 if (grid[x + i][y].isEmpty() || grid[x][y + i].isEmpty()) return true;
             }
         }
-        return false;
+        return false;*/
     }
 
 

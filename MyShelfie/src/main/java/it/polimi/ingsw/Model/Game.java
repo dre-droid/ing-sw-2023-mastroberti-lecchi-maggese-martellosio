@@ -135,6 +135,7 @@ public class Game {
     //***used by RMI ***
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
+            System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
             if(!playerNickname.equals(isPlaying.getNickname())) {
                 throw new InvalidMoveException(playerNickname + " it's not your turn!!!!");
             }
