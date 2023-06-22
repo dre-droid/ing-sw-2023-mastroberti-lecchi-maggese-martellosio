@@ -721,6 +721,8 @@ public class ServerSock {
             String jsonLeaderboard = gson.toJson(leaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
         }
+        String jsonPGMap = gson.toJson(controller.getPGCmap());
+        out.println("[GSONPGMAP]" + jsonPGMap);
         //*********************************************
     }
 
