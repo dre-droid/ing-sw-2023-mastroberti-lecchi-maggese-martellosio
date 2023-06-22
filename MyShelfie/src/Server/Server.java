@@ -203,8 +203,12 @@ public class Server {
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
      * @throws RemoteException
      */
-    public synchronized void notifyLobbyDisconnection(String nickOfDisconnectedPlayer) throws RemoteException{
-        serverRMI.notifyLobbyDisconnectionRMI();
+    public synchronized void notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
+        try {
+            serverRMI.notifyLobbyDisconnectionRMI();
+        } catch (RemoteException e) {
+            System.out.println("cannot contact rmi server");
+        }
         serverSock.notifyLobbyDisconnectionSocket();
         if(!controller.hasGameStarted()) {
             synchronized (clientsLobbyLock) {

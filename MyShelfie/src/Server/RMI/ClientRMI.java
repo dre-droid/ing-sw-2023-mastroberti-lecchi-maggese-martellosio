@@ -427,11 +427,9 @@ public class ClientRMI implements Runnable{
                         System.out.println("Your turn has ended, you now have "+serverRMI.getPoints(playerNickname)+" pts");
                     }
                 }
-            }catch(RemoteException e){
+            } catch(InterruptedException | IOException e){
                 System.out.println("Problem in the connection to the server, try to reconnect...");
-                connectionProblem = true;
-            } catch (InterruptedException | IOException e) {
-                System.out.println("Problem in the connection to the server, try to reconnect...");
+                e.printStackTrace();
                 connectionProblem = true;
             }
         }while (connectionProblem && !getEndGameFlag());

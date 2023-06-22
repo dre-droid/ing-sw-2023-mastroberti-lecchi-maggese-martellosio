@@ -154,6 +154,10 @@ public class LoginSceneController{
                                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                                 scene = new Scene(root);
                                 stage.setScene(scene);
+                                stage.setOnCloseRequest(e->{
+                                    Platform.exit();
+                                    System.exit(0);
+                                });
                                 MatchTypeController mtt = loader.getController();
                                 mtt.setClient(clientRMI);
                                 stage.show();

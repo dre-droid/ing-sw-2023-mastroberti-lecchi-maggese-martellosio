@@ -395,7 +395,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <ImageView fx:id="firstPlayerSeat" fitHeight="54.0" fitWidth="54.0" layoutX="397.0" layoutY="339.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="firstPlayerSeat" fitHeight="48.0" fitWidth="54.0" layoutX="397.0" layoutY="339.0" pickOnBounds="true" preserveRatio="true" rotate="7.1" />
       <GridPane fx:id="RearrangeTiles" layoutX="344.0" layoutY="597.0" prefHeight="54.0" prefWidth="166.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
