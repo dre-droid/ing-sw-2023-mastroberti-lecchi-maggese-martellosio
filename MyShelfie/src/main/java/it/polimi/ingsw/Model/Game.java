@@ -159,13 +159,11 @@ public class Game {
     public void endOfTurn(Player player){
         if(!gameHasEnded){
             if(player.getNickname().equals(isPlaying.getNickname())){
-                //if someone's shelf is full then enter the last round
-                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
-                //check if someone has fulfilled a commongoal
-
-
                 //refill board if necessary
                 board.refill();
+
+                //if someone's shelf is full then enter the last round
+                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
 
                 //update score and leaderboard
                 isPlaying.updateScore();
@@ -180,7 +178,7 @@ public class Game {
                     isPlaying = nextPlayer;
                     setLastTurnFlag();
                 }
-                if (lastTurn) { //game end                              //game end
+                if (lastTurn) {                                         //game end
                     for (Player p: leaderBoard) {
                         p.updateFinalScore();
                     }
@@ -189,6 +187,7 @@ public class Game {
                 }
                 else isPlaying = nextPlayer;
 
+                turnCount++;                                            //increase turnCount
             }
         }
     }
@@ -222,8 +221,6 @@ public class Game {
         //fix insert tiles ordering
         isPlaying.insertTiles(reorderedTiles, column);
 
-        if (isPlaying.hasEndGameToken()) setLastTurnFlag();
-
         //check common goal and eventually give player token
         for (CommonGoalCard c: commonGoalCards)
             if (c.isSatisfiedBy(isPlaying)) {
@@ -235,37 +232,7 @@ public class Game {
                 }
             }
 
-        //refill board if necessary
-        board.refill();
-
-        //update score and leaderboard
-        isPlaying.updateScore();
-        Collections.sort(leaderBoard, new scoreComparator());
-        //next turn and end game logic
-        Player nextPlayer;
-        if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
-        nextPlayer = iterator.next();
-
-        if (isPlaying.hasEndGameToken()) setLastRoundFlag();    //last round
-        if (lastRound && isPlaying.hasFirstPlayerSeat()){       //last turn
-            isPlaying = nextPlayer;
-            setLastTurnFlag();
-        }
-        if (lastTurn) { //game end
-            for (Player p: leaderBoard) {
-                p.updateFinalScore();
-            }
-            printLeaderBoard();
-        }
-        else isPlaying = nextPlayer;
-
-        turnCount++;                                            //increase turnCount
-
-        getBoard().printGridMap();
-        System.out.println();
-        System.out.println("Leaderboard");
-        printLeaderBoard();
-        System.out.println("******************************\n");
+       endOfTurn(isPlaying);
     }
     /**
      * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.

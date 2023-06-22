@@ -9,6 +9,12 @@ public class CLISocket extends ClientSocket{
      * Handles server's received messages
      */
      protected synchronized void handleServerRequest(String line){
+         if (line.startsWith("[GAMEEND]")) {
+             System.out.println(line);
+             printLeaderboard();
+             System.exit(0);
+         }
+
         if (line.equals("[CONNECTED]")) {
             serverPinger();
             disconnectionCheck();
@@ -42,10 +48,7 @@ public class CLISocket extends ClientSocket{
             System.out.println(line);
             System.out.println("******************************");
         }
-        if (line.startsWith("[GAMEEND]")) {
-            System.out.println(line);
-            System.exit(0);
-        }
+
     }
 
     /**
@@ -79,14 +82,7 @@ public class CLISocket extends ClientSocket{
         board.printGridMap();
         System.out.println();
 
-        //leaderboard print
-        System.out.println("Leaderboard");
-        int i = 0;
-        for (Player p: leaderboard) {
-            System.out.print(i + 1 + ". " + p.getNickname() + ": ");
-            System.out.println(p.getScore());
-            i++;
-        }
+        printLeaderboard();
         System.out.println();
 
         //print other player shelfs
@@ -127,14 +123,7 @@ public class CLISocket extends ClientSocket{
         board.printGridMap();
         System.out.println();
 
-        //leaderboard print
-        System.out.println("Leaderboard");
-        int i = 0;
-        for (Player p: leaderboard) {
-            System.out.print(i + 1 + ". " + p.getNickname() + ": ");
-            System.out.println(p.getScore());
-            i++;
-        }
+        printLeaderboard();
         System.out.println();
 
         //print other player shelfs
@@ -159,6 +148,17 @@ public class CLISocket extends ClientSocket{
         }
         System.out.println("*************");
     }
+
+    private void printLeaderboard(){
+        System.out.println("Leaderboard");
+        int i = 0;
+        for (Player p: leaderboard) {
+            System.out.print(i + 1 + ". " + p.getNickname() + ": ");
+            System.out.println(p.getScore());
+            i++;
+        }
+    }
+
     protected void disconnectionAlert(){
         System.out.println("Connection lost, try again later");
     }

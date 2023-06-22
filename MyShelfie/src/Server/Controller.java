@@ -341,10 +341,13 @@ public class Controller {
                     server.serverRMI.updateEndOfTurnObjects(thisTurnsPlayer.getNickname());
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
                     invalidMoveFlag = false;
+                    if(game.hasTheGameEnded()){
+                        System.out.println("Correctly ended game.");
+                        endGame();
+                    }
                 }
                 else {
-                    if(game.hasTheGameEnded())
-                        endGame();
+                    endGame();
                 }
             } catch (InvalidMoveException e) {
                 invalidMoveFlag = true;

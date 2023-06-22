@@ -2,7 +2,7 @@ GUI
     1. Handle match type selector quitting
     2. Add alert when quitting for socket (already working in RMI)
     3. Sistemare gestione errori per GUI
-    4. Interazione socket/RMI con GUI non funziona (non si alternano i turni)
+    4. X - Interazione socket/RMI con GUI non funziona (non si alternano i turni)
     5. Chat non visibile appena si joina la partita (solo in socket)
     6 Socket GUI deve tornare alla pagina di inizio dame quand ocrasha il server
     7. Socket deve chiedere l'indirizzo ip del server (anche su cli)
@@ -11,8 +11,9 @@ GUI
     //optional
 
 CLI
-    1. Mostrare quanti token ci sono sulle common goal (sia RMI che socket)
-    2. Gestire fine gioco (sia RMI che socket)
+    1. Mostrare quanti token ci sono sulle common goal (solo RMI)
+    2. X - Gestire fine gioco (sia RMI che socket)
+    3. Check that the selected tiles can be inserted like in GUI
 
     //optional
     1. Shrink CLI print

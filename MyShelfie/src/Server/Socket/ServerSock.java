@@ -698,25 +698,29 @@ public class ServerSock {
      */
     private void sendSerializedObjects(PrintWriter out, String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
         //*************** SERIALIZATION ***************
-        out.println("[NICKNAME]" + nickname);
+        if (nickname != null)
+            out.println("[NICKNAME]" + nickname);
 
-        String jsonBoard = gson.toJson(b);
-        out.println("[GSONBOARD]" + jsonBoard);
-
-        String jsonShelf = gson.toJson(shelf);
-        out.println("[GSONSHELF]" + jsonShelf);
-
-        String jsonPersonalGoal = gson.toJson(pgc);
-        out.println("[GSONPGC]" + jsonPersonalGoal);
-
-        String jsonCommonGoal = gson.toJson(cgc);
-        out.println("[GSONCGC]" + jsonCommonGoal);
-
-        String jsonLeaderboard = gson.toJson(leaderboard);
-        out.println("[GSONLEAD]" + jsonLeaderboard);
-
-        String jsonPGMap = gson.toJson(controller.getPGCmap());
-        out.println("[GSONPGMAP]" + jsonPGMap);
+        if (b!= null) {
+            String jsonBoard = gson.toJson(b);
+            out.println("[GSONBOARD]" + jsonBoard);
+        }
+        if (shelf != null) {
+            String jsonShelf = gson.toJson(shelf);
+            out.println("[GSONSHELF]" + jsonShelf);
+        }
+        if (pgc != null) {
+            String jsonPersonalGoal = gson.toJson(pgc);
+            out.println("[GSONPGC]" + jsonPersonalGoal);
+        }
+        if (cgc != null) {
+            String jsonCommonGoal = gson.toJson(cgc);
+            out.println("[GSONCGC]" + jsonCommonGoal);
+        }
+        if (leaderboard != null) {
+            String jsonLeaderboard = gson.toJson(leaderboard);
+            out.println("[GSONLEAD]" + jsonLeaderboard);
+        }
         //*********************************************
     }
 
@@ -806,9 +810,8 @@ public class ServerSock {
     public void notifyGameEnd(/*String nick*/) throws IOException {
         for (socketNickStruct c: clients){
             PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            //out.println("[GAMEEND]: ",  + nick + " has quit the game. The game has ended.");
+            sendSerializedObjects(out, null, null, null, null, null, controller.getLeaderboard());
             out.println("[GAMEEND]: The game has ended.");
-            c.getSocket().close();
         }
     }
 
