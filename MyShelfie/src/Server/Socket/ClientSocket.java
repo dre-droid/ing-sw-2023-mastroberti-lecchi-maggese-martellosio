@@ -18,6 +18,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 public abstract class ClientSocket {
+
+    public boolean gameEnd;
     protected Board board = null;
     protected Shelf shelf = null;
     protected PersonalGoalCard personalGoalCard = null;

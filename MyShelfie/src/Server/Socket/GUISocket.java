@@ -41,7 +41,8 @@ public class GUISocket extends ClientSocket{
             if (line.startsWith("[GAMEEND]")) {
                 System.out.println(line);
                 //printLeaderboard();
-                System.exit(0);
+                gameEnd = true;
+                //System.exit(0);
             }
             if(line.equals("[EXIT]")){
                 System.exit(0);

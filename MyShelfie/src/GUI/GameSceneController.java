@@ -1113,6 +1113,17 @@ public class GameSceneController {
                 }
             }
         }).start();
+
+        new Thread(()->{
+            while(!clientSocket.gameEnd){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("problem");
+                }
+            }
+            switchToEndGameScene(clientSocket.getLeaderboard());
+        }).start();
     }
 
     public void setPlayerLabels(){
