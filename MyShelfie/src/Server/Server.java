@@ -81,9 +81,6 @@ public class Server {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     }
                 }
-                Thread.sleep(500);
-                //notifies clients socket whose turn is it
-                notifySocketOfTurnEnd();
                 //calls playTurn() of the player who is currently playing according to controller
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
                     controller.playTurn();
