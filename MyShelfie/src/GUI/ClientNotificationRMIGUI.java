@@ -224,6 +224,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     public boolean drawTilesFromBoard(int x, int y, int amount, Board.Direction direction){
         try {
+            System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
             drawnTiles = serverRMI.drawTilesFromBoard(nickname, x, y, amount, direction);
             return  drawnTiles!=null;
         } catch (RemoteException e) {

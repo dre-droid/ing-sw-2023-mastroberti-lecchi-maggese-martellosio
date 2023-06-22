@@ -81,7 +81,7 @@ public class Controller {
                 //System.out.println(nickname + " joined the game");
                 if (game.hasGameStarted()) {
                     server.serverRMI.notifyStartOfGame();
-                    saveGameProgress();
+                    //saveGameProgress();
                     notifyAll();
                 }
                 return 0;
@@ -218,11 +218,14 @@ public class Controller {
      *         if everything is ok it returns the list of tiles drawn by the player
      */
     public List<Tile> drawFromBoard(String playerNickname, int x, int y, int amount, Board.Direction direction){
+        System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
         List<Tile> toBeReturned = new ArrayList<>();
         if(game.getIsPlaying().getNickname().equals(playerNickname)){
             try{
                 toBeReturned = game.drawsFromBoard(x,y,amount,direction, playerNickname);
             }catch(Exception e){
+                System.out.println("cannot draw these tiles man");
+                e.printStackTrace();
                 return null;
             }
             return toBeReturned;
