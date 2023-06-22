@@ -479,12 +479,38 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
     }
 
+    /**
+     *  Notifies all clients that game has ended.
+     */
     public void notifyEndOfGame() {
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
                 //List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
                 if(client.getValue()!=null)
                     client.getValue().gameIsOver(controller.getLeaderboard());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                System.out.println("Cannot notify controller");
+            }
+        }
+    }
+
+    /**
+     * Notifies all clients that game has ended by disconnection.
+     * @param disconnection true if game has ended by disconnection
+     */
+    public void notifyEndOfGame(boolean disconnection) {
+        for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+            try {
+                if (!disconnection) {
+                    //List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
+                    if (client.getValue() != null)
+                        client.getValue().gameIsOver(controller.getLeaderboard());
+                }else{
+                    if (client.getValue() != null)
+                        client.getValue().broadcastedMessage("All players disconnected. You win!");
+                    //TODO kill client
+                }
             } catch (RemoteException e) {
                 e.printStackTrace();
                 System.out.println("Cannot notify controller");

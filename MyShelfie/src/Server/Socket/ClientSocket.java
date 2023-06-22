@@ -86,9 +86,11 @@ public abstract class ClientSocket {
                     String line = reader.readLine();
 //                    synchronized (object) {
                     messageFromServer = line;
-                    deserializeObjects(line);
-                    if(!line.equals("[PING]"))
+                    if(!line.equals("[PING]")) {
+                        handleServerRequestCommon(line);
+                        deserializeObjects(line);
                         handleServerRequest(line);
+                    }
 //                    }
                 }
             }
@@ -99,6 +101,13 @@ public abstract class ClientSocket {
         };
 
         new Thread(serverListener).start();
+    }
+
+    private synchronized void handleServerRequestCommon(String line){
+        if (line.startsWith("[ALLDISCONNECTED]")){
+            System.out.println("All players disconnected. You win!");
+            System.exit(0);
+        }
     }
 
     /**

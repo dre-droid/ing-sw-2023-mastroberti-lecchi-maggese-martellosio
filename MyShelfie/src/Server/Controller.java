@@ -360,10 +360,18 @@ public class Controller {
 
     public void endGame() throws IOException {
         //server.serverRMI.notifyEndOfGame();
-        server.serverSock.notifyGameEnd();
         game.endGame();
+        server.serverSock.notifyGameEnd();
         deleteProgress();
+    }
 
+    /**
+     * Ends the game due to all but one player disconnecting.
+     */
+    public void disconnectionEndGame() {
+        game.endGame();
+        server.serverSock.broadcastMessage("[ALLDISCONNECTED]", "Server");
+        server.serverRMI.notifyEndOfGame(true);
     }
 
     /**

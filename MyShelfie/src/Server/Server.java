@@ -12,8 +12,10 @@ import java.rmi.registry.Registry;
 import java.util.*;
 
 public class Server {
+    private static final int TIMEOUT_THRESH = 60000; //in millis
+
     public enum connectionType {
-        RMI, Socket
+        RMI, Socket;
     }
     public ServerRMI serverRMI;
     public ServerSock serverSock;
@@ -44,6 +46,7 @@ public class Server {
             controller.setServerSock(serverSock);
             serverRMI.setController(controller);
 
+            // loading from json GameProgress file
             if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
                 loadedFromFile = true;
                 for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
@@ -67,21 +70,11 @@ public class Server {
                 }
             }
             Thread.sleep(500);
+
             // game starts
             serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+            onePlayerLeftTimeout();
             while (!controller.hasTheGameEnded()) {
-                //if only one player remains the game is put on hold. If nobody rejoins the game ends
-                //TODO if the game ends this way it should show the remaining player as winner, NOT THE LEADERBOARD
-                Thread.sleep(500);
-                if (numberOfPlayersLeft() == 1) {
-                    synchronized (this) {
-                        wait(60000);
-                    }
-                    if (numberOfPlayersLeft() == 1) {
-                        controller.endGame();
-                        break;
-                    }
-                }
                 for (int i = 0; i < clientsLobby.size(); i++) {
                     if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
@@ -107,6 +100,35 @@ public class Server {
             //serverRMI.flushServer();    //needs testing
 
         }while (!controller.hasTheGameEnded());
+    }
+
+    /**
+     * Runs a thread that waits until notified by a notifyLobbyDisconnection. When only one player remains, waits for
+     * a timeout and ends the game if no one connects.
+     */
+    private void onePlayerLeftTimeout() {
+        new Thread(() -> {
+            try {
+                while (!controller.hasTheGameEnded()) {
+                    final Object o = new Object();
+
+                    // wait that only one player is left
+                    synchronized (this) {
+                        while (numberOfPlayersLeft() != 1) wait();
+                    }
+                    // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
+                    synchronized (o) {
+                        if (numberOfPlayersLeft() == 1) o.wait(TIMEOUT_THRESH);
+                        if (numberOfPlayersLeft() == 1) {
+                            controller.disconnectionEndGame();
+                        }
+                    }
+                }
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public void addPlayerToRecord(String nickname, connectionType conn) {
@@ -168,7 +190,13 @@ public class Server {
         }
         return true;
     }
-    public void notifyLobbyDisconnection(String nickOfDisconnectedPlayer) throws RemoteException{
+
+    /**
+     * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() waits for it).
+     * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
+     * @throws RemoteException
+     */
+    public synchronized void notifyLobbyDisconnection(String nickOfDisconnectedPlayer) throws RemoteException{
         serverRMI.notifyLobbyDisconnectionRMI();
         serverSock.notifyLobbyDisconnectionSocket();
         if(!controller.hasGameStarted()) {
@@ -189,7 +217,9 @@ public class Server {
         broadcastMessage("Player " + nickOfDisconnectedPlayer + " disconnected", "Server");
         notifyServer();
         System.out.println("a player disconnected from the lobby");
+        notify();
     }
+
     public void notifyGameHasBeenCreated() throws RemoteException{
         serverRMI.gameIsCreated();
         serverSock.notifyGameHasBeenCreatedSocket();
@@ -250,10 +280,12 @@ public class Server {
 
         }).start();
     }
+
     public void broadcastMessage(String message, String sender){
         serverSock.broadcastMessage("[MESSAGE FROM SERVER] " + message, sender);
         serverRMI.broadcastMessage(message, sender);
     }
+
     public int numberOfPlayersLeft(){
         int numOfPlayerLeft = 0;
         for (int i = 0; i < clientsLobby.size(); i++) {
@@ -270,6 +302,7 @@ public class Server {
             notifyAll();
         }
     }
+
     public void removeFromClientsLobby(String nickname){
         synchronized (clientsLobbyLock) {
             clientsLobby.removeIf(clientInfoStruct -> nickname.equals(clientInfoStruct.getNickname()));
