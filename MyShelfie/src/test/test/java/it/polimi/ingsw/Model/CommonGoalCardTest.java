@@ -308,9 +308,9 @@ public class CommonGoalCardTest {
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
-        for(int j = 0;j<5;j++){
-            for(int i=0;i<5-j;i++){
-                grid[i][j]= new Tile(Type.CAT);
+        for(int col = 0;col<5;col++){
+            for(int row = 5 ;row > col ;row--){
+                grid[row][col]= new Tile(Type.CAT);
             }
         }
         assertTrue(cgc.isSatisfiedBy(player));
@@ -324,9 +324,9 @@ public class CommonGoalCardTest {
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
-        for(int j = 0;j<5;j++){
-            for(int i=0;i<6-j;i++){
-                grid[i][j]= new Tile(Type.CAT);
+        for(int col = 0;col<5;col++){
+            for(int row = 5 ;row >= col;row--){
+                grid[row][col]= new Tile(Type.CAT);
             }
         }
         assertTrue(cgc.isSatisfiedBy(player));
@@ -340,7 +340,7 @@ public class CommonGoalCardTest {
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
         for(int j = 0;j<5;j++){
-            for(int i=0;i<6-4+j;i++){
+            for(int i=5;i>=4 - j;i--){
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
@@ -355,7 +355,7 @@ public class CommonGoalCardTest {
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
         for(int j = 0;j<5;j++){
-            for(int i=0;i<6-5+j;i++){
+            for(int i=5;i> 4 - j;i--){
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
@@ -370,11 +370,11 @@ public class CommonGoalCardTest {
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
         for(int j = 0;j<5;j++){
-            for(int i=0;i<6-j;i++){
+            for(int i=5;i >= j;i--){
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
-        grid[0][0] = null;
+        grid[4][2] = null;
         assertFalse(cgc.isSatisfiedBy(player));
     }
 
@@ -385,12 +385,12 @@ public class CommonGoalCardTest {
         CommonGoalCard cgc = new CommonGoalCard(increasingOrDecreasingHeight, 3);
         Shelf shelf = player.getShelf();
         Tile[][] grid = shelf.getGrid();
-        for(int j = 1;j<5;j++){
-            for(int i=1;i<6-4+j;i++){
+        for(int j = 0;j<5;j++){
+            for(int i=5;i>4-j;i--){
                 grid[i][j]= new Tile(Type.CAT);
             }
         }
-        grid[1][3] = null;
+        grid[4][3] = null;
         assertFalse(cgc.isSatisfiedBy(player));
     }
 
