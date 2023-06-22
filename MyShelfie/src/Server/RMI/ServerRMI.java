@@ -679,6 +679,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
                             clientsLobby.entrySet().removeIf(entry -> entry.getValue().equals(client));
                             server.notifyLobbyDisconnection(nickname);          //notifies server that a disconnection has occurred
+                            clients.remove(client.getNickname());
                             return;
                         }
                     }
@@ -694,6 +695,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                 clientsLobby.entrySet().removeIf(entry -> entry.getValue().equals(client));
                                 server.notifyLobbyDisconnection(nickname);
                                 server.clientsMap.remove(nickname);
+                                clients.remove(client.getNickname());
                                 return;
                             }
                         }

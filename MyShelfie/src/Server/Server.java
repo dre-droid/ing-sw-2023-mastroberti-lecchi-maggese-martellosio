@@ -284,7 +284,7 @@ public class Server {
                 }
 
             } catch (InterruptedException | IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("cannot join game");
             }
 
 
