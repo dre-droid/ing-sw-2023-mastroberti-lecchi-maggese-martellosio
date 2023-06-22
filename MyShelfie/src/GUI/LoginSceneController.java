@@ -48,12 +48,26 @@ public class LoginSceneController{
     private ClientNotificationRMIGUI clientRMI;
     private boolean alive = false;
 
+    private boolean disconnected;
+
     public void setClient(GUISocket client){
         this.clientSocket = client;
+        if(disconnected){
+            messageTextArea.setText("You got disconnected...");
+        }
         client.runServer();
     }
+
+    public void setDisconnected(boolean disconnected){
+        this.disconnected = disconnected;
+    }
+
     public void setClient(ClientNotificationRMIGUI client){
+
         this.clientRMI = client;
+        if(disconnected){
+            messageTextArea.setText("You got disconnected...");
+        }
     }
 
     /**

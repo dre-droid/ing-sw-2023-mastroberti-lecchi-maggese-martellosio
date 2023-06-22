@@ -194,14 +194,14 @@ public class GameSceneController {
         alreadySet=true;
         Platform.runLater(()->{
             Stage st = (Stage) this.MyShelf.getScene().getWindow();
-            st.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e->{
+            st.setOnCloseRequest(e->{
                 e.consume();
                 Platform.runLater(()->{
                     Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                     alert.setTitle("Do you want to quit the game?");
                     alert.setHeaderText("If you quit the game, the current game will end");
 
-                    if(alert.showAndWait().get()==ButtonType.OK){
+                    if(alert.showAndWait().orElse(ButtonType.CANCEL)==ButtonType.OK){
                         if(clientRMI!=null){
                             clientRMI.quitGame();
                         }
@@ -216,7 +216,6 @@ public class GameSceneController {
             });
 
         });
-
     }
 
     /**
@@ -1485,8 +1484,14 @@ public class GameSceneController {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("LoginScene.fxml"));
                     root = loader.load();
                     LoginSceneController loginSceneController = loader.getController();
+                    loginSceneController.setDisconnected(true);
                     loginSceneController.setClient(this.clientRMI);
+
                     Stage stage = (Stage) chatButton.getScene().getWindow();
+                    stage.setOnCloseRequest(e->{
+                        e.consume();
+                        Platform.exit();
+                    });
                     scene = new Scene(root);
                     stage.setScene(scene);
                     stage.setResizable(false);

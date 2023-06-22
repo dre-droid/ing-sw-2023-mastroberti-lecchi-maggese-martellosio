@@ -55,7 +55,9 @@ public class EndGameController {
         winnerLabel.setText("The winner is "+leaderboard.get(0).getNickname());
         Stage st = (Stage) winnerLabel.getScene().getWindow();
         st.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, e->{
+            e.consume();
             Platform.exit();
+            System.exit(0);
         });
     }
 }
