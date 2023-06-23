@@ -1,11 +1,15 @@
 package Server.Socket;
 
 public class GUISocket extends ClientSocket{
+    public final Object connectionLostLock = new Object();
+    public final Object gameEndLock = new Object();
     public final Object chatMessageLock = new Object();
     public final Object drawLock = new Object();
-    public boolean draw = false;
+
     public final Object insertLock = new Object();
     public boolean insert = false;
+    public boolean gameEnd = false;
+    public boolean draw = false;
     public GUISocket(String ip){
         this.ip = ip;
     }
@@ -95,12 +99,19 @@ public class GUISocket extends ClientSocket{
                 chatMessageLock.notifyAll();
             }
         }
+        if(line.startsWith("[GAMEEND]")){
+            synchronized (gameEndLock){
+                gameEnd = true;
+                gameEndLock.notifyAll();
+            }
+        }
+
     }
 
     protected void disconnectionAlert(){
-        synchronized (chatMessageLock){
-            chatMessage = "Connection lost, try again later";
-            chatMessageLock.notifyAll();
+        synchronized (connectionLostLock){
+            connectionLost = true;
+            connectionLostLock.notifyAll();
         }
     }
 }

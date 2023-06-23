@@ -162,7 +162,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     }
 
     @Override
-    public void updateCommonGoalTokens(List<CommonGoalCard> cgcs) throws RemoteException {
+    public void updateCommonGoalTokens() throws RemoteException {
 
     }
 }

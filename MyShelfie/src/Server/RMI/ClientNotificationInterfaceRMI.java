@@ -55,7 +55,7 @@ public interface ClientNotificationInterfaceRMI extends java.rmi.Remote{
     public void notifyOfDisconnection() throws RemoteException;
     public void broadcastedMessage(String message) throws RemoteException;
 
-    public void updateCommonGoalTokens(List<CommonGoalCard> cgcs) throws RemoteException;
+    public void updateCommonGoalTokens() throws RemoteException;
 
 
 }
