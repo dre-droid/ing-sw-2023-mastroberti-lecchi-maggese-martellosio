@@ -705,6 +705,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getNickname())){
                                         server.clientsLobby.get(i).setDisconnected(true);
+                                        clients.put(client.getNickname(), null);
                                         if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getNickname())){
                                             endOfTurn(client.getNickname());
                                         }
@@ -865,7 +866,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             if(client.getValue()!=null){
                 try {
-                    client.getValue().updateCommonGoalTokens(controller.getCommonGoalCards());
+                    client.getValue().updateCommonGoalTokens();
                 } catch (RemoteException e) {
                     System.out.println("cannot contact rmi clients");
                 }

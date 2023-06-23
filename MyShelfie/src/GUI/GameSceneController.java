@@ -217,9 +217,7 @@ public class GameSceneController {
                         //Platform.exit();
                     }
                 });
-
             });
-
         });
     }
 
