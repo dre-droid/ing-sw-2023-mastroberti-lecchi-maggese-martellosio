@@ -37,7 +37,7 @@ public abstract class ClientSocket {
     public String chatMessage = "";
     public boolean turnHasEnded = false;
     public String turnOfPlayer = "";
-    public String nextScene = "";
+    //public String nextScene = "";
     public List<Tile> drawnTiles;
     public long lastPing;
     public final long disconnectionTime = 10000;
@@ -172,7 +172,7 @@ public abstract class ClientSocket {
         if (line.startsWith("[CURRENTPLAYER]")){
             line = line.replace("[CURRENTPLAYER]", "");
             isPlaying = line;
-            turnHasEnded = true;
+            //turnHasEnded = true;
         }
         if (line.startsWith("[FIRSTPLAYERSEAT]")){
             firstPlayerSeat = true;
@@ -185,7 +185,7 @@ public abstract class ClientSocket {
 //            String gsonString = line.replace("[DRAWNTILES]", "");
 //            drawnTiles = gson.fromJson(gsonString, typeToken.getType());
 //        }
-        notifyAll();
+        //notifyAll();
     }
 
     /**

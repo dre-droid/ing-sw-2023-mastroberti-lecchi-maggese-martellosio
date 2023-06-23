@@ -1090,8 +1090,14 @@ public class GameSceneController {
             synchronized (gameStartLock) {  // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
                 new Thread(() -> {
                     try {
-                        synchronized (clientSocket) {
+                        /*synchronized (clientSocket) {
                             while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
+                        }
+
+                         */
+                        synchronized (clientSocket.turnHasEndedLock){
+                            while (!clientSocket.turnHasEnded)
+                                clientSocket.turnHasEndedLock.wait();
                         }
                         if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
                         updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
@@ -1110,8 +1116,14 @@ public class GameSceneController {
             synchronized (gameStartLock){   // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
                 while (!clientSocket.getSocket().isClosed()) {
                     try {
-                        synchronized (clientSocket) {
+                        /*synchronized (clientSocket) {
                             while (!clientSocket.turnHasEnded) clientSocket.wait();
+                        }
+
+                         */
+                        synchronized (clientSocket.turnHasEndedLock){
+                            while (!clientSocket.turnHasEnded)
+                                clientSocket.turnHasEndedLock.wait();
                         }
                         if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
                         updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());

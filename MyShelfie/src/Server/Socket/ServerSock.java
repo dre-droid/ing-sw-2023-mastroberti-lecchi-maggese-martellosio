@@ -203,7 +203,7 @@ public class ServerSock {
                         server.addPlayerToRecord(nickname, Server.connectionType.Socket);
                         out.println("[INFO] Waiting for all players to connect...");
                     }
-                    case -2 -> {    //the game has already started
+                    case -2 -> {    //the game has already started SHOULD NEVER REACH
                         out.println("[INFO] The game already started, you can't join, try again later");
                         out.println("[EXIT]");
                         clients.removeIf(socketNickStruct -> nickname.equals(socketNickStruct.getName()));

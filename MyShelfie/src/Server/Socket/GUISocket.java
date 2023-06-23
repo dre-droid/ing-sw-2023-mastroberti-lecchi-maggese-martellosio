@@ -5,11 +5,13 @@ public class GUISocket extends ClientSocket{
     public final Object gameEndLock = new Object();
     public final Object chatMessageLock = new Object();
     public final Object drawLock = new Object();
-
+    public final Object nextSceneLock = new Object();
+    public final Object turnHasEndedLock = new Object();
     public final Object insertLock = new Object();
     public boolean insert = false;
     public boolean gameEnd = false;
     public boolean draw = false;
+    public String nextScene = "";
     public GUISocket(String ip){
         this.ip = ip;
     }
@@ -49,11 +51,18 @@ public class GUISocket extends ClientSocket{
 
 
             //GUI
+            /*
             if (line.startsWith("[REQUEST] Invalid nickname") || line.startsWith("[REQUEST] Nickname already in use")){
                 line = line.replace("[REQUEST] ", "");
                 nextScene = line;
                 System.out.println("client socket " + nextScene);
             }
+            if (line.startsWith("[INFO] Game is starting.")){
+                nextScene = "GameStart";
+                turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
+            }
+
+
             else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
                 nextScene = "MatchType";
             }
@@ -71,8 +80,42 @@ public class GUISocket extends ClientSocket{
             if (line.startsWith("[GAMEEND]")) {
                 gameEnd = true;
                 turnHasEnded = true;
+            }*/
+        //notifyAll();
+        }
+        if (line.startsWith("[INFO] Game is starting.")){
+            synchronized (nextSceneLock) {
+                nextScene = "GameStart";
+                turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
+                nextSceneLock.notifyAll();
             }
-        notifyAll();
+        }
+        if (line.startsWith("[REQUEST] Invalid nickname") || line.startsWith("[REQUEST] Nickname already in use")){
+            synchronized (nextSceneLock) {
+                line = line.replace("[REQUEST] ", "");
+                nextScene = line;
+                //System.out.println("client socket " + nextScene);
+                nextSceneLock.notifyAll();
+            }
+        }
+        if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
+            synchronized (nextSceneLock) {
+                nextScene = "MatchType";
+                nextSceneLock.notifyAll();
+            }
+        }
+        if (line.startsWith("[INFO] Waiting for all players to connect...") || line.startsWith("[INFO] You have successfully rejoined the game")
+                || line.equals("[INFO] Joined a Game")){
+            synchronized (nextSceneLock) {
+                nextScene = "GameScene";
+                nextSceneLock.notifyAll();
+            }
+        }
+        if (line.equals("[INFO] Game is being created by another player...") || line.startsWith("[INFO] The game already started")){
+            synchronized (nextSceneLock) {
+                nextScene = line.replace("[INFO] ", "");
+                nextSceneLock.notifyAll();
+            }
         }
         if (line.startsWith("[MESSAGE FROM")){
             synchronized (chatMessageLock){
@@ -103,6 +146,12 @@ public class GUISocket extends ClientSocket{
             synchronized (gameEndLock){
                 gameEnd = true;
                 gameEndLock.notifyAll();
+            }
+        }
+        if(line.startsWith("[CURRENTPLAYER]")){
+            synchronized (turnHasEndedLock){
+                turnHasEnded = true;
+                turnHasEndedLock.notifyAll();
             }
         }
 

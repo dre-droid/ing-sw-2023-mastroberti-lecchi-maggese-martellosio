@@ -210,8 +210,8 @@ public class LoginSceneController{
             clientSocket.clientSpeaker(usernameText.getText());
             // wait for server response being handled by clientSocket
             do {
-                synchronized (clientSocket) {
-                    while (clientSocket.nextScene.equals("")) clientSocket.wait();
+                synchronized (clientSocket.nextSceneLock) {
+                    while (clientSocket.nextScene.equals("")) clientSocket.nextSceneLock.wait();
                 }
 
                 if (clientSocket.nextScene.equals("MatchType")) {
