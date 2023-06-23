@@ -447,8 +447,15 @@ public class GameSceneController {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
            updateShelf(shelf);
+           // update scoring tokens on common goal cards
+           for (int i = 0; i < clientSocket.getCommonGoalCards().size(); i++)
+               updateCommonGoalCardTokens(i + 1, clientSocket.getCommonGoalCards().get(i).getScoringTokens());
+           updateScoringTokens(clientSocket.getScoringTokens());
+           // update opponents shelves
            for (Player p: leaderboard)
                updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+            System.out.println("Leaderboard");
+            clientSocket.getLeaderboard().stream().forEach(el -> System.out.println(el + String.valueOf(el.getScore())));
            updateLeaderboard(leaderboard);
            createLeaderboard(leaderboard);
            if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
@@ -1113,17 +1120,6 @@ public class GameSceneController {
                 }
             }
         }).start();
-
-        new Thread(()->{
-            while(!clientSocket.gameEnd){
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    System.out.println("problem");
-                }
-            }
-            switchToEndGameScene(clientSocket.getLeaderboard());
-        }).start();
     }
 
     public void setPlayerLabels(){
@@ -1415,11 +1411,11 @@ public class GameSceneController {
         Platform.runLater(()->{
 //            System.out.println("ciao ho aggiornato i token delle common");
             if(tokens==null){
-                System.out.println("tokens null");
+//                System.out.println("tokens null");
                 return;
             }
             if(tokens.size()==0){
-                System.out.println("token size =0");
+//                System.out.println("token size =0");
                 if(n==1){
                     cgc1tokens.setImage(null);
                 }else if(n==2){
@@ -1429,19 +1425,16 @@ public class GameSceneController {
             }
             OptionalInt optionalInt = tokens.stream().mapToInt(ScoringToken::getPoints).max();
             int maxAvailablePts = optionalInt.getAsInt();
-            /*for(ScoringToken st :tokens){
-                System.out.println("token disp: "+st.getPoints());
-            }*/
             if(n==1){
                 //cgc1tokens
-               System.out.println("common goal card 1 token modificati");
+//                System.out.println("common goal card 1 token modificati");
                 cgc1tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }else if(n==2){
-                System.out.println("common goal card 2 token modificati");
+//                System.out.println("common goal card 2 token modificati");
                 cgc2tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }
             else{
-                System.out.println("N = "+n);
+//                System.out.println("N = "+n);
             }
         });
     }

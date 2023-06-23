@@ -24,6 +24,7 @@ public abstract class ClientSocket {
     protected Shelf shelf = null;
     protected PersonalGoalCard personalGoalCard = null;
     protected List<CommonGoalCard> commonGoalCards = null;
+    protected List<ScoringToken> scoringTokens = null;
     protected List<Player> leaderboard = null;
     protected String nickname = null;
     protected Socket socket = null;
@@ -156,6 +157,11 @@ public abstract class ClientSocket {
         if (line.startsWith("[NICKNAME]")) {
             nickname = line.replace("[NICKNAME]", "");
         }
+        if (line.startsWith("[GSONSCORINGTOKENS]")){
+            line = line.replace("[GSONSCORINGTOKENS]", "");
+            TypeToken<List<ScoringToken>> typeToken = new TypeToken<>() {};
+            scoringTokens = gson.fromJson(line, typeToken.getType());
+        }
         if (line.startsWith("[GSONPGMAP]")){
             line = line.replace("[GSONPGMAP]", "");
             TypeToken<Map<Integer, PersonalGoalCard>> typeToken = new TypeToken<>() {};
@@ -245,6 +251,7 @@ public abstract class ClientSocket {
     public List<CommonGoalCard> getCommonGoalCards() {
         return commonGoalCards;
     }
+    public List<ScoringToken> getScoringTokens() {return scoringTokens;}
     public List<Player> getLeaderboard() {
         return leaderboard;
     }

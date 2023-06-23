@@ -17,6 +17,7 @@ CLI
     1. Mostrare quanti token ci sono sulle common goal (solo RMI)
     2. X - Gestire fine gioco (sia RMI che socket)
     3. Check that the selected tiles can be inserted like in GUI
+    4. Check che ci sia spazio nella shelf come in GUI!!
 
     //optional
     1. Shrink CLI print
@@ -27,4 +28,5 @@ Both
 
     //optional
     1. No one notified of who disconnected
+    2. Unify all clients data structures (game.players, socket.clients, server.map, server.lobby, servermi.clients)
     2. problem when two players quit at the same moment

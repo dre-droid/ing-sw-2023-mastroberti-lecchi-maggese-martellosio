@@ -335,7 +335,7 @@ public class Controller {
 
         do {
             try {
-                info = serverSock.drawInquiry(this.getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), this.getLeaderboard());
+                info = serverSock.drawInquiry(getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), getScoringToken(getNameOfPlayerWhoIsCurrentlyPlaying()), getLeaderboard());
                 if (!Objects.isNull(info)) {    //null object is passed when player disconnects during turn
                     //System.out.println("Object was passed");
                     game.playTurn(info.getX(), info.getY(), info.getAmount(), info.getDirection(), info.getColumn(), info.getTiles());

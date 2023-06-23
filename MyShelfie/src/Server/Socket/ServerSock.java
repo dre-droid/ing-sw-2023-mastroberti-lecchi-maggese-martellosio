@@ -455,7 +455,7 @@ public class ServerSock {
      * @param shelf - client's board
      * @return drawInfo, a struct containing which tiles are drawn and the column where they are to be placed in client's shelf
      */
-    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard) throws InvalidMoveException {
+    public drawInfo drawInquiry(String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<ScoringToken> scoringTokens, List<Player> leaderboard) throws InvalidMoveException {
         Socket playerSocket = null;
         List<Tile> drawnTiles = new ArrayList<>();
         drawInfo drawInfo = new drawInfo();
@@ -475,7 +475,7 @@ public class ServerSock {
 
         try {
             PrintWriter out = new PrintWriter(playerSocket.getOutputStream(), true);
-            sendSerializedObjects(out, nickname, b, shelf, pgc, cgc, leaderboard);
+            sendSerializedObjects(out, nickname, b, shelf, pgc, cgc, scoringTokens, leaderboard, true);
 
             boolean imbecille = false;
             boolean invalidMoveFlag = false;
@@ -696,11 +696,10 @@ public class ServerSock {
      * Sends serialized objects to specified PrintWriter
      * @param out the specifiec PrintWriter
      */
-    private void sendSerializedObjects(PrintWriter out, String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<Player> leaderboard){
+    private void sendSerializedObjects(PrintWriter out, String nickname, Board b, Shelf shelf, PersonalGoalCard pgc, List<CommonGoalCard> cgc, List<ScoringToken> scoringTokens, List<Player> leaderboard, boolean pgcMap){
         //*************** SERIALIZATION ***************
         if (nickname != null)
             out.println("[NICKNAME]" + nickname);
-
         if (b!= null) {
             String jsonBoard = gson.toJson(b);
             out.println("[GSONBOARD]" + jsonBoard);
@@ -716,13 +715,23 @@ public class ServerSock {
         if (cgc != null) {
             String jsonCommonGoal = gson.toJson(cgc);
             out.println("[GSONCGC]" + jsonCommonGoal);
+            System.out.println("Tokens size for common goal card 1: " + controller.getCommonGoalCards().get(0).getScoringTokens().size());
+            System.out.println("Tokens size for common goal card 2: " + controller.getCommonGoalCards().get(1).getScoringTokens().size());
+        }
+        if (scoringTokens != null){
+            String jsonScoringTokens = gson.toJson(scoringTokens);
+            out.println("[GSONSCORINGTOKENS]" + jsonScoringTokens);
         }
         if (leaderboard != null) {
             String jsonLeaderboard = gson.toJson(leaderboard);
             out.println("[GSONLEAD]" + jsonLeaderboard);
+            System.out.println("Leaderboard");
+            controller.getLeaderboard().stream().forEach(el -> System.out.println(el + String.valueOf(el.getScore())));
         }
-        String jsonPGMap = gson.toJson(controller.getPGCmap());
-        out.println("[GSONPGMAP]" + jsonPGMap);
+        if (pgcMap) {
+            String jsonPGMap = gson.toJson(controller.getPGCmap());
+            out.println("[GSONPGMAP]" + jsonPGMap);
+        }
         //*********************************************
     }
 
@@ -792,7 +801,7 @@ public class ServerSock {
         try {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
-                sendSerializedObjects(pw, c.getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getLeaderboard());
+                sendSerializedObjects(pw, c.getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getScoringToken(c.getName()), controller.getLeaderboard(), true);
                 pw.println("[CURRENTPLAYER]" + nickname);
                 pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
             }
@@ -804,7 +813,7 @@ public class ServerSock {
     public void notifyGameEnd(/*String nick*/) throws IOException {
         for (socketNickStruct c: clients){
             PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-            sendSerializedObjects(out, null, null, null, null, null, controller.getLeaderboard());
+            sendSerializedObjects(out, null, null, null, null, null, controller.getScoringToken(c.getName()), controller.getLeaderboard(), false);
             out.println("[GAMEEND]: The game has ended.");
         }
     }
@@ -836,7 +845,7 @@ public class ServerSock {
     }
 
     /**
-     * Sends all clients a serialized copy of the game board and of the leaderboard. Also sends the nick of the current
+     * Sends all clients a serialized copy of the game board, leaderboard, player's scoring tokens and common goal cards. Also sends the nick of the current
      * player - this notifies that the turn has ended.
      * Note: leaderboard is a List<Player>, so it contains all players' instance fields.
      */
@@ -844,14 +853,17 @@ public class ServerSock {
         try {
             for (socketNickStruct s : clients) {
                 PrintWriter pw = new PrintWriter(s.getSocket().getOutputStream(), true);
-                String jsonBoard = gson.toJson(controller.getBoard());
-                pw.println("[GSONBOARD]" + jsonBoard);
-                System.out.println("Serialized board");
 
-                String jsonLeaderboard = gson.toJson(controller.getLeaderboard());
-                pw.println("[GSONLEAD]" + jsonLeaderboard);
+                Board b = controller.getBoard();
+                List<CommonGoalCard> commonGoalCards = controller.getCommonGoalCards();
+                List<ScoringToken> scoringTokens = controller.getScoringToken(s.getName());
+                List<Player> leaderboard = controller.getLeaderboard();
 
+                // send clients objects above
+                sendSerializedObjects(pw, null, b, null, null, commonGoalCards, scoringTokens, leaderboard, false);
+                // updated current player
                 pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+
                 }
         }catch (Exception e){
             e.printStackTrace();
