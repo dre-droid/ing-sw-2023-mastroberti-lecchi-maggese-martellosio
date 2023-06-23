@@ -160,15 +160,6 @@ public class GameSceneController {
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
-
-            //TODO refactor code below (chat setting) to a private method
-            /*
-            messageTextArea2.setVisible(true);
-            messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
-            messageTextArea2.appendText("\n");
-            chatButton.setVisible(true);
-            chatTextField.setVisible(true);
-             */
            updateBoard(board);
            setPersonalGoalCardImage(pgc, pgcMap);
            createLeaderboard(leaderboard);
@@ -185,12 +176,11 @@ public class GameSceneController {
            }
            else{
                updateShelf(clientSocket.getShelf().getGrid(), PlayerShelfGrid);
+               // update opp shelf
                for (Player p: clientSocket.getLeaderboard())
-                    updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+                   updateOppShelf(p.getNickname(), p.getShelf().getGrid());
                updateLeaderboard(clientSocket.getLeaderboard());
                updateScoringTokens(clientSocket.getScoringTokens());
-               if (clientSocket.hasFirstPlayerSeat()) setFirstPlayerSeat();
-
            }
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
@@ -465,10 +455,7 @@ public class GameSceneController {
            // update opponents shelves
            for (Player p: leaderboard)
                updateOppShelf(p.getNickname(), p.getShelf().getGrid());
-            System.out.println("Leaderboard");
-            clientSocket.getLeaderboard().stream().forEach(el -> System.out.println(el + String.valueOf(el.getScore())));
            updateLeaderboard(leaderboard);
-           createLeaderboard(leaderboard);
            if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
                drawIsOver = false;
         });
@@ -684,7 +671,6 @@ public class GameSceneController {
         }
     }
 
-    //TODO it should be that you cant press checkmark button if drawn tiles cant fit in any column
     /**
      * Sends the server a request to insert the tiles in the selected column of the shelf.
      * Calls updateGameScene().
@@ -1085,6 +1071,8 @@ public class GameSceneController {
     }
 
     //****** socket specific ********//
+    private final Object gameStartLock = new Object();
+
     /**
      * Creates threads to run updateGUIIfGameHasStarted and socketUpdateGUI
      */
@@ -1099,35 +1087,39 @@ public class GameSceneController {
      * @throws InterruptedException
      */
     public void socketInitializeGameScene(){
-        new Thread(() -> {
-            try {
-                synchronized (clientSocket) {
-                    while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
-                }
-                updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
-                setPlayerName(clientSocket.getNickname());
-                clientSocket.turnHasEnded = false;
-            }catch (InterruptedException e){
-                e.printStackTrace();
+            synchronized (gameStartLock) {  // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
+                new Thread(() -> {
+                    try {
+                        synchronized (clientSocket) {
+                            while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
+                        }
+                        updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
+                        setPlayerName(clientSocket.getNickname());
+                        clientSocket.turnHasEnded = false;
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }).start();
             }
-        }).start();
     }
 
     public void socketUpdateGameScene(){
         new Thread(() -> {
             // runs for the whole duration of the game
-            while (!clientSocket.getSocket().isClosed()){
-                try {
-                    synchronized (clientSocket) {
-                        while (!clientSocket.turnHasEnded) clientSocket.wait();
+            synchronized (gameStartLock){   // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
+                while (!clientSocket.getSocket().isClosed()) {
+                    try {
+                        synchronized (clientSocket) {
+                            while (!clientSocket.turnHasEnded) clientSocket.wait();
+                        }
+                        //System.out.println("Updated game scene");
+                        //System.out.println(clientSocket.isPlaying);
+                        updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
+                        clientSocket.turnHasEnded = false;
                     }
-                    //System.out.println("Updated game scene");
-                    //System.out.println(clientSocket.isPlaying);
-                    updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
-                    clientSocket.turnHasEnded = false;
-                }
-                catch (Exception e){
-                    e.printStackTrace();
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
