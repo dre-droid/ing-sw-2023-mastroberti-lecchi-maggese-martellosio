@@ -342,6 +342,7 @@ public class Controller {
                     serverSock.turnEnd(thisTurnsPlayer.getShelf(), thisTurnsPlayer.getNickname());
                     saveGameProgress();
                     server.serverRMI.updateBoard();
+                    server.serverRMI.checkIfCommonGoalsHaveBeenFulfilled(getNameOfPlayerWhoIsCurrentlyPlaying());
                     server.serverRMI.updateEndOfTurnObjects(thisTurnsPlayer.getNickname());
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
                     invalidMoveFlag = false;

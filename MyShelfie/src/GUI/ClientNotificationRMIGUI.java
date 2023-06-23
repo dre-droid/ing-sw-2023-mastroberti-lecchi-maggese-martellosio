@@ -290,6 +290,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
         System.out.println("common goal number: "+nOfCommonGoalCard);
         if(nOfCommonGoalCard==0){
+            for(ScoringToken st: serverRMI.getCgcTokens(cgc)){
+                System.out.println(st.getPoints());
+            }
             this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
         }else if (nOfCommonGoalCard==1){
             this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));

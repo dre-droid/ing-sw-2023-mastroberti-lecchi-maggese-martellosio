@@ -33,7 +33,7 @@ public class CommonGoalCard implements Serializable {
                 tokens.add(token4pts);
                 tokens.add(token6pts);
                 tokens.add(token8pts);
-            }
+            }break;
             case 4: {
                 ScoringToken token6pts = new ScoringToken(6);
                 ScoringToken token2pts = new ScoringToken(2);

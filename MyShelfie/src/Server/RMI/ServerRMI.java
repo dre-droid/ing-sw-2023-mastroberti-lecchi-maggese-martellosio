@@ -311,7 +311,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     }
 
 
-    private void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
+    public void checkIfCommonGoalsHaveBeenFulfilled(String playerNickname) throws RemoteException {
         if(playerNickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())) {
             if (controller.checkIfCommonGoalN1IsFulfilled(playerNickname)) {
 
