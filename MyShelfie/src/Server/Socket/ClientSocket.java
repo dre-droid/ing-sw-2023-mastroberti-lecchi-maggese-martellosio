@@ -174,7 +174,7 @@ public abstract class ClientSocket {
 //            String gsonString = line.replace("[DRAWNTILES]", "");
 //            drawnTiles = gson.fromJson(gsonString, typeToken.getType());
 //        }
-        notify();
+        notifyAll();
     }
 
     /**

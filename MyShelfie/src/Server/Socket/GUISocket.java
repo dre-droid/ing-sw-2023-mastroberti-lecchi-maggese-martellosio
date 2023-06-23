@@ -93,7 +93,7 @@ public class GUISocket extends ClientSocket{
         }
         if(line.startsWith("[INFO] You have successfully rejoined the game")){
             synchronized (chatMessageLock){
-                chatMessage = "Connection lost, try again later";
+                chatMessage = "You have successfully rejoined the game";
                 chatMessageLock.notifyAll();
             }
         }
