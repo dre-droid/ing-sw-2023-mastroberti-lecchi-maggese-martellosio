@@ -856,4 +856,21 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
     }
 
+    public String getFirstPlayerToPlay(){
+        Optional<Player> first = controller.getPlayers().stream().filter(Player::getFirstPlayerSeat).findFirst();
+        return first.map(Player::getNickname).orElse(null);
+    }
+
+    public void updateCommonGoalTokens(){
+        for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+            if(client.getValue()!=null){
+                try {
+                    client.getValue().updateCommonGoalTokens(controller.getCommonGoalCards());
+                } catch (RemoteException e) {
+                    System.out.println("cannot contact rmi clients");
+                }
+            }
+        }
+    }
+
 }

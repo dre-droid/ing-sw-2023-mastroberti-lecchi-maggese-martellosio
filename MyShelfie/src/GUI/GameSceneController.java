@@ -50,8 +50,10 @@ public class GameSceneController {
     public ImageView MyShelf;
     @FXML
     public GridPane RearrangeTiles;
-    @FXML
+
     public ImageView firstPlayerSeat;
+    @FXML
+    public ImageView endGameToken;
     @FXML
     public Text TopLabel;
     @FXML
@@ -1440,12 +1442,12 @@ public class GameSceneController {
     }
 
     /**
-     * this method is used to add the first player seat token to the gui (to be used only by the starting player
+     * this method is used to set the end game token
      */
     public void setEndGameToken(){
         Platform.runLater(()->{
             Image img = new Image("scoring_tokens/endgame.jpg", 60,60,true, false);
-            firstPlayerSeat.setImage(img);
+            endGameToken.setImage(img);
         });
     }
 
@@ -1529,6 +1531,10 @@ public class GameSceneController {
         Platform.runLater(()->{
             Platform.exit();
         });
+    }
+
+    public void setFirstPlayerSeat(){
+        firstPlayerSeat.setImage(new Image("misc/firstplayertoken.png",50,50,true,false));
     }
 }
 //TODO RMI currently can send but not recieve messages to/from socket

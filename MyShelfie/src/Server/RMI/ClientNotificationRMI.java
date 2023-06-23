@@ -160,4 +160,9 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
     public void broadcastedMessage(String message) throws RemoteException{
         System.out.println(message);
     }
+
+    @Override
+    public void updateCommonGoalTokens(List<CommonGoalCard> cgcs) throws RemoteException {
+
+    }
 }

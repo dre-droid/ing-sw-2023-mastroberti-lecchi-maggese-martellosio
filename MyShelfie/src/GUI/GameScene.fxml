@@ -382,7 +382,6 @@
       </Text>
       <ImageView fx:id="myEndGameToken" fitHeight="44.0" fitWidth="65.0" layoutX="362.0" layoutY="615.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="MyToken2" fitHeight="44.0" fitWidth="65.0" layoutX="465.0" layoutY="615.0" pickOnBounds="true" preserveRatio="true" />
-      <ImageView fx:id="EndGameToken1" fitHeight="63.0" fitWidth="93.0" layoutX="729.0" layoutY="107.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="EndGameToken2" fitHeight="63.0" fitWidth="93.0" layoutX="725.0" layoutY="284.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="EndGameToken3" fitHeight="63.0" fitWidth="93.0" layoutX="725.0" layoutY="449.0" pickOnBounds="true" preserveRatio="true" />
       <GridPane fx:id="TokenContainer" layoutX="516.0" layoutY="646.0" prefHeight="174.0" prefWidth="200.0">
@@ -395,7 +394,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <ImageView fx:id="firstPlayerSeat" fitHeight="48.0" fitWidth="54.0" layoutX="397.0" layoutY="339.0" pickOnBounds="true" preserveRatio="true" rotate="7.1" />
+      <ImageView fx:id="endGameToken" fitHeight="48.0" fitWidth="54.0" layoutX="397.0" layoutY="339.0" pickOnBounds="true" preserveRatio="true" rotate="7.1" />
       <GridPane fx:id="RearrangeTiles" layoutX="344.0" layoutY="597.0" prefHeight="54.0" prefWidth="166.0">
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -409,5 +408,6 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
       </GridPane>
+      <ImageView fx:id="firstPlayerSeat" fitHeight="63.0" fitWidth="65.0" layoutX="445.0" layoutY="465.0" pickOnBounds="true" preserveRatio="true" />
    </children>
 </AnchorPane>

@@ -69,4 +69,6 @@ public interface RMIinterface extends java.rmi.Remote{
     public List<Player> getPlayers() throws RemoteException;
 
     public boolean haveIEndGameToken(String nickname) throws RemoteException;
+
+    public String getFirstPlayerToPlay() throws RemoteException;
 }

@@ -207,6 +207,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             commonGoalCards = serverRMI.getCommonGoalCards();
             List<Player> leaderboard = serverRMI.getLeaderboard();
             String isPlaying = serverRMI.getIsPlaying();
+            if(serverRMI.getFirstPlayerToPlay().equals(nickname)){
+                gsc.setFirstPlayerSeat();
+            }
             if(gsc!=null) {
                 System.out.println("gsc non è null per "+nickname);
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
@@ -461,6 +464,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void broadcastedMessage(String message) throws RemoteException {
         if(!Objects.isNull(gsc))
             gsc.rmiMessageTextArea(message);
+    }
+
+    @Override
+    public void updateCommonGoalTokens(List<CommonGoalCard> cgcs) throws RemoteException {
+        gsc.updateCommonGoalCardTokens(1, cgcs.get(0).getScoringTokens());
+        gsc.updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
     }
 
     public List<ScoringToken> getMyToken(){
