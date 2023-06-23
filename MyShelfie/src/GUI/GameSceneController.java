@@ -447,8 +447,8 @@ public class GameSceneController {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
            updateShelf(shelf);
-           //for (Player p: leaderboard)
-           //    updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+           for (Player p: leaderboard)
+               updateOppShelf(p.getNickname(), p.getShelf().getGrid());
            updateLeaderboard(leaderboard);
            createLeaderboard(leaderboard);
            if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
