@@ -181,6 +181,7 @@ public class GameSceneController {
                    updateOppShelf(p.getNickname(), p.getShelf().getGrid());
                updateLeaderboard(clientSocket.getLeaderboard());
                updateScoringTokens(clientSocket.getScoringTokens());
+               if (clientSocket.hasFirstPlayerSeat()) setFirstPlayerSeat();
            }
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
@@ -1539,6 +1540,5 @@ public class GameSceneController {
     }
 }
 //TODO RMI currently can send but not recieve messages to/from socket
-//TODO visualize common goal tokens in gui
 //TODO socket should display error message when quitting
 //TODO make client locally insert tiles to speed up loading time
