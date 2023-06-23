@@ -97,8 +97,14 @@ public class ServerSock {
                 if (imbecille) {
                     if (nicknameAlreadyInUse)
                         out.println("[REQUEST] Nickname already in use. Try again:");
-                    else
-                        out.println("[REQUEST] Invalid nickname. Try again:");
+                    else{
+                        if(controller.hasGameStarted()){
+                            out.println("[REQUEST] Invalid nickname, the game already started, insert the nickname of a disconnected player");
+                        }
+                        else {
+                            out.println("[REQUEST] Invalid nickname. Try again:");
+                        }
+                    }
                 }
                 nickname = reader.readLine();
                 if (nickname.equals("[PING]")) break;
@@ -115,7 +121,7 @@ public class ServerSock {
                 }
 
                 if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") ||
-                        nickname.startsWith("/") || nickname.equals("Server") || nicknameAlreadyInUse)
+                        nickname.startsWith("/") || nickname.equals("Server") || nicknameAlreadyInUse || controller.hasGameStarted())
                     imbecille = true;
                 else
                     break;
@@ -123,11 +129,11 @@ public class ServerSock {
                 imbecille = false;
             }
         } while (true);
-        if(controller.hasGameStarted()){
-            out.println("[INFO] The game already started, you can't join, try again later");
+        //if(controller.hasGameStarted()){
+            //out.println("[INFO] The game already started, you can't join, try again later");
             //out.println("[EXIT]");
-            return;
-        }
+            //return;
+        //}
 
 
         server.clientsLobby.add(new ClientInfoStruct(nickname));

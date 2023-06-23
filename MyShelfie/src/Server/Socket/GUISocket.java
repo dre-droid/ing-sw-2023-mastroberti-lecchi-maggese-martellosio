@@ -49,7 +49,7 @@ public class GUISocket extends ClientSocket{
 
 
             //GUI
-            if (line.startsWith("[REQUEST] Invalid nickname.") || line.startsWith("[REQUEST] Nickname already in use")){
+            if (line.startsWith("[REQUEST] Invalid nickname") || line.startsWith("[REQUEST] Nickname already in use")){
                 line = line.replace("[REQUEST] ", "");
                 nextScene = line;
                 System.out.println("client socket " + nextScene);
