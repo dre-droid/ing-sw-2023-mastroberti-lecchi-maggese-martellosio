@@ -207,10 +207,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             commonGoalCards = serverRMI.getCommonGoalCards();
             List<Player> leaderboard = serverRMI.getLeaderboard();
             String isPlaying = serverRMI.getIsPlaying();
-            if(serverRMI.getFirstPlayerToPlay().equals(nickname)){
-                gsc.setFirstPlayerSeat();
-            }
+
             if(gsc!=null) {
+                if(serverRMI.getFirstPlayerToPlay().equals(nickname)){
+                    gsc.setFirstPlayerSeat();
+                }
                 System.out.println("gsc non è null per "+nickname);
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
                 if(serverRMI.haveIEndGameToken(nickname))

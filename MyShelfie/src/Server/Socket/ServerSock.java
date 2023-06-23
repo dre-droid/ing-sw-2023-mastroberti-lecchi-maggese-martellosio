@@ -429,12 +429,14 @@ public class ServerSock {
                             if (System.currentTimeMillis() - client.getLastPing() > 5000){
                                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getName())){
+                                        if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getName())){
+                                            controller.endOfTurn(client.getName());
+                                        }
                                         server.clientsLobby.get(i).setDisconnected(true);
                                         server.notifyLobbyDisconnection(client.getName());
                                         return;
                                     }
                                 }
-
                             }
                         }
                     }
