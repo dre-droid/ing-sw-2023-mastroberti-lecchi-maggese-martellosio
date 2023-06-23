@@ -19,7 +19,7 @@ import java.io.PrintWriter;
 
 public abstract class ClientSocket {
 
-    public boolean gameEnd;
+
     protected Board board = null;
     protected Shelf shelf = null;
     protected PersonalGoalCard personalGoalCard = null;
@@ -30,7 +30,7 @@ public abstract class ClientSocket {
     protected String nickname = null;
     protected Socket socket = null;
     protected Map<Integer, PersonalGoalCard> pgcMap = null;
-
+    public boolean connectionLost = false;
     public final Gson gson = new GsonBuilder().registerTypeAdapter(StrategyCommonGoal.class, new StrategyAdapter()).create();
     public String isPlaying = "";
     public String messageFromServer = "";

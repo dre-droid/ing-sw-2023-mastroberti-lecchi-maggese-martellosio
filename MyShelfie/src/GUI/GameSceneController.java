@@ -648,7 +648,7 @@ public class GameSceneController {
      * @param pos1 column of the first element to swap
      * @param pos2 column of the second element to swap
      */
-    public synchronized void switchDrawnTiles(int pos1, int pos2){
+    public /*synchronized*/ void switchDrawnTiles(int pos1, int pos2){
         if(pos1>=0 && pos1<drawnTilesCounter && pos2>=0 && pos2<drawnTilesCounter){
             Node temp1 = getNodeAt(0, pos1, TileToBeInserted);
             Node temp2 = getNodeAt(0, pos2, TileToBeInserted);
@@ -1122,6 +1122,32 @@ public class GameSceneController {
                         e.printStackTrace();
                     }
                 }
+            }
+        }).start();
+        //thread to launch endGameScene
+        new Thread(() -> {
+            synchronized (clientSocket.gameEndLock){
+                while(!clientSocket.gameEnd) {
+                    try {
+                        clientSocket.gameEndLock.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            switchToEndGameScene(clientSocket.getLeaderboard());
+        }).start();
+        //thread to go back login if disconnected
+        new Thread(() -> {
+            synchronized (clientSocket.connectionLostLock){
+                while(!clientSocket.connectionLost) {
+                    try {
+                        clientSocket.connectionLostLock.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                backToLogin();
             }
         }).start();
     }
