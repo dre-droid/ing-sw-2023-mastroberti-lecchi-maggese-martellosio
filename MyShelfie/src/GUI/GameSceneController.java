@@ -183,6 +183,15 @@ public class GameSceneController {
                updateLeaderboard(clientRMI.getLeaderboard());
                updateScoringTokens(clientRMI.getMyToken());
            }
+           else{
+               updateShelf(clientSocket.getShelf().getGrid(), PlayerShelfGrid);
+               for (Player p: clientSocket.getLeaderboard())
+                    updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+               updateLeaderboard(clientSocket.getLeaderboard());
+               updateScoringTokens(clientSocket.getScoringTokens());
+               if (clientSocket.hasFirstPlayerSeat()) setFirstPlayerSeat();
+
+           }
            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
            drawIsOver = false;

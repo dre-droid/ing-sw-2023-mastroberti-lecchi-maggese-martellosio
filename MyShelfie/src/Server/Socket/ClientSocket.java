@@ -26,6 +26,7 @@ public abstract class ClientSocket {
     protected List<CommonGoalCard> commonGoalCards = null;
     protected List<ScoringToken> scoringTokens = null;
     protected List<Player> leaderboard = null;
+    protected boolean firstPlayerSeat = false;
     protected String nickname = null;
     protected Socket socket = null;
     protected Map<Integer, PersonalGoalCard> pgcMap = null;
@@ -172,6 +173,9 @@ public abstract class ClientSocket {
             isPlaying = line;
             turnHasEnded = true;
         }
+        if (line.startsWith("[FIRSTPLAYERSEAT]")){
+            firstPlayerSeat = true;
+        }
         if (line.equals("[PING]")){
             lastPing = System.currentTimeMillis();
         }
@@ -265,6 +269,10 @@ public abstract class ClientSocket {
         return pgcMap;
     }
     public boolean isMyTurn() {return isPlaying.equals(nickname);}
+
+    public boolean hasFirstPlayerSeat() {
+        return firstPlayerSeat;
+    }
 }
 
 

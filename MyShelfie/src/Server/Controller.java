@@ -469,6 +469,15 @@ public class Controller {
         return copy;
     }
 
+    /**
+     * @return the nickname of the player with firstPlayerSeat
+     */
+    public String getFirstPlayer(){
+        for (Player p: game.getPlayerList())
+            if (p.hasFirstPlayerSeat()) return p.getNickname();
+        return null;
+    }
+
     public int getNumOfPlayers(){
         return game.getNumOfPlayers();
     }

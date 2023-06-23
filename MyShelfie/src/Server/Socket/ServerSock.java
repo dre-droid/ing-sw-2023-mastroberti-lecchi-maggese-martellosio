@@ -802,6 +802,7 @@ public class ServerSock {
             for (socketNickStruct c : clients) {
                 PrintWriter pw = new PrintWriter(c.getSocket().getOutputStream(), true);
                 sendSerializedObjects(pw, c.getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(c.getName())), controller.getPGC(c.getName()), controller.getCommonGoalCards(), controller.getScoringToken(c.getName()), controller.getLeaderboard(), true);
+                if (controller.getFirstPlayer().equals(c.getName())) pw.println("[FIRSTPLAYERSEAT]");
                 pw.println("[CURRENTPLAYER]" + nickname);
                 pw.println("[INFO]: Game is starting. " + nickname + "'s turn.");
             }
