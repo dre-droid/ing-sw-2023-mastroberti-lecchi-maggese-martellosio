@@ -157,6 +157,7 @@ public abstract class ClientSocket {
         }
         if (line.startsWith("[NICKNAME]")) {
             nickname = line.replace("[NICKNAME]", "");
+            System.out.println("**testing** Nickname: " + nickname);
         }
         if (line.startsWith("[GSONSCORINGTOKENS]")){
             line = line.replace("[GSONSCORINGTOKENS]", "");
