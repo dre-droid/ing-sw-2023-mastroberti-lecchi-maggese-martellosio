@@ -468,16 +468,18 @@ public class GameSceneController {
      * @param grid
      */
     public void updateOppShelf(String nickname, Tile[][] grid){
+        System.out.println("GRID");
+        System.out.println(new Shelf(grid));
         if(Opp1ShelfGrid.getUserData()!=null)
-            if(((String)Opp1ShelfGrid.getUserData()).equals(nickname)){
-            updateShelf(grid,Opp1ShelfGrid);
+            if((Opp1ShelfGrid.getUserData()).equals(nickname)){
+                updateShelf(grid,Opp1ShelfGrid);
             }
         if(Opp2ShelfGrid.getUserData()!=null)
-            if(((String)Opp2ShelfGrid.getUserData()).equals(nickname)){
+            if((Opp2ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp2ShelfGrid);
             }
         if(Opp3ShelfGrid.getUserData()!=null)
-            if(((String)Opp3ShelfGrid.getUserData()).equals(nickname)){
+            if((Opp3ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp3ShelfGrid);
             }
     }
@@ -889,7 +891,6 @@ public class GameSceneController {
                     }
                 }
         });
-
     }
 
     /**
@@ -1094,6 +1095,7 @@ public class GameSceneController {
                         synchronized (clientSocket) {
                             while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
                         }
+                        if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
                         updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
                         setPlayerName(clientSocket.getNickname());
                         clientSocket.turnHasEnded = false;
@@ -1113,8 +1115,7 @@ public class GameSceneController {
                         synchronized (clientSocket) {
                             while (!clientSocket.turnHasEnded) clientSocket.wait();
                         }
-                        //System.out.println("Updated game scene");
-                        //System.out.println(clientSocket.isPlaying);
+                        if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
                         updateGameScene(clientSocket.isPlaying, clientSocket.getBoard().getBoardForDisplay(), clientSocket.getLeaderboard(), clientSocket.getShelf());
                         clientSocket.turnHasEnded = false;
                     }
@@ -1148,11 +1149,11 @@ public class GameSceneController {
                         }
                         case 1 -> {
                             Opp2ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp2ShelfGrid);
                         }
                         case 2 -> {
                             Opp3ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+                            updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp3ShelfGrid);
                         }
                     }
                 }
@@ -1165,11 +1166,11 @@ public class GameSceneController {
                         }
                         case 1 -> {
                             Opp2ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+                            updateShelf(players.get(i).getShelf().getGrid(), Opp2ShelfGrid);
                         }
                         case 2 -> {
                             Opp3ShelfGrid.setUserData(players.get(i).getNickname());
-                            updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+                            updateShelf(players.get(i).getShelf().getGrid(), Opp3ShelfGrid);
                         }
                     }
                 }

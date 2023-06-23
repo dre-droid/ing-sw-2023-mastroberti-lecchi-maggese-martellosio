@@ -97,11 +97,10 @@ public class Server {
             }
 
             //game end handling
-            System.out.println("Game has ended. Accepting players for new game...");
+            System.out.println("Game has ended.");
+            serverSock.notifyGameEnd();
             serverRMI.notifyEndOfGame();
             controller.deleteProgress();
-            //wait(100000);
-            //Thread.sleep(100000);
             //serverSock.flushServer();
             //serverRMI.flushServer();    //needs testing
 

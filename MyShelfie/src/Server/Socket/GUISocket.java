@@ -38,12 +38,6 @@ public class GUISocket extends ClientSocket{
                 System.out.println(line);
                 System.out.println("******************************");
             }
-            if (line.startsWith("[GAMEEND]")) {
-                System.out.println(line);
-                //printLeaderboard();
-                gameEnd = true;
-                //System.exit(0);
-            }
             if(line.equals("[EXIT]")){
                 System.exit(0);
             }
@@ -69,6 +63,10 @@ public class GUISocket extends ClientSocket{
             if (line.startsWith("[INFO] Game is starting.")){
                 nextScene = "GameStart";
                 turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
+            }
+            if (line.startsWith("[GAMEEND]")) {
+                gameEnd = true;
+                turnHasEnded = true;
             }
         notifyAll();
         }
@@ -98,6 +96,7 @@ public class GUISocket extends ClientSocket{
             }
         }
     }
+
     protected void disconnectionAlert(){
         synchronized (chatMessageLock){
             chatMessage = "Connection lost, try again later";

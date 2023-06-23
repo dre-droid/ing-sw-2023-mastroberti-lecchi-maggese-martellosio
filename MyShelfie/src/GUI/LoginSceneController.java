@@ -303,4 +303,3 @@ public class LoginSceneController{
 
 
 }
-//TODO add popup to quit game on closing window also on socket
