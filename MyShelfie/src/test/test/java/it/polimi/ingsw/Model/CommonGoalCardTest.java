@@ -300,6 +300,30 @@ public class CommonGoalCardTest {
         }
         assertFalse(cgc.isSatisfiedBy(player));
     }
+    @Test
+    public void isSatisfied_TwoLinesOfDifferentType_shelfDoesNotMatchTheGoal_returnTrueFra(){
+        Player player = new Player("Asdrubale", false, null);
+        TwoLinesOfDifferentTypes twoLinesOfDifferentTypes = new TwoLinesOfDifferentTypes();
+        CommonGoalCard cgc = new CommonGoalCard(twoLinesOfDifferentTypes, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[5][0] = new Tile(Type.TROPHY);
+        grid[5][1] = new Tile(Type.GAME);
+        grid[5][2] = new Tile(Type.PLANT);
+        grid[5][3] = new Tile(Type.FRAME);
+        grid[5][4] = new Tile(Type.CAT);
+
+        grid[4][0] = new Tile(Type.TROPHY);
+        grid[4][1] = new Tile(Type.GAME);
+        grid[4][2] = new Tile(Type.PLANT);
+        grid[4][3] = new Tile(Type.FRAME);
+        grid[4][4] = new Tile(Type.CAT);
+
+        grid[3][2] = new Tile(Type.CAT);
+
+        assertTrue(cgc.isSatisfiedBy(player));
+
+    }
 
     @Test
     public void isSatisfied_IncreasingOrDecreasingHeight_DecreasingColumnsStartingFrom5Height_returnTrue(){
@@ -450,6 +474,31 @@ public class CommonGoalCardTest {
         grid[3][3] = new Tile(Type.TROPHY);
         assertFalse(cgc.isSatisfiedBy(player));
     }
+    @Test
+    public void isSatisfied_SquaredShapedGroups_squaresOverlap_returnTrueAndrea(){
+        Player player = new Player("Save", false, null);
+        SquaredShapedGroups squaredShapedGroups = new SquaredShapedGroups();
+        CommonGoalCard cgc = new CommonGoalCard(squaredShapedGroups, 3);
+        Shelf shelf = player.getShelf();
+        Tile[][] grid = shelf.getGrid();
+        grid[5][0] = new Tile(Type.TROPHY);
+        grid[4][0] = new Tile(Type.TROPHY);
+        grid[5][1] = new Tile(Type.TROPHY);
+        grid[4][1] = new Tile(Type.TROPHY);
+
+        grid[2][2] = new Tile(Type.BOOK);
+        grid[2][3] = new Tile(Type.BOOK);
+        grid[3][2] = new Tile(Type.BOOK);
+        grid[3][3] = new Tile(Type.BOOK);
+
+        grid[4][2]= new Tile(Type.BOOK);
+        grid[5][3]= new Tile(Type.GAME);
+        grid[4][3]= new Tile(Type.BOOK);
+        grid[5][2]= new Tile(Type.GAME);
+        assertTrue(cgc.isSatisfiedBy(player));
+
+    }
+
 
     @Test
     public void isSatisfied_SixGroupsOfAtLeastTwoSameTypeTiles_shelfMatchGoal_returnTrue(){

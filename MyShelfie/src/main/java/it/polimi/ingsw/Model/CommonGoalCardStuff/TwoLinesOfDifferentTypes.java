@@ -8,33 +8,35 @@ import java.io.Serializable;
  * checks if there are two rows containing tiles of all different types
  */
 public class TwoLinesOfDifferentTypes implements StrategyCommonGoal, Serializable {
+    @Override
     public boolean executeStrategy(Shelf shelf) {
         Tile[][] shelfGrid = shelf.getGrid();
-        boolean repeated=false;
+        boolean repeated;
         int rowcount=0;
 
-        for(int row=0;row<5;row++){
+        for(int row=0;row<6;row++){
+            repeated = false;
+            outerLoop:
             for(int i=0;i<5;i++){
                 for(int j=i+1;j<5;j++){
-                    if(shelfGrid[row][i]== null || shelfGrid[row][j]== null)
+                    if(shelfGrid[row][i]== null || shelfGrid[row][j]== null) {
                         repeated = true;
-                    else{
-                        if (shelfGrid[row][i] != null && shelfGrid[row][j] != null)
-                            if(shelfGrid[row][i].getType() == shelfGrid[row][j].getType()){
-                                repeated=true;
+                        break outerLoop;
+                    }else{
+                        if(shelfGrid[row][i].getType() == shelfGrid[row][j].getType()){
+                            repeated=true;
+                            break outerLoop;
                         }
                     }
                 }
             }
             if (!repeated)
                 rowcount++;
-            repeated = false;
 
         }
-        if (rowcount>=2)
-            return true ;
-        else
-            return false;
+        System.out.println(rowcount);
+        return  (rowcount >= 2);
+
     }
 
     @Override
