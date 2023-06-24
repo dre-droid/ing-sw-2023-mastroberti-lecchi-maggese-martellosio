@@ -536,9 +536,14 @@ public class ServerSock {
                 imbecille = false;
 
                 //asks for tile quantity to be drawn
+                boolean tooManyTilesDrawn = false;
                 do {
-                    if (imbecille)
-                        out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
+                    if (imbecille){
+                        if (tooManyTilesDrawn)
+                            out.println("[REQUEST] Invalid Input! No column in your shelf can fit that many tiles! How many tiles do you want to draw?");
+                        else
+                            out.println("[REQUEST] Invalid Input! How many tiles do you want to draw?");
+                    }
                     else
                         out.println("[REQUEST] How many tiles do you want to draw?");
                     //waits for input
@@ -550,8 +555,19 @@ public class ServerSock {
                         return null;
 
                     line = messageBuffer.remove(0);
+                    //Check if there's a column that can fit the amount of tiles selected
+                    tooManyTilesDrawn = true;
+                    if(isNumeric(line) && Integer.parseInt(line) > 0 && Integer.parseInt(line) < 4) {
+                        for (int i = 0; i < 5; i++) {
+                            if (shelf.canItFit(Integer.parseInt(line), i))
+                                tooManyTilesDrawn = false;
+                        }
+                    }
+                    else{
+                        tooManyTilesDrawn = false;
+                    }
                     imbecille = true;
-                } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1);
+                } while (!isNumeric(line) || Integer.parseInt(line) > 3 || Integer.parseInt(line) < 1 || tooManyTilesDrawn);
                 drawInfo.setAmount(Integer.parseInt(line));
                 imbecille = false;
 
