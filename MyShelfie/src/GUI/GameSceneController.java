@@ -125,6 +125,7 @@ public class GameSceneController {
     public GridPane PlayerShelfGrid;
     public Label PlayerName;
     private int drawnTilesCounter;
+    private int maxDrawableTiles;
     private List<Position> alreadyDrawnPositions;
     private int[] reorderedList = new int[3];
     private boolean leaderboardCheck = false;
@@ -228,6 +229,15 @@ public class GameSceneController {
     public void updateBoard(TilePlacingSpot[][] grid){
 //        System.out.println("board should be updated 777777777");
         Platform.runLater(() -> {
+            //Calculates the available spaces in the emptiest column of the player shelf
+            maxDrawableTiles = 0;
+            Shelf shelf = Objects.isNull(clientSocket) ? new Shelf(clientRMI.getMyShelf()) : clientSocket.getShelf();
+            for (int j = 1; j < 4; j++) {
+                for (int i = 0; i < 5; i++) {
+                    if (shelf.canItFit(j, i))
+                        maxDrawableTiles = Integer.max(maxDrawableTiles, j);
+                }
+            }
             alreadyDrawnPositions = new ArrayList<>();
             removeDrawnTilesFromBoard(grid);
             EventHandler<MouseEvent> eventHandler = e -> {
@@ -496,7 +506,7 @@ public class GameSceneController {
                 return;
         }
         if(!drawIsOver){
-            if (drawnTilesCounter < 3) {
+            if (drawnTilesCounter < Integer.min(maxDrawableTiles, 3)) {
                 //System.out.println(event.getSource().toString());
                 Rectangle sender = (Rectangle) event.getSource();
                 int row = transformIntegerToInt(GridPane.getRowIndex(sender));
