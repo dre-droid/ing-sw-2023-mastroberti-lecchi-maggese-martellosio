@@ -10,7 +10,13 @@ GUI
         SIA SOCKET CHE RMI
     9. CLI deve controllare che ci sia spazio nella shelf prima di pescare le tiles
     10. add first player seat to gui and fix end game token in gui
+    11. Endgame token
+
+
     //optional
+    1. Display scoring tokens to other players
+    2. Make leaderboard 4 rows long
+
 
 
 CLI
@@ -30,3 +36,9 @@ Both
     1. No one notified of who disconnected
     2. Unify all clients data structures (game.players, socket.clients, server.map, server.lobby, servermi.clients)
     2. problem when two players quit at the same moment
+
+TODAY
+1. Gestire playerJoin quando partita è già cominciata (deve tornare a prima di playerJoin)
+2. EndGameToken
+3. RMI mostrare messaggio di errore in loginScene
+4. Usare un solo tipo di tile
