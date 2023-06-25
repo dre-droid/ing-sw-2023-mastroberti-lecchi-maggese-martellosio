@@ -27,6 +27,7 @@ public abstract class ClientSocket {
     protected List<ScoringToken> scoringTokens = null;
     protected List<Player> leaderboard = null;
     protected boolean firstPlayerSeat = false;
+    protected boolean hasEndGameToken = false;
     protected String nickname = null;
     protected Socket socket = null;
     protected Map<Integer, PersonalGoalCard> pgcMap = null;
@@ -43,54 +44,26 @@ public abstract class ClientSocket {
     public final long disconnectionTime = 10000;
     protected String ip = "127.0.0.1";
 
-    public void runServer(){
-        Scanner userInput = new Scanner(System.in);
-        boolean connected;
-        String serverIp;
-        System.out.println("First of all insert the ip address of the server:");
-        do {
-            serverIp = userInput.nextLine();
-            try{
-                InetAddress inetAddress = InetAddress.getByName(serverIp);
-                if(inetAddress instanceof Inet4Address){
-                    if(serverIp.equals(inetAddress.getHostAddress())){
-                        if(serverIp.equals("127.0.0.2")){
-                            connected = false;
-                        }
-                        else{
-                            System.out.println("correct ip: "+serverIp);
-                            try{
-                                //connect to server
-                                socket= new Socket(serverIp,59010);
-                                socket.setKeepAlive(true);
-                                connected = true;
 
+   public ClientSocket(String ip){this.ip=ip;}
 
-                                try{
-                                    serverListener();
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-
-                            } catch (IOException e) {throw new RuntimeException(e);}
-                        }
-                    }
-                    else{
-                        connected = false;
-                    }
-                }
-                else{
-                    connected=false;
-                }
-            }catch(UnknownHostException uhe){
-                connected = false;
-            }
-            if(!connected){
-                System.out.println("The ip you used is not a correct ip or it does not correspond to the server ip");
-            }
-        }while(!connected);
-
+    public void runServer() {
+       try {
+           //connect to server
+           socket = new Socket(ip, 59010);
+           socket.setKeepAlive(true);
+           serverListener();
+       } catch (SocketException e) {
+           throw new RuntimeException(e);
+       } catch (UnknownHostException e) {
+           throw new RuntimeException(e);
+       } catch (IOException e) {
+           throw new RuntimeException(e);
+       }
     }
+
+
+
 
     /**
      * Creates a thread that sends a PING to the server every 5 seconds
@@ -308,6 +281,10 @@ public abstract class ClientSocket {
     public boolean hasFirstPlayerSeat() {
         return firstPlayerSeat;
     }
+
+    public boolean hasEndGameToken(){return hasEndGameToken();}
+
+
 }
 
 

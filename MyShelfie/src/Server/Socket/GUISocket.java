@@ -13,7 +13,7 @@ public class GUISocket extends ClientSocket{
     public boolean draw = false;
     public String nextScene = "";
     public GUISocket(String ip){
-        this.ip = ip;
+        super(ip);
     }
     /**
      * Handles server's received messages

@@ -5,6 +5,11 @@ import main.java.it.polimi.ingsw.Model.Shelf;
 import java.util.Scanner;
 
 public class CLISocket extends ClientSocket{
+
+    public CLISocket(String ip) {
+        super(ip);
+    }
+
     /**
      * Handles server's received messages
      */
