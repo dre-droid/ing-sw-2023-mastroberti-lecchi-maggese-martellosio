@@ -476,8 +476,6 @@ public class GameSceneController {
      * @param grid
      */
     public void updateOppShelf(String nickname, Tile[][] grid){
-        System.out.println("GRID");
-        System.out.println(new Shelf(grid));
         if(Opp1ShelfGrid.getUserData()!=null)
             if((Opp1ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp1ShelfGrid);
