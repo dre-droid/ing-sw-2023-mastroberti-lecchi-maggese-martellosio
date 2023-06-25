@@ -62,8 +62,8 @@ public class SquaredShapedGroups implements StrategyCommonGoal, Serializable {
         int sqx=0;
         int sqy=0;
         outerLoop:
-        for (int col = 0; col < 5; col++) {
-            for (int raw = 0; raw < 6; raw++) {
+        for (int col = 0; col < 4; col++) {
+            for (int raw = 0; raw < 5; raw++) {
                 if (shelfGrid[raw][col] != null && shelfGrid[raw + 1][col + 1] != null && shelfGrid[raw][col + 1] != null && shelfGrid[raw + 1][col] != null) {
                     if (shelfGrid[raw][col].getType() == shelfGrid[raw + 1][col + 1].getType() && shelfGrid[raw][col].getType() == shelfGrid[raw][col + 1].getType() && shelfGrid[raw][col].getType() == shelfGrid[raw + 1][col].getType()) {
                         sqx = raw;
