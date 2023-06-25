@@ -162,6 +162,7 @@ public class LoginSceneController{
                                 }));
                                 MatchTypeController mtt = loader.getController();
                                 mtt.setClient(clientRMI);
+
                                 Platform.runLater(stage::show);
                             }break;
                             case -2:{
@@ -288,6 +289,10 @@ public class LoginSceneController{
                 stage.setScene(scene);
                 stage.setResizable(false);
                 stage.show();
+                stage.setOnCloseRequest(e->{
+                    Platform.exit();
+                    System.exit(0);
+                });
             });
 
 
