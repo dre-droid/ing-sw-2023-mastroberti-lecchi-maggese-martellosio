@@ -106,7 +106,7 @@ public class LoginSceneController{
                         Parent root = loader.load();
                         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                         scene = new Scene(root);
-                        stage.setScene(scene);
+                        Platform.runLater(()->stage.setScene(scene));
 
                         GameSceneController gsc = loader.getController();
                         gsc.setClient(clientRMI);
@@ -114,8 +114,8 @@ public class LoginSceneController{
                             gsc.getClientRMI().updateGUIAtBeginningOfGame();
                         gsc.setPlayerName(clientRMI.getNickname());
 
-                        stage.setResizable(false);
-                        stage.show();
+                        Platform.runLater(()->stage.setResizable(false));
+                        Platform.runLater(stage::show);
 
                     }
                     else{
@@ -156,10 +156,10 @@ public class LoginSceneController{
                                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                                 scene = new Scene(root);
                                 Platform.runLater(() -> stage.setScene(scene));
-                                stage.setOnCloseRequest(e->{
+                                Platform.runLater(()->stage.setOnCloseRequest(e->{
                                     Platform.exit();
                                     System.exit(0);
-                                });
+                                }));
                                 MatchTypeController mtt = loader.getController();
                                 mtt.setClient(clientRMI);
                                 Platform.runLater(stage::show);
@@ -183,7 +183,7 @@ public class LoginSceneController{
                                     gsc.getClientRMI().updateGUIAtBeginningOfGame();
                                 gsc.setPlayerName(clientRMI.getNickname());
 
-                                stage.setResizable(false);
+                                Platform.runLater(()->stage.setResizable(false));
                                 Platform.runLater(stage::show);
                             }break;
                             default:{
@@ -267,9 +267,9 @@ public class LoginSceneController{
             gameSceneController.setPlayerName(clientSocket.getNickname());
 
             scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
+            Platform.runLater(()->stage.setScene(scene));
+            Platform.runLater(()->stage.setResizable(false));
+            Platform.runLater(()->stage.show());
         });
     }
     private void socketSwitchToMatchTypeScene(ActionEvent event){
@@ -284,9 +284,13 @@ public class LoginSceneController{
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             matchTypeController.setClient(clientSocket);
             scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
+            Platform.runLater(()->{
+                stage.setScene(scene);
+                stage.setResizable(false);
+                stage.show();
+            });
+
+
         });
     }
 
