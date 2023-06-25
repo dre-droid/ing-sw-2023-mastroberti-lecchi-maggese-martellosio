@@ -40,6 +40,7 @@ public class LoginSceneController{
 
 
 
+
     private Stage stage;
     private Scene scene;
     private Parent root;
@@ -74,20 +75,20 @@ public class LoginSceneController{
      * Method is called when button is pressed in ConnectionType scene
      */
     public void switchToNextScene(ActionEvent event) {
-        try {
-            if (Objects.isNull(clientSocket)) handleRMIv2(event);
+        if (!alive) { //handles spamming button
+            if (Objects.isNull(clientSocket))
+                new Thread(() -> handleRMIv2(event)).start();
             else {
-                if (!alive) //handles spamming button
-                    new Thread(() -> handleSocket(event)).start();
+                new Thread(() -> handleSocket(event)).start();
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
         }
+        else
+            updateLabelText(messageTextArea, messageTextArea.getText());
     }
 
 
-    private void handleRMIv2(ActionEvent event) throws IOException, InterruptedException{
-        System.out.println("ciao v3");
+    private void handleRMIv2(ActionEvent event){
+        alive = true;
         if(clientRMI!=null){
             System.out.println("rmi active on login scene");
             clientRMI.setnickname(usernameText.getText());
@@ -142,8 +143,9 @@ public class LoginSceneController{
                             updateLabelText(messageTextArea, "Game is being created by another player...");
                         }
                         synchronized (clientRMI){
-                            while(clientRMI.joinGameOutcome == -5)
+                            while(clientRMI.joinGameOutcome == -5){
                                 clientRMI.wait();
+                            }
                         }
                         switch(clientRMI.joinGameOutcome){
                             case -1:{
@@ -153,14 +155,14 @@ public class LoginSceneController{
                                 Parent root = loader.load();
                                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                                 scene = new Scene(root);
-                                stage.setScene(scene);
+                                Platform.runLater(() -> stage.setScene(scene));
                                 stage.setOnCloseRequest(e->{
                                     Platform.exit();
                                     System.exit(0);
                                 });
                                 MatchTypeController mtt = loader.getController();
                                 mtt.setClient(clientRMI);
-                                stage.show();
+                                Platform.runLater(stage::show);
                             }break;
                             case -2:{
                                 errorMessage = "The game has already started";
@@ -173,7 +175,7 @@ public class LoginSceneController{
                                 Parent root = loader.load();
                                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                                 scene = new Scene(root);
-                                stage.setScene(scene);
+                                Platform.runLater(() -> stage.setScene(scene));
 
                                 GameSceneController gsc = loader.getController();
                                 gsc.setClient(clientRMI);
@@ -182,7 +184,7 @@ public class LoginSceneController{
                                 gsc.setPlayerName(clientRMI.getNickname());
 
                                 stage.setResizable(false);
-                                stage.show();
+                                Platform.runLater(stage::show);
                             }break;
                             default:{
                                 //not yet implemented
@@ -196,6 +198,12 @@ public class LoginSceneController{
                 //send to error page
                 updateLabelText(messageTextArea, "cannot connect to server");
             }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+            finally {
+                alive = false;
+            }
         }
        /* Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
         stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -204,6 +212,7 @@ public class LoginSceneController{
         stage.setResizable(false);
         stage.show();*/
     }
+
     private void handleSocket(ActionEvent event){
         try {
             alive = true;
@@ -282,24 +291,26 @@ public class LoginSceneController{
     }
 
     private void updateLabelText(Label label, String string) {
-        // if message is unchanged, animate a yellow blink to give feedback
-        if (messageTextArea.getText().equals(string)) {
-            Duration ANIMATION_DURATION = Duration.seconds(0.3);
+        Platform.runLater(() -> {
+            // if message is unchanged, animate a yellow blink to give feedback
+            if (messageTextArea.getText().equals(string)) {
+                Duration ANIMATION_DURATION = Duration.seconds(0.15);
 
-            Timeline timeline = new Timeline();
+                Timeline timeline = new Timeline();
 
-            KeyValue keyValue1 = new KeyValue(label.textFillProperty(), Color.YELLOW);
-            KeyFrame keyFrame1 = new KeyFrame(ANIMATION_DURATION, keyValue1);
-            KeyValue keyValue2 = new KeyValue(label.textFillProperty(), label.getTextFill());
-            KeyFrame keyFrame2 = new KeyFrame(ANIMATION_DURATION.multiply(2), keyValue2);
+                KeyValue keyValue1 = new KeyValue(label.textFillProperty(), Color.YELLOW);
+                KeyFrame keyFrame1 = new KeyFrame(ANIMATION_DURATION, keyValue1);
+                KeyValue keyValue2 = new KeyValue(label.textFillProperty(), Color.WHITE);
+                KeyFrame keyFrame2 = new KeyFrame(ANIMATION_DURATION.multiply(2), keyValue2);
 
-            timeline.getKeyFrames().addAll(keyFrame1, keyFrame2);
+                timeline.getKeyFrames().addAll(keyFrame1, keyFrame2);
 
-            timeline.setOnFinished(event -> label.setText(string));
+                timeline.setOnFinished(event -> label.setText(string));
 
-            timeline.play(); // start the timeline
-        } else
-            messageTextArea.setText(string);
+                timeline.play(); // start the timeline
+            } else
+                messageTextArea.setText(string);
+        });
     }
 
 

@@ -38,7 +38,7 @@ Both
     2. problem when two players quit at the same moment
 
 TODAY
-1. Gestire playerJoin quando partita è già cominciata (deve tornare a prima di playerJoin)
+1. (Non sono riuscito, per adesso semplicemente chiude il programma.) Gestire playerJoin quando partita è già cominciata (deve tornare a prima di playerJoin)
 2. EndGameToken
-3. RMI mostrare messaggio di errore in loginScene
+3. (I think it does already, fixed the freezing tho) RMI mostrare messaggio di errore in loginScene
 4. Usare un solo tipo di tile
