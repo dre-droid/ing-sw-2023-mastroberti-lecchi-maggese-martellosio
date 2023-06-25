@@ -163,8 +163,7 @@ public class Game {
                 //refill board if necessary
                 board.refill();
 
-                //if someone's shelf is full then enter the last round
-                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
+
 
                 //update score and leaderboard
                 isPlaying.updateScore();
@@ -186,6 +185,9 @@ public class Game {
                     printLeaderBoard();
                     endGame();
                 }
+
+                //if someone's shelf is full then enter the last round
+                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
                 else isPlaying = nextPlayer;
 
                 turnCount++;                                            //increase turnCount
