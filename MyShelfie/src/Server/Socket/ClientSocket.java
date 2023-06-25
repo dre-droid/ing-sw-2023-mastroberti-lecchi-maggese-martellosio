@@ -183,6 +183,10 @@ public abstract class ClientSocket {
         if (line.equals("[PING]")){
             lastPing = System.currentTimeMillis();
         }
+        if(line.equals("[ENDGAMETOKEN]")){
+            hasEndGameToken=true;
+            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$You have received the end game toke$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        }
 //        if (line.startsWith("[DRAWNTILES]")){
 //            TypeToken<List<Tile>> typeToken = new TypeToken<>() {};
 //            String gsonString = line.replace("[DRAWNTILES]", "");
@@ -279,8 +283,7 @@ public abstract class ClientSocket {
         return firstPlayerSeat;
     }
 
-    public boolean hasEndGameToken(){return hasEndGameToken();}
-
+    public boolean hasEndGameToken(){return hasEndGameToken;}
 
 }
 

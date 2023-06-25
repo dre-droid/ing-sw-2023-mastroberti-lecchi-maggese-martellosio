@@ -844,6 +844,15 @@ public class ServerSock {
             out.println("[GAMEEND]: The game has ended.");
         }
     }
+    public void notifyEndGameToken(String nick) throws IOException{
+        for(socketNickStruct c:clients){
+            if(nick.equals(c.getName())){
+                PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
+                sendMessage("[ENDGAMETOKEN]",nick);
+            }
+        }
+
+    }
 
     /**
      * This method is used to update the client at the end of their turn - it informs them the turn has successfully ended and shows them their updated shelf
@@ -863,6 +872,8 @@ public class ServerSock {
             PrintWriter pw = new PrintWriter(playerSocket.getOutputStream(), true);
             String jsonShelf = gson.toJson(updatedShelf);
             pw.println("[GSONSHELF]" + jsonShelf);
+            if(controller.hasEndgameToken(nickname))
+                pw.println("[ENDGAMETOKEN]");
             pw.println("[TURNEND] Your turn has ended! Waiting for next player.");
             updateGameObjectsAfterTurn();
         }
@@ -931,5 +942,7 @@ public class ServerSock {
         synchronized (this){
             notifyAll();
         }
+
     }
+
 }

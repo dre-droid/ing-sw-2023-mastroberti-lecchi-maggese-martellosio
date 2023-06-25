@@ -457,6 +457,8 @@ public class GameSceneController {
            updateTurnLabel(nextPlayer);
            updateBoard(board);
            updateShelf(shelf);
+           if(clientSocket.hasEndGameToken())
+               setEndGameToken();
            // update scoring tokens on common goal cards
            for (int i = 0; i < clientSocket.getCommonGoalCards().size(); i++)
                updateCommonGoalCardTokens(i + 1, clientSocket.getCommonGoalCards().get(i).getScoringTokens());
@@ -963,6 +965,22 @@ public class GameSceneController {
 
     }
 
+  /*  private void updateCG(List<CommonGoalCard> cgcs, int i){
+        if(clientSocket != null){
+            for(Player p: clientSocket.getLeaderboard()){
+                int num = clientSocket.getLeaderboard().size();
+                if(cgcs.get(i).isSatisfiedBy(p) && !cgcs.get(i).hasAlredyBeenRewarded(p)){
+                    switch (cgcs.get(i).getTokens().get(cgcs.get(i).getTokens().size()-1).getPoints()){
+
+                    }
+                }
+            }
+        }
+
+    }
+*/
+
+
 
 
     /**
@@ -1171,6 +1189,10 @@ public class GameSceneController {
         }).start();
     }
 
+    /**
+     * @author SaverioMaggese99
+     * this method set players tokens and shelfs
+     */
     public void setPlayerLabels(){
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
@@ -1494,7 +1516,7 @@ public class GameSceneController {
     public void setEndGameToken(){
         Platform.runLater(()->{
             Image img = new Image("scoring_tokens/endgame.jpg", 60,60,true, false);
-            endGameToken.setImage(img);
+            MyEndGameToken.setImage(img);
         });
     }
 
