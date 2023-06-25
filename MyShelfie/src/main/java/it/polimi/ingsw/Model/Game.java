@@ -181,13 +181,16 @@ public class Game {
                 // if last turn
                 if (lastRound && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){       // set last turn
                     endGame();
-                }else isPlaying = nextPlayer;
+                }
+                else isPlaying = nextPlayer;
 
                 turnCount++;                                            //increase turnCount
             }
         }
     }
 
+    //******************
+    //*** used by Socket ***
     /**
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player

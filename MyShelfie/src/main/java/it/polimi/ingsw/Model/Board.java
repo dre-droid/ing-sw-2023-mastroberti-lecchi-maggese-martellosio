@@ -294,7 +294,7 @@ public class Board {
      * position with new tiles drawn from the bag
      */
     public void refill() {
-        if (this.isRefillneeded() == true) {
+        if (this.isRefillneeded()) {
             //this section clean the board from the remaining Tiles left on the board
             for (int i = 0; i < NumOfRows; i++) {
                 for (int j = 0; j < NumOfColumns; j++) {
@@ -353,7 +353,7 @@ public class Board {
                     }
                     //case for all the other tiles
                     else {
-                        if (!(grid[i + 1][j].isEmpty() && grid[i - 1][i].isEmpty() && grid[i][j + 1].isEmpty() && grid[i][j - 1].isEmpty()))
+                        if (!(grid[i + 1][j].isEmpty() && grid[i - 1][j].isEmpty() && grid[i][j + 1].isEmpty() && grid[i][j - 1].isEmpty()))
                             anyTileIsNotIsolated = true;
                     }
                 }
