@@ -349,7 +349,6 @@ public class Controller {
                     invalidMoveFlag = false;
                     if(game.hasTheGameEnded()){
                         System.out.println("Correctly ended game.");
-                        endGame();
                     }
                 }
                 else{
@@ -358,8 +357,6 @@ public class Controller {
             } catch (InvalidMoveException e) {
                 invalidMoveFlag = true;
                 e.printStackTrace();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }while(invalidMoveFlag);
     }

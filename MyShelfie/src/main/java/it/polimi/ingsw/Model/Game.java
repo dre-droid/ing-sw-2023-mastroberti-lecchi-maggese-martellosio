@@ -21,6 +21,7 @@ public class Game {
     private final HashMap<Integer, PersonalGoalCard> validTilesMap = new HashMap<>();
     private Board board;
     private int turnCount;
+    int lastPlayerIndex;
     private boolean lastTurn;
     private boolean lastRound;
     private boolean gameHasEnded;
@@ -175,26 +176,18 @@ public class Game {
                 if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
                 nextPlayer = iterator.next();
 
-                if (lastRound && isPlaying.hasFirstPlayerSeat()){       //last turn
-                    isPlaying = nextPlayer;
-                    setLastTurnFlag();
-                }
-                if (lastTurn) {                                         //game end
-                    for (Player p: leaderBoard) {
-                        p.updateFinalScore();
-                    }
-                    printLeaderBoard();
+//                System.out.println("Is playing: " + isPlaying + ". Has endgametoken: " + isPlaying.hasEndGameToken());
+//                System.out.println("Last player ind: " + lastPlayerIndex + " last player: " + playersList.get(lastPlayerIndex));
+                // if last turn
+                if (lastRound && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){       // set last turn
                     endGame();
-                }
-                else isPlaying = nextPlayer;
+                }else isPlaying = nextPlayer;
 
                 turnCount++;                                            //increase turnCount
             }
         }
     }
 
-    //******************
-    //*** used by Socket ***
     /**
      * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player
@@ -280,6 +273,9 @@ public class Game {
         iterator = playersList.iterator();
         while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname()));
         isPlaying = playersList.get(starter);
+        lastPlayerIndex = (playersList.indexOf(isPlaying) + 1) % playersList.size();
+        playersList.stream().forEach(System.out::println);
+        System.out.println("Last player index is " + lastPlayerIndex);
     }
     /**
      * Chooses two random and distinct common goal cards and adds them to the commonGoalCards list
