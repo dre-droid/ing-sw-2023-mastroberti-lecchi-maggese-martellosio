@@ -225,8 +225,11 @@ public class LoginSceneController{
                     String string = clientSocket.nextScene;
                     Platform.runLater(() -> updateLabelText(messageTextArea, string));
                     clientSocket.nextScene = "";
-                    if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname"))
+                    if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname") || string.startsWith("The game already started"))
                         break;
+                    if (string.startsWith("The game already started, you can't join, try again later")){
+                        System.exit(0);
+                    }
                 }
             }while(!clientSocket.nextScene.equals("GameScene") && !clientSocket.nextScene.equals("MatchType"));
         }catch(InterruptedException | RuntimeException e){
@@ -279,7 +282,6 @@ public class LoginSceneController{
     }
 
     private void updateLabelText(Label label, String string) {
-        System.out.println("ciao pappappero");
         // if message is unchanged, animate a yellow blink to give feedback
         if (messageTextArea.getText().equals(string)) {
             Duration ANIMATION_DURATION = Duration.seconds(0.3);

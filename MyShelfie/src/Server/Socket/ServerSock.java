@@ -121,7 +121,7 @@ public class ServerSock {
                 }
 
                 if (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") ||
-                        nickname.startsWith("/") || nickname.equals("Server") || nicknameAlreadyInUse || controller.hasGameStarted())
+                        nickname.startsWith("/") || nickname.startsWith("[") || nickname.equals("Server") || nicknameAlreadyInUse || controller.hasGameStarted())
                     imbecille = true;
                 else
                     break;

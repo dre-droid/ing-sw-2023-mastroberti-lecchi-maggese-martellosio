@@ -53,12 +53,8 @@ public abstract class ClientSocket {
            socket = new Socket(ip, 59010);
            socket.setKeepAlive(true);
            serverListener();
-       } catch (SocketException e) {
-           throw new RuntimeException(e);
-       } catch (UnknownHostException e) {
-           throw new RuntimeException(e);
        } catch (IOException e) {
-           throw new RuntimeException(e);
+           e.printStackTrace();
        }
     }
 
@@ -273,6 +269,7 @@ public abstract class ClientSocket {
     public Socket getSocket() {
         return socket;
     }
+    public String getIp() { return ip;}
     public Map<Integer, PersonalGoalCard> getPgcMap() {
         return pgcMap;
     }

@@ -2,6 +2,8 @@ package Server.Socket;
 
 import main.java.it.polimi.ingsw.Model.Player;
 import main.java.it.polimi.ingsw.Model.Shelf;
+
+import java.net.Socket;
 import java.util.Scanner;
 
 public class CLISocket extends ClientSocket{
@@ -17,34 +19,34 @@ public class CLISocket extends ClientSocket{
          if (line.startsWith("[YOUR TURN]")) {
             printTurn();
             System.out.println(line);
-        }
+         }
          if (line.startsWith("[INVALID MOVE]")) {
             System.out.println("You cannot select those tiles. Try again.\n");
-        }
+         }
          if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
             System.out.println(line);
-        }
-         if (line.startsWith("[INFO]: Game is starting.")){
+         }
+         if (line.startsWith("[INFO]: Game is starting.")) {
              if (!isPlaying.equals(nickname)) printTurn(isPlaying);
          }
-        if (line.startsWith("[SHELF]")) {
+         if (line.startsWith("[SHELF]")) {
             System.out.println(line);
             printShelf(getShelf());
-        }
-        if (line.startsWith("[TURNEND]")) {
+         }
+         if (line.startsWith("[TURNEND]")) {
             printShelf(getShelf());
             System.out.println();
             System.out.println(line);
             System.out.println("******************************");
         }
-         if (line.startsWith("[GAMEEND]")) {
+        if (line.startsWith("[GAMEEND]")) {
              System.out.println(line);
              printLeaderboard();
              System.exit(0);
-         }
-         if(line.equals("[EXIT]")){
+        }
+        if(line.equals("[EXIT]")){
              System.exit(0);
-         }
+        }
 
     }
 
