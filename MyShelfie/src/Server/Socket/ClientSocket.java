@@ -1,7 +1,6 @@
 package Server.Socket;
 
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.util.List;
 import java.util.Map;
 import com.google.gson.Gson;
@@ -16,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.Scanner;
 
 public abstract class ClientSocket {
 
@@ -44,18 +44,52 @@ public abstract class ClientSocket {
     protected String ip = "127.0.0.1";
 
     public void runServer(){
-        try{
-            //connect to server
-            socket= new Socket(ip,59010);
-            socket.setKeepAlive(true);
-
+        Scanner userInput = new Scanner(System.in);
+        boolean connected;
+        String serverIp;
+        System.out.println("First of all insert the ip address of the server:");
+        do {
+            serverIp = userInput.nextLine();
             try{
-                serverListener();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+                InetAddress inetAddress = InetAddress.getByName(serverIp);
+                if(inetAddress instanceof Inet4Address){
+                    if(serverIp.equals(inetAddress.getHostAddress())){
+                        if(serverIp.equals("127.0.0.2")){
+                            connected = false;
+                        }
+                        else{
+                            System.out.println("correct ip: "+serverIp);
+                            try{
+                                //connect to server
+                                socket= new Socket(serverIp,59010);
+                                socket.setKeepAlive(true);
+                                connected = true;
 
-        } catch (IOException e) {throw new RuntimeException(e);}
+
+                                try{
+                                    serverListener();
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                            } catch (IOException e) {throw new RuntimeException(e);}
+                        }
+                    }
+                    else{
+                        connected = false;
+                    }
+                }
+                else{
+                    connected=false;
+                }
+            }catch(UnknownHostException uhe){
+                connected = false;
+            }
+            if(!connected){
+                System.out.println("The ip you used is not a correct ip or it does not correspond to the server ip");
+            }
+        }while(!connected);
+
     }
 
     /**
