@@ -181,9 +181,12 @@ public class Game {
                 if (lastRound && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){       // set last turn
                     endGame();
                 }
-                else isPlaying = nextPlayer;
+                else{
+                    if (isPlaying.hasEndGameToken()) setLastRoundFlag();
+                    isPlaying = nextPlayer;
+                }
                 //if someone's shelf is full then enter the last round
-                if (isPlaying.hasEndGameToken()) setLastRoundFlag();
+
 
                 turnCount++;                                            //increase turnCount
             }
@@ -217,7 +220,11 @@ public class Game {
         }
 
         //fix insert tiles ordering
-        isPlaying.insertTiles(reorderedTiles, column);
+        Player current = getPlayerList().stream().filter(player -> player.getNickname().equals(isPlaying.getNickname())).toList().get(0);
+        insertTilesInShelf(reorderedTiles,column,current);
+
+
+        //isPlaying.insertTiles(reorderedTiles, column);
 
         //check common goal and eventually give player token
         for (CommonGoalCard c: commonGoalCards)

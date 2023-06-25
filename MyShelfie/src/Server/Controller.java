@@ -330,7 +330,7 @@ public class Controller {
      */
     public void playTurn() {
         boolean invalidMoveFlag = false;
-        Player thisTurnsPlayer = game.getIsPlaying();
+        Player thisTurnsPlayer = getPlayers().stream().filter(player -> player.getNickname().equals(game.getIsPlaying().getNickname())).toList().get(0);
         drawInfo info;
 
         do {
