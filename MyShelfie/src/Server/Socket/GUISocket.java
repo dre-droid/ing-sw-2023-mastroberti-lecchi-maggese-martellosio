@@ -2,6 +2,7 @@ package Server.Socket;
 
 public class GUISocket extends ClientSocket{
     public final Object connectionLostLock = new Object();
+
     public final Object gameEndLock = new Object();
     public final Object chatMessageLock = new Object();
     public final Object drawLock = new Object();
@@ -45,7 +46,7 @@ public class GUISocket extends ClientSocket{
                 System.out.println("******************************");
             }
             if(line.equals("[EXIT]")){
-                System.exit(0);
+                //System.exit(0);
             }
 
 

@@ -238,7 +238,9 @@ public class LoginSceneController{
                     if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname") || string.startsWith("The game already started"))
                         break;
                     if (string.startsWith("The game already started, you can't join, try again later")){
-                        System.exit(0);
+                        String ip = this.clientSocket.getIp();
+                        this.clientSocket = new GUISocket(ip);
+                        //System.exit(0);
                     }
                 }
             }while(!clientSocket.nextScene.equals("GameScene") && !clientSocket.nextScene.equals("MatchType"));

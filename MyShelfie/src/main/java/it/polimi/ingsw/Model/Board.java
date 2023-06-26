@@ -363,6 +363,9 @@ public class Board {
         return (!anyTileIsNotIsolated);
     }
 
+    /**
+     * this method is used to print on terminal the state of the board
+     */
     public void printGridMap() {
         System.out.println(" ----- Board ------");
         for (int i = -1; i < NumOfRows; i++) {

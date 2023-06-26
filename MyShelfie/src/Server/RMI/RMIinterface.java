@@ -42,7 +42,7 @@ public interface RMIinterface extends java.rmi.Remote{
 
     public String getCommonGoalCardDescription() throws RemoteException;
 
-    public void quitGame(String playerNickname) throws IOException;
+    public void quitGame(String playerNickname) throws RemoteException;
 
     public void chatMessage(String senderName, String text, String receiverName, Boolean pm) throws RemoteException;
 

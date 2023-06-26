@@ -120,6 +120,10 @@ public class GameSceneController {
     @FXML ImageView cgc1tokens;
 
     @FXML ImageView cgc2tokens;
+    @FXML ImageView OppChair1;
+    @FXML ImageView OppChair2;
+    @FXML ImageView OppChair3;
+
 
     public boolean drawIsOver;
     public GridPane PlayerShelfGrid;
@@ -1198,6 +1202,7 @@ public class GameSceneController {
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
         ImageView[] endgametokens = new ImageView[]{EndGameToken1,EndGameToken2,EndGameToken3};
+        ImageView[] chairs = new ImageView[]{OppChair1,OppChair2,OppChair3};
         int n = clientSocket == null ? clientRMI.getLeaderboard().size() : clientSocket.getLeaderboard().size();
         List<Player> players = clientSocket == null ? clientRMI.getLeaderboard() : clientSocket.getLeaderboard();
         String nickname = clientSocket == null ? clientRMI.getNickname() : clientSocket.getNickname();
@@ -1241,8 +1246,8 @@ public class GameSceneController {
                     }
                 }
 
-                if (players.get(i).hasEndGameToken())
-                    endgametokens[i].setImage(new Image("scoring_tokens/endgame.jpg"));
+                if (players.get(i).hasFirstPlayerSeat())
+                    chairs[i].setImage(new Image("misc/firstplayertoken.png"));
                 count++;
                 if (players.get(i).getNickname().equals(nickname) && players.get(i).hasEndGameToken())
                     MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));

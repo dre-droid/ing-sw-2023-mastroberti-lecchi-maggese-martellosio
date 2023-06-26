@@ -6,8 +6,6 @@ GUI
     5. Chat non visibile appena si joina la partita (solo in socket)
     6 Socket GUI deve tornare alla pagina di inizio dame quand ocrasha il server
     7. Socket deve chiedere l'indirizzo ip del server (anche su cli)
-    8. non funziona la partita a 4 giocatori, quando peschi le ultime due tile in basso crasha per index out of bound
-        SIA SOCKET CHE RMI
     9. CLI deve controllare che ci sia spazio nella shelf prima di pescare le tiles
     10. add first player seat to gui and fix end game token in gui
     11. Endgame token
