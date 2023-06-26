@@ -20,7 +20,7 @@ public class Server {
     public ServerRMI serverRMI;
     public ServerSock serverSock;
     public Map<String, connectionType> clientsMap;
-    private Controller controller;
+    public Controller controller;
     public ArrayList<ClientInfoStruct> clientsLobby;
     public boolean onlyOnePlayer = false;
     public final Object clientsLobbyLock = new Object();

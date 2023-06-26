@@ -806,7 +806,7 @@ public class ServerSock {
     /**
      * Prints message to the client that matches the 'String nickname' param in the 'socketNickStruct clients' list
      */
-    private void sendMessage(String message, String nickname){
+    public void sendMessage(String message, String nickname){
         try {
             for (socketNickStruct c : clients) {
                 if (c.getName().equals(nickname)) {

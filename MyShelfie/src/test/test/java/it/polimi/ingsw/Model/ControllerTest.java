@@ -1,10 +1,15 @@
 package test.java.it.polimi.ingsw.Model;
 
 import java.io.*;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import Server.Controller;
 import Server.RMI.ServerRMI;
 import Server.Server;
+import Server.Socket.CLISocket;
 import Server.Socket.ClientSocket;
 import Server.ClientWithChoice;
 import Server.Socket.ServerSock;
@@ -496,6 +501,7 @@ public class ControllerTest {
             assertEquals(controller.getPGC(x.getNickname()), game.getPlayerList().stream().filter(p -> p.getNickname().equals(x.getNickname())).toList().get(0).getPersonalGoalCard());
             assertEquals(controller.getPoints(x.getNickname()), game.getPlayerList().stream().filter(p -> p.getNickname().equals(x.getNickname())).toList().get(0).getScore());
         }
+        assertEquals(controller.getPoints("a"), 0);
     }
     @Test
     public void testsetServerSock(){
@@ -538,29 +544,87 @@ public class ControllerTest {
         assertTrue(game.hasTheGameEnded());
     }
 
+    @Test
+    public void playTurnTest() throws InterruptedException, IOException {
+        String filePath = "MyShelfie/src/Server/GameProgress.json";
+        Path path = Paths.get(filePath);
+
+        try {
+            // Delete the file if it exists
+            Files.deleteIfExists(path);
+            System.out.println("File deleted successfully.");
+        } catch (Exception e) {
+            // Handle any exceptions that occur during file deletion
+            System.out.println("An error occurred while deleting the file: " + e.getMessage());
+        }
+        Thread.sleep(500);
+        new Thread(() -> {
+            try {
+                server.run();
+            } catch (InterruptedException | IOException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
+        Thread.sleep(500);
+
+        ClientSocket cliSocket1 = new CLISocket("127.0.0.1");
+        cliSocket1.runServer();
+        Thread.sleep(500);
+        cliSocket1.clientSpeaker("a");
+        Thread.sleep(500);
+        cliSocket1.clientSpeaker("2");
+        ClientSocket cliSocket2 = new CLISocket("127.0.0.1");
+        Thread.sleep(500);
+        cliSocket2.runServer();
+        Thread.sleep(500);
+        cliSocket2.clientSpeaker("b");
+
+        Thread.sleep(4000);
+
+        assertNull(server.controller.getMyPersonalCard("c"));
+        assertNotNull(server.controller.getMyPersonalCard("a"));
+        assertEquals(server.controller.getAvailableScoringTokens(server.controller.getCommonGoalCards().get(0)).get(1).getPoints(), 8);
+        if(server.controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals("a")){
+            cliSocket1.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("3");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("2");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("2");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket1.clientSpeaker("2");
+            Thread.sleep(2000);
+        }
+        else{
+            cliSocket2.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("3");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("2");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("2");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("1");
+            Thread.sleep(500);
+            cliSocket2.clientSpeaker("2");
+            Thread.sleep(2000);
+        }
+        assertTrue(server.controller.getBoard().isThisPositionEmpty(1, 3));
+        assertTrue(server.controller.getBoard().isThisPositionEmpty(1, 4));
+    }
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // Add more tests to cover other methods in the Controller class
     private static String readFileContent(String filePath) throws FileNotFoundException {
         StringBuilder content = new StringBuilder();
         File file = new File(filePath);
