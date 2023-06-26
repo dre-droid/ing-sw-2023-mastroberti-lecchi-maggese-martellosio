@@ -25,8 +25,8 @@ public class Tile implements Serializable {
      * @return the path to a random image between the three available of the same type
      */
     private String setImgPath() {
-        Random random = new Random();
-        int val = random.nextInt(3) + 1;
+        //Random random = new Random();
+        int val = 1;
 
         switch (type) {
             case CAT -> {

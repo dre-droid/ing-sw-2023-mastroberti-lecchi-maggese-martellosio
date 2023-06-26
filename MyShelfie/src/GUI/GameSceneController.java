@@ -477,9 +477,9 @@ public class GameSceneController {
     }
 
     /**
-     * Updates opponents' shelves
-     * @param nickname the
-     * @param grid
+     * Updates opponent's shelf
+     * @param nickname the name of the opponent player of which we want to update the view of shelf
+     * @param grid a matrix of tiles representing the shelf of the opponent
      */
     public void updateOppShelf(String nickname, Tile[][] grid){
         if(Opp1ShelfGrid.getUserData()!=null)
@@ -544,7 +544,7 @@ public class GameSceneController {
      * This method is used to sort the elements in the gridpane TileToBeInserted based on their position on the board
      * (if they were on the same y, they are sorted with ascending x value, if they were on the same x with ascending
      * x value)
-     * @param positions
+     * @param positions list of positions of the tiles in the board
      */
     private void updateTileToBeInserted(List<Position> positions){
         positions = Position.sortPositions(positions);
