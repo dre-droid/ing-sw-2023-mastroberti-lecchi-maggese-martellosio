@@ -124,12 +124,14 @@ public class GameSceneController {
     @FXML ImageView OppChair2;
     @FXML ImageView OppChair3;
 
-
+    private String nicknameHasEnded;
     public boolean drawIsOver;
     public GridPane PlayerShelfGrid;
     public Label PlayerName;
     private int drawnTilesCounter;
     private int maxDrawableTiles;
+
+    private String nicknameFirstPlayer;
     private List<Position> alreadyDrawnPositions;
     private int[] reorderedList = new int[3];
     private boolean leaderboardCheck = false;
@@ -165,34 +167,39 @@ public class GameSceneController {
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
-           updateBoard(board);
-           setPersonalGoalCardImage(pgc, pgcMap);
-           createLeaderboard(leaderboard);
-           setCommonGoalCardImage(cgcs.get(0),1);
-           setCommonGoalCardImage(cgcs.get(1),2);
-           setPlayerLabels();
-           updateTurnLabel(isPlaying);
-           createShelfButtons();
-           if (!Objects.isNull(clientRMI)) {
-               updateShelf(clientRMI.getMyShelf(), PlayerShelfGrid);
-               clientRMI.updateOpponentsShelf();
-               updateLeaderboard(clientRMI.getLeaderboard());
-               updateScoringTokens(clientRMI.getMyToken());
-           }
-           else{
-               updateShelf(clientSocket.getShelf().getGrid(), PlayerShelfGrid);
-               // update opp shelf
-               for (Player p: clientSocket.getLeaderboard())
-                   updateOppShelf(p.getNickname(), p.getShelf().getGrid());
-               updateLeaderboard(clientSocket.getLeaderboard());
-               updateScoringTokens(clientSocket.getScoringTokens());
-               if (clientSocket.hasFirstPlayerSeat()) setFirstPlayerSeat();
-           }
-           updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
-           updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
-           drawIsOver = false;
+            for(Player player: leaderboard){
+                if(player.hasFirstPlayerSeat()){
+                    nicknameFirstPlayer= player.getNickname();
+                }
+            }
+            updateBoard(board);
+            setPersonalGoalCardImage(pgc, pgcMap);
+            createLeaderboard(leaderboard);
+            setCommonGoalCardImage(cgcs.get(0),1);
+            setCommonGoalCardImage(cgcs.get(1),2);
+            setPlayerLabels();
+            updateTurnLabel(isPlaying);
+            createShelfButtons();
+            if (!Objects.isNull(clientRMI)) {
+                updateShelf(clientRMI.getMyShelf(), PlayerShelfGrid);
+                clientRMI.updateOpponentsShelf();
+                updateLeaderboard(clientRMI.getLeaderboard());
+                updateScoringTokens(clientRMI.getMyToken());
+            }
+            else{
+                updateShelf(clientSocket.getShelf().getGrid(), PlayerShelfGrid);
+                // update opp shelf
+                for (Player p: clientSocket.getLeaderboard())
+                    updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+                updateLeaderboard(clientSocket.getLeaderboard());
+                updateScoringTokens(clientSocket.getScoringTokens());
+                if (clientSocket.hasFirstPlayerSeat()) setFirstPlayerSeat();
+            }
+            updateCommonGoalCardTokens(1,cgcs.get(0).getScoringTokens());
+            updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
+            drawIsOver = false;
 
-           //this is used to quit the game when exiting the gui
+            //this is used to quit the game when exiting the gui
             if(!alreadySet)
                 setCloseAlert();
 
@@ -446,6 +453,9 @@ public class GameSceneController {
                 final ObservableList<TableRecord> data = FXCollections.observableArrayList();
                 for (Player p : leaderboard) {
                     data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
+                    if(p.hasEndGameToken()){
+                        nicknameHasEnded = p.getNickname();
+                    }
                 }
                 TableLeaderboard.setItems(data);
             }
@@ -458,41 +468,73 @@ public class GameSceneController {
      */
     public void updateGameScene(String nextPlayer, TilePlacingSpot[][] board, List<Player> leaderboard, Shelf shelf){
         Platform.runLater(() -> {
-           updateTurnLabel(nextPlayer);
-           updateBoard(board);
-           updateShelf(shelf);
-           if(clientSocket.hasEndGameToken())
-               setEndGameToken();
-           // update scoring tokens on common goal cards
-           for (int i = 0; i < clientSocket.getCommonGoalCards().size(); i++)
-               updateCommonGoalCardTokens(i + 1, clientSocket.getCommonGoalCards().get(i).getScoringTokens());
-           updateScoringTokens(clientSocket.getScoringTokens());
-           // update opponents shelves
-           for (Player p: leaderboard)
-               updateOppShelf(p.getNickname(), p.getShelf().getGrid());
-           updateLeaderboard(leaderboard);
-           if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
-               drawIsOver = false;
+            updateTurnLabel(nextPlayer);
+            updateBoard(board);
+            updateShelf(shelf);
+            if(clientSocket != null) {
+                if (clientSocket.hasEndGameToken()){
+                    nicknameHasEnded=clientSocket.getNickname();
+                    setEndGameToken();
+                }
+            }else{
+                if(clientRMI != null){
+                    if(clientRMI.hasEndgameToken(clientRMI.getNickname())){
+                        nicknameHasEnded=clientSocket.getNickname();
+                        setEndGameToken();
+
+                    }
+                }
+            }
+            // update scoring tokens on common goal cards
+            for (int i = 0; i < clientSocket.getCommonGoalCards().size(); i++)
+                updateCommonGoalCardTokens(i + 1, clientSocket.getCommonGoalCards().get(i).getScoringTokens());
+            updateScoringTokens(clientSocket.getScoringTokens());
+            // update opponents shelves
+            for (Player p: leaderboard){
+                updateOppShelf(p.getNickname(), p.getShelf().getGrid());
+            }
+
+            updateLeaderboard(leaderboard);
+            if(Objects.equals(clientSocket.getNickname(), clientSocket.isPlaying))
+                drawIsOver = false;
         });
     }
 
     /**
-     * Updates opponent's shelf
-     * @param nickname the name of the opponent player of which we want to update the view of shelf
-     * @param grid a matrix of tiles representing the shelf of the opponent
+     * Updates opponents' shelves
+     * @param nickname the
+     * @param grid
      */
     public void updateOppShelf(String nickname, Tile[][] grid){
         if(Opp1ShelfGrid.getUserData()!=null)
             if((Opp1ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp1ShelfGrid);
+                if(nickname.equals(nicknameFirstPlayer)){
+                    OppChair1.setImage(new Image("misc/firstplayertoken.png"));
+                }
+                if(nickname.equals(nicknameHasEnded)){
+                    EndGameToken1.setImage(new Image("scoring_tokens/endgame.jpg"));
+                }
             }
         if(Opp2ShelfGrid.getUserData()!=null)
             if((Opp2ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp2ShelfGrid);
+                if(nickname.equals(nicknameFirstPlayer)){
+                    OppChair2.setImage(new Image("misc/firstplayertoken.png"));
+                }
+                if(nickname.equals(nicknameHasEnded)){
+                    EndGameToken2.setImage(new Image("scoring_tokens/endgame.jpg"));
+                }
             }
         if(Opp3ShelfGrid.getUserData()!=null)
             if((Opp3ShelfGrid.getUserData()).equals(nickname)){
                 updateShelf(grid,Opp3ShelfGrid);
+                if(nickname.equals(nicknameFirstPlayer)){
+                    OppChair3.setImage(new Image("misc/firstplayertoken.png"));
+                }
+                if(nickname.equals(nicknameHasEnded)){
+                    EndGameToken3.setImage(new Image("scoring_tokens/endgame.jpg"));
+                }
             }
     }
 
@@ -544,7 +586,7 @@ public class GameSceneController {
      * This method is used to sort the elements in the gridpane TileToBeInserted based on their position on the board
      * (if they were on the same y, they are sorted with ascending x value, if they were on the same x with ascending
      * x value)
-     * @param positions list of positions of the tiles in the board
+     * @param positions
      */
     private void updateTileToBeInserted(List<Position> positions){
         positions = Position.sortPositions(positions);
@@ -556,7 +598,7 @@ public class GameSceneController {
             if(getNodeAt(0,column, TileToBeInserted)!=null){
                 StackPane n = (StackPane) getNodeAt(0,column,TileToBeInserted);
                 Position pos = (Position) n.getUserData();
-               //System.out.println("round "+i+", "+pos.toString()+"//"+n.toString());
+                //System.out.println("round "+i+", "+pos.toString()+"//"+n.toString());
                 positionList.add(i,pos);
                 stackPaneList.add(i,n);
                 i++;
@@ -616,7 +658,7 @@ public class GameSceneController {
             // socket
             if (!Objects.isNull(clientSocket))
                 socketHandleCheckmarkButton(event);
-            // rmi
+                // rmi
             else {
                 if (!clientRMI.isMyTurn())
                     return;
@@ -735,7 +777,7 @@ public class GameSceneController {
         if(clientRMI.insertTilesInShelf(Integer.parseInt(column)));
             //System.out.println("Insert in shelf rmi successful");
         else;
-            //System.out.println("Problem in insert in shelf");
+        //System.out.println("Problem in insert in shelf");
         updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
@@ -961,8 +1003,8 @@ public class GameSceneController {
                 drawnTilesCounter--;
                 Position p = (Position) stackPane.getUserData();
                 alreadyDrawnPositions.stream().filter(
-                                position -> (position.getX()==p.getX() && position.getY()==p.getY())
-                        ).findFirst().ifPresent(position->alreadyDrawnPositions.remove(position));
+                        position -> (position.getX()==p.getX() && position.getY()==p.getY())
+                ).findFirst().ifPresent(position->alreadyDrawnPositions.remove(position));
                 updateTileToBeInserted(alreadyDrawnPositions);
             }
         }
@@ -996,7 +1038,7 @@ public class GameSceneController {
         boolean oneSideFree = false;
         int row, column;
         //check up
-       // System.out.println("UP:");
+        // System.out.println("UP:");
         row = p.getX();
         column = p.getY()-1;
         if(getNodeAt(row, column, BoardGrid)==null){
@@ -1117,27 +1159,27 @@ public class GameSceneController {
      * @throws InterruptedException
      */
     public void socketInitializeGameScene(){
-            synchronized (gameStartLock) {  // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
-                new Thread(() -> {
-                    try {
+        synchronized (gameStartLock) {  // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously
+            new Thread(() -> {
+                try {
                         /*synchronized (clientSocket) {
                             while (!clientSocket.turnHasEnded) clientSocket.wait();    // waits for game to start
                         }
 
                          */
-                        synchronized (clientSocket.turnHasEndedLock){
-                            while (!clientSocket.turnHasEnded)
-                                clientSocket.turnHasEndedLock.wait();
-                        }
-                        if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
-                        updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
-                        setPlayerName(clientSocket.getNickname());
-                        clientSocket.turnHasEnded = false;
-                    }catch (InterruptedException e){
-                        e.printStackTrace();
+                    synchronized (clientSocket.turnHasEndedLock){
+                        while (!clientSocket.turnHasEnded)
+                            clientSocket.turnHasEndedLock.wait();
                     }
-                }).start();
-            }
+                    if (clientSocket.gameEnd) switchToEndGameScene(clientSocket.getLeaderboard());
+                    updateGUIAtBeginningOfGame(clientSocket.getBoard().getBoardForDisplay(), clientSocket.getPgcMap(), clientSocket.getPersonalGoalCard(), clientSocket.getCommonGoalCards(), clientSocket.getLeaderboard(), clientSocket.isPlaying);
+                    setPlayerName(clientSocket.getNickname());
+                    clientSocket.turnHasEnded = false;
+                }catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     public void socketUpdateGameScene(){
@@ -1195,7 +1237,8 @@ public class GameSceneController {
 
     /**
      * @author SaverioMaggese99
-     * this method set players tokens and shelfs
+     * this method set players tokens and shelfs at the beginning of the game and is called
+     * in updateGUIatBeginningofGAme
      */
     public void setPlayerLabels(){
         int count = 0;
@@ -1217,10 +1260,13 @@ public class GameSceneController {
                         case 0 -> {
                             Opp1ShelfGrid.setUserData(players.get(i).getNickname());
                             updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp1ShelfGrid);
+
+
                         }
                         case 1 -> {
                             Opp2ShelfGrid.setUserData(players.get(i).getNickname());
                             updateShelf(clientRMI.getShelfOfPlayer(players.get(i).getNickname()), Opp2ShelfGrid);
+
                         }
                         case 2 -> {
                             Opp3ShelfGrid.setUserData(players.get(i).getNickname());
@@ -1234,6 +1280,7 @@ public class GameSceneController {
                         case 0 -> {
                             Opp1ShelfGrid.setUserData(players.get(i).getNickname());
                             updateShelf(players.get(i).getShelf().getGrid(), Opp1ShelfGrid);
+
                         }
                         case 1 -> {
                             Opp2ShelfGrid.setUserData(players.get(i).getNickname());
@@ -1242,12 +1289,11 @@ public class GameSceneController {
                         case 2 -> {
                             Opp3ShelfGrid.setUserData(players.get(i).getNickname());
                             updateShelf(players.get(i).getShelf().getGrid(), Opp3ShelfGrid);
+
                         }
                     }
                 }
 
-                if (players.get(i).hasFirstPlayerSeat())
-                    chairs[i].setImage(new Image("misc/firstplayertoken.png"));
                 count++;
                 if (players.get(i).getNickname().equals(nickname) && players.get(i).hasEndGameToken())
                     MyEndGameToken.setImage(new Image("scoring_tokens/endgame.jpg"));
