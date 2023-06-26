@@ -498,4 +498,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         cannotContactServer = true;
         this.gsc.backToLogin();
     }
+
+    public boolean hasEndgameToken(String nickname){
+        try {
+            return serverRMI.haveIEndGameToken(nickname);
+        } catch (RemoteException e) {
+            backToLogin();
+            return false;
+        }
+    }
 }
