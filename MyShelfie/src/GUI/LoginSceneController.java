@@ -206,12 +206,6 @@ public class LoginSceneController{
                 alive = false;
             }
         }
-       /* Parent root = FXMLLoader.load(getClass().getResource("MatchType.fxml"));
-        stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setResizable(false);
-        stage.show();*/
     }
 
     private void handleSocket(ActionEvent event){
@@ -219,31 +213,40 @@ public class LoginSceneController{
             alive = true;
             clientSocket.clientSpeaker(usernameText.getText());
             // wait for server response being handled by clientSocket
+            System.out.println("print1");
+            String string;
+            boolean flag = true;
             do {
                 synchronized (clientSocket.nextSceneLock) {
+                    System.out.println("print2");
                     while (clientSocket.nextScene.equals("")) clientSocket.nextSceneLock.wait();
+                    string = clientSocket.nextScene;
+                    clientSocket.nextScene = "";
+                    System.out.println("print3 " + clientSocket.nextScene);
                 }
-
-                if (clientSocket.nextScene.equals("MatchType")) {
+                System.out.println("print4");
+                if (string.equals("MatchType")) {
                     //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
                     socketSwitchToMatchTypeScene(event);
-                } else if (clientSocket.nextScene.equals("GameScene")) {
+                    flag = false;
+                    System.out.println("print5");
+                } else if (string.equals("GameScene")) {
                     //change scene to GameScene
                     socketSwitchToGameScene(event);
+                    flag = false;
+                    System.out.println("print6");
                 } else {
-                    // display error message from server
-                    String string = clientSocket.nextScene;
-                    Platform.runLater(() -> updateLabelText(messageTextArea, string));
-                    clientSocket.nextScene = "";
-                    if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname") || string.startsWith("The game already started"))
+                    updateLabelText(messageTextArea, string);
+                    System.out.println("print7");
+                    if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname"))
                         break;
                     if (string.startsWith("The game already started, you can't join, try again later")){
-                        String ip = this.clientSocket.getIp();
-                        this.clientSocket = new GUISocket(ip);
-                        //System.exit(0);
+                        //String ip = this.clientSocket.getIp();
+                        //this.clientSocket = new GUISocket(ip);
+                        System.exit(0);
                     }
                 }
-            }while(!clientSocket.nextScene.equals("GameScene") && !clientSocket.nextScene.equals("MatchType"));
+            }while(flag);
         }catch(InterruptedException | RuntimeException e){
             e.printStackTrace();
         }

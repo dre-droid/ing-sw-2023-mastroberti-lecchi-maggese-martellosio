@@ -49,40 +49,6 @@ public class GUISocket extends ClientSocket{
                 //System.exit(0);
             }
 
-
-
-            //GUI
-            /*
-            if (line.startsWith("[REQUEST] Invalid nickname") || line.startsWith("[REQUEST] Nickname already in use")){
-                line = line.replace("[REQUEST] ", "");
-                nextScene = line;
-                System.out.println("client socket " + nextScene);
-            }
-            if (line.startsWith("[INFO] Game is starting.")){
-                nextScene = "GameStart";
-                turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
-            }
-
-
-            else if (line.startsWith("[REQUEST] Choose the number of players for the game:")){
-                nextScene = "MatchType";
-            }
-            else if (line.startsWith("[INFO] Waiting for all players to connect...") || line.startsWith("[INFO] You have successfully rejoined the game")
-            || line.equals("[INFO] Joined a Game")) {
-                nextScene = "GameScene";
-            }
-            if(line.equals("[INFO] Game is being created by another player...") || line.startsWith("[INFO] The game already started")){
-                nextScene = line.replace("[INFO] ", "");
-            }
-            if (line.startsWith("[INFO] Game is starting.")){
-                nextScene = "GameStart";
-                turnOfPlayer = line.replace("[INFO]: Game is starting. ", "");
-            }
-            if (line.startsWith("[GAMEEND]")) {
-                gameEnd = true;
-                turnHasEnded = true;
-            }*/
-        //notifyAll();
         }
         if (line.startsWith("[INFO] Game is starting.")){
             synchronized (nextSceneLock) {
@@ -106,7 +72,7 @@ public class GUISocket extends ClientSocket{
             }
         }
         if (line.startsWith("[INFO] Waiting for all players to connect...") || line.startsWith("[INFO] You have successfully rejoined the game")
-                || line.equals("[INFO] Joined a Game")){
+                || line.startsWith("[INFO] Joined a Game")){
             synchronized (nextSceneLock) {
                 nextScene = "GameScene";
                 nextSceneLock.notifyAll();
