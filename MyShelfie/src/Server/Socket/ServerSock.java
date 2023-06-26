@@ -602,6 +602,7 @@ public class ServerSock {
                     invalidMoveFlag = false;
                 } catch (InvalidMoveException e) {
                     invalidMoveFlag = true;
+                    e.printStackTrace();
                 }
             }while (invalidMoveFlag);
 
