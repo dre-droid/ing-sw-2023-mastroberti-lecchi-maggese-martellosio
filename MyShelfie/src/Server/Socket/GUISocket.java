@@ -45,7 +45,7 @@ public class GUISocket extends ClientSocket{
                 System.out.println("******************************");
             }
             if(line.equals("[EXIT]")){
-                System.exit(0);
+                //System.exit(0);
             }
 
 

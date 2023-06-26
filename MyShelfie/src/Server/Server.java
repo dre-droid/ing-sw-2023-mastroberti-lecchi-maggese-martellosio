@@ -12,7 +12,7 @@ import java.rmi.registry.Registry;
 import java.util.*;
 
 public class Server {
-    private static final int TIMEOUT_THRESH = 10000; //in millis
+    private static final int TIMEOUT_THRESH = 60000; //in millis
 
     public enum connectionType {
         RMI, Socket;

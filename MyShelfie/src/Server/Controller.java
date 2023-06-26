@@ -291,6 +291,9 @@ public class Controller {
      * @param playerNickname the name of the player who calls this action
      */
     public void endOfTurn(String playerNickname){
+        if(hasTheGameEnded()){
+            return;
+        }
         if(playerNickname.equals(game.getIsPlaying().getNickname())){
             game.endOfTurn(game.getIsPlaying());
             saveGameProgress();
