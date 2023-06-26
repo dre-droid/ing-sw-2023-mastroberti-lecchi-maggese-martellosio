@@ -164,31 +164,26 @@ public class Game {
                 //refill board if necessary
                 board.refill();
 
-
-
                 //update score and leaderboard
                 isPlaying.updateScore();
                 Collections.sort(leaderBoard, new scoreComparator());
 
-                //next turn and end game logic
+                //select next player
                 Player nextPlayer;
                 if (!iterator.hasNext()) iterator = playersList.iterator(); //if reached end of list, go to beginning
                 nextPlayer = iterator.next();
 
-//                System.out.println("Is playing: " + isPlaying + ". Has endgametoken: " + isPlaying.hasEndGameToken());
-//                System.out.println("Last player ind: " + lastPlayerIndex + " last player: " + playersList.get(lastPlayerIndex));
                 // if last turn
-                if (lastRound && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){       // set last turn
+                if ((lastRound || isPlaying.hasEndGameToken()) && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){
                     endGame();
                 }
                 else{
-                    if (isPlaying.hasEndGameToken()) setLastRoundFlag();
+                    if (isPlaying.hasEndGameToken())
+                        setLastRoundFlag(); // if someone's shelf is full then enter the last round
                     isPlaying = nextPlayer;
                 }
-                //if someone's shelf is full then enter the last round
 
-
-                turnCount++;                                            //increase turnCount
+                turnCount++;                //increase turnCount
             }
         }
     }
@@ -284,7 +279,8 @@ public class Game {
         iterator = playersList.iterator();
         while (!iterator.next().getNickname().equals(playersList.get(starter).getNickname()));
         isPlaying = playersList.get(starter);
-        lastPlayerIndex = (playersList.indexOf(isPlaying) + 1) % playersList.size();
+        lastPlayerIndex = playersList.indexOf(isPlaying) == 0 ? playersList.size() - 1 : playersList.indexOf(isPlaying) - 1;
+        System.out.println("Last player index: "+ lastPlayerIndex + ". Player: " + playersList.get(lastPlayerIndex));
         playersList.stream().forEach(System.out::println);
         System.out.println("Last player index is " + lastPlayerIndex);
     }

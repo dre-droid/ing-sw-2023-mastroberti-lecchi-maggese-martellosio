@@ -200,6 +200,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     @Override
     public List<Tile> drawTilesFromBoard(String playerNickname, int x,int y,int amount,Board.Direction direction) throws java.rmi.RemoteException{
         System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
+        // check that a column that can fit 'amount' tiles exists in player's shelf
+        boolean tooManyTilesDrawn = true;
+        for (int i = 0; i < 5; i++) {
+            if (new Shelf(getMyShelf(playerNickname)).canItFit(amount, i))
+                tooManyTilesDrawn = false;
+        }
+        if (tooManyTilesDrawn) return null;
+
         List<Tile> drawnTiles = controller.drawFromBoard(playerNickname, x, y, amount, direction);
         if(drawnTiles==null){
             //clients.stream().filter(client->client.nickname.equals(playerNickname)).toList().get(0).client.moveIsNotValid();
