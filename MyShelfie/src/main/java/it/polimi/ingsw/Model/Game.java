@@ -265,7 +265,31 @@ public class Game {
      */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){
+            if(p1.getScore() == p2.getScore()){
+                return distanceFromFirstPlayer(p2)-distanceFromFirstPlayer(p1);
+            }
             return p2.getScore() - p1.getScore();
+        }
+    }
+
+    /**
+     * this method is used to get the distance of a player from the player who holds the first player seat
+     * @param player
+     * @return the distance of the player from the first player
+     */
+    private int distanceFromFirstPlayer(Player player){
+        int indexOfPlayer = playersList.indexOf(player);
+        int indexOfFirstPlayer=-1;
+        for(Player p: playersList){
+            if(p.hasFirstPlayerSeat()){
+                indexOfFirstPlayer = playersList.indexOf(p);
+            }
+        }
+        if(indexOfPlayer<indexOfFirstPlayer){
+            return indexOfFirstPlayer-indexOfPlayer;
+        }
+        else{
+            return playersList.size()-indexOfPlayer+indexOfFirstPlayer;
         }
     }
     //*********************
