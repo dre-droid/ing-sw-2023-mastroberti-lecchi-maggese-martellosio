@@ -497,6 +497,11 @@ public class ClientRMI implements Runnable{
 
         Tile[][] shelf = serverRMI.getMyShelf(playerNickname);
         Tile[][] pgCard = serverRMI.getMyPersonalGoal(playerNickname);
+        for(Player p : serverRMI.getLeaderboard()){
+            if(p.hasEndGameToken()){
+                System.out.println("CAREFUL THIS IS YOUR LAST TURN:" + " " + p.getNickname()+" " + "HAS GOT THE ENDGAME TOKEN");
+            }
+        }
 
         System.out.println("Your shelf:      Your Personal goal:");
         for(int row=0;row<6;row++){
