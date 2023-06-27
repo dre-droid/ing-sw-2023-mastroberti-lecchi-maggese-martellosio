@@ -284,8 +284,8 @@ public class Game {
         }
     }
     /**
-     * comparator used to keep the leaderboard in descending ordered by score
-     * tie breaking rules: if two players have same score the further player from the player who started the gaem is returned first
+     * comparator used to keep the leaderboard in descending ordered by score (and by distance from the
+     * first player if the score is tied)
      */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){

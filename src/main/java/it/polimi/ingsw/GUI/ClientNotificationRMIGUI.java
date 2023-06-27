@@ -51,6 +51,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     }
 
 
+    /**
+     * this method is used to send a request to the server rmi to get the leaderboard
+     * @return a list of player representing the leaderboard, null if there are some problems
+     * in contatting the server
+     */
     public List<Player> getLeaderboard(){
         try{
             return serverRMI.getLeaderboard();
@@ -60,6 +65,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to reconnect to a game
+     * @return true if the reconnection goes well, false otherwise
+     */
     public boolean reconnectToGame(){
         System.out.println("Trying to reconnect...");
         try{
@@ -72,6 +81,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     }
 
 
+    /**
+     * this method is used to start the client notification server by connecting to the server rmi
+     * @throws RemoteException
+     */
     public void startNotificationServer() throws RemoteException{
         try{
             Registry registryServer = LocateRegistry.getRegistry(serverIp);
@@ -98,10 +111,18 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         clientRegistry.rebind("Client",this);
     }
 
+    /**
+     * this method is used to set the chosen nickname
+     * @param nick nickname chosen by the player
+     */
     public void setnickname(String nick){
         this.nickname = nick;
     }
 
+    /**
+     * this method is used to get the nickname
+     * @return nickname
+     */
     public String getNickname(){return this.nickname;}
 
     public int joinGame() {
@@ -113,6 +134,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return -3;
         }
     }
+
+    /**
+     * this method is used to join the lobby
+     * @return a int code value representing the outcome of the operation (for the explanation of
+     * the numeric value look at the sequence diagrams)
+     */
     public int joinLobby() {
         try {
             return serverRMI.joinLobby(nickname, port, myIp);
@@ -121,6 +148,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return -3;
         }
     }
+
+    /**
+     * this method is useed to constantly ping the rmi server to check if the server is still up, in ù
+     * case the server does not respond send the player back to the login scene
+     */
     public void periodicPing() {
         new Thread(() -> {
             while (!cannotContactServer) {
@@ -144,6 +176,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }).start();
     }
 
+    /**
+     * this method is used to send the create new game command to the server
+     * @param numOfPlayers
+     * @return
+     */
     public boolean createNewGame(int numOfPlayers){
         System.out.println("creating new game...");
         try {
@@ -184,6 +221,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     }
 
+    /**
+     * this method is called by the server to notify the client that the game has started
+     * @param startingPlayer name of the player who holds the first player seat
+     * @throws RemoteException
+     */
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {
         GameStartFlag=true;
@@ -191,6 +233,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         updateGUIAtBeginningOfGame();
     }
 
+    /**
+     * this method is used to update the gui at the beginning of the game :)
+     */
     public void updateGUIAtBeginningOfGame(){
         try{
             TilePlacingSpot[][] board= serverRMI.getBoard();
@@ -218,6 +263,14 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to send the command to the server to draw the tiles from the board
+     * @param x x coordinate on the board
+     * @param y y coordinate on the board
+     * @param amount amount of tiles to draw
+     * @param direction direction in which to draw the tiles
+     * @return the list of drawn tiles if the operation didn't contain any errors, null otherwise
+     */
     public boolean drawTilesFromBoard(int x, int y, int amount, Board.Direction direction){
         try {
             System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
@@ -228,6 +281,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to switch the position of two of the drawn tilies
+     * @param pos1 position of the first tile
+     * @param pos2 position of the second tile
+     */
     public void rearrangeDrawnTiles(int pos1, int pos2){
         try{
             Tile temp = drawnTiles.get(pos1);
@@ -238,6 +296,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to send the command to insert the drawn tiles in the shelf
+     * @param column column in which to insert the drawn tiles
+     * @return true if the tiles are inserted, false otherwise
+     */
     public boolean insertTilesInShelf(int column ) {
         try {
             boolean returnValue = serverRMI.insertTilesInShelf(nickname,drawnTiles,column);
@@ -253,6 +316,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to get the shelf of the player from the server rmi
+     * @return a matrix of tiles representing the shelf of the requesting player, null if there
+     * are problems in contacting the server or if the name of the player is not one of the players
+     * in the game
+     */
     public Tile[][] getMyShelf(){
         try {
             return serverRMI.getMyShelf(nickname);
@@ -262,6 +331,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to get the shelf of an opponent player
+     * @param player name of the opponent player
+     * @return a matrix of tiles representing the shelf of the requesting player, null if there
+     * are problems in contacting the server or if the name of the player is not one of the players
+     * in the game
+     */
     public Tile[][] getShelfOfPlayer(String player){
         try {
             return serverRMI.getMyShelf(player);

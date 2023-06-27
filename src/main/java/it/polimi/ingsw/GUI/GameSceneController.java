@@ -446,6 +446,7 @@ public class GameSceneController {
                 for (Player p : leaderboard) {
                     data.add(new TableRecord(p.getNickname(), "" + p.getScore()));
                     if(p.hasEndGameToken()){
+                        System.out.println(""+p.getNickname()+" has the end game token");
                         nicknameHasEnded = p.getNickname();
                     }
                 }
@@ -473,7 +474,6 @@ public class GameSceneController {
                     if(clientRMI.hasEndgameToken(clientRMI.getNickname())){
                         nicknameHasEnded=clientSocket.getNickname();
                         setEndGameToken();
-
                     }
                 }
             }
