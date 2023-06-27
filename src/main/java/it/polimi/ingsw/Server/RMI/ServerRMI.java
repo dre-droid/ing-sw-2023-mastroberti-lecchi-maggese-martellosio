@@ -217,14 +217,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
 
         List<Tile> drawnTiles = controller.drawFromBoard(playerNickname, x, y, amount, direction);
         if(drawnTiles==null){
-            //clients.stream().filter(client->client.nickname.equals(playerNickname)).toList().get(0).client.moveIsNotValid();
             System.out.println("move is not valid");
             clients.get(playerNickname).moveIsNotValid();
             return null;
         }
-        /*timerDraw.cancel();
-        timerInsert = new Timer();
-        startTimer(timerInsert,insertDelay);*/
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected()))){
                 client.getValue().updateBoard(controller.getTilePlacingSpot());
@@ -352,10 +348,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected())))
                         client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(0));
                 }
-
-                /*for (ClientNotificationRecord c : clients) {
-                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard1Description());
-                }*/
             }
             if (controller.checkIfCommonGoalN2IsFulfilled(playerNickname)){
 
@@ -363,10 +355,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected())))
                         client.getValue().someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCards().get(1));
                 }
-
-                /*for (ClientNotificationRecord c : clients) {
-                    c.client.someoneHasCompletedACommonGoal(playerNickname, controller.getCommonGoalCard2Description());
-                }*/
             }
 
         }
@@ -385,38 +373,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 notifyEndOfGame();
             }
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
-
-
-
-            //ClientNotificationInterfaceRMI clientToBeNotified = clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            /*if(clientToBeNotified!=null)
-                clientToBeNotified.startTurn();*/
             controller.endOfTurn(playerNickname);
             server.notifySocketOfTurnEnd();
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                 if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected())))
                     client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
             }
-
-            //saveGameProgress();
-
         }
     }
-
-    /*private void startTimer(Timer timer, int delay){
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                try{
-                    //clients.stream().filter(client -> client.nickname.equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying())).toList().get(0).client.runOutOfTime();
-                    clients.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).runOutOfTime();
-                    endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                }catch (RemoteException e){
-                    e.printStackTrace();
-                }
-            }
-        },delay);
-    }*/
 
 
     /**
@@ -571,11 +535,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyEndOfGame() {
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
-                //List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
                 if(client.getValue()!=null)
                     client.getValue().gameIsOver(controller.getLeaderboard());
             } catch (RemoteException e) {
-                //e.printStackTrace();
                 //System.out.println("Cannot notify controller");
             }
         }
@@ -589,7 +551,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
                 if (!disconnection) {
-                    //List<String> leaderboard = controller.getLeaderboard().stream().map(player->player.getNickname()+" pts: "+player.getScore()).toList();
                     if (client.getValue() != null)
                         client.getValue().gameIsOver(controller.getLeaderboard());
                 }else{
@@ -697,81 +658,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         }
         else
             return null;
-    }
-
-    /**
-     * This method is used to check if rmi clients are still connected, if not it removes the one that disconnected from both clientsInLobby
-     * list in server and from clientsLobby map and alerts the server of the disconnection by calling server.notifyLobbyDisconnection()
-     * @author Diego Lecchi
-     */
-    private void checkForDisconnections(){
-        new Thread(() -> {
-            while(controller==null){
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    System.out.println("sleep problem");
-                }
-            }
-            System.out.println("checkfordisconnections-->controller not null");
-            while(!controller.hasGameBeenCreated()){
-                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
-                while(iterator.hasNext()){
-                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
-                    ClientNotificationInterfaceRMI client = entry.getKey();
-                    RmiNickStruct nickStruct = entry.getValue();
-                    try{
-                        client.ping();
-                    }catch(RemoteException re){
-                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                        opt.ifPresent(clientInfoStruct -> server.clientsLobby.remove(clientInfoStruct));
-                        opt.ifPresent(clientInfoStruct -> clients.remove(clientInfoStruct.getNickname()));
-                        server.notifyLobbyDisconnection(nickStruct.getNickname());
-                    }
-                    System.out.println(nickStruct.getNickname()+" check before game created");
-                }
-            }
-            System.out.println("checkfordisconnections-->game created");
-            while(!controller.hasGameStarted()){
-                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
-                while(iterator.hasNext()){
-                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
-                    ClientNotificationInterfaceRMI client = entry.getKey();
-                    RmiNickStruct nickStruct = entry.getValue();
-                    try{
-                        client.ping();
-                    }catch(RemoteException re){
-                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                        opt.ifPresent(clientInfoStruct -> server.clientsLobby.remove(clientInfoStruct));
-                        opt.ifPresent(clientInfoStruct -> clients.remove(clientInfoStruct.getNickname()));
-                        server.notifyLobbyDisconnection(nickStruct.getNickname());
-                        server.clientsMap.remove(nickStruct.getNickname());
-                    }
-                    System.out.println(nickStruct.getNickname()+" check before game started");
-                }
-            }
-            System.out.println("checkfordisconnections-->game started");
-            while(!controller.hasTheGameEnded()){
-                Iterator<Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct>> iterator = clientsLobby.entrySet().iterator();
-                while(iterator.hasNext()){
-                    Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> entry = iterator.next();
-                    ClientNotificationInterfaceRMI client = entry.getKey();
-                    RmiNickStruct nickStruct = entry.getValue();
-                    try{
-                        client.ping();
-                    }catch(RemoteException re){
-                        System.out.println(nickStruct.getNickname()+" got disconnected");
-                        Optional<ClientInfoStruct> opt = server.clientsLobby.stream().filter(player->player.getNickname().equals(nickStruct.getNickname())).findFirst();
-                        opt.ifPresent(clientInfoStruct -> clientInfoStruct.setDisconnected(true));
-                        opt.ifPresent(clientInfoStruct -> clients.put(clientInfoStruct.getNickname(), null));
-                        server.notifyLobbyDisconnection(nickStruct.getNickname());
-                        server.clientsMap.remove(nickStruct.getNickname());
-                    }
-                    System.out.println(nickStruct.getNickname()+" check before game ended");
-                }
-            }
-            System.out.println("checkfordisconnections-->game ended");
-        }).start();
     }
 
     /**
@@ -949,18 +835,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             System.out.println("all players ok");
             if(server.loadedFromFile){
                 System.out.println("loaded check ok...");
-                /*//scam the problem
-                List<Tile> ts = new ArrayList<>();
-                Tile t = new Tile(Type.CAT);
-                ts.add(t);
-                String currentname = controller.getNameOfPlayerWhoIsCurrentlyPlaying();
-                Player current = controller.getPlayers().stream().filter(player -> player.getNickname().equals(currentname)).toList().get(0);
-                try {
-                    controller.insertTilesInShelf(currentname, ts, 1);
-                } catch (Exception e) {
-                    System.out.println("fake insertion problem");
-                }
-                //*/
                 for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                     if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected()))){
                         System.out.println("start game sent");

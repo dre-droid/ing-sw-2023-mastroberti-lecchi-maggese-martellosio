@@ -171,10 +171,6 @@ public class Controller {
         return null;
     }
 
-    /*public boolean hasGameBeenCreated(){
-        return game!=null;
-    }*/
-
     /**
      * this method is used to get the description of the first common goal card of the game
      * @return the description of the first common goal card if the game has started, null otherwise
@@ -363,6 +359,10 @@ public class Controller {
         }while(invalidMoveFlag);
     }
 
+    /**
+     * calls game.endGame() to set endGame to true and notifies RMI and Socket Clients through serverRMI and serverSock methods
+     * @throws IOException
+     */
     public void endGame() throws IOException {
         server.serverRMI.notifyEndOfGame();
         game.endGame();
@@ -398,6 +398,10 @@ public class Controller {
         game.saveGameProgress("src/main/resources/jsonGameProgress/GameProgress.json");
     }
 
+    /**
+     * loads GameProgress.json in game if it exists in the directory
+     * @return true if GameProgress.json exists and is loaded or false otherwise
+     */
     public boolean loadGameProgress(){
         if(checkForSavedGameProgress() && game==null){
             game = new Game("src/main/resources/jsonGameProgress/GameProgress.json");
@@ -408,7 +412,7 @@ public class Controller {
             return false;
     }
     /**
-     * This method has been made public for testing purposes
+     * This method is used to delete a GameProgress.json file if it exists
      */
     public void deleteProgress(){
         File toBeDeleted = new File("src/main/resources/jsonGameProgress/GameProgress.json");
@@ -417,7 +421,7 @@ public class Controller {
         else System.out.println("File not deleted");
     }
     /**
-     * This method has been made public for testing purposes
+     * This method checks if GameProgress.json is present in this path
      */
     public boolean checkForSavedGameProgress(){
         File toBeChecked = new File("src/main/resources/jsonGameProgress/GameProgress.json");
@@ -430,6 +434,11 @@ public class Controller {
         return game.getValidTilesMap();
     }
 
+    /**
+     * Get the personal Goal Card of a player with the nickname passed in as parameter
+     * @param playerNickname nickname of the player
+     * @return PersonalGoalCard of a given player
+     */
     public PersonalGoalCard getPGC(String playerNickname) {
         return game.getPlayerList().stream().filter(p->p.getNickname().equals(playerNickname)).toList().get(0).getPersonalGoalCard();
     }
@@ -459,6 +468,11 @@ public class Controller {
         Optional<CommonGoalCard> opt = game.getCommonGoalCards().stream().filter(cgc->cgc.getDescription().equals(commonGoalCard.getDescription())).findFirst();
         return opt.map(CommonGoalCard::getScoringTokens).orElse(null);
     }
+
+    /**
+     *
+     * @return a List of String with the nickname of the Players in Game
+     */
     public List<String> getGamePlayerListNickname(){
         return game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList());
     }
@@ -489,6 +503,11 @@ public class Controller {
         return game.getPlayerList();
     }
 
+    /**
+     * This method is used to check if a player has endGameToken
+     * @param nickname nickname of the player
+     * @return true if the player with the given nickname has endGameToken, false otherwise
+     */
     public boolean hasEndgameToken(String nickname){
         Optional<Player>  p = game.getPlayerList().stream().filter(player -> player.getNickname().equals(nickname)).findFirst();
         if(p.isEmpty())
