@@ -175,6 +175,8 @@ public class Game {
 
                 // if last turn
                 if ((lastRound || isPlaying.hasEndGameToken()) && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){
+                    playersList.forEach(Player::updateFinalScore);
+                    Collections.sort(leaderBoard, new scoreComparator());
                     endGame();
                 }
                 else{
@@ -256,7 +258,8 @@ public class Game {
         }
     }
     /**
-     * comparator used to keep the leaderboard in descending ordered by score
+     * comparator used to keep the leaderboard in descending ordered by score (and by distance from the
+     * first player if the score is tied)
      */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){

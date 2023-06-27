@@ -61,10 +61,19 @@ public class CommonGoalCard implements Serializable {
     }
 
 
+    /**
+     * this method is used to add a player to the list of the players who already took the reward
+     * from this personal goal
+     * @param player player to add to the list of players who have already been rewarded
+     */
     public void addPlayerToAlreadyBeenRewarded(Player player) {
         this.playersAlredyRewarded.add(player.getNickname());
     }
 
+    /**
+     * this method is used to add a player to the list of players who completed this common goal
+     * @param player player to add to the list
+     */
     public void addPlayerToWhoCompleted(Player player) {
         this.playersWhoCompleted.add(player.getNickname());
     }
@@ -118,6 +127,10 @@ public class CommonGoalCard implements Serializable {
         }
     }
 
+    /**
+     * this method is used to get a text description of the common goal card
+     * @return
+     */
     public String getDescription() {
         return this.strategy.toString();
     }
@@ -126,6 +139,10 @@ public class CommonGoalCard implements Serializable {
         return strategy.getClassID();
     }
 
+    /**
+     * this method is used to get the list of the remaining scoring tokens
+     * @return a list containing the remaining scoring token
+     */
     public List<ScoringToken> getScoringTokens(){
         List<ScoringToken> copyTokens = new ArrayList<>();
         this.tokens.stream().forEach(scoringToken -> {copyTokens.add(new ScoringToken(scoringToken.getPoints()));});
