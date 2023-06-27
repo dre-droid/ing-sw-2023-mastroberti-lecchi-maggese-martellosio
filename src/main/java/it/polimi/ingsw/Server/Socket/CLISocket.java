@@ -13,6 +13,7 @@ public class CLISocket extends ClientSocket{
 
     /**
      * Handles server's received messages
+     * @param line: the serialized object sent from the server
      */
      protected synchronized void handleServerRequest(String line){
          if (line.startsWith("[YOUR TURN]")) {
@@ -47,6 +48,7 @@ public class CLISocket extends ClientSocket{
              System.exit(0);
         }
 
+
     }
 
     /**
@@ -59,7 +61,11 @@ public class CLISocket extends ClientSocket{
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
         Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getScoringTokens().get(commonGoalCards.get(0).getScoringTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getScoringTokens().get(commonGoalCards.get(1).getScoringTokens().size() - 1).getPoints());
-
+        for(Player p: leaderboard){
+            if(p.hasEndGameToken()){
+                System.out.println("CAREFULL THIS IS YOUR LAST TURN:" + " " + p.getNickname()+" " + "HAS GOT THE ENDGAME TOKEN");
+            }
+        }
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {
@@ -134,6 +140,11 @@ public class CLISocket extends ClientSocket{
         }
     }
 
+    /**
+     * Prints the shelf of the player in the CLI
+     * @param shelf : player's shelf
+     */
+
     private void printShelf(Shelf shelf){
         System.out.println("*** Shelf ***");
         System.out.println("1 2 3 4 5");
@@ -147,6 +158,10 @@ public class CLISocket extends ClientSocket{
         System.out.println("*************");
     }
 
+    /**
+     * Pritns player's leaderboard in his CLI
+     */
+
     private void printLeaderboard(){
         System.out.println("Leaderboard");
         int i = 0;
@@ -156,6 +171,10 @@ public class CLISocket extends ClientSocket{
             i++;
         }
     }
+
+    /**
+     * Sends a disocnnection alert in CLI Socket if the connection ping hasn't occured in the expected time window
+     */
 
     protected void disconnectionAlert(){
         System.out.println("Connection lost, try again later");
