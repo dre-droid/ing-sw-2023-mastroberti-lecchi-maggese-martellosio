@@ -54,6 +54,10 @@ public class Player implements Serializable{
         }
     }
 
+    /**
+     * This method calculates the points coming from the completion of the PersonalGoalCard
+     * @return : the points obtained through completion of the PersonalGoalCard
+     */
     public int checkPersonalGoal(){
         return personalGoalCard.getPoints(shelf);
     }
@@ -61,6 +65,11 @@ public class Player implements Serializable{
     }
     private void setEndGameToken() {this.endGameToken = true;}
     public void setFirstPlayerSeat() {this.firstPlayerSeat = true;}
+
+    /**
+     * This method adds ScoringToken t to the scoringTokenList
+     * @param t: Scoring Token to be addes
+     */
     public void addScoringToken(ScoringToken t) {
         scoringTokensList.add(t);
     }
@@ -84,6 +93,8 @@ public class Player implements Serializable{
     }
     public boolean hasEndGameToken(){
         return endGameToken;
+
+
     }
     public List<ScoringToken> getScoringTokensList(){
         if (!scoringTokensList.isEmpty()) return new ArrayList<>(scoringTokensList);
@@ -100,10 +111,20 @@ public class Player implements Serializable{
         if(hasEndGameToken())
             score+=1;
     }
+
+    /**
+     * This method is called at the end of the game to calculate the score updated
+     * with the points coming from the PersonalGoal Cards (calculated in checkPersonalgoal())
+     */
     public void updateFinalScore(){
         score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
 
     }
+
+    /**
+     * This method is called to calculate CommonGoalCards points
+     * @return : the points obtaine through the completion of CommonGoal Cards
+     */
     private int getTokensScore(){
         int sum = 0;
         if (scoringTokensList.isEmpty()) return 0;
