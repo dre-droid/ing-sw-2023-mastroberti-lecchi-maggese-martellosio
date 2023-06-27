@@ -133,7 +133,17 @@ public class Game {
         return false;
     }
 
-    //***used by RMI ***
+
+    /**
+     * This method is used to draw tiles from board
+     * @param x : represents the row of the first tile you want to draw from
+     * @param y : represents the column of the first tile you want to draw from
+     * @param amount : the number of tiles you want to draw
+     * @param direction : starting from the first tiles position just specified, the direction to follow to pick the remaining ones
+     * @param playerNickname : player that is performing the drawing
+     * @return : list ot tiles drawn from Board if the tiles can be drawn, null otherwise
+     * @throws InvalidMoveException
+     */
     public List<Tile> drawsFromBoard(int x,int y,int amount, Board.Direction direction,String playerNickname) throws InvalidMoveException{
         if(!gameHasEnded){
             System.out.println("("+x+","+y+") amount = "+amount+" direction ="+direction.toString());
@@ -145,6 +155,15 @@ public class Game {
         }
         return null;
     }
+
+    /**
+     * This method is used to insert the tiles you just have drawn into player's shelf
+     * @param drawnTiles : the list of tiles resulting from drawsFromBoard
+     * @param column : the column in player's shelf you want to insert drawn tiles
+     * @param player : the player who's playing the turn, performing insertion
+     * @return: true if insertion is correctly executed, false otherwise
+     * @throws InvalidMoveException
+     */
     public boolean insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
         if(!gameHasEnded){
             System.out.println("insert shelf ok called");
@@ -158,6 +177,11 @@ public class Game {
         }
         return false;
     }
+
+    /**
+     * This method is used to handle player's end turn
+     * @param player: the player that is playing and is about to end his turn
+     */
     public void endOfTurn(Player player){
         if(!gameHasEnded){
             if(player.getNickname().equals(isPlaying.getNickname())){
@@ -191,7 +215,7 @@ public class Game {
     //******************
     //*** used by Socket ***
     /**
-     * makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
+     *  This method  makes the player draw from the board and inserts tile in the shelf, then changes the isPlaying Player
      * parameters to call drawTiles and insertTiles methods in class Player
      * @param x rows of game board [0 ... 9]
      * @param y columns of game board [0 ... 9]
@@ -244,6 +268,10 @@ public class Game {
            leaderBoard.remove(p);
        }
     }
+    /**
+     * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
+     * Should only be called if game hasn't started.
+     */
     public void removePlayer(String nick) {
         Iterator<Player> iterator = playersList.iterator();
         while (iterator.hasNext()) {
@@ -257,6 +285,7 @@ public class Game {
     }
     /**
      * comparator used to keep the leaderboard in descending ordered by score
+     * tie breaking rules: if two players have same score the further player from the player who started the gaem is returned first
      */
     private class scoreComparator implements Comparator<Player>{
         public int compare(Player p1, Player p2){
@@ -269,7 +298,7 @@ public class Game {
 
     /**
      * this method is used to get the distance of a player from the player who holds the first player seat
-     * @param player
+     * @param player : player you want to check the distance from first player
      * @return the distance of the player from the first player
      */
     private int distanceFromFirstPlayer(Player player){
@@ -591,6 +620,11 @@ public class Game {
 
     }
 
+    /**
+     * This method saves games progress in a file to guarantee persistence funcionality
+     * @param filePath: the filePath that points to the file in which to save game progresses.
+     */
+
     public void saveGameProgress(String filePath) {
         FileWriter jsonFile;
         GsonBuilder builder = new GsonBuilder();
@@ -630,6 +664,13 @@ public class Game {
 
 
     }
+
+    /**
+     * This method is used to guarantee the persistence functionality and is invoked to loadGameProgress from
+     * the file in which it was previously saved from method saveGameProgress
+     * @param filePath: filPath of the file you want to load game progress from
+     * @return: false if the file does not exist, true if the progresses are correctly loaded
+     */
 
     public boolean loadGameProgress(String filePath){
         File jsonFile = new File(filePath);
