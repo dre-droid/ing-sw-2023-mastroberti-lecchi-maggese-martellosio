@@ -21,11 +21,19 @@ public class Server {
     public Map<String, connectionType> clientsMap;
     public Controller controller;
     public ArrayList<ClientInfoStruct> clientsLobby;
-    public boolean onlyOnePlayer = false;
     public final Object clientsLobbyLock = new Object();
 
     public boolean loadedFromFile;
 
+    /**
+     * Runs the server, handling the game flow and player connections. Starts the Socket and RMI servers, then loads game
+     * progress from a JSON file if available, or proceeds with the regular join process. Waits for all players to connect
+     * and the game to start. Enters the game loop, where players take turns until the game ends.
+     * Handles disconnections and skips turns of disconnected players, handles the end of the game and performs cleanup
+     * operations.
+     * @throws InterruptedException If the execution is interrupted while waiting.
+     * @throws IOException If an I/O error occurs.
+     */
     public void run() throws InterruptedException, IOException {
         //run Socket and RMI servers
         serverSock = new ServerSock(controller, this);
@@ -141,6 +149,19 @@ public class Server {
         clientsMap.put(nickname, conn);
     }
 
+    /**
+     * this method is used to send chat messages to every RMI and Socket client. It's called by serverRMI.chatMessage()
+     * and serverSock.sendChatMessageToClient(), if the receiver is "all" then the message passed in parameter "text" will
+     * be sent to all the clients but the one who wrote it. If the receiver parameter is a player in the game the message will be
+     * sent to that player by calling either serverRMI.chatMessage() or serverSock.sendChatMessageToClient().
+     * The Boolean pm (private message) will be used to print either MESSAGE FROM *nick receiver* if pm is false or
+     * MESSAGE FROM *nick receiver* TO YOU otherwise. If the receiver parameter is a nickname of a player not present in
+     * the game the message will simply be ignored.
+     * @param sender nickname of the player who sends the message
+     * @param text body of the message
+     * @param receiver nickname of the player to whom the chat message is destined (all if the message is for everybody)
+     * @param pm Private message, true if the message is destined to one player only
+     */
     public void chatMessage(String sender, String text, String receiver, Boolean pm){
         //broadcast message
         if(receiver.equals("all")){
@@ -232,12 +253,24 @@ public class Server {
         }
     }
 
+    /**
+     * Used to notify serverSock, serverRMI and server that a game has been created
+     * @throws RemoteException
+     */
     public void notifyGameHasBeenCreated() throws RemoteException{
         serverRMI.gameIsCreated();
         serverSock.notifyGameHasBeenCreatedSocket();
         notifyServer();
     }
 
+    /**
+     * This method is called by run() whenever a saved game GameProgress.json is not present. It's used to launch the respective
+     * method joinGame of ServerRMI and ServerSock in a specific order to avoid more than one player creating a new game
+     * at the same time. While the match type isn't chosen yet, the respective joinGame() is called for the first client
+     * in clientsLobby, if that client disconnects then it will be removed from clientsLobby and therefore clientsLobby.get(0)
+     * is now different from the old clientsLobby.get(0) and so joinGame() will be now executed for the new one.
+     * Whenever the match type is selected this method will call joinGame() for the rest of the clients in clientsLobby
+     */
     public void joinGame() {
         new Thread (()->{
             try {
@@ -288,16 +321,23 @@ public class Server {
                 System.out.println("cannot join game");
             }
 
-
-
         }).start();
     }
 
+    /**
+     * This method is used to send a message to all RMI and socket clients except the sender of that message
+     * @param message - message to broadcast
+     * @param sender - nickname of the player that broadcasts the message
+     */
     public void broadcastMessage(String message, String sender){
         serverSock.broadcastMessage("[MESSAGE FROM SERVER] " + message, sender);
         serverRMI.broadcastMessage(message, sender);
     }
 
+    /**
+     * @return number of players in the game which have the boolean disconnected set to false in the ArrayList of ClientInfoStruct
+     * clientsLobby
+     */
     public int numberOfPlayersLeft(){
         int numOfPlayerLeft = 0;
         for (int i = 0; i < clientsLobby.size(); i++) {
@@ -306,15 +346,22 @@ public class Server {
                     numOfPlayerLeft++;
             }
         }
-//        System.out.println("num of players connected = "+numOfPlayerLeft);
         return numOfPlayerLeft;
     }
+
+    /**
+     * notifies all the thread waiting on this
+     */
     public void notifyServer(){
         synchronized (this){
             notifyAll();
         }
     }
 
+    /**
+     * removes a ClientInfoStruct object from the ArrayList clientInfoStruct if an object with this nickname exists
+     * @param nickname - nickname of a player that needs to be removed from clientsLobby
+     */
     public void removeFromClientsLobby(String nickname){
         synchronized (clientsLobbyLock) {
             clientsLobby.removeIf(clientInfoStruct -> nickname.equals(clientInfoStruct.getNickname()));
@@ -327,16 +374,14 @@ public class Server {
     }
 
     /**
-     * To use only fot testing purposes
-     * @param serverRMI
+     * Used only for testing purposes
      */
     public void setServerRMI(ServerRMI serverRMI){
         this.serverRMI=serverRMI;
     }
 
     /**
-     * To use only fot testing purposes
-     * @param serverSock
+     * Used only for testing purposes
      */
     public void setServerSock(ServerSock serverSock){
         this.serverSock=serverSock;
