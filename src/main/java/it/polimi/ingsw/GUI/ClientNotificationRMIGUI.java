@@ -347,6 +347,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is called by the rmi server to notify the players that someone has completed
+     * a common goal
+     * @param playerNickname name of the player who completed a common goal
+     * @param cgc common goal that has been completed
+     * @throws RemoteException
+     */
     @Override
     public void someoneHasCompletedACommonGoal(String playerNickname, CommonGoalCard cgc) throws RemoteException {
         if(playerNickname.equals(this.nickname)) {
@@ -374,6 +381,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is called by the server to notify that a player ended its turn
+     * @param currentPlayerNickname name of the player that ended the turn
+     * @param nextPlayerNickname name of the next player that has to play
+     * @throws RemoteException
+     */
     @Override
     public void aTurnHasEnded(String currentPlayerNickname, String nextPlayerNickname) throws RemoteException {
         gsc.updateTurnLabel(nextPlayerNickname);
@@ -383,6 +396,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             gsc.setEndGameToken();
     }
 
+    /**
+     * this method is called by the server to notify the players that the game is over
+     * @param leaderboard leaderboard containing the players and their score
+     * @throws RemoteException
+     */
     @Override
     public void gameIsOver(List<Player> leaderboard) throws RemoteException {
         if(leaderboard==null)
@@ -410,11 +428,22 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     }
 
+    /**
+     * this method is called by the server to notify the client that his turn has started
+     * @throws RemoteException
+     */
     @Override
     public void startTurn() throws RemoteException {
         MyTurnFlag = true;
     }
 
+    /**
+     * this method is called by the server to show on the chat a message
+     * @param text body of the message
+     * @param sender name of the player who sent the message
+     * @param pm boolean value, if true it means that this is a private message
+     * @throws RemoteException
+     */
     @Override
     public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException {
         if(pm)
@@ -423,6 +452,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             gsc.rmiMessageTextArea("[MESSAGE FROM "+sender+"]: "+text);
     }
 
+
+    /**
+     * this message is used to send a message
+     * @param message the message
+     */
     public void sendChatMessage(String message){
         String text = "", receiver = "";
         int atIndex;
@@ -445,6 +479,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     }
 
+    /**
+     * this method is used to send the quit command to the server
+     */
     public void quitGame(){
         try {
             this.quit = true;
@@ -459,17 +496,32 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
 
     }
 
+    /**
+     * this method is called by the server to update the view of the board of the client
+     * @param boardView a matrix of tile placing spot representing the board
+     * @throws RemoteException
+     */
     @Override
     public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException {
         System.out.println(nickname+" has updated the board");
         gsc.updateBoard(boardView);
     }
 
+    /**
+     * this method is called by the server to update the view of this client of the opponent's shelf
+     * @param nickname name of the opponent player
+     * @param grid matrix of tiles representing the shelf of the opponent player
+     * @throws RemoteException
+     */
     @Override
     public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
         gsc.updateOppShelf(nickname,grid);
     }
 
+    /**
+     * this method is used to set the game scene controller
+     * @param controller game scene controller
+     */
     public void setGameSceneController(GameSceneController controller){
         System.out.println("controller set");
         gsc = controller;
@@ -478,6 +530,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to get the board from the server
+     * @return a matrix of tile placing spot representing the board, null if there are some
+     * problems in contacting the rmi server
+     */
     public TilePlacingSpot[][] getBoard(){
         try {
             return serverRMI.getBoard();
@@ -485,9 +542,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             backToLogin();
             return null;
         }
-
     }
 
+    /**
+     * this method is used to check on the server if the game has already started
+     * @return true if the game has started, false if it has not started or if there are problems
+     * in contacting the server
+     */
     public boolean hasGameStarted(){
         try {
             return serverRMI.hasGameStarted();
@@ -497,6 +558,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to check the value of the MyTurnFlag
+     * @return the value of the MyTurnFlag
+     */
     public boolean isMyTurn(){
         return MyTurnFlag;
     }
@@ -506,12 +571,23 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void notifyOfDisconnection() throws RemoteException{
 
     }
+
+    /**
+     * this method is called by the server to notify the client of the outcome of the game join
+     * @param outcome outcome of the join operation
+     * @throws RemoteException
+     */
     public void joinGameOutcome(int outcome) throws RemoteException{
         joinGameOutcome = outcome;
         synchronized (this) {
             this.notifyAll();
         }
     }
+
+    /**
+     * this method is used to check if the game is being created by another player
+     * @return true if someone else is creating the game, false otherwise
+     */
     public boolean isGameBeingCreated() {
         try {
             return serverRMI.isGameBeingCreated();
@@ -520,6 +596,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             return false;
         }
     }
+
+    /**
+     * this method is used to check if the player with the chosen nickname is the first in the
+     * lobby
+     * @param nickname name of the player
+     * @return true if the player is the first in the lobby, false otherwise
+     */
     public boolean firstInLobby (String nickname){
         try {
             return serverRMI.firstInLobby(nickname);
@@ -529,12 +612,22 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is called by the server to send a broadcast message
+     * @param message content of the message
+     * @throws RemoteException
+     */
     @Override
     public void broadcastedMessage(String message) throws RemoteException {
         if(!Objects.isNull(gsc))
             gsc.rmiMessageTextArea(message);
     }
 
+    /**
+     * this method is called by the server to update the view of the scoring tokens on each of
+     * the common goal cards
+     * @throws RemoteException
+     */
     @Override
     public void updateCommonGoalTokens() throws RemoteException {
         List<CommonGoalCard> cgcs = serverRMI.getCommonGoalCards();
@@ -542,6 +635,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         gsc.updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
     }
 
+    /**
+     * this method is used to get the scoring token of the player
+     * @return the scoring token of the player, null if there are problems in contacting the
+     * server
+     */
     public List<ScoringToken> getMyToken(){
         try {
             return serverRMI.getMyTokens(nickname);
@@ -551,6 +649,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to update the view of the opponents shelves
+     */
     public void updateOpponentsShelf(){
         try {
             List<Player> players = serverRMI.getPlayers();
@@ -562,11 +663,21 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         }
     }
 
+    /**
+     * this method is used to go back to the login scene
+     */
     public void backToLogin(){
         cannotContactServer = true;
         this.gsc.backToLogin();
     }
 
+    /**
+     * this method is used to check if the player with the chosen nickname has the end game
+     * token
+     * @param nickname name of the chosen player
+     * @return true if the player has the end game token, false if he hasn't got it or if there
+     * are problems in contacting the server
+     */
     public boolean hasEndgameToken(String nickname){
         try {
             return serverRMI.haveIEndGameToken(nickname);
