@@ -46,6 +46,9 @@ public abstract class ClientSocket {
 
    public ClientSocket(String ip){this.ip=ip;}
 
+    /**
+     * This method is used to connect to server by setting up the socket and launching method serverListener()
+     */
     public void runServer() {
        try {
            //connect to server
@@ -61,7 +64,7 @@ public abstract class ClientSocket {
 
 
     /**
-     * Creates a thread that sends a PING to the server every 5 seconds
+     * Creates a thread that sends a PING to the server every second
      */
     protected void serverPinger(){
         Runnable serverPinger = () -> {
@@ -82,7 +85,7 @@ public abstract class ClientSocket {
     }
 
     /**
-     * creates a thread to listen messages from the server
+     * creates a thread that listens to messages from server
      */
 
     protected void serverListener() {
@@ -94,14 +97,12 @@ public abstract class ClientSocket {
 
                 while(!socket.isClosed()) {
                     String line = reader.readLine();
-//                    synchronized (object) {
                     messageFromServer = line;
                     deserializeObjects(line);
                     if(!line.equals("[PING]")) {
                         handleServerRequestCommon(line);
                         handleServerRequest(line);
                     }
-//                    }
                 }
             }
             catch (SocketException e) {
@@ -114,7 +115,7 @@ public abstract class ClientSocket {
     }
 
     /**
-     * This method is used to handel server's common requests
+     * This method is used to handle server's common requests
      * @param line : the serialized object sent from the server
      */
     private synchronized void handleServerRequestCommon(String line){
@@ -137,7 +138,7 @@ public abstract class ClientSocket {
     protected synchronized void handleServerRequest(String line){}
 
     /**
-     * Handles deserializing objects sent from serverSocket. If [CURRENTPLAYER] message is recieved, client sets turnHasEnded to true.
+     * Handles deserializing objects sent from serverSocket
      * @param line: the serialized object sent from the server
      */
     protected synchronized void deserializeObjects(String line){
@@ -182,7 +183,6 @@ public abstract class ClientSocket {
         if (line.startsWith("[CURRENTPLAYER]")){
             line = line.replace("[CURRENTPLAYER]", "");
             isPlaying = line;
-            //turnHasEnded = true;
         }
         if (line.startsWith("[FIRSTPLAYERSEAT]")){
             firstPlayerSeat = true;
@@ -194,12 +194,6 @@ public abstract class ClientSocket {
             hasEndGameToken=true;
             System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
         }
-//        if (line.startsWith("[DRAWNTILES]")){
-//            TypeToken<List<Tile>> typeToken = new TypeToken<>() {};
-//            String gsonString = line.replace("[DRAWNTILES]", "");
-//            drawnTiles = gson.fromJson(gsonString, typeToken.getType());
-//        }
-        //notifyAll();
     }
 
     /**
@@ -241,8 +235,8 @@ public abstract class ClientSocket {
     }
 
     /**
-     * Creates a Thread that checks if the last ping has occured more than diconnectionTime ago.
-     * If so it throws a disconnectionAlert, else sleeps for 1 second
+     * Creates a Thread that checks if the last ping has occurred more than disconnectionTime ago.
+     * If so it calls disconnectionAlert method, else sleeps for 1 second
      */
     public void disconnectionCheck(){
         new Thread(() -> {
@@ -260,6 +254,11 @@ public abstract class ClientSocket {
             }
         }).start();
     }
+
+    /**
+     * This method is called by disconnectionCheck, and it's used to warn the client that the connection to the server
+     * has been lost - implemented in the concrete children classes
+     */
     protected void disconnectionAlert(){}
 
     //getters
