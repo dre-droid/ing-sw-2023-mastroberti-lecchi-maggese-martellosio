@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="LoginAnchorPane" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.it.polimi.ingsw.GUI.LoginSceneController">
+<AnchorPane fx:id="LoginAnchorPane" prefHeight="865.0" prefWidth="1298.0" stylesheets="/Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.it.polimi.ingsw.GUI.LoginSceneController">
    <children>
       <Pane layoutX="426.0" layoutY="265.0" prefHeight="347.0" prefWidth="446.0">
          <children>

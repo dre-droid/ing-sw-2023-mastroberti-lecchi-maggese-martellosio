@@ -1583,7 +1583,7 @@ public class GameSceneController {
             Scene scene;
             Parent root;
             ClassLoader classLoader = MainGUI.class.getClassLoader();
-            URL fxmlPath = classLoader.getResource("fxmls/EndGameScene.fxml");
+            URL fxmlPath = classLoader.getResource("EndGameScene.fxml");
             if(fxmlPath==null){
                 throw new IllegalStateException("FXML non trovato");
             }
@@ -1613,7 +1613,7 @@ public class GameSceneController {
                     Scene scene;
                     Parent root;
                     ClassLoader classLoader = MainGUI.class.getClassLoader();
-                    URL fxmlPath = classLoader.getResource("fxmls/LoginScene.fxml");
+                    URL fxmlPath = classLoader.getResource("LoginScene.fxml");
                     if(fxmlPath==null){
                         throw new IllegalStateException("FXML non trovato");
                     }

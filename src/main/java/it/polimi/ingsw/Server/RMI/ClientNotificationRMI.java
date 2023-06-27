@@ -94,6 +94,7 @@ public class ClientNotificationRMI extends java.rmi.server.UnicastRemoteObject i
         for(int i=0;i<leaderboard.size();i++){
             System.out.println((i+1)+") "+leaderboard.get(i).getNickname()+"with "+leaderboard.get(i).getScore());
         }
+        System.exit(0);
     }
 
     @Override

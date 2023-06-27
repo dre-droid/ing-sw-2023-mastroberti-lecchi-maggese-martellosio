@@ -54,7 +54,7 @@ public class ConnectionTypeController  {
                 Scene scene;
                 Parent root;
                 ClassLoader classLoader = MainGUI.class.getClassLoader();
-                URL fxmlPath = classLoader.getResource("fxmls/LoginScene.fxml");
+                URL fxmlPath = classLoader.getResource("LoginScene.fxml");
                 if(fxmlPath==null){
                     throw new IllegalStateException("FXML non trovato");
                 }
