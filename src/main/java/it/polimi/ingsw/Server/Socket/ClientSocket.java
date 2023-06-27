@@ -81,6 +81,10 @@ public abstract class ClientSocket {
         new Thread(serverPinger).start();
     }
 
+    /**
+     * creates a thread to listen messages from the server
+     */
+
     protected void serverListener() {
         Runnable serverListener = () -> {
             try {
@@ -109,6 +113,10 @@ public abstract class ClientSocket {
         new Thread(serverListener).start();
     }
 
+    /**
+     * This method is used to handel server's common requests
+     * @param line : the serialized object sent from the server
+     */
     private synchronized void handleServerRequestCommon(String line){
         if (line.startsWith("[INFO] Chosen nickname:")){
             nickname = line.replace("[INFO] Chosen nickname: ", "");
@@ -231,6 +239,11 @@ public abstract class ClientSocket {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Creates a Thread that checks if the last ping has occured more than diconnectionTime ago.
+     * If so it throws a disconnectionAlert, else sleeps for 1 second
+     */
     public void disconnectionCheck(){
         new Thread(() -> {
             lastPing = System.currentTimeMillis();

@@ -13,6 +13,7 @@ public class CLISocket extends ClientSocket{
 
     /**
      * Handles server's received messages
+     * @param line: the serialized object sent from the server
      */
      protected synchronized void handleServerRequest(String line){
          if (line.startsWith("[YOUR TURN]")) {
@@ -139,6 +140,11 @@ public class CLISocket extends ClientSocket{
         }
     }
 
+    /**
+     * Prints the shelf of the player in the CLI
+     * @param shelf : player's shelf
+     */
+
     private void printShelf(Shelf shelf){
         System.out.println("*** Shelf ***");
         System.out.println("1 2 3 4 5");
@@ -152,6 +158,10 @@ public class CLISocket extends ClientSocket{
         System.out.println("*************");
     }
 
+    /**
+     * Pritns player's leaderboard in his CLI
+     */
+
     private void printLeaderboard(){
         System.out.println("Leaderboard");
         int i = 0;
@@ -161,6 +171,10 @@ public class CLISocket extends ClientSocket{
             i++;
         }
     }
+
+    /**
+     * Sends a disocnnection alert in CLI Socket if the connection ping hasn't occured in the expected time window
+     */
 
     protected void disconnectionAlert(){
         System.out.println("Connection lost, try again later");
