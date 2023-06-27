@@ -48,10 +48,10 @@ public class MatchTypeController {
                     System.out.println("Rmi active in match type scene");
                     String nextScenePath;
                     if (clientRMI.createNewGame(numOfPlayers)) {
-                        nextScenePath = "fxmls/GameScene.fxml";
+                        nextScenePath = "GameScene.fxml";
                     } else {
                         //alert about a game already being created
-                        nextScenePath = "fxmls/LoginScene.fxml";
+                        nextScenePath = "LoginScene.fxml";
                     }
                     ClassLoader classLoader = MainGUI.class.getClassLoader();
                     URL fxmlPath = classLoader.getResource(nextScenePath);
@@ -93,7 +93,7 @@ public class MatchTypeController {
     private void socketSwitchToGameScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();
-            URL fxmlPath = classLoader.getResource("fxmls/GameScene.fxml");
+            URL fxmlPath = classLoader.getResource("GameScene.fxml");
             if(fxmlPath==null){
                 throw new IllegalStateException("FXML non trovato");
             }

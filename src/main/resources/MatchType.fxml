@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="MatchTypePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="865.0" prefWidth="1298.0" stylesheets="@Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.it.polimi.ingsw.GUI.MatchTypeController">
+<AnchorPane fx:id="MatchTypePane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="865.0" prefWidth="1298.0" stylesheets="/Application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.java.it.polimi.ingsw.GUI.MatchTypeController">
    <children>
       <Label layoutX="366.0" layoutY="219.0" text="No game to join. Select match type: " textFill="#fffafa">
          <font>

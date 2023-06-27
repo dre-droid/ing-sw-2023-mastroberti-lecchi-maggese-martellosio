@@ -93,9 +93,9 @@ public class LoginSceneController{
                     System.out.println("riconnessione in corso...");
                     if(clientRMI.reconnectToGame()){
                         //switch to game scene
-                        nextScenePath = "fxmls/GameScene.fxml";
+                        nextScenePath = "GameScene.fxml";
                         ClassLoader classLoader = MainGUI.class.getClassLoader();
-                        URL fxmlPath = classLoader.getResource("fxmls/GameScene.fxml");
+                        URL fxmlPath = classLoader.getResource("GameScene.fxml");
                         if(fxmlPath==null){
                             throw new IllegalStateException("FXML non trovato");
                         }
@@ -130,7 +130,7 @@ public class LoginSceneController{
                 switch(outcome){
                     case -1:{
                         errorMessage = "Nickname already in use";
-                        loader = new FXMLLoader(getClass().getResource("../../../../../resources/fxmls/LoginScene.fxml"));
+                        loader = new FXMLLoader(getClass().getResource("../../../../../resources/LoginScene.fxml"));
                         updateLabelText(messageTextArea, errorMessage);
                     }break;
                     case 0:{
@@ -148,7 +148,7 @@ public class LoginSceneController{
                             case -1:{
                                 System.out.println("createnewgamecommand");
                                 ClassLoader classLoader = MainGUI.class.getClassLoader();
-                                URL fxmlPath = classLoader.getResource("fxmls/MatchType.fxml");
+                                URL fxmlPath = classLoader.getResource("MatchType.fxml");
                                 if(fxmlPath==null){
                                     throw new IllegalStateException("FXML non trovato");
                                 }
@@ -173,7 +173,7 @@ public class LoginSceneController{
                             }break;
                             case 0:{
                                 ClassLoader classLoader = MainGUI.class.getClassLoader();
-                                URL fxmlPath = classLoader.getResource("fxmls/GameScene.fxml");
+                                URL fxmlPath = classLoader.getResource("GameScene.fxml");
                                 if(fxmlPath==null){
                                     throw new IllegalStateException("FXML non trovato");
                                 }
@@ -265,7 +265,7 @@ public class LoginSceneController{
     private void socketSwitchToGameScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();
-            URL fxmlPath = classLoader.getResource("fxmls/GameScene.fxml");
+            URL fxmlPath = classLoader.getResource("GameScene.fxml");
             if(fxmlPath==null){
                 throw new IllegalStateException("FXML non trovato");
             }
@@ -293,7 +293,7 @@ public class LoginSceneController{
     private void socketSwitchToMatchTypeScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();
-            URL fxmlPath = classLoader.getResource("fxmls/MatchType.fxml");
+            URL fxmlPath = classLoader.getResource("MatchType.fxml");
             if(fxmlPath==null){
                 throw new IllegalStateException("FXML non trovato");
             }

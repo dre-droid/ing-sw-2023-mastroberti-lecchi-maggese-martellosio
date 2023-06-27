@@ -23,7 +23,7 @@ public class MainGUI extends Application {
         try{
         //Font.loadFont(getClass().getResource("JokermanRegular.ttf").toExternalForm(), 10);
             ClassLoader classLoader = MainGUI.class.getClassLoader();
-            URL fxmlPath = classLoader.getResource("fxmls/ConnectionType.fxml");
+            URL fxmlPath = classLoader.getResource("ConnectionType.fxml");
             if(fxmlPath==null){
                 throw new IllegalStateException("FXML non trovato");
             }
