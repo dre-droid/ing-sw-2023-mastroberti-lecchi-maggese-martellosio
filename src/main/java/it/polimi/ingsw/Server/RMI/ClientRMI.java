@@ -69,6 +69,11 @@ public class ClientRMI implements Runnable{
     private String myIp;
 
 
+    /**
+     * this method is used to connect to the rmi server
+     * @param url ip address of the rmi server
+     * @return
+     */
     private boolean connectToRMIserver(String url){
         try{
             Registry registryServer = LocateRegistry.getRegistry(url);
@@ -80,6 +85,10 @@ public class ClientRMI implements Runnable{
         return true;
     }
 
+    /**
+     * this method is used to start the client notification server so that the server can send message to the
+     * client
+     */
     private void startClientNotificationServer(){
         Random random = new Random();
         boolean outcome = false;
@@ -96,6 +105,14 @@ public class ClientRMI implements Runnable{
         }while(!outcome);
     }
 
+    /**
+     * this method is used to join the game on the server, it asks the client for a nickname and the tries to join
+     * the lobby if the game has not started, if the game has already started then it asks the client the nickname
+     * so he can try to reconnect to the game
+     * @param userInput the scanner on which the client input data
+     * @throws RemoteException
+     * @throws InterruptedException
+     */
     private void joinGame(Scanner userInput) throws RemoteException, InterruptedException {
         boolean reconnected = false;
         do{
@@ -182,7 +199,14 @@ public class ClientRMI implements Runnable{
         System.out.println("You reconnected to the game, wait for your turn now");
     }
 
-
+    /**
+     * this method is used to check int values that the user input so that he does not insert problematic values
+     * @param scanner input scanner on which the player input data
+     * @param min minimum int value
+     * @param max maximum int value
+     * @param ErrorMessage error message to print if the player type a wrong value
+     * @return
+     */
     private int checkedInputForIntValues(Scanner scanner, int min, int max, String ErrorMessage){
         int value=-1;
         String userInput;
@@ -202,6 +226,12 @@ public class ClientRMI implements Runnable{
         return value;
     }
 
+    /**
+     * this method is used to check if the input of the client contains a command to send to the server
+     * @param userInput string typed by the client
+     * @return true if the string contained a command, false otherwise
+     * @throws IOException
+     */
     private boolean checkForCommand(String userInput) throws IOException {
         serverRMI.ping();
         if(userInput.equals("/quit")){
@@ -235,6 +265,9 @@ public class ClientRMI implements Runnable{
         }
     }
 
+    /**
+     * this method is used to reset all the flags
+     */
     public void resetFlags(){
         setGameStartFlag(false);
         setMyTurnFlag(false);
@@ -242,6 +275,9 @@ public class ClientRMI implements Runnable{
         setEndGameFlag(false);
     }
 
+    /**
+     * this method is used to connect to server and play
+     */
     @Override
     public void run() {
 
@@ -257,9 +293,6 @@ public class ClientRMI implements Runnable{
                 boolean correctlyInserted=false;
                 boolean correctlyRearranged = false;
                 List<Tile> rearrangedTiles=null;
-
-
-
 
                 Scanner userInput = new Scanner(System.in);
                 boolean connected;
@@ -437,6 +470,10 @@ public class ClientRMI implements Runnable{
 
     }
 
+    /**
+     * this method is used to print the shelf on the command line
+     * @param grid matrix of tile representing the shelf to print
+     */
     private void printShelf(Tile[][] grid){
         System.out.println("1 2 3 4 5");
         for(int i = 0; i <6 ; i++) {
@@ -458,6 +495,10 @@ public class ClientRMI implements Runnable{
         System.out.println("");
     }
 
+    /**
+     * this method is used to print the board on the command line
+     * @param grid matrix of tile placing spot representing the board to print
+     */
     private void printBoard(TilePlacingSpot[][] grid){
         System.out.println("  0 1 2 3 4 5 6 7 8");
         for(int i = 0;i<9;i++) {
@@ -492,6 +533,10 @@ public class ClientRMI implements Runnable{
         }
     }
 
+    /**
+     * this method is used to print all the information at the beginning of a turn
+     * @throws RemoteException
+     */
     private void printStartOfTurn() throws RemoteException {
         System.out.println("*********  " + playerNickname + ": your turn  *********");
 
@@ -567,6 +612,12 @@ public class ClientRMI implements Runnable{
             }
         }).start();
     }
+
+    /**
+     * this method is used to let the client insert his nickname according to the rules
+     * @param userInput scanner on which the client types
+     * @return
+     */
     public String getPlayerNickname(Scanner userInput){
         String nickname =  userInput.nextLine();
         while (nickname.length() > 15 || nickname.equals("") || nickname.contains("@") || nickname.contains(" ") ||

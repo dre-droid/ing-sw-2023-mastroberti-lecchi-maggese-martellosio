@@ -468,6 +468,8 @@ public class GameSceneController {
                 if (clientSocket.hasEndGameToken()){
                     nicknameHasEnded=clientSocket.getNickname();
                     setEndGameToken();
+                    Optional<Player> endgameholder = clientSocket.getLeaderboard().stream().filter(player -> player.hasEndGameToken()).findFirst();
+                    endgameholder.ifPresent(player -> setOpponentEndGameToken(player.getNickname()));
                 }
             }else{
                 if(clientRMI != null){
