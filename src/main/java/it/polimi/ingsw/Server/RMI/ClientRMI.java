@@ -123,7 +123,7 @@ public class ClientRMI implements Runnable{
             try {
                 InetAddress inetAddress = InetAddress.getLocalHost();
                 myIp = inetAddress.getHostAddress();
-                System.out.println("my ip is = "+myIp);
+                //System.out.println("my ip is = "+myIp);
             } catch (UnknownHostException e) {
                 System.out.println("cannot get ip address ");
             }
@@ -154,7 +154,7 @@ public class ClientRMI implements Runnable{
                 }
                 switch(joinGameOutcome){
                     case 0:{
-                        System.out.println("waiting for players...");
+                        //System.out.println("waiting for players...");
                     }break;
                     case -1: {
                         System.out.println("Creating a new game...How many players can join your game? (2, 3, 4)");
@@ -308,7 +308,7 @@ public class ClientRMI implements Runnable{
                                     connected = false;
                                 }
                                 else{
-                                    System.out.println("correct ip: "+serverIp);
+                                    //System.out.println("correct ip: "+serverIp);
                                     connected = connectToRMIserver(inetAddress.getHostAddress());
                                 }
                             }
@@ -328,7 +328,7 @@ public class ClientRMI implements Runnable{
                 }while(!connected);
 
                 System.out.println("Connected to the server");
-                System.out.println("correct ip: "+serverIp);
+                //System.out.println("correct ip: "+serverIp);
                 //join the game
                 joinGame(userInput);
                 if(!serverRMI.hasGameStarted())
