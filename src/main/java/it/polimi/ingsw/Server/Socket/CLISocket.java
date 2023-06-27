@@ -47,6 +47,7 @@ public class CLISocket extends ClientSocket{
              System.exit(0);
         }
 
+
     }
 
     /**
@@ -59,7 +60,11 @@ public class CLISocket extends ClientSocket{
         //shelf & personalGoal print
         Scanner scannerpg = new Scanner(personalGoalCard.toString());
         Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getScoringTokens().get(commonGoalCards.get(0).getScoringTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getScoringTokens().get(commonGoalCards.get(1).getScoringTokens().size() - 1).getPoints());
-
+        for(Player p: leaderboard){
+            if(p.hasEndGameToken()){
+                System.out.println("CAREFULL THIS IS YOUR LAST TURN:" + " " + p.getNickname()+" " + "HAS GOT THE ENDGAME TOKEN");
+            }
+        }
 
         System.out.println("*** Shelf ***  *** Personal Goal Card ***  *** Common Goal Card ***");
         for (int i = 0; i < 6; i++) {

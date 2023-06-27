@@ -184,7 +184,7 @@ public abstract class ClientSocket {
         }
         if(line.equals("[ENDGAMETOKEN]")){
             hasEndGameToken=true;
-            System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$You have received the end game toke$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+            System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
         }
 //        if (line.startsWith("[DRAWNTILES]")){
 //            TypeToken<List<Tile>> typeToken = new TypeToken<>() {};
