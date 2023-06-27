@@ -199,6 +199,7 @@ public class Game {
 
                 // if last turn
                 if ((lastRound || isPlaying.hasEndGameToken()) && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){
+                    playersList.forEach(Player::updateFinalScore);
                     endGame();
                 }
                 else{

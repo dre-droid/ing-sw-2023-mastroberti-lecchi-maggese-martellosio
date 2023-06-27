@@ -392,6 +392,12 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         gsc.updateTurnLabel(nextPlayerNickname);
         gsc.updateLeaderboard(serverRMI.getLeaderboard());
         gsc.updateBoard(serverRMI.getBoard());
+        List<Player> players = serverRMI.getPlayers();
+        if(players.stream().anyMatch(Player::hasEndGameToken)){
+            if(this.gsc!=null){
+                gsc.setOpponentEndGameToken(players.stream().filter(player -> player.hasEndGameToken()).findFirst().get().getNickname());
+            }
+        }
         if(serverRMI.haveIEndGameToken(nickname))
             gsc.setEndGameToken();
     }

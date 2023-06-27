@@ -530,6 +530,25 @@ public class GameSceneController {
             }
     }
 
+    public void setOpponentEndGameToken(String playerHoldingToken){
+        Image endGameToken = new Image("scoring_tokens/endgame.jpg");
+        if(Opp1ShelfGrid.getUserData()!=null){
+            if(playerHoldingToken.equals(Opp1ShelfGrid.getUserData())){
+                EndGameToken1.setImage(endGameToken);
+            }
+        }
+        if(Opp2ShelfGrid.getUserData()!=null){
+            if(playerHoldingToken.equals(Opp2ShelfGrid.getUserData())){
+                EndGameToken2.setImage(endGameToken);
+            }
+        }
+        if(Opp3ShelfGrid.getUserData()!=null){
+            if(playerHoldingToken.equals(Opp3ShelfGrid.getUserData())){
+                EndGameToken3.setImage(endGameToken);
+            }
+        }
+    }
+
     /**
      * this method is used to handle the event on click of the tiles in the board, if the tile is not already been drawn then it's drawn
      * and placed in the TileToBeInserted grid pane, then the border of the drawn tile in the board turns to yellow
