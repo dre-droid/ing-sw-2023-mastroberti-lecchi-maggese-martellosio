@@ -100,6 +100,10 @@ public class CLISocket extends ClientSocket{
 
     }
 
+    /**
+     * This method is called by Hnadle server request when the game starts and the first to play is currentPlayer rather than this player
+     * @param currentPlayer nickname of the player who starts the game
+     */
     private void printTurn(String currentPlayer){
         System.out.println();
         System.out.println("*********  " + currentPlayer + "'s turn  *********");
@@ -173,7 +177,7 @@ public class CLISocket extends ClientSocket{
     }
 
     /**
-     * Sends a disocnnection alert in CLI Socket if the connection ping hasn't occured in the expected time window
+     * Sends a disconnection alert in CLI Socket if the connection ping hasn't occurred in the expected time window
      */
 
     protected void disconnectionAlert(){
