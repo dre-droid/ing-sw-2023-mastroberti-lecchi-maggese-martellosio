@@ -17,7 +17,7 @@ public class GUISocket extends ClientSocket{
         super(ip);
     }
     /**
-     * Handles server's received messages
+     * Handles server's received messages by notifying threads waiting on a certain lock
      */
     protected void handleServerRequest(String line){
         synchronized (this){
@@ -61,7 +61,6 @@ public class GUISocket extends ClientSocket{
             synchronized (nextSceneLock) {
                 line = line.replace("[REQUEST] ", "");
                 nextScene = line;
-                //System.out.println("client socket " + nextScene);
                 nextSceneLock.notifyAll();
             }
         }
@@ -124,6 +123,9 @@ public class GUISocket extends ClientSocket{
 
     }
 
+    /**
+     * Used to warn socketUpdateGameScene() in GameSceneController that connection to the server has been lost
+     */
     protected void disconnectionAlert(){
         synchronized (connectionLostLock){
             connectionLost = true;

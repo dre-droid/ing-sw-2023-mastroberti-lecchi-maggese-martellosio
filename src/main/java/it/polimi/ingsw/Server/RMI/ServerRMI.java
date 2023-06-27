@@ -482,7 +482,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     @Override
     public String getCommonGoalCardDescription() throws RemoteException {
-        return controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description();
+        return controller.getCommonGoalCard1Description() + " Token: "+
+                controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).size() -1 ).getPoints()
+                + "\n" +controller.getCommonGoalCard2Description() + " Token: " +
+                controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(1)).size() -1 ).getPoints();
     }
 
 
