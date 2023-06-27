@@ -207,6 +207,7 @@ public class ClientRMI implements Runnable{
         if(userInput.equals("/quit")){
             System.out.println("Quit command sent to the server");
             serverRMI.quitGame(playerNickname);
+            System.exit(0);
             return true;
         }else if(userInput.startsWith("/chat ")){
 

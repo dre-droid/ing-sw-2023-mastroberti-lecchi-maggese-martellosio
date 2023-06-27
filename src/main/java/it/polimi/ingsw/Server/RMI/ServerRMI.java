@@ -575,8 +575,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 if(client.getValue()!=null)
                     client.getValue().gameIsOver(controller.getLeaderboard());
             } catch (RemoteException e) {
-                e.printStackTrace();
-                System.out.println("Cannot notify controller");
+                //e.printStackTrace();
+                //System.out.println("Cannot notify controller");
             }
         }
     }
