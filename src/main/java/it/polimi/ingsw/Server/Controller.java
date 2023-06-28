@@ -381,6 +381,7 @@ public class Controller {
         server.serverSock.broadcastMessage("[ALLDISCONNECTED]", "Server");
         server.serverRMI.notifyEndOfGame(finalLead, true);
         game.endGame();
+        deleteProgress();
     }
 
     /**
