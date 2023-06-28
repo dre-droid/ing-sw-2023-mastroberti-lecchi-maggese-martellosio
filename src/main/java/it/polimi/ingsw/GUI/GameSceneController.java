@@ -155,7 +155,13 @@ public class GameSceneController {
 
 
     /**
-     * Updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
+     * This method updates the GUI showing game's first turn board, PersonalGoalCard, CommonGoalCards and leaderbaord
+     * @param board The game board
+     * @param pgcMap The map of personal goal cards containing the valid tiles for comparison.
+     * @param pgc The player's personal goal card
+     * @param cgcs The list of common goal cards
+     * @param leaderboard the list of players that are playing
+     * @param isPlaying nickname of the player who is currently playing
      */
     public void updateGUIAtBeginningOfGame(TilePlacingSpot[][] board, Map<Integer, PersonalGoalCard> pgcMap, PersonalGoalCard pgc, List<CommonGoalCard> cgcs, List<Player> leaderboard, String isPlaying){
         Platform.runLater(() -> {
@@ -198,6 +204,12 @@ public class GameSceneController {
         });
 
     }
+
+    /**
+     * This method is used to display an alert when the player wants to close the GameScene window and checks
+     * if the player wants to exit the game. If the player wants to end the game he will click the OK button in the alert
+     * and the player will quit the game.
+     */
 
     public void setCloseAlert(){
         alreadySet=true;
@@ -303,6 +315,12 @@ public class GameSceneController {
             }
         });
     }
+
+    /**
+     * This method is used to show the player his personal goal card.
+     * @param pgc the personal goal card assigned to the player
+     * @param pgcMap The map of personal goal cards containing the valid tiles for comparison.
+     */
 
     public void setPersonalGoalCardImage(PersonalGoalCard pgc, Map<Integer, PersonalGoalCard> pgcMap){
         int id=-1;
@@ -412,6 +430,12 @@ public class GameSceneController {
         });
     }
 
+    /**
+     *  This method creates the leaderboard as a table with 2 columns: one for the player nickname and
+     *  the other for their scores. The leaderboard is always sorted in decreasing points.
+     * @param leaderboard the list of player who are playing and their scores
+     */
+
     public void createLeaderboard(List<Player> leaderboard){
         Platform.runLater(() -> {
             if (!leaderboardCheck) {
@@ -495,9 +519,10 @@ public class GameSceneController {
     }
 
     /**
-     * Updates opponents' shelves
-     * @param nickname the
-     * @param grid
+     * This method updates Opponent Shelfs and assigns firstplayertoken and endgame token checking
+     * the correspondence between the UserData and the nickname of the player that has those tokens
+     * @param nickname : the nickname of player whose shelf is updated
+     * @param grid : Shelf's grid from which you retrieve user data.
      */
     public void updateOppShelf(String nickname, Tile[][] grid){
         if(Opp1ShelfGrid.getUserData()!=null)
@@ -531,6 +556,11 @@ public class GameSceneController {
                 }
             }
     }
+
+    /**
+     * This method is used to update opponentEndGameToken
+     * @param playerHoldingToken : nickname of the player who is holding the endgame token.
+     */
 
     public void setOpponentEndGameToken(String playerHoldingToken){
         Image endGameToken = new Image("scoring_tokens/endgame.jpg");
@@ -639,8 +669,9 @@ public class GameSceneController {
 
 
     /**
-     * Sends the server a request to draw the selected tiles from the board.
+     * This method sends the server a request to draw the selected tiles from the board.
      * Updates client's board.
+     * @param event the CheckMarkButton has been pressed
      */
     private void handleCheckmarkButton(ActionEvent event) {
         Shelf shelf = Objects.isNull(clientSocket) ? new Shelf(clientRMI.getMyShelf()) : clientSocket.getShelf();
@@ -742,8 +773,9 @@ public class GameSceneController {
     }
 
     /**
-     * Sends the server a request to insert the tiles in the selected column of the shelf.
+     * This method sends the server a request to insert the tiles in the selected column of the shelf.
      * Calls updateGameScene().
+     * @param column the column in which you want to insert the tiles drawn
      */
     private void handleShelfButton(String column){
         // socket
@@ -785,6 +817,7 @@ public class GameSceneController {
 
     /**
      * This method is called to insert the tile picked with the gui in the shelf on the rmi server
+     * @param column : the column in which you want to insert the tiles drawn.
      */
     private void rmiHandleShelfButton(String column){
         if(clientRMI.insertTilesInShelf(Integer.parseInt(column)));
@@ -798,6 +831,11 @@ public class GameSceneController {
         ImageView img = (ImageView) e.getSource();
         handleShelfButton(img.getId());
     };
+
+    /**
+     * This method is used th set Shelf Buttons visible when the green check has been pressed and the player has to insert
+     * the tiles in the shelf.
+     */
     private void createShelfButtons(){
         shelfButtonsPane.setVisible(false);
         for (int i = 0; i < 5; i++) {
@@ -809,7 +847,12 @@ public class GameSceneController {
     }
 
     /**
-     * this method is used to send the tile to draw to the server, is called when the green check button is pressed
+     * This method draws tiles from the RMI server and updates the game board.
+     * Retrieves the necessary parameters from the GUI and checks if the drawn tiles are on the same row or column.
+     * It sorts the list of positions accordingly and determines the direction in which the tiles should be placed on the game board.
+     * The method then calls the RMI server's drawTilesFromBoard(int, int, int, Board.Direction) method
+     * to draw the tiles and updates the game board accordingly.
+     * If the draw operation is successful, the shelf buttons pane is made visible on the GUI.
      */
     public void drawTilesFromRMIServer(){
         //first we get all the parameters we need from the gui
@@ -930,7 +973,8 @@ public class GameSceneController {
     }
 
     /**
-     * Updates player's shelf in the scene
+     * This method is used to update the player's shelf in Game Scene
+     * @param shelf : the shelf to be updated
      */
     private void updateShelf(Shelf shelf){
         for (int rows = 0; rows < 6; rows++)
@@ -961,7 +1005,8 @@ public class GameSceneController {
     }
 
     /**
-     * Changes the top label to display the new currently playing client
+     * This method updates the turnLabel with the nickname of the player who is currently playing
+     * @param player the nickname of the player who is playing
      */
     public void updateTurnLabel(String player) {
         TopLabel.setText(player + "'s turn.");
@@ -1144,8 +1189,8 @@ public class GameSceneController {
     }
 
     /**
-     * this method is used to transform an integer into an int
-     * @param i integer
+     * This method is used to transform an integer into an int
+     * @param i integer to trasfrom
      * @return the int value of the integer if the integer is not null, 0 otherwise
      */
     private int transformIntegerToInt(Integer i){
@@ -1195,6 +1240,14 @@ public class GameSceneController {
         }
     }
 
+    /** This method updates the game scene via socket communication.
+     *  This method runs in a separate thread and continuously updates the game scene based on incoming data received via socket communication.
+     *  It synchronizes access to ensure that the updateGameScene method is not executed simultaneously
+     *  with the socketInitializeGameScene() method.
+     *  The method waits for the turn to end, and upon receiving the notification, updates the game scene with the current state of the board,
+     *  leaderboard, and shelf. If the game ends, it triggers the switch to the end game scene by passing the leaderboard data.
+     *  Additionally, if the connection is lost, it navigates back to the login screen by calling the {@link #backToLogin()} method.
+     */
     public void socketUpdateGameScene(){
         new Thread(() -> {
             // runs for the whole duration of the game
@@ -1263,7 +1316,7 @@ public class GameSceneController {
 
     /**
      * @author SaverioMaggese99
-     * this method set players tokens and shelfs at the beginning of the game and is called
+     * This method set players tokens and shelfs at the beginning of the game and is called
      * in updateGUIatBeginningofGAme
      */
     public void setPlayerLabels(){
@@ -1358,7 +1411,7 @@ public class GameSceneController {
      * this method is called once chat button is pressed, if clientSocket != null it sends the chat message through method clientSpeaker
      * otherwise it means the player is using RMI so the message is sent through method sendChatMessage
      * @author Diego Lecchi
-     * @param e
+     * @param e: chatButton clicked event
      * @throws RemoteException
      */
     public void chatButtonPressed(ActionEvent e) throws RemoteException {
@@ -1474,7 +1527,8 @@ public class GameSceneController {
     }
 
     /**
-     * Sends server selected column and reordering info
+     * This method sends server the selected column and information about reordering drawn tiles.
+     * @param column the column sent to the server in which tiles have to be inserted.
      */
     private void socketHandleShelfButton(String column){
         // sends selected column
@@ -1588,7 +1642,7 @@ public class GameSceneController {
     }
 
     /**
-     * this method is used to set the end game token
+     * This method is udes to set the End Game token to the player that has received it in his scene
      */
     public void setEndGameToken(){
         Platform.runLater(()->{
@@ -1610,6 +1664,11 @@ public class GameSceneController {
             });
         }
     }
+
+    /**
+     * This method is called to load the EndGameScene when the game has ended.
+     * @param leaderboard : the game leaderboard used to show the game results.
+     */
 
     public void switchToEndGameScene(List<Player> leaderboard){
         Platform.runLater(()->{
@@ -1638,6 +1697,12 @@ public class GameSceneController {
         });
 
     }
+
+    /**
+     * This method is used to return to the LogIn scene.This method switches the application's scene to the login scene, allowing the user to log in again.
+     * It loads the "LoginScene.fxml" file, sets the necessary controller and client, and displays the new scene in a new stage.
+     * Additionally, it handles the close request of the stage by exiting the platform when the close button is pressed.
+     */
 
     public void backToLogin(){
         Platform.runLater(()->{
@@ -1675,6 +1740,13 @@ public class GameSceneController {
 
         });
     }
+
+    /**
+     * This method sets up the chat interface.
+     * This method configures the chat interface by making the necessary components visible and setting an initial message.
+     * It shows the message text area, sets the welcome message, and makes the chat button and text field visible for user interaction.
+     * The chat interface allows users to send messages and engage in conversations with others.
+     */
     public void chatSetUp (){
         messageTextArea2.setVisible(true);
         messageTextArea2.setText("Welcome to My Shelfie! To chat with others just type in the box below, to chat privately with another player type @NameOfPlayer followed by the message you wish to send");
@@ -1688,6 +1760,10 @@ public class GameSceneController {
             Platform.exit();
         });
     }
+
+    /**
+     * This method is used to set the first player seat only in the scene of the player who has the first player seat.
+     */
 
     public void setFirstPlayerSeat(){
         firstPlayerSeat.setImage(new Image("misc/firstplayertoken.png",50,50,true,false));
