@@ -389,7 +389,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void aTurnHasEnded(String currentPlayerNickname, String nextPlayerNickname) throws RemoteException {
-        gsc.updateTurnLabel(nextPlayerNickname);
+        gsc.updateTurnLabel(serverRMI.getIsPlaying());
         gsc.updateLeaderboard(serverRMI.getLeaderboard());
         gsc.updateBoard(serverRMI.getBoard());
         List<Player> players = serverRMI.getPlayers();
@@ -440,6 +440,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void startTurn() throws RemoteException {
+        gsc.updateTurnLabel(serverRMI.getIsPlaying());
         MyTurnFlag = true;
     }
 

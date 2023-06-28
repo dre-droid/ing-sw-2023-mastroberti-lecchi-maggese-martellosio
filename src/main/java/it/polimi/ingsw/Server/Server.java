@@ -93,6 +93,7 @@ public class Server {
                     if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                         notifySocketOfTurnEnd();
+                        serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
                     }
                 }
 

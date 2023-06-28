@@ -240,7 +240,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 }
             }
         }catch (Exception e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -520,7 +520,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyStartOfGame() {
         try{
             for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-                if(client.getValue()!=null){
+                if(client.getValue()!=null && checkIfPlayerIsConnected(client.getValue())){
                     client.getValue().startingTheGame(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     client.getValue().announceCommonGoals(controller.getCommonGoalCard1Description()+"\n"+controller.getCommonGoalCard2Description());
                     if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
@@ -540,7 +540,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyEndOfGame() {
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
-                if(client.getValue()!=null)
+                if(client.getValue()!=null && checkIfPlayerIsConnected(client.getValue()))
                     client.getValue().gameIsOver(controller.getLeaderboard());
             } catch (RemoteException e) {
                 //System.out.println("Cannot notify controller");
@@ -706,9 +706,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getNickname())){
                                         server.clientsLobby.get(i).setDisconnected(true);
                                         //clients.put(client.getNickname(), null);
-                                        if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getNickname())){
+                                        /*if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getNickname())){
                                             endOfTurn(client.getNickname());
-                                        }
+                                        }*/
                                         server.notifyLobbyDisconnection(nickname);
                                         return;
                                     }
@@ -866,7 +866,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void broadcastMessage(String message, String sender){
         try{
             for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-                if(client.getValue()!=null) {
+                if(client.getValue()!=null && checkIfPlayerIsConnected(client.getValue())) {
                     if(!client.getKey().equals(sender))
                         client.getValue().broadcastedMessage("Message from Server: " + message);
                 }
@@ -890,7 +890,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     public void updateCommonGoalTokens(){
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
-            if(client.getValue()!=null){
+            if(client.getValue()!=null && checkIfPlayerIsConnected(client.getValue())){
                 try {
                     client.getValue().updateCommonGoalTokens();
                 } catch (RemoteException e) {
@@ -898,6 +898,27 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 }
             }
         }
+    }
+
+    public void notifyEndOfTurn(String name){
+        for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
+            if(client.getValue()!=null && checkIfPlayerIsConnected(client.getValue())){
+                try{
+                    client.getValue().aTurnHasEnded(name,controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                }catch(RemoteException remoteException){
+
+                }
+            }
+        }
+    }
+
+    public boolean checkIfPlayerIsConnected(ClientNotificationInterfaceRMI clientNotificationRMI){
+        try{
+            clientNotificationRMI.ping();
+        }catch (RemoteException re){
+            return false;
+        }
+        return true;
     }
 
 }

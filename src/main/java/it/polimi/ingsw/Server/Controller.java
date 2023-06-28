@@ -291,6 +291,7 @@ public class Controller {
         }
         if(playerNickname.equals(game.getIsPlaying().getNickname())){
             game.endOfTurn(game.getIsPlaying());
+
             saveGameProgress();
             if(server.serverRMI.isHeARmiPlayer(getNameOfPlayerWhoIsCurrentlyPlaying())){
                 if(server.serverRMI.isHeDisconnected(getNameOfPlayerWhoIsCurrentlyPlaying())){
@@ -330,7 +331,6 @@ public class Controller {
         boolean invalidMoveFlag = false;
         Player thisTurnsPlayer = getPlayers().stream().filter(player -> player.getNickname().equals(game.getIsPlaying().getNickname())).toList().get(0);
         drawInfo info;
-
         do {
             try {
                 info = serverSock.drawInquiry(getNameOfPlayerWhoIsCurrentlyPlaying(), game.getBoard(), game.getIsPlaying().getShelf(), game.getIsPlaying().getPersonalGoalCard(), game.getCommonGoalCards(), getScoringToken(getNameOfPlayerWhoIsCurrentlyPlaying()), getLeaderboard());
@@ -344,6 +344,9 @@ public class Controller {
                     server.serverRMI.updateCommonGoalTokens();
                     server.serverRMI.updateEndOfTurnObjects(thisTurnsPlayer.getNickname());
                     server.serverRMI.notifyStartOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
+                    /*while(server.clientsLobby.stream().filter(p->p.getNickname().equals(getNameOfPlayerWhoIsCurrentlyPlaying())).toList().get(0).isDisconnected()){
+                        endOfTurn(getNameOfPlayerWhoIsCurrentlyPlaying());
+                    }*/
                     invalidMoveFlag = false;
                     if(game.hasTheGameEnded()){
                         System.out.println("Correctly ended game.");
