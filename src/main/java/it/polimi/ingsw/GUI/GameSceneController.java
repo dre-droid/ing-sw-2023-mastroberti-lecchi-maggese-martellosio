@@ -465,8 +465,8 @@ public class GameSceneController {
             updateBoard(board);
             updateShelf(shelf);
             if(clientSocket != null) {
-                if (clientSocket.hasEndGameToken()){
-                    nicknameHasEnded=clientSocket.getNickname();
+                if (clientSocket.getNickname().equals(nicknameHasEnded)){
+                    //nicknameHasEnded=clientSocket.getNickname();
                     setEndGameToken();
                     Optional<Player> endgameholder = clientSocket.getLeaderboard().stream().filter(player -> player.hasEndGameToken()).findFirst();
                     endgameholder.ifPresent(player -> setOpponentEndGameToken(player.getNickname()));
@@ -1219,6 +1219,19 @@ public class GameSceneController {
                     }
                 }
             }
+        }).start();
+        //thread to assign endGameToken for socket
+        new Thread(() -> {
+            synchronized (clientSocket.endGameTokenNickLock){
+                while(clientSocket.endGameTokenNick.equals("")) {
+                    try {
+                        clientSocket.endGameTokenNickLock.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            nicknameHasEnded = clientSocket.endGameTokenNick;
         }).start();
         //thread to launch endGameScene
         new Thread(() -> {

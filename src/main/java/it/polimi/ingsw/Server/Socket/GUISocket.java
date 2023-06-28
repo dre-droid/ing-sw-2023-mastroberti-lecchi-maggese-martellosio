@@ -9,6 +9,8 @@ public class GUISocket extends ClientSocket{
     public final Object nextSceneLock = new Object();
     public final Object turnHasEndedLock = new Object();
     public final Object insertLock = new Object();
+    public final Object endGameTokenNickLock = new Object();
+    public String endGameTokenNick = "";
     public boolean insert = false;
     public boolean gameEnd = false;
     public boolean draw = false;
@@ -118,6 +120,13 @@ public class GUISocket extends ClientSocket{
             synchronized (turnHasEndedLock){
                 turnHasEnded = true;
                 turnHasEndedLock.notifyAll();
+            }
+        }
+        if(line.startsWith("[ENDGAMETOKEN]")){
+            synchronized (endGameTokenNickLock){
+                System.out.println(line);
+                endGameTokenNick = line.replace("[ENDGAMETOKEN] ", "");
+                endGameTokenNickLock.notifyAll();
             }
         }
 
