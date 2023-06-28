@@ -197,7 +197,9 @@ public class Game {
 
                 //update score and leaderboard
                 isPlaying.updateScore();
-                Collections.sort(leaderBoard, new scoreComparator());
+                ArrayList<Player> sortedLeaderBoard = new ArrayList<>(leaderBoard);
+                Collections.sort(sortedLeaderBoard, new scoreComparator());
+                leaderBoard = sortedLeaderBoard;
 
                 //select next player
                 Player nextPlayer;
@@ -270,16 +272,7 @@ public class Game {
 
        endOfTurn(isPlaying);
     }
-    /**
-     * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
-     * Should only be called if game hasn't started.
-     */
-    public void removePlayerOld(String nick) {
-       for (Player p: playersList) if (p.getNickname().equals(nick)){
-           playersList.remove(p);
-           leaderBoard.remove(p);
-       }
-    }
+
     /**
      * Removes player with nickname nick from playersList and leaderBoard when client disconnects before game has started.
      * Should only be called if game hasn't started.
@@ -485,18 +478,6 @@ public class Game {
 
 
     /**
-     * Prints leaderboard to console
-     */
-    public void printLeaderBoard(){
-        int i = 0;
-        for (Player p: leaderBoard) {
-            System.out.println(i + 1 + ". " + p.getNickname() + ", score: " + p.getScore());
-            i++;
-        }
-        System.out.println();
-    }
-
-    /**
      * @author DiegoLecchi
      * assigns a personal goal card randomly to each player in playerList
      */
@@ -511,8 +492,6 @@ public class Game {
             }
             numberAlreadyDrawn[i]=randomNum;
             i++;
-            //pg.initializeValidTiles(randomNum);
-
             p.setPersonalGoalCard(validTilesMap.get(randomNum));
         }
     }

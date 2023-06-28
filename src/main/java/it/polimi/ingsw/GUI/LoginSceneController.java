@@ -1,5 +1,6 @@
 package main.java.it.polimi.ingsw.GUI;
 
+import javafx.scene.image.Image;
 import main.java.it.polimi.ingsw.Server.Socket.GUISocket;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -33,6 +34,7 @@ public class LoginSceneController{
 
 
 
+
     private Stage stage;
     private Scene scene;
     private Parent root;
@@ -51,6 +53,10 @@ public class LoginSceneController{
         client.runServer();
     }
 
+    /**
+     * This method is used to setDisconnected flag
+     * @param disconnected is the boolean to which you want to set the flag to
+     */
     public void setDisconnected(boolean disconnected){
         this.disconnected = disconnected;
     }
@@ -64,8 +70,12 @@ public class LoginSceneController{
     }
 
     /**
-     * Method is called when button is pressed in ConnectionType scene
+     * This method calls the methods to handle the LoginScene button click:
+     * if the client is connected via Socket starts a thread that runs handleSocket(event)
+     * if the client is connected via RMI strats a thread that runs handleRMIv2(event)
+     * @param event click on the LogInButton
      */
+
     public void switchToNextScene(ActionEvent event) {
         if (!alive) { //handles spamming button
             if (Objects.isNull(clientSocket))
@@ -78,6 +88,12 @@ public class LoginSceneController{
             updateLabelText(messageTextArea, messageTextArea.getText());
     }
 
+    /**
+     * This method is used to handle the LoginScene dynamics. Set client's nickname, loads the correct scenes weather
+     * there has been a reconnection, if the player has to select the match type switches to MatchTypeScene, updates labels
+     * and performs checks to correctly handle.
+     * @param event :  is the event that triggers the loading of MatchTypeScene -> click on logIn button
+     */
 
     private void handleRMIv2(ActionEvent event){
         alive = true;
@@ -213,6 +229,12 @@ public class LoginSceneController{
         }
     }
 
+    /**
+     * This method is used to handle the Gamescene dynamics: the method chooses the next scene to load calling the methods
+     * accordingly.
+     * @param event : the event that triggers the switch scene -> click on LogIn Button
+     */
+
     private void handleSocket(ActionEvent event){
         try {
             alive = true;
@@ -262,6 +284,12 @@ public class LoginSceneController{
         }
     }
 
+    /**
+     * This method is used to load the GameScene when player is in the LogInScene and is not the one that created the Game.
+     * @param event:  is the event that triggers the loading of MatchTypeScene -> click on logIn button
+     */
+
+
     private void socketSwitchToGameScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();
@@ -290,6 +318,12 @@ public class LoginSceneController{
             Platform.runLater(()->stage.show());
         });
     }
+
+    /**
+     * This method is used to switch to MatchTypeScene when button LogIn is pressed if the player is the first one
+     * to logIn.
+     * @param event : is the event that triggers the loading of MatchTypeScene -> click on logIn button
+     */
     private void socketSwitchToMatchTypeScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();
@@ -322,6 +356,13 @@ public class LoginSceneController{
 
         });
     }
+
+    /**
+     * This method is used to update the LabelText in LogInScene with message string. It is used for instance
+     * to print error messages to the user.
+     * @param label : the label I want to set the text to string
+     * @param string : the message I want to populate the label with
+     */
 
     private void updateLabelText(Label label, String string) {
         Platform.runLater(() -> {

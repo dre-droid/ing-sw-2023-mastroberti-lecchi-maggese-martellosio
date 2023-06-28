@@ -42,7 +42,13 @@ public class ConnectionTypeController  {
     @FXML
     private TextField ipAddress;
 
-
+    /**
+     * This method is used to load the Loginscene after having selected a connection type between RMI and Socket.
+     * At least one radiobutton has to be selected in order to proceed. Calls method checkIp to verify the correctness of the ip
+     * inserted and set the TextLabel with an error message if there is one. Depending on the button selected creates
+     * a client connected through Socket or RMI.
+     * @param event event that triggers the method, i.e. the Next Button.
+     */
     public void switchToLoginScene(ActionEvent event){
         try {
             if(MatchTypeGroup.getSelectedToggle()==null){
@@ -95,6 +101,12 @@ public class ConnectionTypeController  {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * This method is used to check if the server ip inserted by the players matches the actual id of the server
+     * @param ip the ip of the server the player wants to connect to
+     * @return true if the connection to the server was successful, false otherwise
+     */
 
     private boolean checkIp(String ip){
         try{

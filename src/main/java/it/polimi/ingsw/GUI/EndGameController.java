@@ -23,6 +23,12 @@ public class EndGameController {
     @FXML
     private Text winnerLabel;
 
+    /**
+     * This method is used to depict the result of the game that just ended, it shows
+     * the leaderboard sorted by points and assigns images to show the ranking of the
+     * players
+     * @param leaderboard the list of player that played the game and that we're willing to depict
+     */
     public void showLeaderboard(List<Player> leaderboard){
         Image img = null;
         ImageView imv;

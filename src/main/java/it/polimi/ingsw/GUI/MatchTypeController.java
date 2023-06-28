@@ -31,7 +31,11 @@ public class MatchTypeController {
     private GUISocket clientSocket;
 
 
-
+    /**
+     * This method selects the number of players for the Game and switches to GameScene, if Game is already been created
+     * switches to the LoginScene
+     * @param event : selection of either 2 player button, 3 player button or 4 plater button
+     */
     public void switchtoGameScene(ActionEvent event){
         if (rButton2p.isSelected() || rButton3p.isSelected() || rButton4p.isSelected()) {
             try {
@@ -62,8 +66,10 @@ public class MatchTypeController {
                     Parent root = loader.load();
                     Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
+
                     scene = new Scene(root);
                     stage.setScene(scene);
+
                     GameSceneController gsc = loader.getController();
                     gsc.setClient(clientRMI);
                     gsc.setPlayerName(clientRMI.getNickname());
@@ -90,6 +96,10 @@ public class MatchTypeController {
         }
     }
 
+    /**
+     * This method is used to switch to the Game Scene using the JavaFX platform Thread
+     * @param event the ActionEvent that triggers the game switch, i.e. the press of the Next Button.
+     */
     private void socketSwitchToGameScene(ActionEvent event){
         Platform.runLater(() -> {
             ClassLoader classLoader = MainGUI.class.getClassLoader();

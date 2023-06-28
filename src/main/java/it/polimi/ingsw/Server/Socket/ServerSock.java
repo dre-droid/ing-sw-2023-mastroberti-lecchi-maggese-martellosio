@@ -840,12 +840,8 @@ public class ServerSock {
     }
     public void notifyEndGameToken(String nick) throws IOException{
         for(socketNickStruct c:clients){
-            if(nick.equals(c.getName())){
-                PrintWriter out = new PrintWriter(c.getSocket().getOutputStream(), true);
-                sendMessage("[ENDGAMETOKEN]",nick);
-            }
+            sendMessage("[ENDGAMETOKEN] " + nick, c.getName());
         }
-
     }
 
     /**
@@ -866,8 +862,11 @@ public class ServerSock {
             PrintWriter pw = new PrintWriter(playerSocket.getOutputStream(), true);
             String jsonShelf = gson.toJson(updatedShelf);
             pw.println("[GSONSHELF]" + jsonShelf);
-            if(controller.hasEndgameToken(nickname))
-                pw.println("[ENDGAMETOKEN]");
+            if(controller.hasEndgameToken(nickname)){
+                //    pw.println("[ENDGAMETOKEN]");
+                notifyEndGameToken(nickname);
+            }
+
             pw.println("[TURNEND] Your turn has ended! Waiting for next player.");
             updateGameObjectsAfterTurn();
         }
