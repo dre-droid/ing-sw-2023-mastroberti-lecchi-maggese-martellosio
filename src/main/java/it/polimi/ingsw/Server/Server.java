@@ -125,16 +125,14 @@ public class Server {
             try {
                 while (!controller.hasTheGameEnded()) {
                     final Object o = new Object();
-
                     // wait that only one player is left
                     synchronized (this) {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
-
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
                     synchronized (o) {
-                        if (numberOfPlayersLeft() == 1) o.wait(TIMEOUT_THRESH);
-                        if (numberOfPlayersLeft() == 1) {
+                        if (numberOfPlayersLeft() <= 1) o.wait(TIMEOUT_THRESH);
+                        if (numberOfPlayersLeft() <= 1) {
                             controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
                         }
                     }

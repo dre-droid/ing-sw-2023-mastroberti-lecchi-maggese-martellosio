@@ -312,7 +312,12 @@ public class Board {
             for (int i = 0; i < NumOfRows; i++) {
                 for (int j = 0; j < NumOfColumns; j++) {
                     if (grid[i][j].isAvailable()) {
-                        grid[i][j].positionTile(bag.pickRandomTile());
+                        if(bag.getSize()>0){
+                            grid[i][j].positionTile(bag.pickRandomTile());
+                        }
+                        else{
+                            return;
+                        }
                     }
                 }
             }
