@@ -169,8 +169,15 @@ public class Game {
             System.out.println("insert shelf ok called");
             if(!player.getNickname().equals(isPlaying.getNickname()))
                 throw new InvalidMoveException(player.getNickname()+" it's not your turn!!!");
-            if(player.insertTiles(drawnTiles,column))
+            if(player.insertTiles(drawnTiles,column)){
+                if(player.getShelf().isFull()){
+                    if(playersList.stream().noneMatch(Player::hasEndGameToken)){
+                        player.setEndGameToken();
+                    }
+                }
                 return true;
+            }
+
             else{
                 System.out.println("problemone nell'inserimento");
             }
@@ -198,13 +205,17 @@ public class Game {
                 nextPlayer = iterator.next();
 
                 // if last turn
+                System.out.println("last round = "+lastRound+", lastplayerindex = "+lastPlayerIndex);
                 if ((lastRound || isPlaying.hasEndGameToken()) && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){
                     playersList.forEach(Player::updateFinalScore);
                     endGame();
                 }
                 else{
-                    if (isPlaying.hasEndGameToken())
+                    if (isPlaying.hasEndGameToken()){
+                        System.out.println(isPlaying.getNickname()+" has the end game token");
                         setLastRoundFlag(); // if someone's shelf is full then enter the last round
+                    }
+                    System.out.println("last round = "+lastRound+", lastplayerindex = "+lastPlayerIndex);
                     isPlaying = nextPlayer;
                 }
 
@@ -693,12 +704,13 @@ public class Game {
 
         JsonReader reader = new JsonReader(fr);
         //reader.setLenient(true);
-        isPlaying = gson.fromJson(reader, Player.class);
+        Player current = gson.fromJson(reader, Player.class);
         //System.out.println("THE NAME OF THE PLAYER IS "+p.getNickname());
         board= gson.fromJson(reader, Board.class);
         //b.printGridMap();
         Type listType = new TypeToken<List<Player>>() {}.getType();
         playersList = gson.fromJson(reader, listType);
+        isPlaying = playersList.stream().filter(player -> player.getNickname().equals(current.getNickname())).findFirst().get();
         //players.stream().forEach(player->System.out.println(player.getNickname()));
         leaderBoard.addAll(playersList);
         leaderBoard.sort(new scoreComparator());
@@ -716,6 +728,9 @@ public class Game {
         lastRound = flags[1];
         gameHasEnded = flags[2];
         gameHasStarted = flags[3];
+
+        Player first = playersList.stream().filter(Player::hasFirstPlayerSeat).findFirst().get();
+        lastPlayerIndex = playersList.indexOf(first) == 0 ? playersList.size() - 1 : playersList.indexOf(first) - 1;
         try {
             fr.close();
         } catch (IOException e) {

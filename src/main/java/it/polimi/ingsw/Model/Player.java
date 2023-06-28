@@ -44,7 +44,7 @@ public class Player implements Serializable{
         try {
             System.out.println("player--> insert tiles called");
             shelf.insertTiles(currentTiles, column);
-            if (shelf.isFull()) setEndGameToken();
+            //if (shelf.isFull()) setEndGameToken();
             return true;
         }
         catch (IndexOutOfBoundsException e) {
@@ -63,7 +63,7 @@ public class Player implements Serializable{
     }
     public void setCurrentTiles(List<Tile> list){ this.currentTiles = list;
     }
-    private void setEndGameToken() {this.endGameToken = true;}
+    public void setEndGameToken() {this.endGameToken = true;}
     public void setFirstPlayerSeat() {this.firstPlayerSeat = true;}
 
     /**
@@ -109,7 +109,7 @@ public class Player implements Serializable{
     public void updateScore(){
         score = getTokensScore() + shelf.getAdjScore();
         if(hasEndGameToken())
-            score+=1;
+            score=score+1;
     }
 
     /**
@@ -118,10 +118,6 @@ public class Player implements Serializable{
      */
     public void updateFinalScore(){
         score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
-        if(hasEndGameToken()){
-            score+=1;
-        }
-
     }
 
     /**
