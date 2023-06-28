@@ -18,8 +18,11 @@ public class GUISocket extends ClientSocket{
     public GUISocket(String ip){
         super(ip);
     }
+
     /**
-     * Handles server's received messages by notifying threads waiting on a certain lock
+     * This method is called to handle the request coming from the server to
+     * perform all the operations carried out during the turn.
+     * @param line is the message received from the server
      */
     protected void handleServerRequest(String line){
         synchronized (this){
@@ -133,7 +136,7 @@ public class GUISocket extends ClientSocket{
     }
 
     /**
-     * Used to warn socketUpdateGameScene() in GameSceneController that connection to the server has been lost
+     * This method is used to warn socketUpdateGameScene() in GameSceneController that connection to the server has been lost
      */
     protected void disconnectionAlert(){
         synchronized (connectionLostLock){
