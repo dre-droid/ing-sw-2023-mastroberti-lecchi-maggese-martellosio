@@ -556,13 +556,14 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
             try {
                 if (!disconnection) {
-                    if (client.getValue() != null)
+                    if (client.getValue() != null && checkIfPlayerIsConnected(client.getValue()))
                         client.getValue().gameIsOver(controller.getLeaderboard());
                 }else{
                     if (client.getValue() != null) {
                         System.out.println("Leaderboard");
                         finalLead.stream().forEach(System.out::println);
-                        client.getValue().gameIsOver(finalLead);
+                        if(checkIfPlayerIsConnected(client.getValue()))
+                            client.getValue().gameIsOver(finalLead);
                     }
                 }
             } catch (RemoteException e) {
