@@ -10,7 +10,13 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class ClientWithChoice {
-
+    /**
+     * This method runs the client application.
+     * Prompts the user to choose a connection type (RMI or Socket), creates the corresponding client,
+     * and establishes the connection with the server.
+     * If RMI is chosen, it creates a new RMI client.
+     * If Socket is chosen, it prompts the user to enter the server's IP address, validates it, and creates a new socket client.
+     */
     public void run(){
         Scanner userInput = new Scanner(System.in);
         System.out.println("[CONNECTION-CHOICE] Input 1 if you want to connect to RMI server, 2 if you want to use the socket");
@@ -66,16 +72,30 @@ public class ClientWithChoice {
 
     }
 
+    /**
+     * This method is used to creat a new RMI client when the client selects to play
+     * with RMI connection.
+     */
+
+
     public void createNewRMIClient(){
         ClientRMI clientRMI = new ClientRMI();
         Thread thread = new Thread(clientRMI);
         thread.start();
     }
 
+    /**
+     * This method creates a new clientSocket when the client selects to play
+     * with Socket.
+     * @param ip String ip of the server the client is trying to connect to
+     */
+
     public void createNewSocketClient(String ip){
         ClientSocket clientSocket = new CLISocket(ip);
         clientSocket.runServer();
     }
+
+
 
     public static void main(String[] args){
         ClientWithChoice client = new ClientWithChoice();
