@@ -232,6 +232,11 @@ public class ServerSock {
             if (server.clientsLobby.get(i).getNickname().equals(nickname)){         //search for the object in server.clientsLobby with the same nickname
                 server.clientsLobby.get(i).setSocket(client);                       //updates the Socket
                 server.clientsLobby.get(i).setDisconnected(false);                  //set boolean disconnected to false
+                //server.clientsLobby.get(i).setRmiIp(null);
+                //server.clientsLobby.get(i).setRmiPort(0);
+                //if (server.clientsMap.get(nickname).equals(Server.connectionType.RMI)){      //if client was rmi
+                //    clients.add(new socketNickStruct(client, nickname));
+                //}
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);   //adds client to server.clientsMap
                 clientListener(client, nickname, reader, out);                           //launches clientListener
                 break;
@@ -862,10 +867,6 @@ public class ServerSock {
             PrintWriter pw = new PrintWriter(playerSocket.getOutputStream(), true);
             String jsonShelf = gson.toJson(updatedShelf);
             pw.println("[GSONSHELF]" + jsonShelf);
-            if(controller.hasEndgameToken(nickname)){
-                //    pw.println("[ENDGAMETOKEN]");
-                notifyEndGameToken(nickname);
-            }
 
             pw.println("[TURNEND] Your turn has ended! Waiting for next player.");
             updateGameObjectsAfterTurn();
@@ -896,6 +897,12 @@ public class ServerSock {
                 pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
 
                 }
+            String nickname = controller.getPlayers().stream().filter(Player::hasEndGameToken).map(Player::getNickname).findFirst().orElse(null);
+            if (nickname != null) {
+                if(controller.hasEndgameToken(nickname)){
+                    notifyEndGameToken(nickname);
+                }
+            }
         }catch (Exception e){
             e.printStackTrace();
         }

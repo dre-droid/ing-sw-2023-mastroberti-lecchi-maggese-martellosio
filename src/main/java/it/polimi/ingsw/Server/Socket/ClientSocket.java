@@ -190,10 +190,6 @@ public abstract class ClientSocket {
         if (line.equals("[PING]")){
             lastPing = System.currentTimeMillis();
         }
-        if(line.equals("[ENDGAMETOKEN]")){
-            hasEndGameToken=true;
-            System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
-        }
     }
 
     /**

@@ -277,7 +277,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             drawnTiles = serverRMI.drawTilesFromBoard(nickname, x, y, amount, direction);
             return  drawnTiles!=null;
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return false;
         }
     }
 

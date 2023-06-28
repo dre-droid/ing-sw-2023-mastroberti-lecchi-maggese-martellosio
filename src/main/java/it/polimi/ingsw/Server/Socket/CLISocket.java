@@ -44,6 +44,13 @@ public class CLISocket extends ClientSocket{
              printLeaderboard();
              System.exit(0);
         }
+         if(line.startsWith("[ENDGAMETOKEN]")){
+             line = line.replace("[ENDGAMETOKEN] ", "");
+             if (!line.equals(nickname))
+                System.out.println("*******Player " + line + " has received the end game token, waiting for other player's last turn*******");
+             else
+                 System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
+         }
         if(line.equals("[EXIT]")){
              System.exit(0);
         }
@@ -63,7 +70,7 @@ public class CLISocket extends ClientSocket{
         Scanner scannercg = new Scanner(commonGoalCards.get(0).getDescription() +  "TOKEN:" + commonGoalCards.get(0).getScoringTokens().get(commonGoalCards.get(0).getScoringTokens().size() - 1).getPoints() + "\n" + commonGoalCards.get(1).getDescription() + "TOKEN:"+commonGoalCards.get(1).getScoringTokens().get(commonGoalCards.get(1).getScoringTokens().size() - 1).getPoints());
         for(Player p: leaderboard){
             if(p.hasEndGameToken()){
-                System.out.println("CAREFULL THIS IS YOUR LAST TURN:" + " " + p.getNickname()+" " + "HAS GOT THE ENDGAME TOKEN");
+                System.out.println("CAREFUL THIS IS YOUR LAST TURN:" + " " + p.getNickname()+" " + "HAS GOT THE ENDGAME TOKEN");
             }
         }
 
