@@ -652,6 +652,7 @@ public class Game {
             gson.toJson(flags, flags.getClass(), jsonFile);
             jsonFile.close();
         }catch(IOException e){
+            e.printStackTrace();
             System.out.println("Error in saving the game progress in json file");
         }
 
