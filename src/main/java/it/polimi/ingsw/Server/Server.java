@@ -88,17 +88,19 @@ public class Server {
                     while (numberOfPlayersLeft() == 1) wait();
                 }
 
+                boolean skipTurn = false;
                 // skip turn of disconnected player if current
                 for (int i = 0; i < clientsLobby.size(); i++) {
                     if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
                         controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                         notifySocketOfTurnEnd();
                         serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
+                        skipTurn = true;
                     }
                 }
 
                 //calls playTurn() of the player who is currently playing according to controller
-                if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
+                if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket) && !skipTurn) {
                     controller.playTurn();
                     notifySocketOfTurnEnd();
                     // RMI update in controller.playTurn()
