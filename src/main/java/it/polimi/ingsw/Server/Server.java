@@ -89,9 +89,12 @@ public class Server {
                         // notify last client that he's the only player left
                         // notify socket
                         clientsLobby.stream()
-                                .filter(c -> c.getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && c.getSocket() != null)
-                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", controller.getNameOfPlayerWhoIsCurrentlyPlaying()));
-                        //{ /* send rmi message: Everyone disconnected! After a timeout passed an no rejoins, you'll have won.*/}
+                                .filter(c -> !c.isDisconnected() && c.getSocket() != null)
+                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname()));
+                        // notify RMI
+                        /*clientsLobby.stream()
+                                .filter(c -> !c.isDisconnected() && c.getSocket() == null)
+                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname()));*/
                         wait();
                     }
                 }
