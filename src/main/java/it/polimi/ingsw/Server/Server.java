@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Server {
     private static final int TIMEOUT_THRESH = 60000; //in millis
@@ -22,6 +23,7 @@ public class Server {
     public Controller controller;
     public ArrayList<ClientInfoStruct> clientsLobby;
     public final Object clientsLobbyLock = new Object();
+    private final Object onePlayerLeftLock = new Object();
 
     public boolean loadedFromFile;
 
@@ -137,16 +139,15 @@ public class Server {
         new Thread(() -> {
             try {
                 while (!controller.hasTheGameEnded()) {
-                    final Object o = new Object();
                     // wait that only one player is left
                     synchronized (this) {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
-                    synchronized (o) {
-                        if (numberOfPlayersLeft() <= 1) o.wait(TIMEOUT_THRESH);
+                    synchronized (onePlayerLeftLock) {
+                        if (numberOfPlayersLeft() <= 1) onePlayerLeftLock.wait(TIMEOUT_THRESH);
                         if (numberOfPlayersLeft() <= 1) {
-                            controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
+                            controller.disconnectionEndGame(clientsLobby.stream().filter(c -> !c.isDisconnected()).toList().get(0).getNickname());
                         }
                     }
                 }
@@ -366,6 +367,9 @@ public class Server {
     public void notifyServer(){
         synchronized (this){
             notifyAll();
+        }
+        synchronized (onePlayerLeftLock){
+            onePlayerLeftLock.notifyAll();
         }
     }
 
