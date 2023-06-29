@@ -210,6 +210,9 @@ public class Game {
                 System.out.println("last round = "+lastRound+", lastplayerindex = "+lastPlayerIndex);
                 if ((lastRound || isPlaying.hasEndGameToken()) && isPlaying.getNickname().equals(playersList.get(lastPlayerIndex).getNickname())){
                     playersList.forEach(Player::updateFinalScore);
+                    sortedLeaderBoard = new ArrayList<>(leaderBoard);
+                    Collections.sort(sortedLeaderBoard, new scoreComparator());
+                    leaderBoard = sortedLeaderBoard;
                     endGame();
                 }
                 else{
