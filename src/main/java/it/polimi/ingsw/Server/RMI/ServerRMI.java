@@ -7,6 +7,7 @@ import main.java.it.polimi.ingsw.Model.CommonGoalCardStuff.CommonGoalCard;
 import main.java.it.polimi.ingsw.Server.ClientInfoStruct;
 
 import java.io.IOException;
+import java.net.NetworkInterface;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -70,6 +71,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         server.notifyServer();                            //notifies server that a new client has been added to arrayList server.clientsLobby
         clientsLobby.put(clientToBeNotified, new RmiNickStruct(nickname));
         clientsLobby.get(clientToBeNotified).setLastPing(System.currentTimeMillis());
+        System.out.println(nickname+" has joined the lobby");
         checkForDisconnectionsV2(clientsLobby.get(clientToBeNotified));
         return 0;
     }
@@ -374,6 +376,9 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             }
             checkIfCommonGoalsHaveBeenFulfilled(playerNickname);
             controller.endOfTurn(playerNickname);
+            if(controller.hasGameBeenCreated() && controller.hasTheGameEnded()){
+                return;
+            }
             server.notifySocketOfTurnEnd();
             for(Map.Entry<String, ClientNotificationInterfaceRMI> client: clients.entrySet()){
                 if(client.getValue()!=null && (server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getKey()) && cis.isDisconnected())))
@@ -576,8 +581,8 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     }
                 }
             } catch (RemoteException e) {
-                e.printStackTrace();
-                System.out.println("Cannot notify controller");
+                //e.printStackTrace();
+                //System.out.println("Cannot notify controller");
             }
         }
     }
@@ -682,20 +687,29 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void checkForDisconnectionsV2(RmiNickStruct client) {
         new Thread(() -> {
             try{
+
                 String nickname = client.getNickname();
-                while (true) {
+                System.out.println("GAYYYYYYYYYY "+ nickname);
+                while(!controller.hasGameBeenCreated()){
+                    Thread.sleep(1000);
+                }
+                while (!controller.hasTheGameEnded()) {
+                    System.out.println("MEGA GAYYYY"+nickname);
+
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
                             clientsLobby.entrySet().removeIf(entry -> entry.getValue().equals(client));
                             server.notifyLobbyDisconnection(nickname);          //notifies server that a disconnection has occurred
                             clients.remove(client.getNickname());
+                            System.out.println(client.getNickname()+" disconnect 1");
                             return;
                         }
                     }
                     //else if player is in the game
                     else {
                         if(!clientsLobby.containsValue(client)){
+                            System.out.println(client.getNickname()+" disconnect 2");
                             return;
                         }
                         //if game hasn't started yet
@@ -706,6 +720,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                 server.notifyLobbyDisconnection(nickname);
                                 server.clientsMap.remove(nickname);
                                 clients.remove(client.getNickname());
+                                System.out.println(client.getNickname()+" disconnect 3");
                                 return;
                             }
                         }
@@ -720,11 +735,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                             endOfTurn(client.getNickname());
                                         }*/
                                         server.notifyLobbyDisconnection(nickname);
+                                        System.out.println(client.getNickname()+" disconnect 4");
                                         return;
                                     }
                                 }
-
                             }
+                            System.out.println(client.getNickname()+" still connected");
                         }
                     }
                     Thread.sleep(500);
@@ -858,7 +874,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                             client.getValue().startTurn();
                             System.out.println("start turn sent to "+client.getKey());
                         }
-
                     }
                 }
                 server.loadedFromFile = false;
@@ -929,6 +944,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             return false;
         }
         return true;
+    }
+
+    public void emptyClients(){
+        this.clientsLobby.clear();
+        this.clients.clear();
     }
 
 }

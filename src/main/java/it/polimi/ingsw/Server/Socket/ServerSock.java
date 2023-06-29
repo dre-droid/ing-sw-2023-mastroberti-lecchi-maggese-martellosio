@@ -414,7 +414,7 @@ public class ServerSock {
     public void checkForDisconnectionsV2(socketNickStruct client) {
         new Thread(() -> {
             try{
-                while (true) {
+                while (!controller.hasTheGameEnded()) {
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
@@ -953,6 +953,10 @@ public class ServerSock {
             notifyAll();
         }
 
+    }
+
+    public void emptyClients(){
+        this.clients.clear();
     }
 
 }

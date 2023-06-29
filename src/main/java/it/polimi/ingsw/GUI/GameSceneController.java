@@ -824,7 +824,8 @@ public class GameSceneController {
             //System.out.println("Insert in shelf rmi successful");
         else;
         //System.out.println("Problem in insert in shelf");
-        updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
+        if(clientRMI.getMyShelf()!=null)
+            updateShelf(clientRMI.getMyShelf(),PlayerShelfGrid);
     }
 
     EventHandler<MouseEvent> shelfButtonsHandler = e -> {

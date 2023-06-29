@@ -122,6 +122,9 @@ public class Controller {
      * @return a Tile matrix representing the current state of the Shelf of the player, null if the game hasn't started yet
      */
     public Tile[][] getMyShelf(String playerNickname){
+        if(game==null){
+            return null;
+        }
         if(game.hasGameStarted()){
             Tile[][] displayGrid = new Tile[6][5];
             for(Player p: game.getPlayerList()){
@@ -309,6 +312,8 @@ public class Controller {
      * @return true if the game has ended, false otherwise
      */
     public boolean hasTheGameEnded(){
+        if(game==null)
+            return true;
         return game.hasTheGameEnded();
     }
 
@@ -370,12 +375,6 @@ public class Controller {
         server.serverRMI.notifyEndOfGame();
         game.endGame();
         server.serverSock.notifyGameEnd();
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        deleteProgress();
     }
 
     /**
@@ -386,7 +385,6 @@ public class Controller {
         server.serverSock.broadcastMessage("[ALLDISCONNECTED]", "Server");
         server.serverRMI.notifyEndOfGame(finalLead, true);
         game.endGame();
-        deleteProgress();
     }
 
     /**
@@ -414,7 +412,6 @@ public class Controller {
     public boolean loadGameProgress(){
         if(checkForSavedGameProgress() && game==null){
             game = new Game("GameProgress.json");
-
             return true;
         }
         else
@@ -434,9 +431,7 @@ public class Controller {
      */
     public boolean checkForSavedGameProgress(){
         File toBeChecked = new File("GameProgress.json");
-        if(toBeChecked.exists())
-            return true;
-        else return false;
+        return toBeChecked.exists();
     }
 
     public Map<Integer, PersonalGoalCard> getPGCmap(){
@@ -483,6 +478,8 @@ public class Controller {
      * @return a List of String with the nickname of the Players in Game
      */
     public List<String> getGamePlayerListNickname(){
+        if(game==null)
+            return null;
         return game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList());
     }
 
@@ -505,10 +502,14 @@ public class Controller {
     }
 
     public int getNumOfPlayers(){
+        if(game == null)
+            return 0;
         return game.getNumOfPlayers();
     }
 
     public List<Player> getPlayers(){
+        if(game==null)
+            return null;
         return game.getPlayerList();
     }
 
@@ -523,6 +524,12 @@ public class Controller {
             return false;
         else
             return p.get().hasEndGameToken();
+    }
+
+    public void postEndGame(){
+        deleteProgress();
+        this.game = null;
+        this.isGameBeingCreated = false;
     }
 
 

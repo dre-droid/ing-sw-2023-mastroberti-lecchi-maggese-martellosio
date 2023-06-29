@@ -9,10 +9,11 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Server {
     private static final int TIMEOUT_THRESH = 60000; //in millis
+
+    public final Object onePlayerLeftLock = new Object();
 
     public enum connectionType {
         RMI, Socket;
@@ -23,7 +24,6 @@ public class Server {
     public Controller controller;
     public ArrayList<ClientInfoStruct> clientsLobby;
     public final Object clientsLobbyLock = new Object();
-    private final Object onePlayerLeftLock = new Object();
 
     public boolean loadedFromFile;
 
@@ -40,6 +40,7 @@ public class Server {
         //run Socket and RMI servers
         serverSock = new ServerSock(controller, this);
         serverSock.runServer();
+
         try {
             Registry registry = LocateRegistry.createRegistry(1099);
             serverRMI = new ServerRMI(controller, this);
@@ -47,88 +48,100 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        do {
-            //initiates clients and creates new controller
-            clientsMap = new HashMap<>();
-            clientsLobby = new ArrayList<>();
-            controller = new Controller(this);
-            serverSock.setController(controller);
-            controller.setServerSock(serverSock);
-            serverRMI.setController(controller);
+        do{
+            do {
+                //initiates clients and creates new controller
+                clientsMap = new HashMap<>();
+                clientsLobby = new ArrayList<>();
+                controller = new Controller(this);
+                serverSock.setController(controller);
+                controller.setServerSock(serverSock);
+                serverRMI.setController(controller);
 
-            // loading from json GameProgress file
-            if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
-                loadedFromFile = true;
-                for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
-                    clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
-                    clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
-                }                                               //and set disconnected as true to trigger a rejoin
-                synchronized (this) {
-                    while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
-                        this.wait();        //wait for all the player in the saved game to join to resume the game
+                // loading from json GameProgress file
+                if (controller.loadGameProgress()){     //true if GameProgress.json is present and if so loadGameProgress will load it
+                    loadedFromFile = true;
+                    for (int i = 0; i < controller.getGamePlayerListNickname().size(); i++) {       //for every nickname now in game
+                        clientsLobby.add(new ClientInfoStruct(controller.getGamePlayerListNickname().get(i)));
+                        clientsLobby.get(i).setDisconnected(true);  //add a ClientInfoStruct object in clientsLobby with the same name
+                    }                                               //and set disconnected as true to trigger a rejoin
+                    synchronized (this) {
+                        while (clientsLobby.stream().anyMatch(client -> client.isDisconnected())){
+                            this.wait();        //wait for all the player in the saved game to join to resume the game
+                        }
                     }
                 }
-            }
-            else {      //otherwise GameProgress.json is not present so the usual join is called
-                joinGame();
-            }
-
-            // waits that all players connect and game starts
-            synchronized (controller) {
-                while (!controller.hasGameStarted() && isEveryoneConnected()) {
-                    controller.wait();
+                else {      //otherwise GameProgress.json is not present so the usual join is called
+                    joinGame();
                 }
-            }
-            Thread.sleep(1000);
 
-            // game starts
-            serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            onePlayerLeftTimeout();
-            while (!controller.hasTheGameEnded()) {
-                // if only one player left, wait
-                synchronized (this) {
-                    while (numberOfPlayersLeft() == 1) {
-                        // notify last client that he's the only player left
-                        // notify socket
-                        clientsLobby.stream()
-                                .filter(c -> !c.isDisconnected() && c.getSocket() != null)
-                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname()));
-                        // notify RMI
-                        /*clientsLobby.stream()
-                                .filter(c -> !c.isDisconnected() && c.getSocket() == null)
-                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname()));*/
-                        wait();
+                // waits that all players connect and game starts
+                synchronized (controller) {
+                    while (!controller.hasGameStarted() && isEveryoneConnected()) {
+                        controller.wait();
                     }
                 }
+                Thread.sleep(1000);
 
-                boolean skipTurn = false;
-                // skip turn of disconnected player if current
-                for (int i = 0; i < clientsLobby.size(); i++) {
-                    if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
-                        controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        notifySocketOfTurnEnd();
-                        serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
-                        skipTurn = true;
+                // game starts
+                serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                onePlayerLeftTimeout();
+                while (!controller.hasTheGameEnded()) {
+                    System.out.println("-------hola--------");
+                    // if only one player left, wait
+                    synchronized (onePlayerLeftLock) {
+                        if (numberOfPlayersLeft() == 1) {
+                            // notify last client that he's the only player left
+                            clientsLobby.stream()
+                                    .filter(c -> !c.isDisconnected() && c.getSocket() != null)
+                                    .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname())); //TODO show to GUI
+                            System.out.println("server print 3");
+                            onePlayerLeftLock.wait();
+                        }
+                    }
+
+                    // skip turn of disconnected player if current
+                    if (controller.game != null && !controller.hasTheGameEnded()) {
+                        for (int i = 0; i < clientsLobby.size(); i++) {
+                            if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
+                                controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                                notifySocketOfTurnEnd();
+                                serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
+                            }
+                        }
+                    }
+
+
+                    //calls playTurn() of the player who is currently playing according to controller
+                    if (controller.game != null && !controller.hasTheGameEnded()) {
+                        if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket)) {
+                            controller.playTurn();
+                            notifySocketOfTurnEnd();
+                            // RMI update in controller.playTurn()
+                        }
                     }
                 }
+                //game end handling
+                System.out.println("Game has ended.");
+                serverSock.notifyGameEnd();
+                serverRMI.notifyEndOfGame();
+                controller.postEndGame();
+                //serverSock.flushServer();
+                //serverRMI.flushServer();    //needs testing
 
-                //calls playTurn() of the player who is currently playing according to controller
-                if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket) && !skipTurn) {
-                    controller.playTurn();  // calls endOfTurn if player disconnects!
-                    notifySocketOfTurnEnd();
-                    // RMI is updated in controller.playTurn()
-                }
-            }
+            }while (!controller.hasTheGameEnded());
+            //server flush
+            this.clientsLobby.clear();
+            this.clientsMap.clear();
+            this.loadedFromFile = false;
+            serverRMI.emptyClients();
+            serverSock.emptyClients();
+            do {
+                controller.deleteProgress();
+            }while(controller.checkForSavedGameProgress());
+            System.out.println("game ended----------------------");
+        }while(true);
 
-            //game end handling
-            System.out.println("Game has ended.");
-            serverSock.notifyGameEnd();
-            serverRMI.notifyEndOfGame();
-            controller.deleteProgress();
-            //serverSock.flushServer();
-            //serverRMI.flushServer();    //needs testing
-
-        }while (!controller.hasTheGameEnded());
     }
 
     /**
@@ -139,15 +152,19 @@ public class Server {
         new Thread(() -> {
             try {
                 while (!controller.hasTheGameEnded()) {
+                    final Object o = new Object();
                     // wait that only one player is left
                     synchronized (this) {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
-                    synchronized (onePlayerLeftLock) {
-                        if (numberOfPlayersLeft() <= 1) onePlayerLeftLock.wait(TIMEOUT_THRESH);
+                    synchronized (o) {
+                        if (numberOfPlayersLeft() <= 1) o.wait(TIMEOUT_THRESH);
                         if (numberOfPlayersLeft() <= 1) {
-                            controller.disconnectionEndGame(clientsLobby.stream().filter(c -> !c.isDisconnected()).toList().get(0).getNickname());
+                            controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
+                            synchronized (onePlayerLeftLock){
+                                onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
+                            }
                         }
                     }
                 }
@@ -235,7 +252,7 @@ public class Server {
      * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() and run() wait for it).
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
      */
-    public void notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
+    public synchronized void  notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
         try {
             serverRMI.notifyLobbyDisconnectionRMI();
         } catch (RemoteException e) {
@@ -310,10 +327,11 @@ public class Server {
                             while (iterator.hasNext()) {
                                 ClientInfoStruct client = iterator.next();
                                 boolean alreadyInGame = false;
-                                for (int i = 0; i < controller.game.getPlayerList().size(); i++) {      //if the player is already in the game
-                                    if(client.getNickname().equals(controller.game.getPlayerList().get(i).getNickname()))
-                                        alreadyInGame = true;       //set this bool to true so join won't be executed
-                                }
+                                if(controller.game!=null)
+                                    for (int i = 0; i < controller.game.getPlayerList().size(); i++) {      //if the player is already in the game
+                                        if(client.getNickname().equals(controller.game.getPlayerList().get(i).getNickname()))
+                                            alreadyInGame = true;       //set this bool to true so join won't be executed
+                                    }
 
                                 if(!alreadyInGame) {
                                     if (client.getRmiPort() != 0) { // if client is RMI
@@ -352,6 +370,9 @@ public class Server {
      */
     public int numberOfPlayersLeft(){
         int numOfPlayerLeft = 0;
+        if(controller.game==null){
+            return 0;
+        }
         for (int i = 0; i < clientsLobby.size(); i++) {
             if (controller.getGamePlayerListNickname().contains(clientsLobby.get(i).getNickname())){
                 if(!clientsLobby.get(i).isDisconnected())
@@ -367,9 +388,6 @@ public class Server {
     public void notifyServer(){
         synchronized (this){
             notifyAll();
-        }
-        synchronized (onePlayerLeftLock){
-            onePlayerLeftLock.notifyAll();
         }
     }
 
