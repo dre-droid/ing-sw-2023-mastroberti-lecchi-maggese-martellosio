@@ -370,6 +370,11 @@ public class Controller {
         server.serverRMI.notifyEndOfGame();
         game.endGame();
         server.serverSock.notifyGameEnd();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         deleteProgress();
     }
 
