@@ -11,6 +11,7 @@ public class CLISocket extends ClientSocket{
         super(ip);
     }
 
+    public boolean once;
     /**
      * Handles server's received messages
      * @param line: the serialized object sent from the server
@@ -44,12 +45,16 @@ public class CLISocket extends ClientSocket{
              printLeaderboard();
              System.exit(0);
         }
+
          if(line.startsWith("[ENDGAMETOKEN]")){
              line = line.replace("[ENDGAMETOKEN] ", "");
-             if (!line.equals(nickname))
-                System.out.println("*******Player " + line + " has received the end game token, waiting for other player's last turn*******");
-             else
-                 System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
+             if(!once) {
+                 if (!line.equals(nickname))
+                     System.out.println("*******Player " + line + " has received the end game token, waiting for other player's last turn*******");
+                 else
+                     System.out.println("*******You have received the end game token, waiting for other player's last turn*******");
+                once = true;
+             }
          }
         if(line.equals("[EXIT]")){
              System.exit(0);
