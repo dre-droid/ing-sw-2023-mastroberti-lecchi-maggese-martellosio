@@ -87,8 +87,11 @@ public class Server {
                 synchronized (this) {
                     while (numberOfPlayersLeft() == 1) {
                         // notify last client that he's the only player left
-                        if (clientsLobby.get(0).getSocket() != null) serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", clientsLobby.get(0).getNickname());
-                        else { /* send rmi message: Everyone disconnected! After a timeout passed an no rejoins, you'll have won.*/}
+                        // notify socket
+                        clientsLobby.stream()
+                                .filter(c -> c.getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && c.getSocket() != null)
+                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", controller.getNameOfPlayerWhoIsCurrentlyPlaying()));
+                        //{ /* send rmi message: Everyone disconnected! After a timeout passed an no rejoins, you'll have won.*/}
                         wait();
                     }
                 }
