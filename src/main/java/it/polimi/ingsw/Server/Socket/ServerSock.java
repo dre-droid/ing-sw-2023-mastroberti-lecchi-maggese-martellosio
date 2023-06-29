@@ -252,7 +252,15 @@ public class ServerSock {
                     sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
                     server.notifyServer();                                      //notify server
                     server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
-                    if (!controller.hasGameStarted()) notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    // send rejoining client all game objects
+                    try{
+                        PrintWriter pw = new PrintWriter(clients.get(i).getSocket().getOutputStream(), true);
+                        sendSerializedObjects(pw, clients.get(i).getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(clients.get(i).getName())), controller.getPGC(clients.get(i).getName()), controller.getCommonGoalCards(), controller.getScoringToken(clients.get(i).getName()), controller.getLeaderboard(), true);
+                        if (controller.getFirstPlayer().equals(clients.get(i).getName())) pw.println("[FIRSTPLAYERSEAT]");
+                        pw.println("[CURRENTPLAYER]" + nickname);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                     break;
                 }
             }
