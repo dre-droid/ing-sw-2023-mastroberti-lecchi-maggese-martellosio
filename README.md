@@ -1,9 +1,9 @@
 # ing-sw-2023-mastroberti-lecchi-maggese-martellosio
-Progetto di Ingegneria del Software
+Software engineering project
 
-Componenti del gruppo : Andrea Mastroberti, Diego Lecchi, Saverio Maggese, Francesco Martellosio
+Contributors : Andrea Mastroberti, Diego Lecchi, Saverio Maggese, Francesco Martellosio
 
-Funzionalità implementate:
+Implemented features:
     Regole Complete,
     TUI,
     GUI,
@@ -11,5 +11,4 @@ Funzionalità implementate:
     Socket,
     3 FA : persistenza, resilienza , chat.
 
-Come eseguire : eseguire server.jar per far partire il server
-                dopodichè eseguire cli.jar se si vuole giocare con la CLI oppure gui.jar se si vuole giocare con l'interfaccia grafica.
+How to play: run `java -jar server.java` to run the server, then connect to it by running `java -jar cli.jar`or `java -jar gui.jar` to either play with CLI or GUI.
