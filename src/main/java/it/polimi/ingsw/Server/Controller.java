@@ -399,7 +399,7 @@ public class Controller {
      * This method has been made public for testing purposes
      */
     public void saveGameProgress(){
-        game.saveGameProgress("src/main/resources/jsonGameProgress/GameProgress.json");
+        game.saveGameProgress("GameProgress.json");
     }
 
     /**
@@ -408,7 +408,7 @@ public class Controller {
      */
     public boolean loadGameProgress(){
         if(checkForSavedGameProgress() && game==null){
-            game = new Game("src/main/resources/jsonGameProgress/GameProgress.json");
+            game = new Game("GameProgress.json");
 
             return true;
         }
@@ -419,7 +419,7 @@ public class Controller {
      * This method is used to delete a GameProgress.json file if it exists
      */
     public void deleteProgress(){
-        File toBeDeleted = new File("src/main/resources/jsonGameProgress/GameProgress.json");
+        File toBeDeleted = new File("GameProgress.json");
         if(toBeDeleted.delete())
             System.out.println("File deleted correctly");
         else System.out.println("File not deleted");
@@ -428,7 +428,7 @@ public class Controller {
      * This method checks if GameProgress.json is present in this path
      */
     public boolean checkForSavedGameProgress(){
-        File toBeChecked = new File("src/main/resources/jsonGameProgress/GameProgress.json");
+        File toBeChecked = new File("GameProgress.json");
         if(toBeChecked.exists())
             return true;
         else return false;
