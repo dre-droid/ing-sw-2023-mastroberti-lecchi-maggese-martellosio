@@ -161,7 +161,7 @@ public class Game {
      * @param drawnTiles : the list of tiles resulting from drawsFromBoard
      * @param column : the column in player's shelf you want to insert drawn tiles
      * @param player : the player who's playing the turn, performing insertion
-     * @return: true if insertion is correctly executed, false otherwise
+     * @return true if insertion is correctly executed, false otherwise
      * @throws InvalidMoveException
      */
     public boolean insertTilesInShelf(List<Tile> drawnTiles,int column,Player player) throws InvalidMoveException {
@@ -664,7 +664,7 @@ public class Game {
      * This method is used to guarantee the persistence functionality and is invoked to loadGameProgress from
      * the file in which it was previously saved from method saveGameProgress
      * @param filePath: filPath of the file you want to load game progress from
-     * @return: false if the file does not exist, true if the progresses are correctly loaded
+     * @return false if the file does not exist, true if the progresses are correctly loaded
      */
 
     public boolean loadGameProgress(String filePath){

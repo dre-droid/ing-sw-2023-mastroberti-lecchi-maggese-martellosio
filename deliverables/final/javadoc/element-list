@@ -1,0 +1,7 @@
+main.java.it.polimi.ingsw.GUI
+main.java.it.polimi.ingsw.GUI.PositionStuff
+main.java.it.polimi.ingsw.Model
+main.java.it.polimi.ingsw.Model.CommonGoalCardStuff
+main.java.it.polimi.ingsw.Server
+main.java.it.polimi.ingsw.Server.RMI
+main.java.it.polimi.ingsw.Server.Socket

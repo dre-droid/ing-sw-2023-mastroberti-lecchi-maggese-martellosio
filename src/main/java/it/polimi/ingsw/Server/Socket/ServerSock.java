@@ -283,7 +283,7 @@ public class ServerSock {
 
     /**
      * Creates a thread to listen and process a client messages. All received strings are either processed or appended
-     * to a List<String> messageBuffer. In the latter case notify() is called to wake up drawInquiry waiting on input from client.
+     * to a List of Strings messageBuffer. In the latter case notify() is called to wake up drawInquiry waiting on input from client.
      * @author Diego Lecchi, Andrea Mastroberti
      * @param client - Socket of the client
      * @param nickname - nickname of the client
@@ -879,7 +879,7 @@ public class ServerSock {
     /**
      * Sends all clients a serialized copy of the game board, leaderboard, player's scoring tokens and common goal cards. Also sends the nick of the current
      * player - this notifies that the turn has ended.
-     * Note: leaderboard is a List<Player>, so it contains all players' instance fields.
+     * Note: leaderboard is a List of Players, so it contains all players' instance fields.
      */
     public void updateGameObjectsAfterTurn(){
         try {

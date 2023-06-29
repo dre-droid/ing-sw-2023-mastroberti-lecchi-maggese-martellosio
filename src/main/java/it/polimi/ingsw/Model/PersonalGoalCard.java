@@ -10,10 +10,7 @@ import java.util.*;
  */
 
 public class PersonalGoalCard implements Serializable {
-    /**
-     * @param valildTiles is a shelf that contains only the tiles that the player has to match in order to obtain points
-     *
-     */
+
     protected Shelf validTiles;
 
     public PersonalGoalCard() {this.validTiles = new Shelf();}

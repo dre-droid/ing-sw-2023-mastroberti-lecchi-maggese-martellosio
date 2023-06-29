@@ -220,7 +220,6 @@ public class Server {
     /**
      * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() and run() wait for it).
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
-     * @throws RemoteException
      */
     public void notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
         try {

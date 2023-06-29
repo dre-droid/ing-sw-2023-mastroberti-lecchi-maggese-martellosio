@@ -238,7 +238,7 @@ public class GameSceneController {
     }
 
     /**
-     * Replaces the scene's board tiles with grid[][] tiles. Each tile has a EventHandler<MouseEvent> to handle tile selection.
+     * Replaces the scene's board tiles with grid[][] tiles. Each tile has a EventHandler for MouseEvent to handle tile selection.
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
@@ -1214,7 +1214,6 @@ public class GameSceneController {
 
     /**
      * Used by socket to wait for server notification that game has started. When it has, updateGUIAtBeginningOfGame is called.
-     * @throws InterruptedException
      */
     public void socketInitializeGameScene(){
         synchronized (gameStartLock) {  // simply avoids both the socketInitializeGameScene and the socketUpdateGameScene threads execute simultaneously

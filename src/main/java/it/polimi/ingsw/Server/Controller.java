@@ -257,7 +257,7 @@ public class Controller {
     /**
      * this method is used to check if the player with the name "playerNickname" has completed the first common goal
      * @param playerNickname the name of a player
-     * @returnm false if the name of the player is not the one of the player who is currently playing its turn or if the player has
+     * @return false if the name of the player is not the one of the player who is currently playing its turn or if the player has
      * not completed the first common goal, true if the player has completed the first common goal
      */
     public boolean checkIfCommonGoalN1IsFulfilled(String playerNickname){
@@ -270,7 +270,7 @@ public class Controller {
     /**
      * this method is used to check if the player with the name "playerNickname" has completed the second common goal
      * @param playerNickname the name of a player
-     * @returnm false if the name of the player is not the one of the player who is currently playing its turn or if the player has
+     * @return false if the name of the player is not the one of the player who is currently playing its turn or if the player has
      * not completed the second common goal, true if the player has completed the second common goal
      */
     public boolean checkIfCommonGoalN2IsFulfilled(String playerNickname){

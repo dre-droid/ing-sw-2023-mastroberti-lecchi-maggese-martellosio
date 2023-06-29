@@ -55,6 +55,11 @@ public class Shelf implements Serializable {
     /**
      * @author Francesco Martellosio
      * This method is used to calculate the adjacence points of the shelf
+     * it iterates over all the spot in the shelf. if the spot is not empty it checks the type of the tile present, and then
+     * it looks the adjacent positions and add to the ToBeChecked list, and then it add the explored tile to the AlreadyChecked
+     * list, it updates the counter by adding one and then it pass to the next tile in the toBeCheced list, it does the same operation
+     * until the ToBeChecked list is empty, at this point it converts the counter of adjacent tiles into points and then accumulates
+     * it
      * @return the points from the current adjacencies
      */
     public int getAdjScore() {
