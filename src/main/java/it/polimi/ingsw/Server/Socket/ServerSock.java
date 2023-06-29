@@ -258,6 +258,8 @@ public class ServerSock {
                         sendSerializedObjects(pw, clients.get(i).getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(clients.get(i).getName())), controller.getPGC(clients.get(i).getName()), controller.getCommonGoalCards(), controller.getScoringToken(clients.get(i).getName()), controller.getLeaderboard(), true);
                         if (controller.getFirstPlayer().equals(clients.get(i).getName())) pw.println("[FIRSTPLAYERSEAT]");
                         pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                        pw.println("[INFO]: Game is starting. " + clients.get(i) + "'s turn.");
+
                     } catch (Exception e){
                         e.printStackTrace();
                     }
