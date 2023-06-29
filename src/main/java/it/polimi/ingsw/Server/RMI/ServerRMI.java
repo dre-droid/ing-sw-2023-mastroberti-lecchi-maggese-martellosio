@@ -482,12 +482,21 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
      */
     @Override
     public String getCommonGoalCardDescription() throws RemoteException {
-        return controller.getCommonGoalCard1Description() + " Token: "+
-                controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
-                get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).size() -1 ).getPoints()
-                + "\n" +controller.getCommonGoalCard2Description() + " Token: " +
-                controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
-                get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(1)).size() -1 ).getPoints();
+        String cgcs = controller.getCommonGoalCard1Description()+"\n" +controller.getCommonGoalCard2Description();
+        cgcs+="\n Tokens of common goal card 1: ";
+        for(ScoringToken st: getCommonGoalCards().get(0).getScoringTokens()){
+            cgcs+=st.getPoints()+" ";
+        }
+        cgcs+="\n Tokens of common goal card 2: ";
+        for(ScoringToken st: getCommonGoalCards().get(1).getScoringTokens()){
+            cgcs+=st.getPoints()+" ";
+        }
+        return cgcs;
+                //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).size() -1 ).getPoints()
+
+                //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(1)).gesize() -1 ).getPoints();
     }
 
 
