@@ -85,7 +85,12 @@ public class Server {
             while (!controller.hasTheGameEnded()) {
                 // if only one player left, wait
                 synchronized (this) {
-                    while (numberOfPlayersLeft() == 1) wait();
+                    while (numberOfPlayersLeft() == 1) {
+                        // notify last client that he's the only player left
+                        if (clientsLobby.get(0).getSocket() != null) serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", clientsLobby.get(0).getNickname());
+                        else { /* send rmi message: Everyone disconnected! After a timeout passed an no rejoins, you'll have won.*/}
+                        wait();
+                    }
                 }
 
                 boolean skipTurn = false;
@@ -101,9 +106,9 @@ public class Server {
 
                 //calls playTurn() of the player who is currently playing according to controller
                 if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.Socket) && !skipTurn) {
-                    controller.playTurn();
+                    controller.playTurn();  // calls endOfTurn if player disconnects!
                     notifySocketOfTurnEnd();
-                    // RMI update in controller.playTurn()
+                    // RMI is updated in controller.playTurn()
                 }
             }
 
