@@ -252,7 +252,7 @@ public class ServerSock {
                     sendMessage("[INFO] You have successfully rejoined the game, wait for your turn", client);
                     server.notifyServer();                                      //notify server
                     server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
-                    notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                    if (!controller.hasGameStarted()) notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                     break;
                 }
             }
