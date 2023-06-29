@@ -591,7 +591,7 @@ public class GameSceneController {
             if(!clientRMI.isMyTurn())
                 return;
         }else{
-            if (!clientSocket.isMyTurn())
+            if (!clientSocket.isMyTurn() || !clientSocket.youCanDraw)
                 return;
         }
         if(!drawIsOver){
@@ -1523,6 +1523,7 @@ public class GameSceneController {
         for (int i = 0; i < drawnTilesCounter; i++)
             reorderedList[i] = i + 1;
         shelfButtonsPane.setVisible(true);
+        clientSocket.youCanDraw = false;
     }
 
     /**

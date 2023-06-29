@@ -14,6 +14,7 @@ public class GUISocket extends ClientSocket{
     public boolean insert = false;
     public boolean gameEnd = false;
     public boolean draw = false;
+    public boolean youCanDraw;
     public String nextScene = "";
     public GUISocket(String ip){
         super(ip);
@@ -29,6 +30,7 @@ public class GUISocket extends ClientSocket{
             // temporary CLI for debugging
             if (line.startsWith("[YOUR TURN]")) {
                 //printTurn();
+                youCanDraw = true;
                 System.out.println(line);
             }
             if (line.startsWith("[INVALID MOVE]")) {
