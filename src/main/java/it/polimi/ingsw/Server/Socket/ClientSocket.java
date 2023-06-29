@@ -98,10 +98,12 @@ public abstract class ClientSocket {
                 while(!socket.isClosed()) {
                     String line = reader.readLine();
                     messageFromServer = line;
-                    deserializeObjects(line);
-                    if(!line.equals("[PING]")) {
-                        handleServerRequestCommon(line);
-                        handleServerRequest(line);
+                    if (line != null) {
+                        deserializeObjects(line);
+                        if (!line.equals("[PING]")) {
+                            handleServerRequestCommon(line);
+                            handleServerRequest(line);
+                        }
                     }
                 }
             }

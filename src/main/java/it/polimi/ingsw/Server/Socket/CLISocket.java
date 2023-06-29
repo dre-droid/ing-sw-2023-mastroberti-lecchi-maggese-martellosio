@@ -189,5 +189,11 @@ public class CLISocket extends ClientSocket{
 
     protected void disconnectionAlert(){
         System.out.println("Connection lost, try again later");
+        try{
+            Thread.sleep(5000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 }

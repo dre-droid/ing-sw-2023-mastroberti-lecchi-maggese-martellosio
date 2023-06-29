@@ -142,6 +142,12 @@ public class GUISocket extends ClientSocket{
         synchronized (connectionLostLock){
             connectionLost = true;
             connectionLostLock.notifyAll();
+            try{
+                Thread.sleep(5000);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            System.exit(0);
         }
     }
 }

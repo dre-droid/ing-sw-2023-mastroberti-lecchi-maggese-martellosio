@@ -49,6 +49,12 @@ public class LoginSceneController{
         this.clientSocket = client;
         if(disconnected){
             messageTextArea.setText("You got disconnected...");
+            try{
+                Thread.sleep(5000);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            System.exit(0);
         }
         client.runServer();
     }
