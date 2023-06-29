@@ -118,6 +118,8 @@ public class Player implements Serializable{
      */
     public void updateFinalScore(){
         score = getTokensScore() + shelf.getAdjScore() + checkPersonalGoal();
+        if(hasEndGameToken())
+            score=score+1;
     }
 
     /**

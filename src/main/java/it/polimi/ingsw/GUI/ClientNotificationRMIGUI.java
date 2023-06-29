@@ -360,7 +360,9 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         if(playerNickname.equals(this.nickname)) {
             List<ScoringToken> tokens = serverRMI.getMyTokens(this.nickname);
             //update the view
-            this.gsc.updateScoringTokens(tokens);
+            if(this.gsc!=null){
+                this.gsc.updateScoringTokens(tokens);
+            }
         }
         int nOfCommonGoalCard=-1;
         for(CommonGoalCard c: commonGoalCards){
@@ -373,9 +375,11 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
             for(ScoringToken st: serverRMI.getCgcTokens(cgc)){
                 System.out.println(st.getPoints());
             }
-            this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
+            if(gsc!=null)
+                this.gsc.updateCommonGoalCardTokens(1,serverRMI.getCgcTokens(cgc));
         }else if (nOfCommonGoalCard==1){
-            this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
+            if(gsc!=null)
+                this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
         }
         else{
             System.out.println("errore -1");
@@ -390,17 +394,27 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void aTurnHasEnded(String currentPlayerNickname, String nextPlayerNickname) throws RemoteException {
-        gsc.updateTurnLabel(serverRMI.getIsPlaying());
-        gsc.updateLeaderboard(serverRMI.getLeaderboard());
-        gsc.updateBoard(serverRMI.getBoard());
-        List<Player> players = serverRMI.getPlayers();
+        if(gsc!=null){
+            gsc.updateTurnLabel(serverRMI.getIsPlaying());
+            gsc.updateLeaderboard(serverRMI.getLeaderboard());
+            gsc.updateBoard(serverRMI.getBoard());
+        }
+        List<Player> players;
+        try{
+             players = serverRMI.getPlayers();
+        }catch (RemoteException re){
+            backToLogin();
+            return;
+        }
+
         if(players.stream().anyMatch(Player::hasEndGameToken)){
             if(this.gsc!=null){
                 gsc.setOpponentEndGameToken(players.stream().filter(player -> player.hasEndGameToken()).findFirst().get().getNickname());
             }
         }
         if(serverRMI.haveIEndGameToken(nickname))
-            gsc.setEndGameToken();
+            if(gsc!=null)
+                gsc.setEndGameToken();
     }
 
     /**
@@ -412,7 +426,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     public void gameIsOver(List<Player> leaderboard) throws RemoteException {
         if(leaderboard==null)
             return;
-        gsc.switchToEndGameScene(leaderboard);
+        if(gsc!=null)
+            gsc.switchToEndGameScene(leaderboard);
     }
 
     @Override
@@ -441,7 +456,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void startTurn() throws RemoteException {
-        gsc.updateTurnLabel(serverRMI.getIsPlaying());
+        if(gsc!=null)
+            gsc.updateTurnLabel(serverRMI.getIsPlaying());
         MyTurnFlag = true;
     }
 
@@ -454,10 +470,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void receiveMessage(String text, String sender, Boolean pm) throws RemoteException {
-        if(pm)
-            gsc.rmiMessageTextArea("[MESSAGE FROM " + sender + " TO YOU]: " + text);
-        else
-            gsc.rmiMessageTextArea("[MESSAGE FROM "+sender+"]: "+text);
+        if(gsc!=null){
+            if(pm)
+                gsc.rmiMessageTextArea("[MESSAGE FROM " + sender + " TO YOU]: " + text);
+            else
+                gsc.rmiMessageTextArea("[MESSAGE FROM "+sender+"]: "+text);
+        }
+
     }
 
 
@@ -512,7 +531,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void updateBoard(TilePlacingSpot[][] boardView) throws RemoteException {
         System.out.println(nickname+" has updated the board");
-        gsc.updateBoard(boardView);
+        if(gsc!=null)
+            gsc.updateBoard(boardView);
     }
 
     /**
@@ -523,7 +543,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     @Override
     public void updateOppShelf(String nickname, Tile[][] grid) throws RemoteException {
-        gsc.updateOppShelf(nickname,grid);
+        if(gsc!=null)
+            gsc.updateOppShelf(nickname,grid);
     }
 
     /**
@@ -639,8 +660,10 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void updateCommonGoalTokens() throws RemoteException {
         List<CommonGoalCard> cgcs = serverRMI.getCommonGoalCards();
-        gsc.updateCommonGoalCardTokens(1, cgcs.get(0).getScoringTokens());
-        gsc.updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
+        if(gsc!=null){
+            gsc.updateCommonGoalCardTokens(1, cgcs.get(0).getScoringTokens());
+            gsc.updateCommonGoalCardTokens(2, cgcs.get(1).getScoringTokens());
+        }
     }
 
     /**
@@ -676,7 +699,8 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
      */
     public void backToLogin(){
         cannotContactServer = true;
-        this.gsc.backToLogin();
+        if(gsc!=null)
+            this.gsc.backToLogin();
     }
 
     /**
