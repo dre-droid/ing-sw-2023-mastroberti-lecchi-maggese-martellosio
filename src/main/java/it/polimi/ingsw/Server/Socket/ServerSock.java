@@ -361,8 +361,20 @@ public class ServerSock {
                 }
             } catch (SocketException e){
                 System.out.println(nickname + "'s socket has been closed.");
+                for (int i = 0; i < server.clientsLobby.size(); i++) {
+                    if(server.clientsLobby.get(i).getNickname().equals(nickname)){
+                                        /*if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getName())){
+                                            controller.endOfTurn(client.getName());
+                                        }
+
+                                         */
+                        server.clientsLobby.get(i).setDisconnected(true);
+                        server.notifyLobbyDisconnection(nickname);
+
+                    }
+                }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                //throw new RuntimeException(e);
             }
         });
         clientListener.start();
@@ -415,6 +427,7 @@ public class ServerSock {
         new Thread(() -> {
             try{
                 while (!controller.hasTheGameEnded()) {
+                    System.out.println("AOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO "+ client.getName());
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
@@ -441,6 +454,7 @@ public class ServerSock {
                         //if player is in the game and the game started
                         else {
                             if (System.currentTimeMillis() - client.getLastPing() > 5000){
+                                System.out.println(client.getName()+" SHOULD BE DISCONNECTED");
                                 for (int i = 0; i < server.clientsLobby.size(); i++) {
                                     if(server.clientsLobby.get(i).getNickname().equals(client.getName())){
                                         /*if(controller.getNameOfPlayerWhoIsCurrentlyPlaying().equals(client.getName())){

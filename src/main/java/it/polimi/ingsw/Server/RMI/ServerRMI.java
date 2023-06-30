@@ -259,7 +259,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 }
             }
         }catch (Exception e){
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 

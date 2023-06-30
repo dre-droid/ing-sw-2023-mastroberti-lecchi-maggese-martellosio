@@ -708,7 +708,8 @@ public class GameSceneController {
                     return;
                 drawTilesFromRMIServer();
             }
-            drawIsOver = true;
+            if(alreadyDrawnPositions!=null)
+                drawIsOver = true;
             // hide checkmark button
             TileToBeInserted.getChildren().remove(getNodeAt(0,3,TileToBeInserted));
 
@@ -885,11 +886,11 @@ public class GameSceneController {
         //System.out.println("coordinates: ("+x+","+y+")"+", amount = "+amount+", direction = "+direction);
         if(clientRMI.drawTilesFromBoard(x,y,amount,direction)){
             //System.out.println("RMI draw operation was a success");
-
+            shelfButtonsPane.setVisible(true);
         }
 
 
-        shelfButtonsPane.setVisible(true);
+
     }
 
     /**
