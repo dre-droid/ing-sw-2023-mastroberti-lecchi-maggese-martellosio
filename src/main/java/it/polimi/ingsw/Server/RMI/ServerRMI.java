@@ -426,7 +426,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         //we check if there is a player with this name in the game
         for(ClientInfoStruct cis: server.clientsLobby){
             if(cis.getNickname().equals(playerNickname) && !cis.isDisconnected())
-                System.out.println("problema è che il player risulta ancora connesso");
+                //System.out.println("problema è che il player risulta ancora connesso");
             if(cis.getNickname().equals(playerNickname) && cis.isDisconnected()){
                 cis.setRmiIp(ip);
                 cis.setRmiPort(port);
@@ -692,7 +692,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             try{
 
                 String nickname = client.getNickname();
-                System.out.println("GAYYYYYYYYYY "+ nickname);
                 while(!controller.hasGameBeenCreated()){
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
@@ -707,7 +706,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                     Thread.sleep(100);
                 }
                 while (!controller.hasTheGameEnded()) {
-                    System.out.println("MEGA GAYYYY"+nickname);
+
 
 
                     //else if player is in the game
@@ -773,7 +772,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public void notifyLobbyDisconnectionRMI() throws RemoteException{
         for (Map.Entry<ClientNotificationInterfaceRMI, RmiNickStruct> client : clientsLobby.entrySet()){
             if(server.clientsLobby.stream().noneMatch(cis -> cis.getNickname().equals(client.getValue().getNickname()) && cis.isDisconnected())) {
-                System.out.println("notifico " + client.getValue().getNickname());
+                System.out.println("notifY " + client.getValue().getNickname());
                 client.getKey().notifyOfDisconnection();
             }
         }
