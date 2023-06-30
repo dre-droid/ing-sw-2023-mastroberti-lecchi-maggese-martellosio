@@ -9,6 +9,6 @@ Implemented features:
     GUI,
     RMI,
     Socket,
-    3 FA : persistenza, resilienza , chat.
+    3 FA : persistenza, resilienza , chat. NB: persistenza non è stabile per disconnessioni contemporanee di 2 client o più.
 
 How to play: run `java -jar server.java` to run the server, then connect to it by running `java -jar cli.jar`or `java -jar gui.jar` to either play with CLI or GUI.
