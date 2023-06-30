@@ -136,7 +136,6 @@ public class GameSceneController {
     public void setClient(ClientNotificationRMIGUI client) {
         this.clientRMI = client;
         //System.out.println(this.toString());
-        System .out.println("AAAAAAAAAAAAAAAAAAAAAA");
         clientRMI.setGameSceneController(this);
         chatSetUp();
         if(clientRMI.hasGameStarted()){
@@ -242,7 +241,7 @@ public class GameSceneController {
      * @param grid - game board
      */
     public void updateBoard(TilePlacingSpot[][] grid){
-//        System.out.println("board should be updated 777777777");
+//
         Platform.runLater(() -> {
             //Calculates the available spaces in the emptiest column of the player shelf
             maxDrawableTiles = 0;
@@ -327,15 +326,13 @@ public class GameSceneController {
         Image image=null;
         boolean flag;
         if(pgcMap==null || pgc ==null){
-//            System.out.println("oh no la pgc map è nulla");
+//
         }
         if(pgcMap.isEmpty()){
-//            System.out.println("mappa vuota per le pgc");
+//
         }
         for(Map.Entry<Integer, PersonalGoalCard> pgcKey: pgcMap.entrySet()){
-            /*System.out.println(pgcKey.getValue().toString());
-            System.out.println("/////////////////////////////");
-            System.out.println(pgc.toString());*/
+
             Tile[][] tps = pgcKey.getValue().getValidTiles().getGridForDisplay();
             Tile[][] tpsPlayer = pgc.getValidTiles().getGridForDisplay();
             flag =true;
@@ -352,13 +349,13 @@ public class GameSceneController {
             }
             if(flag){
                 id= pgcKey.getKey();
-                //System.out.println("---"+id);
+
             }
             flag = true;
 
-            //System.out.println("-------------------------------");
+
         }
-//        System.out.println("ID = "+id);
+//
         switch (id){
             case 1:image = new Image("personal_goal_cards/Personal_Goals.png") ;break;
             case 2:image = new Image("personal_goal_cards/Personal_Goals2.png") ;break;
@@ -650,10 +647,7 @@ public class GameSceneController {
         }
 
         TileToBeInserted.getChildren().clear();
-//        System.out.println("filling the gridpane");
-//        System.out.println("size of already drawn positions: "+alreadyDrawnPositions.size());
         for(Position p: positions){
-//            System.out.println("Position to be inserted = "+p.toString());
             TileToBeInserted.add(stackPaneList.get(positionList.indexOf(p)), getFirstEmptySpot(TileToBeInserted).getY(), 0);
         }
         if (drawnTilesCounter >= 1) {
@@ -872,7 +866,7 @@ public class GameSceneController {
         if(onSameRow){
             alreadyDrawnPositions = alreadyDrawnPositions.stream().sorted(Comparator.comparingInt(Position::getY)).toList();
             /*for(int i=0;i<alreadyDrawnPositions.size();i++){
-                System.out.println("("+alreadyDrawnPositions.get(i).getX()+","+alreadyDrawnPositions.get(i).getY()+")");
+
             }*/
             direction = Board.Direction.RIGHT;
         }
@@ -1025,7 +1019,7 @@ public class GameSceneController {
                 if(getNodeAt(row,column,gridPane)==null){
                     return new Position(row, column);
                 }
-//                System.out.println("TileToBeInserted in column "+column+" not empty");
+//
             }
         return null;
     }
@@ -1098,28 +1092,25 @@ public class GameSceneController {
         boolean oneSideFree = false;
         int row, column;
         //check up
-        // System.out.println("UP:");
         row = p.getX();
         column = p.getY()-1;
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check down
-        //System.out.println("DOWN:");
         row = p.getX();
         column = p.getY()+1;
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check left
-        //System.out.println("LEFT:");
         row = p.getX()-1;
         column = p.getY();
         if(getNodeAt(row, column, BoardGrid)==null){
             oneSideFree = true;
         }
         //check right
-        //System.out.println("RIGHT:");
+
         row = p.getX()+1;
         column = p.getY();
         if(getNodeAt(row, column, BoardGrid)==null){
@@ -1324,7 +1315,6 @@ public class GameSceneController {
         int count = 0;
         Label[] labels = new Label[]{p1Label, p2Label, p3Label};
         ImageView[] shelfs = new ImageView[]{Opp1Shelf_ID,Opp2Shelf_ID,Opp3Shelf_ID};
-        ImageView[] endgametokens = new ImageView[]{EndGameToken1,EndGameToken2,EndGameToken3};
         ImageView[] chairs = new ImageView[]{OppChair1,OppChair2,OppChair3};
         int n = clientSocket == null ? clientRMI.getLeaderboard().size() : clientSocket.getLeaderboard().size();
         List<Player> players = clientSocket == null ? clientRMI.getLeaderboard() : clientSocket.getLeaderboard();
@@ -1613,13 +1603,13 @@ public class GameSceneController {
      */
     public void updateCommonGoalCardTokens(int n, List<ScoringToken> tokens){
         Platform.runLater(()->{
-//            System.out.println("ciao ho aggiornato i token delle common");
+//
             if(tokens==null){
-//                System.out.println("tokens null");
+//
                 return;
             }
             if(tokens.size()==0){
-//                System.out.println("token size =0");
+//
                 if(n==1){
                     cgc1tokens.setImage(null);
                 }else if(n==2){
@@ -1631,10 +1621,10 @@ public class GameSceneController {
             int maxAvailablePts = optionalInt.getAsInt();
             if(n==1){
                 //cgc1tokens
-//                System.out.println("common goal card 1 token modificati");
+//
                 cgc1tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }else if(n==2){
-//                System.out.println("common goal card 2 token modificati");
+//
                 cgc2tokens.setImage(new Image("scoring_tokens/scoring_"+maxAvailablePts+".jpg", 72, 74,true, false));
             }
             else{
@@ -1674,13 +1664,12 @@ public class GameSceneController {
 
     public void switchToEndGameScene(List<Player> leaderboard){
         Platform.runLater(()->{
-//            System.out.println("end game scene loading...");
             Scene scene;
             Parent root;
             ClassLoader classLoader = MainGUI.class.getClassLoader();
             URL fxmlPath = classLoader.getResource("EndGameScene.fxml");
             if(fxmlPath==null){
-                throw new IllegalStateException("FXML non trovato");
+                throw new IllegalStateException("FXML not found");
             }
             FXMLLoader loader = new FXMLLoader(fxmlPath);
             try {
@@ -1710,13 +1699,13 @@ public class GameSceneController {
         Platform.runLater(()->{
             try{
                 try{
-                    System.out.println("hey ritorniamo al login");
+                    System.out.println("hey let's head back to login");
                     Scene scene;
                     Parent root;
                     ClassLoader classLoader = MainGUI.class.getClassLoader();
                     URL fxmlPath = classLoader.getResource("LoginScene.fxml");
                     if(fxmlPath==null){
-                        throw new IllegalStateException("FXML non trovato");
+                        throw new IllegalStateException("FXML not found");
                     }
                     FXMLLoader loader = new FXMLLoader(fxmlPath);
                     root = loader.load();
