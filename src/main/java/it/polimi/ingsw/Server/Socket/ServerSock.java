@@ -36,17 +36,17 @@ public class ServerSock {
      * Creates a thread to accept clients.
      */
     public void runServer(){
-        System.out.println("Socket server up and running...");
-        Thread runServer = new Thread(() -> {
-            try (ServerSocket serverSocket = new ServerSocket(59010)) {
-                //checkForDisconnections();
-                while (true) {
-                    Socket client = serverSocket.accept();
-                    acceptClient(client);
-                }
-            }catch (IOException e) {e.printStackTrace();}
-        });
-        runServer.start();
+            System.out.println("Socket server up and running...");
+            Thread runServer = new Thread(() -> {
+                try (ServerSocket serverSocket = new ServerSocket(59010)) {
+                    //checkForDisconnections();
+                    while (true) {
+                        Socket client = serverSocket.accept();
+                        acceptClient(client);
+                    }
+                }catch (IOException e) {e.printStackTrace();}
+            });
+            runServer.start();
     }
 
     /**
@@ -123,9 +123,9 @@ public class ServerSock {
             }
         } while (true);
         //if(controller.hasGameStarted()){
-        //out.println("[INFO] The game already started, you can't join, try again later");
-        //out.println("[EXIT]");
-        //return;
+            //out.println("[INFO] The game already started, you can't join, try again later");
+            //out.println("[EXIT]");
+            //return;
         //}
 
 
@@ -232,6 +232,11 @@ public class ServerSock {
             if (server.clientsLobby.get(i).getNickname().equals(nickname)){         //search for the object in server.clientsLobby with the same nickname
                 server.clientsLobby.get(i).setSocket(client);                       //updates the Socket
                 server.clientsLobby.get(i).setDisconnected(false);                  //set boolean disconnected to false
+                //server.clientsLobby.get(i).setRmiIp(null);
+                //server.clientsLobby.get(i).setRmiPort(0);
+                //if (server.clientsMap.get(nickname).equals(Server.connectionType.RMI)){      //if client was rmi
+                //    clients.add(new socketNickStruct(client, nickname));
+                //}
                 server.addPlayerToRecord(nickname, Server.connectionType.Socket);   //adds client to server.clientsMap
                 clientListener(client, nickname, reader, out);                           //launches clientListener
                 break;
@@ -250,19 +255,16 @@ public class ServerSock {
                     // send rejoining client all game objects
                     try{
                         PrintWriter pw = new PrintWriter(clients.get(i).getSocket().getOutputStream(), true);
-                        sendSerializedObjects(pw, nickname, new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(clients.get(i).getName())), controller.getPGC(nickname), controller.getCommonGoalCards(), controller.getScoringToken(nickname), controller.getLeaderboard(), true);
-                        if (controller.getFirstPlayer().equals(nickname)) pw.println("[FIRSTPLAYERSEAT]");
+                        sendSerializedObjects(pw, clients.get(i).getName(), new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(clients.get(i).getName())), controller.getPGC(clients.get(i).getName()), controller.getCommonGoalCards(), controller.getScoringToken(clients.get(i).getName()), controller.getLeaderboard(), true);
+                        if (controller.getFirstPlayer().equals(clients.get(i).getName())) pw.println("[FIRSTPLAYERSEAT]");
                         pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        if (controller.hasGameStarted()) pw.println("[INFO]: Game is starting. " + clients.get(i).getName() + "'s turn.");
+                        pw.println("[INFO]: Game is starting. " + clients.get(i) + "'s turn.");
 
                     } catch (Exception e){
                         e.printStackTrace();
                     }
                     break;
                 }
-            }
-            synchronized (server.onePlayerLeftLock){
-                server.onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
             }
         }
         else{                           //otherwise the client is trying to rejoin a saved game, so we need to add a new socketNickStruct in clients
@@ -272,17 +274,6 @@ public class ServerSock {
                     if(clients.get(i).getName().equals(nickname)) {
                         clients.get(i).setLastPing(System.currentTimeMillis()); //set lastPing to current time
                         checkForDisconnectionsV2(clients.get(i));               //launch check for disconnection
-                        //TODO why not send all game objects to client here as well?
-                        try{
-                            PrintWriter pw = new PrintWriter(clients.get(i).getSocket().getOutputStream(), true);
-                            sendSerializedObjects(pw, nickname, new Board(controller.getTilePlacingSpot()), new Shelf(controller.getMyShelf(clients.get(i).getName())), controller.getPGC(nickname), controller.getCommonGoalCards(), controller.getScoringToken(nickname), controller.getLeaderboard(), true);
-                            if (controller.getFirstPlayer().equals(nickname)) pw.println("[FIRSTPLAYERSEAT]");
-                            pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                            if (controller.hasGameStarted()) pw.println("[INFO]: Game is starting. " + clients.get(i).getName() + "'s turn.");
-
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }
                         break;
                     }
                 }
@@ -297,9 +288,6 @@ public class ServerSock {
             }
             server.notifyServer();  //notify server
             server.broadcastMessage("Player " + nickname + " rejoined the game!", nickname);
-        }
-        synchronized (server.onePlayerLeftLock){
-            server.onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
         }
     }
 
@@ -341,7 +329,7 @@ public class ServerSock {
                                     chatHandler(nickname, line);
                                 }
 
-                                // processes /quit
+                                    // processes /quit
                                 else if (line.equals("/quit")) {    //TODO needs to advise everyone who quitted the game "player1 quitted"
                                     controller.endGame();
                                     break;  //closes listener on confirmed quit
@@ -734,7 +722,7 @@ public class ServerSock {
             // send client drawn tiles
             out.println("[DRAWNTILES]" + gson.toJson(reorderedTiles));
         } catch(IOException | InterruptedException e){
-            e.printStackTrace();
+                e.printStackTrace();
         }
         return drawInfo;
     }
@@ -918,7 +906,7 @@ public class ServerSock {
                 // updated current player
                 pw.println("[CURRENTPLAYER]" + controller.getNameOfPlayerWhoIsCurrentlyPlaying());
 
-            }
+                }
             String nickname = controller.getPlayers().stream().filter(Player::hasEndGameToken).map(Player::getNickname).findFirst().orElse(null);
             if (nickname != null) {
                 if(controller.hasEndgameToken(nickname)){
@@ -934,7 +922,7 @@ public class ServerSock {
      *  Creates new instance of clients array
      */
     public void flushServer(){
-        clients = new ArrayList<>();
+            clients = new ArrayList<>();
     }
 
     public void setController(Controller c){ this.controller = c;}

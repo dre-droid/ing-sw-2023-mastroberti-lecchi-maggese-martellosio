@@ -442,12 +442,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 clientsLobby.put(clientToBeNotified, new RmiNickStruct(playerNickname));
                 clientsLobby.get(clientToBeNotified).setLastPing(System.currentTimeMillis());
                 checkForDisconnectionsV2(clientsLobby.get(clientToBeNotified));
-                synchronized (server.onePlayerLeftLock){
-                    server.onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
-                }
-                for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet())
-                    if(client.getKey().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()))
-                        notifyStartOfTurn(client.getKey());
                 return true;
             }
         }
@@ -503,11 +497,11 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
             cgcs+=st.getPoints()+" ";
         }
         return cgcs;
-        //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
-        //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).size() -1 ).getPoints()
+                //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).size() -1 ).getPoints()
 
-        //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
-        //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(1)).gesize() -1 ).getPoints();
+                //controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(0)).
+                //get(controller.getAvailableScoringTokens(controller.getCommonGoalCards().get(1)).gesize() -1 ).getPoints();
     }
 
 

@@ -83,33 +83,34 @@ public class Server {
                 }
                 Thread.sleep(1000);
 
-            // game starts
-            serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-            onePlayerLeftTimeout();
-            while (!controller.hasTheGameEnded()) {
-                // if only one player left, wait
-                Thread.sleep(500);
-                System.out.println("server print");
-                synchronized (onePlayerLeftLock) {
-                    if (numberOfPlayersLeft() == 1) {
-                        // notify last client that he's the only player left
-                        clientsLobby.stream()
-                                .filter(c -> !c.isDisconnected() && c.getSocket() != null)
-                                .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname())); //TODO show to GUI
-                        System.out.println("server print 3");
-                        onePlayerLeftLock.wait();
+                // game starts
+                serverSock.notifyGameStart(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                onePlayerLeftTimeout();
+                while (!controller.hasTheGameEnded()) {
+                    System.out.println("-------hola--------");
+                    // if only one player left, wait
+                    synchronized (onePlayerLeftLock) {
+                        if (numberOfPlayersLeft() == 1) {
+                            // notify last client that he's the only player left
+                            clientsLobby.stream()
+                                    .filter(c -> !c.isDisconnected() && c.getSocket() != null)
+                                    .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname())); //TODO show to GUI
+                            System.out.println("server print 3");
+                            onePlayerLeftLock.wait();
+                        }
                     }
-                }
-                System.out.println("server print 2");
-                // skip turn of disconnected player if current
-                for (int i = 0; i < clientsLobby.size(); i++) {
-                    if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
-                        controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                        notifySocketOfTurnEnd();
-                        serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
-                        break;
+
+                    // skip turn of disconnected player if current
+                    if (controller.game != null && !controller.hasTheGameEnded()) {
+                        for (int i = 0; i < clientsLobby.size(); i++) {
+                            if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
+                                controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                                notifySocketOfTurnEnd();
+                                serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
+                            }
+                        }
                     }
-                }
+
 
                     //calls playTurn() of the player who is currently playing according to controller
                     if (controller.game != null && !controller.hasTheGameEnded()) {
@@ -117,11 +118,6 @@ public class Server {
                             controller.playTurn();
                             notifySocketOfTurnEnd();
                             // RMI update in controller.playTurn()
-                        }else if (clientsMap.get(controller.getNameOfPlayerWhoIsCurrentlyPlaying()).equals(connectionType.RMI) &&
-                                clientsLobby.stream().anyMatch(client -> client.getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && client.isDisconnected())) {
-
-                            serverRMI.notifyEndOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                            notifySocketOfTurnEnd();
                         }
                     }
                 }
@@ -162,12 +158,12 @@ public class Server {
                         while (numberOfPlayersLeft() != 1) wait();
                     }
                     // if no one connects in TIMEOUT_THRESH declare the remaining player the winner, end the game
-                    synchronized (onePlayerLeftLock) {
-                        while (numberOfPlayersLeft() <= 1) {
-                            System.out.println("while (numberOfPlayersLeft() <= 1)");
-                            onePlayerLeftLock.wait(TIMEOUT_THRESH);
-                            if (numberOfPlayersLeft() <= 1) {
-                                controller.disconnectionEndGame(clientsLobby.stream().filter(c -> !c.isDisconnected()).toList().get(0).getNickname());
+                    synchronized (o) {
+                        if (numberOfPlayersLeft() <= 1) o.wait(TIMEOUT_THRESH);
+                        if (numberOfPlayersLeft() <= 1) {
+                            controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
+                            synchronized (onePlayerLeftLock){
+                                onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
                             }
                         }
                     }
@@ -256,7 +252,7 @@ public class Server {
      * Notifies all clients that a player has disconnected. Notifies all threads waiting on this (onePlayerLeftTimout() and run() wait for it).
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
      */
-    public synchronized void notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
+    public synchronized void  notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
         try {
             serverRMI.notifyLobbyDisconnectionRMI();
         } catch (RemoteException e) {
@@ -281,6 +277,9 @@ public class Server {
         broadcastMessage("Player " + nickOfDisconnectedPlayer + " disconnected", "Server");
         notifyServer();
         System.out.println("a player disconnected from the lobby");
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     /**
