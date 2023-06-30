@@ -29,6 +29,7 @@ public class ServerSock {
 
     public boolean active=true;
 
+
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
         this.server = server;
@@ -42,10 +43,12 @@ public class ServerSock {
             Thread runServer = new Thread(() -> {
                 try (ServerSocket serverSocket = new ServerSocket(59010)) {
                     //checkForDisconnections();
+                    Socket client = null;
                     while (active) {
-                        Socket client = serverSocket.accept();
+                        client = serverSocket.accept();
                         acceptClient(client);
                     }
+                    //client.close();
                 }catch (IOException e) {e.printStackTrace();}
             });
             runServer.start();
@@ -979,6 +982,8 @@ public class ServerSock {
     public void emptyClients(){
         this.clients.clear();
         active = false;
+        this.messageBuffer.clear();
+
     }
 
 }

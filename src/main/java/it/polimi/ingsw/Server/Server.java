@@ -48,9 +48,10 @@ public class Server {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        serverSock = new ServerSock(controller, this);
+        serverSock.runServer();
         do{
-            serverSock = new ServerSock(controller, this);
-            serverSock.runServer();
+
             do {
 
                 //initiates clients and creates new controller
@@ -148,8 +149,9 @@ public class Server {
             do {
                 controller.deleteProgress();
             }while(controller.checkForSavedGameProgress());
+            Thread.sleep(10000);
             //System.out.println("game ended----------------------");
-            System.exit(0);
+            //System.exit(0);
         }while(true);
 
     }
