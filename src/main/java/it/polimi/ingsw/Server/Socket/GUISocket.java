@@ -149,6 +149,7 @@ public class GUISocket extends ClientSocket{
             }catch (Exception e){
                 e.printStackTrace();
             }
+            System.out.println("You disconnected!");
             System.exit(0);
         }
     }

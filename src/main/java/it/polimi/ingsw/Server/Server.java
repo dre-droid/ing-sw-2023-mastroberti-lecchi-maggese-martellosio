@@ -9,6 +9,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Server {
     private static final int TIMEOUT_THRESH = 60000; //in millis
@@ -161,7 +162,8 @@ public class Server {
                     synchronized (o) {
                         if (numberOfPlayersLeft() <= 1) o.wait(TIMEOUT_THRESH);
                         if (numberOfPlayersLeft() <= 1) {
-                            controller.disconnectionEndGame(clientsLobby.get(0).getNickname());
+                            String finalNick = (clientsLobby.stream().filter(c -> !c.isDisconnected()).toList()).get(0).getNickname();
+                            controller.disconnectionEndGame(finalNick);
                             synchronized (onePlayerLeftLock){
                                 onePlayerLeftLock.notifyAll();   //notifies server that a player has rejoined
                             }
