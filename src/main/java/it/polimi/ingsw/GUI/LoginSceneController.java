@@ -112,14 +112,14 @@ public class LoginSceneController{
                 String errorMessage="";
                 clientRMI.startNotificationServer();
                 if(clientRMI.hasGameStarted()){
-                    System.out.println("riconnessione in corso...");
+                    System.out.println("Reconnecting...");
                     if(clientRMI.reconnectToGame()){
                         //switch to game scene
                         nextScenePath = "GameScene.fxml";
                         ClassLoader classLoader = MainGUI.class.getClassLoader();
                         URL fxmlPath = classLoader.getResource("GameScene.fxml");
                         if(fxmlPath==null){
-                            throw new IllegalStateException("FXML non trovato");
+                            throw new IllegalStateException("FXML not found");
                         }
                         loader = new FXMLLoader(fxmlPath);
                         Parent root = loader.load();
@@ -138,8 +138,8 @@ public class LoginSceneController{
 
                     }
                     else{
-                        updateLabelText(messageTextArea, "Non è stato possibile riconnettersi, prova con un altro nickname");
-                        System.out.println("ERRORE RICONNESIONE");
+                        updateLabelText(messageTextArea, "It was not possbile to reconnect, try another nickname");
+                        System.out.println("RECONNECTION ERROR");
                         return;
 
                     }
@@ -172,7 +172,7 @@ public class LoginSceneController{
                                 ClassLoader classLoader = MainGUI.class.getClassLoader();
                                 URL fxmlPath = classLoader.getResource("MatchType.fxml");
                                 if(fxmlPath==null){
-                                    throw new IllegalStateException("FXML non trovato");
+                                    throw new IllegalStateException("FXML not found");
                                 }
                                 loader = new FXMLLoader(fxmlPath);
                                 Parent root = loader.load();
@@ -197,7 +197,7 @@ public class LoginSceneController{
                                 ClassLoader classLoader = MainGUI.class.getClassLoader();
                                 URL fxmlPath = classLoader.getResource("GameScene.fxml");
                                 if(fxmlPath==null){
-                                    throw new IllegalStateException("FXML non trovato");
+                                    throw new IllegalStateException("FXML not found");
                                 }
                                 loader = new FXMLLoader(fxmlPath);
                                 Parent root = loader.load();
@@ -246,31 +246,27 @@ public class LoginSceneController{
             alive = true;
             clientSocket.clientSpeaker(usernameText.getText());
             // wait for server response being handled by clientSocket
-            System.out.println("print1");
             String string;
             boolean flag = true;
             do {
                 synchronized (clientSocket.nextSceneLock) {
-                    System.out.println("print2");
+
                     while (clientSocket.nextScene.equals("")) clientSocket.nextSceneLock.wait();
                     string = clientSocket.nextScene;
                     clientSocket.nextScene = "";
-                    System.out.println("print3 " + clientSocket.nextScene);
                 }
-                System.out.println("print4");
+
                 if (string.equals("MatchType")) {
                     //change scene to MatchType (Platform.runLater() needed to update UI when not in main Thread)
                     socketSwitchToMatchTypeScene(event);
                     flag = false;
-                    System.out.println("print5");
+
                 } else if (string.equals("GameScene")) {
                     //change scene to GameScene
                     socketSwitchToGameScene(event);
                     flag = false;
-                    System.out.println("print6");
                 } else {
                     updateLabelText(messageTextArea, string);
-                    System.out.println("print7");
                     if(string.startsWith("Nickname already in use") || string.startsWith("Invalid nickname"))
                         break;
                     if (string.startsWith("The game already started, you can't join, try again later")){
