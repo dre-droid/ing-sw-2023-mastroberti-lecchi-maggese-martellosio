@@ -98,7 +98,7 @@ public class Server {
                             // notify last client that he's the only player left
                             clientsLobby.stream()
                                     .filter(c -> !c.isDisconnected() && c.getSocket() != null)
-                                    .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname())); //TODO show to GUI
+                                    .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname()));
                             //System.out.println("server print 3");
                             onePlayerLeftLock.wait();
                         }

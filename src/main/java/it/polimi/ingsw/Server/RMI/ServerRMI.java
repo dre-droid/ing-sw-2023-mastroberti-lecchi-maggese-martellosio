@@ -14,7 +14,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.*;
 
-//TODO client will receive chat messages from socket clients while a game hasn't started yet, but won't send any until the game started, the previous messages will appear
 public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RMIinterface{
     
     Server server;
@@ -76,7 +75,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         return 0;
     }
 
-    //TODO gestire se più giocatori joinano rispetto a numero partita
+
     /**
      * This method is called to join the game, if the controller added the player correctly it alerts the client and add it to the
      * clients list, if the controller cannot add the player to the game (outcome=-1,-2,-3) it sends a message to the client with the

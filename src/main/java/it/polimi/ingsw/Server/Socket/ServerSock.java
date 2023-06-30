@@ -123,7 +123,7 @@ public class ServerSock {
                     imbecille = true;
                 else
                     break;
-            } catch (Exception e){    //TODO what does this try/catch do?
+            } catch (Exception e){
                 imbecille = false;
             }
         } while (true);
@@ -335,7 +335,7 @@ public class ServerSock {
                                 }
 
                                     // processes /quit
-                                else if (line.equals("/quit")) {    //TODO needs to advise everyone who quitted the game "player1 quitted"
+                                else if (line.equals("/quit")) {
                                     controller.endGame();
                                     break;  //closes listener on confirmed quit
                                 }
@@ -443,7 +443,6 @@ public class ServerSock {
                     Thread.sleep(100);
                 }
                 while (!controller.hasTheGameEnded()) {
-                    System.out.println("AOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO "+ client.getName());
 
 
                     //else if player is in the game
@@ -458,7 +457,7 @@ public class ServerSock {
                                 server.notifyLobbyDisconnection(client.getName());
                                 server.clientsMap.remove(client.getName());
                                 clients.remove(client);
-                                return; //todo server deve mandare un messaggio che si e' disconnesso qualcuno tipo messaggio chat
+                                return;
                             }
                         }
                         //if player is in the game and the game started
