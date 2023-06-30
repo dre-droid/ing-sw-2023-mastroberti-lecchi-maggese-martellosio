@@ -238,11 +238,12 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         try {
             for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
                 if (client.getValue() != null) {
-                    client.getValue().updateBoard(controller.getTilePlacingSpot());
+                    if(!server.clientsLobby.stream().filter(clientInfoStruct -> clientInfoStruct.getNickname().equals(client.getKey())).findFirst().get().isDisconnected())
+                        client.getValue().updateBoard(controller.getTilePlacingSpot());
                 }
             }
         }catch (Exception e){
-            //e.printStackTrace();
+            e.printStackTrace();
         }
     }
 
@@ -254,8 +255,10 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
         try {
             for (Map.Entry<String, ClientNotificationInterfaceRMI> client : clients.entrySet()) {
                 if (client.getValue() != null) {
-                    client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
-                    client.getValue().updateOppShelf(playerNickname, controller.getMyShelf(playerNickname));
+                    if(!server.clientsLobby.stream().filter(clientInfoStruct -> clientInfoStruct.getNickname().equals(client.getKey())).findFirst().get().isDisconnected()) {
+                        client.getValue().aTurnHasEnded(playerNickname, controller.getNameOfPlayerWhoIsCurrentlyPlaying());
+                        client.getValue().updateOppShelf(playerNickname, controller.getMyShelf(playerNickname));
+                    }
                 }
             }
         }catch (Exception e){
@@ -691,11 +694,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 String nickname = client.getNickname();
                 System.out.println("GAYYYYYYYYYY "+ nickname);
                 while(!controller.hasGameBeenCreated()){
-                    Thread.sleep(1000);
-                }
-                while (!controller.hasTheGameEnded()) {
-                    System.out.println("MEGA GAYYYY"+nickname);
-
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
@@ -706,8 +704,13 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                             return;
                         }
                     }
+                    Thread.sleep(100);
+                }
+                while (!controller.hasTheGameEnded()) {
+                    System.out.println("MEGA GAYYYY"+nickname);
+
+
                     //else if player is in the game
-                    else {
                         if(!clientsLobby.containsValue(client)){
                             System.out.println(client.getNickname()+" disconnect 2");
                             return;
@@ -744,7 +747,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                         }
                     }
                     Thread.sleep(500);
-                }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -931,7 +933,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                 try{
                     client.getValue().aTurnHasEnded(name,controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                 }catch(RemoteException remoteException){
-
+                    remoteException.printStackTrace();
                 }
             }
         }
