@@ -27,6 +27,8 @@ public class ServerSock {
     public List<String> messageBuffer = new ArrayList<>();
     public final Object clientsLock = new Object();
 
+    public boolean active=true;
+
     public ServerSock(Controller controller, Server server){
         this.controller = controller;
         this.server = server;
@@ -40,7 +42,7 @@ public class ServerSock {
             Thread runServer = new Thread(() -> {
                 try (ServerSocket serverSocket = new ServerSocket(59010)) {
                     //checkForDisconnections();
-                    while (true) {
+                    while (active) {
                         Socket client = serverSocket.accept();
                         acceptClient(client);
                     }
@@ -426,8 +428,7 @@ public class ServerSock {
     public void checkForDisconnectionsV2(socketNickStruct client) {
         new Thread(() -> {
             try{
-                while (!controller.hasTheGameEnded()) {
-                    System.out.println("AOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO "+ client.getName());
+                while(!controller.hasGameBeenCreated()){
                     //if game hasn't been created yet
                     if (!controller.hasGameBeenCreated()) {
                         if (System.currentTimeMillis() - client.getLastPing() > 3000){
@@ -436,8 +437,14 @@ public class ServerSock {
                             return;
                         }
                     }
+                    Thread.sleep(100);
+                }
+                while (!controller.hasTheGameEnded()) {
+                    System.out.println("AOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO "+ client.getName());
+
+
                     //else if player is in the game
-                    else {
+
                         if(!clients.contains(client)){
                             return;
                         }
@@ -471,7 +478,7 @@ public class ServerSock {
                         }
                     }
                     Thread.sleep(500);
-                }
+
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -971,6 +978,7 @@ public class ServerSock {
 
     public void emptyClients(){
         this.clients.clear();
+        active = false;
     }
 
 }

@@ -39,8 +39,7 @@ public class Server {
      */
     public void run() throws InterruptedException, IOException {
         //run Socket and RMI servers
-        serverSock = new ServerSock(controller, this);
-        serverSock.runServer();
+
 
         try {
             Registry registry = LocateRegistry.createRegistry(1099);
@@ -50,7 +49,10 @@ public class Server {
             e.printStackTrace();
         }
         do{
+            serverSock = new ServerSock(controller, this);
+            serverSock.runServer();
             do {
+
                 //initiates clients and creates new controller
                 clientsMap = new HashMap<>();
                 clientsLobby = new ArrayList<>();
@@ -96,16 +98,20 @@ public class Server {
                             clientsLobby.stream()
                                     .filter(c -> !c.isDisconnected() && c.getSocket() != null)
                                     .forEach(c -> serverSock.sendMessage("[INFO] Everyone disconnected! After a timeout passed an no rejoins, you'll have won.", c.getNickname())); //TODO show to GUI
-                            System.out.println("server print 3");
+                            //System.out.println("server print 3");
                             onePlayerLeftLock.wait();
                         }
                     }
+
+                    /*if(clientsLobby.stream().anyMatch(ClientInfoStruct::isDisconnected)){
+                        controller.endGame();
+                    }*/
 
                     // skip turn of disconnected player if current
                     if (controller.game != null && !controller.hasTheGameEnded()) {
                         for (int i = 0; i < clientsLobby.size(); i++) {
                             if (clientsLobby.get(i).getNickname().equals(controller.getNameOfPlayerWhoIsCurrentlyPlaying()) && clientsLobby.get(i).isDisconnected()) {
-                                System.out.println("player "+ controller.getNameOfPlayerWhoIsCurrentlyPlaying()+" is disconnected and should skip turn");
+                                //System.out.println("player "+ controller.getNameOfPlayerWhoIsCurrentlyPlaying()+" is disconnected and should skip turn");
                                 controller.endOfTurn(controller.getNameOfPlayerWhoIsCurrentlyPlaying());
                                 notifySocketOfTurnEnd();
                                 serverRMI.notifyEndOfTurn(clientsLobby.get(i).getNickname());
@@ -124,7 +130,7 @@ public class Server {
                     }
                 }
                 //game end handling
-                System.out.println("Game has ended.");
+                //System.out.println("Game has ended.");
                 serverSock.notifyGameEnd();
                 serverRMI.notifyEndOfGame();
                 controller.postEndGame();
@@ -138,10 +144,12 @@ public class Server {
             this.loadedFromFile = false;
             serverRMI.emptyClients();
             serverSock.emptyClients();
+
             do {
                 controller.deleteProgress();
             }while(controller.checkForSavedGameProgress());
-            System.out.println("game ended----------------------");
+            //System.out.println("game ended----------------------");
+            System.exit(0);
         }while(true);
 
     }
@@ -204,13 +212,13 @@ public class Server {
                         try{
                             serverRMI.chatMessage(sender, text, client.getKey(), pm);
                         } catch (RemoteException e) {
-                            System.out.println("Cannot send message to "+receiver);
+                            //System.out.println("Cannot send message to "+receiver);
                         }
                     }else{
                         try {
                             serverSock.sendChatMessageToClient(sender, text, client.getKey(), pm);
                         } catch (IOException e) {
-                            System.out.println("Cannot send message to"+receiver);
+                            //System.out.println("Cannot send message to"+receiver);
                         }
                     }
             }
@@ -222,7 +230,7 @@ public class Server {
                 try{
                     serverRMI.chatMessage(sender, text, receiver, pm);
                 } catch (RemoteException e) {
-                    System.out.println("Cannot send message to "+receiver);
+                    //System.out.println("Cannot send message to "+receiver);
                 }
             }
             //send message to socket client
@@ -230,7 +238,7 @@ public class Server {
                 try {
                     serverSock.sendChatMessageToClient(sender, text, receiver, pm);
                 } catch (IOException e) {
-                    System.out.println("Cannot send message to"+receiver);
+                    //System.out.println("Cannot send message to"+receiver);
                 }
             }
         }
@@ -256,11 +264,11 @@ public class Server {
      * @param nickOfDisconnectedPlayer the nickname of the player that disconnected
      */
     public synchronized void  notifyLobbyDisconnection(String nickOfDisconnectedPlayer){
-        System.out.println("notify lobby disconnection has been called lalalalalalalallalaal");
+        //System.out.println("notify lobby disconnection has been called lalalalalalalallalaal");
         try {
             serverRMI.notifyLobbyDisconnectionRMI();
         } catch (RemoteException e) {
-            System.out.println("cannot contact rmi server");
+            //System.out.println("cannot contact rmi server");
         }
         serverSock.notifyLobbyDisconnectionSocket();
         if(!controller.hasGameStarted()) {
@@ -280,7 +288,7 @@ public class Server {
         }
         broadcastMessage("Player " + nickOfDisconnectedPlayer + " disconnected", "Server");
         notifyServer();
-        System.out.println("a player disconnected from the lobby");
+        //System.out.println("a player disconnected from the lobby");
         synchronized (this) {
             notifyAll();
         }
@@ -352,7 +360,7 @@ public class Server {
                 }
 
             } catch (InterruptedException | IOException e) {
-                System.out.println("cannot join game");
+                //System.out.println("cannot join game");
             }
 
         }).start();
