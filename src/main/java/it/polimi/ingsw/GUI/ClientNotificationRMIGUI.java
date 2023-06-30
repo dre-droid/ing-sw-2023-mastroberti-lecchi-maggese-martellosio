@@ -229,7 +229,6 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
     @Override
     public void startingTheGame(String startingPlayer) throws RemoteException {
         GameStartFlag=true;
-        System.out.println("GAME HAS STARTED LETSGOOOOOOO");
         updateGUIAtBeginningOfGame();
     }
 
@@ -249,14 +248,13 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
                 if(serverRMI.getFirstPlayerToPlay().equals(nickname)){
                     gsc.setFirstPlayerSeat();
                 }
-                System.out.println("gsc non è null per "+nickname);
                 gsc.updateGUIAtBeginningOfGame(board, pgcMap, pgc, commonGoalCards, leaderboard, isPlaying);
                 if(serverRMI.haveIEndGameToken(nickname))
                     gsc.setEndGameToken();
 
             }
             else{
-                System.out.println("gsc null ma non si sa perchè");
+                //System.out.println("gsc null ma non si sa perchè");
             }
         }catch(RemoteException re){
             backToLogin();
@@ -382,7 +380,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
                 this.gsc.updateCommonGoalCardTokens(2,serverRMI.getCgcTokens(cgc));
         }
         else{
-            System.out.println("errore -1");
+            System.out.println("error -1");
         }
     }
 
@@ -555,7 +553,7 @@ public class ClientNotificationRMIGUI extends java.rmi.server.UnicastRemoteObjec
         System.out.println("controller set");
         gsc = controller;
         if(gsc!=null){
-            System.out.println("gsc non è nullo nel set");
+            //System.out.println("gsc non è nullo nel set");
         }
     }
 
