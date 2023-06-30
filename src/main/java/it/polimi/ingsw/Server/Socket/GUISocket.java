@@ -27,35 +27,9 @@ public class GUISocket extends ClientSocket{
      */
     protected void handleServerRequest(String line){
         synchronized (this){
-            // temporary CLI for debugging
             if (line.startsWith("[YOUR TURN]")) {
-                //printTurn();
                 youCanDraw = true;
-                System.out.println(line);
             }
-            if (line.startsWith("[INVALID MOVE]")) {
-                System.out.println("You cannot select those tiles. Try again.\n");
-            }
-            if (line.startsWith("[REQUEST]") || line.startsWith("[MESSAGE") || line.startsWith("[INFO]")) {
-                System.out.println(line);
-            }
-            if (line.startsWith("[INFO]: Game is starting.")){
-                //if (!isPlaying.equals(nickname)) printTurn(isPlaying);
-            }
-            if (line.startsWith("[SHELF]")) {
-                System.out.println(line);
-                //printShelf(getShelf());
-            }
-            if (line.startsWith("[TURNEND]")) {
-                //printShelf(getShelf());
-                System.out.println();
-                System.out.println(line);
-                System.out.println("******************************");
-            }
-            if(line.equals("[EXIT]")){
-                //System.exit(0);
-            }
-
         }
         if (line.startsWith("[INFO] Game is starting.")){
             synchronized (nextSceneLock) {
@@ -129,7 +103,6 @@ public class GUISocket extends ClientSocket{
         }
         if(line.startsWith("[ENDGAMETOKEN]")){
             synchronized (endGameTokenNickLock){
-                System.out.println(line);
                 endGameTokenNick = line.replace("[ENDGAMETOKEN] ", "");
                 endGameTokenNickLock.notifyAll();
             }
@@ -149,7 +122,6 @@ public class GUISocket extends ClientSocket{
             }catch (Exception e){
                 e.printStackTrace();
             }
-            System.out.println("You disconnected!");
             System.exit(0);
         }
     }
