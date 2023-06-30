@@ -477,7 +477,7 @@ public class Controller {
      *
      * @return a List of String with the nickname of the Players in Game
      */
-    public List<String> getGamePlayerListNickname(){
+    public synchronized List<String> getGamePlayerListNickname(){
         if(game==null)
             return null;
         return game.getPlayerList().stream().map(Player::getNickname).collect(Collectors.toList());

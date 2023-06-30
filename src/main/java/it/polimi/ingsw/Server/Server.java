@@ -93,6 +93,9 @@ public class Server {
                 while (!controller.hasTheGameEnded()) {
                     //System.out.println("-------hola--------");
                     // if only one player left, wait
+
+
+
                     synchronized (onePlayerLeftLock) {
                         if (numberOfPlayersLeft() == 1) {
                             // notify last client that he's the only player left
@@ -103,6 +106,7 @@ public class Server {
                             onePlayerLeftLock.wait();
                         }
                     }
+
 
                     /*if(clientsLobby.stream().anyMatch(ClientInfoStruct::isDisconnected)){
                         controller.endGame();
@@ -149,7 +153,8 @@ public class Server {
             do {
                 controller.deleteProgress();
             }while(controller.checkForSavedGameProgress());
-            Thread.sleep(10000);
+            System.out.println("game has ende, accepting clients for a new one...");
+            Thread.sleep(3000);
             //System.out.println("game ended----------------------");
             //System.exit(0);
         }while(true);
@@ -280,10 +285,20 @@ public class Server {
         }
         //add when game has already started
         else{
+            //controller.endGame();
             synchronized (clientsLobbyLock) {
                 for(ClientInfoStruct cis: clientsLobby){
                     if(cis.getNickname().equals(nickOfDisconnectedPlayer)){
                         cis.setDisconnected(true);
+                        /*try {
+                            controller.endGame();
+                            synchronized (onePlayerLeftLock){
+                                onePlayerLeftLock.notifyAll();
+                            }
+
+                        } catch (IOException e) {
+                            System.out.println();
+                        }*/
                     }
                 }
             }
