@@ -144,54 +144,59 @@ public abstract class ClientSocket {
      * @param line: the serialized object sent from the server
      */
     protected synchronized void deserializeObjects(String line){
-        if (line.startsWith("[GSONBOARD]")) {
-            System.out.println("Deserialized board.");
-            String gsonString = line.replace("[GSONBOARD]", "");
-            board = gson.fromJson(gsonString, Board.class);
+        try{
+            if (line.startsWith("[GSONBOARD]")) {
+                System.out.println("Deserialized board.");
+                String gsonString = line.replace("[GSONBOARD]", "");
+                board = gson.fromJson(gsonString, Board.class);
+            }
+            if (line.startsWith("[GSONSHELF]")) {
+                String gsonString = line.replace("[GSONSHELF]", "");
+                shelf = gson.fromJson(gsonString, Shelf.class);
+            }
+            if (line.startsWith("[GSONLEAD]")) {
+                TypeToken<List<Player>> typeToken = new TypeToken<>() {};
+                String gsonString = line.replace("[GSONLEAD]", "");
+                leaderboard = gson.fromJson(gsonString, typeToken.getType());
+            }
+            if (line.startsWith("[GSONPGC]")) {
+                TypeToken<PersonalGoalCard> typeToken = new TypeToken<>() {};
+                String gsonString = line.replace("[GSONPGC]", "");
+                personalGoalCard = gson.fromJson(gsonString, typeToken.getType());
+            }
+            if (line.startsWith("[GSONCGC]")) {
+                line = line.replace("[GSONCGC]", "");
+                TypeToken<List<CommonGoalCard>> typeToken = new TypeToken<>() {};
+                commonGoalCards = gson.fromJson(line, typeToken.getType());
+            }
+            if (line.startsWith("[NICKNAME]")) {
+                nickname = line.replace("[NICKNAME]", "");
+                System.out.println("**testing** Nickname: " + nickname);
+            }
+            if (line.startsWith("[GSONSCORINGTOKENS]")){
+                line = line.replace("[GSONSCORINGTOKENS]", "");
+                TypeToken<List<ScoringToken>> typeToken = new TypeToken<>() {};
+                scoringTokens = gson.fromJson(line, typeToken.getType());
+            }
+            if (line.startsWith("[GSONPGMAP]")){
+                line = line.replace("[GSONPGMAP]", "");
+                TypeToken<Map<Integer, PersonalGoalCard>> typeToken = new TypeToken<>() {};
+                pgcMap = gson.fromJson(line, typeToken.getType());
+            }
+            if (line.startsWith("[CURRENTPLAYER]")){
+                line = line.replace("[CURRENTPLAYER]", "");
+                isPlaying = line;
+            }
+            if (line.startsWith("[FIRSTPLAYERSEAT]")){
+                firstPlayerSeat = true;
+            }
+            if (line.equals("[PING]")){
+                lastPing = System.currentTimeMillis();
+            }
+        }catch (Exception e){
+            System.out.println("heeehhh");
         }
-        if (line.startsWith("[GSONSHELF]")) {
-            String gsonString = line.replace("[GSONSHELF]", "");
-            shelf = gson.fromJson(gsonString, Shelf.class);
-        }
-        if (line.startsWith("[GSONLEAD]")) {
-            TypeToken<List<Player>> typeToken = new TypeToken<>() {};
-            String gsonString = line.replace("[GSONLEAD]", "");
-            leaderboard = gson.fromJson(gsonString, typeToken.getType());
-        }
-        if (line.startsWith("[GSONPGC]")) {
-            TypeToken<PersonalGoalCard> typeToken = new TypeToken<>() {};
-            String gsonString = line.replace("[GSONPGC]", "");
-            personalGoalCard = gson.fromJson(gsonString, typeToken.getType());
-        }
-        if (line.startsWith("[GSONCGC]")) {
-            line = line.replace("[GSONCGC]", "");
-            TypeToken<List<CommonGoalCard>> typeToken = new TypeToken<>() {};
-            commonGoalCards = gson.fromJson(line, typeToken.getType());
-        }
-        if (line.startsWith("[NICKNAME]")) {
-            nickname = line.replace("[NICKNAME]", "");
-            System.out.println("**testing** Nickname: " + nickname);
-        }
-        if (line.startsWith("[GSONSCORINGTOKENS]")){
-            line = line.replace("[GSONSCORINGTOKENS]", "");
-            TypeToken<List<ScoringToken>> typeToken = new TypeToken<>() {};
-            scoringTokens = gson.fromJson(line, typeToken.getType());
-        }
-        if (line.startsWith("[GSONPGMAP]")){
-            line = line.replace("[GSONPGMAP]", "");
-            TypeToken<Map<Integer, PersonalGoalCard>> typeToken = new TypeToken<>() {};
-            pgcMap = gson.fromJson(line, typeToken.getType());
-        }
-        if (line.startsWith("[CURRENTPLAYER]")){
-            line = line.replace("[CURRENTPLAYER]", "");
-            isPlaying = line;
-        }
-        if (line.startsWith("[FIRSTPLAYERSEAT]")){
-            firstPlayerSeat = true;
-        }
-        if (line.equals("[PING]")){
-            lastPing = System.currentTimeMillis();
-        }
+
     }
 
     /**
