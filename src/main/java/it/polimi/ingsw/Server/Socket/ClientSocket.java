@@ -132,6 +132,9 @@ public abstract class ClientSocket {
             serverPinger();
             disconnectionCheck();
         }
+        if (line.startsWith("[INFO]")){
+            System.out.println("Current player: " + isPlaying);
+        }
     }
 
     /**
