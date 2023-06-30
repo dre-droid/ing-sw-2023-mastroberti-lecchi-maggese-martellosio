@@ -146,7 +146,6 @@ public abstract class ClientSocket {
     protected synchronized void deserializeObjects(String line){
         try{
             if (line.startsWith("[GSONBOARD]")) {
-                System.out.println("Deserialized board.");
                 String gsonString = line.replace("[GSONBOARD]", "");
                 board = gson.fromJson(gsonString, Board.class);
             }
@@ -171,7 +170,6 @@ public abstract class ClientSocket {
             }
             if (line.startsWith("[NICKNAME]")) {
                 nickname = line.replace("[NICKNAME]", "");
-                System.out.println("**testing** Nickname: " + nickname);
             }
             if (line.startsWith("[GSONSCORINGTOKENS]")){
                 line = line.replace("[GSONSCORINGTOKENS]", "");
@@ -194,7 +192,7 @@ public abstract class ClientSocket {
                 lastPing = System.currentTimeMillis();
             }
         }catch (Exception e){
-            System.out.println("heeehhh");
+            e.printStackTrace();
         }
 
     }
