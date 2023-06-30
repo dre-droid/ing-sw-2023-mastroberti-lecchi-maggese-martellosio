@@ -742,7 +742,6 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
                                     }
                                 }
                             }
-                            System.out.println(client.getNickname()+" still connected");
                         }
                     }
                     Thread.sleep(500);
