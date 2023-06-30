@@ -1760,6 +1760,3 @@ public class GameSceneController {
         firstPlayerSeat.setImage(new Image("misc/firstplayertoken.png",50,50,true,false));
     }
 }
-//TODO RMI currently can send but not recieve messages to/from socket
-//TODO socket should display error message when quitting
-//TODO make client locally insert tiles to speed up loading time

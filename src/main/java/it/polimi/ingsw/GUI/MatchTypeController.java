@@ -78,7 +78,6 @@ public class MatchTypeController {
                 // client socket
                 } else {
                     clientSocket.clientSpeaker(Integer.toString(numOfPlayers));
-                    //TODO check that RMI hasnt created a game in the mean time
                     //e.g.
                     //[INFO]: Chosen nickname: dre
                     //[INFO]: Game is being created by another player...
