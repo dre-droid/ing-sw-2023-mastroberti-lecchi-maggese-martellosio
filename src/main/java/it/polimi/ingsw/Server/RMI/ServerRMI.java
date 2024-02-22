@@ -424,7 +424,7 @@ public class ServerRMI extends java.rmi.server.UnicastRemoteObject implements RM
     public boolean reconnect(String playerNickname, int port, String ip)  throws RemoteException{
         //we check if there is a player with this name in the game
         for(ClientInfoStruct cis: server.clientsLobby){
-            if(cis.getNickname().equals(playerNickname) && !cis.isDisconnected())
+            if(cis.getNickname().equals(playerNickname) && !cis.isDisconnected()){}
                 //System.out.println("problema è che il player risulta ancora connesso");
             if(cis.getNickname().equals(playerNickname) && cis.isDisconnected()){
                 cis.setRmiIp(ip);
