@@ -37,8 +37,6 @@ We chose to implement the complete rule set of the game, effectively translating
 
 ## Implementation Details
 
-***Descrizione della soluzione***
-
 ### Model
 
 As it’s clear from the simplified UML diagram, the object “Game” is the primary class composed by the objects Board, Player in a playerList and commonGoalCards. About the latter, we implemented a Strategy design pattern, to enable extendibility of the code in the future allowing to add more common goal cards. Extendibility was also the reason we implemented a map for personal goal cards.
